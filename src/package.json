@@ -1,0 +1,27 @@
+{
+  "name": "fabric-shim",
+  "version": "1.0.0-snapshot.0",
+  "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
+  "main": "index.js",
+  "repository": {
+    "type": "gerrit",
+    "url": "http://gerrit.hyperledger.org/r/fabric"
+  },
+  "keywords": [
+    "fabric-shim",
+    "Hyperledger Fabric",
+    "Fabric Shim"
+  ],
+  "engines": {
+    "node": ">=6.9.5 <7.0",
+    "npm": ">=3.10.10 <4.0"
+  },
+  "engine-strict": true,
+  "engineStrict": true,
+  "license": "Apache-2.0",
+  "dependencies": {
+    "command-line-args": "^4.0.6",
+    "grpc": "^1.4.1",
+    "log4js": "^2.2.0"
+  }
+}
