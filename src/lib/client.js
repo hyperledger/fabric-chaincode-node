@@ -230,10 +230,10 @@ var ChaincodeSupportClient = class {
 					return reject(new Error(res.payload.toString()));
 				} else {
 					let errMsg = util.format(
-							'[%s]Received incorrect chaincode in response to the GetState() call: type="%s", expecting "RESPONSE"',
-							shortTxid(res.txid), res.type);
+						'[%s]Received incorrect chaincode in response to the GetState() call: type="%s", expecting "RESPONSE"',
+						shortTxid(res.txid), res.type);
 					logger.debug(errMsg);
-					return reject(new Error())
+					return reject(new Error());
 				}
 			});
 

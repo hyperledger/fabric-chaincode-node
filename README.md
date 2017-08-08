@@ -23,6 +23,60 @@ After cloning the fabric repo, you must also download a changeset that is requir
 git fetch ssh://<gerrit_id>@gerrit.hyperledger.org:29418/fabric refs/changes/23/11823/5 && git checkout FETCH_HEAD
 ```
 
+At this point you can proceed with one of the following two options to set up your local environment.
+
+#### Using Docker
+
+This is the recommended way to set up a local environment, by using docker to run the peer and orderer nodes, and to use the binary commands inside the hyperledger/fabric-tools docker image (configtxgen, peer) to generate the bootstrap materials for the network, a.k.a the genesis block for the orderer and the channel transaction configuration for creating the channels.
+
+Run this command from the fabric project, which was cloned above, to build the necessary docker images:
+```
+make docker-clean
+make docker
+```
+
+You should also clone the `fabric-ca` repository and run the same two commands above.
+
+You should then see a list of docker images when you run `docker images`, such as the following:
+```
+REPOSITORY                     TAG                              IMAGE ID            CREATED             SIZE
+hyperledger/fabric-tools       latest                           e275b4dcad6e        4 days ago          1.34GB
+hyperledger/fabric-tools       x86_64-1.0.1-snapshot-62fd2682   e275b4dcad6e        4 days ago          1.34GB
+hyperledger/fabric-couchdb     latest                           7a2bb267be40        4 days ago          1.48GB
+hyperledger/fabric-couchdb     x86_64-1.0.1-snapshot-62fd2682   7a2bb267be40        4 days ago          1.48GB
+hyperledger/fabric-orderer     latest                           271f0855f8df        4 days ago          179MB
+hyperledger/fabric-orderer     x86_64-1.0.1-snapshot-62fd2682   271f0855f8df        4 days ago          179MB
+hyperledger/fabric-peer        latest                           a8a801ad4865        4 days ago          182MB
+hyperledger/fabric-peer        x86_64-1.0.1-snapshot-62fd2682   a8a801ad4865        4 days ago          182MB
+hyperledger/fabric-ccenv       latest                           1b05ef3e62c6        4 days ago          1.29GB
+hyperledger/fabric-ccenv       x86_64-1.0.1-snapshot-62fd2682   1b05ef3e62c6        4 days ago          1.29GB
+hyperledger/fabric-ca          latest                           2acc2db19d7f        4 days ago          238MB
+hyperledger/fabric-ca          x86_64-1.0.1-snapshot-e2bde12    2acc2db19d7f        4 days ago          238MB
+```
+
+These are the docker images needed to execute the tests. You may have more images built by the make commands.
+
+Next run this single command to bring up a basic network of one orderer (using "SOLO"), one peer (using CouchDB as state database), then create a channel called "mychannel", and join the peer to that channel:
+```
+gulp channel-init
+```
+
+You should see the following docker instances with the `docker ps` command:
+```
+CONTAINER ID        IMAGE                               COMMAND                  CREATED             STATUS              PORTS                                            NAMES
+a086c14cbad9        hyperledger/fabric-peer:latest      "peer node start"        18 hours ago        Up 18 hours         0.0.0.0:7051->7051/tcp, 0.0.0.0:7053->7053/tcp   peer0.org1.example.com
+651bcbb5a1a4        hyperledger/fabric-ca:latest        "sh -c 'fabric-ca-..."   18 hours ago        Up 18 hours         0.0.0.0:7054->7054/tcp                           ca.example.com
+50316f8422ff        hyperledger/fabric-orderer:latest   "orderer"                18 hours ago        Up 18 hours         0.0.0.0:7050->7050/tcp                           orderer.example.com
+bfd9120b530c        hyperledger/fabric-couchdb:latest   "tini -- /docker-e..."   18 hours ago        Up 18 hours         4369/tcp, 9100/tcp, 0.0.0.0:5984->5984/tcp       couchdb
+c2aaaed2056d        hyperledger/fabric-tools:latest     "/bin/bash"              18 hours ago        Up 18 hours                                                          cli
+```
+
+You can now proceed to the section "Test Node.js Chaincode".
+
+#### Using Command Binaries
+
+Alternatively you can use the `peer` and `orderer` binaries to manually start the target network and initialize the channel.
+
 Run these commands to build the executabiles needed for the test environment:
 ```
 make peer
@@ -33,7 +87,7 @@ make configtxgen
 Use the configtxgen tool to generate a genesis block and a channel config:
 ```
 ./build/bin/configtxgen -outputBlock sampleconfig/test.genesis.block -profile SampleSingleMSPSolo
-./build/bin/configtxgen -outputCreateChannelTx sampleconfig/test.tx -profile SampleSingleMSPChannel -channelID test
+./build/bin/configtxgen -outputCreateChannelTx sampleconfig/test.tx -profile SampleSingleMSPChannel -channelID mychannel
 ```
 
 Then you can launch a peer node and an orderer node with the following commands:
@@ -44,11 +98,13 @@ ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 ORDERER_GENERAL_GENESISMETHOD=file ORDERER
 
 Create a channel and join the peer to the channel:
 ```
-./build/bin/peer channel create -o localhost:7050 -c test -f ./sampleconfig/test.tx
+./build/bin/peer channel create -o localhost:7050 -c mychannel -f ./sampleconfig/test.tx
 ./build/bin/peer channel join -b ./test.block
 ```
 
-Now you are ready to test the node.js chaincode. Change directory to the test folder (fabric/core/chaincode/shim/node/test). For now only a simple test is available, which is "test.js". Before you can launch that, run these commands first:
+#### Test Node.js Chaincode
+
+Now you are ready to test the node.js chaincode. Change directory to the fabric-chaincode-node folder. For now only a simple test is available, which is "test.js". Before you can launch that, run these commands first:
 ```
 npm install
 gulp protos
@@ -56,7 +112,7 @@ gulp protos
 
 Run the following command to launch the test (replacing "192.168.1.64" with the IP address of the target peer):
 ```
-CORE_CHAINCODE_ID_NAME="mycc:v0" node test.js --peer.address grpc://192.168.1.64:7051
+CORE_CHAINCODE_ID_NAME="mycc:v0" node test/integration/test.js --peer.address grpc://192.168.1.64:7051
 ```
 
 You should see a confirmation message in the peer's log about the REGISTER request being handled successfully.

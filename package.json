@@ -13,10 +13,18 @@
     "fabric-shim": "file:../src"
   },
   "devDependencies": {
+    "fs-extra": "^4.0.1",
     "gulp": "^3.9.1",
     "gulp-debug": "^3.1.0",
     "gulp-eslint": "^4.0.0",
+    "gulp-istanbul": "^1.1.2",
+    "gulp-replace": "^0.6.1",
+    "gulp-shell": "^0.6.3",
+    "gulp-tape": "0.0.9",
     "gulp-watch": "^4.3.11",
-    "require-dir": "^0.3.2"
+    "require-dir": "^0.3.2",
+    "tap-colorize": "^1.2.0",
+    "tape": "^4.8.0",
+    "tape-promise": "^2.0.1"
   }
 }

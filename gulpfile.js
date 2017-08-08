@@ -3,8 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-var requireDir = require('require-dir');
-var gulp = require('gulp');
+const requireDir = require('require-dir');
+const gulp = require('gulp');
 
 // Require all tasks in gulp/tasks, including subfolders
 requireDir('./build', { recurse: true });

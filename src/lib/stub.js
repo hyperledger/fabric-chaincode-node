@@ -36,7 +36,17 @@ const RESPONSE_CODE = {
 var Stub = class {
 	constructor(client, txId, chaincodeInput, signedProposal) {
 		this.txId = txId;
-		this.args = chaincodeInput.args;
+		this.args = chaincodeInput.args.map((entry) => {
+			let ret;
+			// attempt to parse the input as JSON first
+			try {
+				ret = JSON.parse(entry.toBuffer());
+			} catch(err) {
+				ret = entry.toBuffer().toString();
+			}
+
+			return ret;
+		});
 		this.handler = client;
 		this.signedProposal = signedProposal;
 
@@ -47,10 +57,10 @@ var Stub = class {
 				throw new Error(util.format('Failed extracting proposal from signedProposal. [%s]', err));
 			}
 
-			if (!this.proposal.header || this.proposal.header.length === 0)
+			if (!this.proposal.header || this.proposal.header.toBuffer().length === 0)
 				throw new Error('Proposal header is empty');
 
-			if (!this.proposal.payload || this.proposal.payload.length === 0)
+			if (!this.proposal.payload || this.proposal.payload.toBuffer().length === 0)
 				throw new Error('Proposal payload is empty');
 
 			let header;
@@ -80,6 +90,10 @@ var Stub = class {
 			// TODO: compute binding based on nonce, creator and epoch
 			this.binding = '';
 		}
+	}
+
+	getArgs() {
+		return this.args;
 	}
 
 	getTxID() {
