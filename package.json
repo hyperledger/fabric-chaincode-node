@@ -10,7 +10,7 @@
   "engineStrict": true,
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-shim": "file:../src"
+    "fabric-shim": "file:./src"
   },
   "devDependencies": {
     "fs-extra": "^4.0.1",
