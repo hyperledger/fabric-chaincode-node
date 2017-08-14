@@ -133,7 +133,15 @@ var ChaincodeSupportClient = class {
 					type !== MSG_TYPE.READY) {
 
 					if (type === MSG_TYPE.RESPONSE) {
-						self.handleResponse(msg);
+						let cb = self._peerListeners[msg.txid];
+
+						if (cb) {
+							cb(msg);
+						} else {
+							let errMsg = util.format('Failed to find a listener for the peer response with transaction Id %s', msg.txid);
+							logger.error(errMsg);
+							throw new Error(errMsg);
+						}
 					} else if (type === MSG_TYPE.ERROR) {
 						// TODO: peer has sent error response to a request from the shim
 						// use the txId of the message to call the corresponding callback
@@ -204,12 +212,6 @@ var ChaincodeSupportClient = class {
 		handleMessage(msg, this, 'invoke');
 	}
 
-	handleResponse(msg) {
-		let cb = this._peerListeners[msg.txid];
-
-		if (cb) cb(msg);
-	}
-
 	handleGetState(key, txId) {
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE,
@@ -217,28 +219,45 @@ var ChaincodeSupportClient = class {
 			txid: txId
 		};
 
-		let self = this;
-		return new Promise((resolve, reject) => {
-			self.registerPeerListener(txId, (res) => {
-				self.removePeerListener(txId);
+		return this._askPeerAndListen(msg, 'GetState');
+	}
 
-				if (res.type === MSG_TYPE.RESPONSE) {
-					logger.debug(util.format('[%s]Received GetState() successful response', shortTxid(res.txid)));
-					return resolve(res.payload);
-				} else if (res.type === MSG_TYPE.ERROR) {
-					logger.debug(util.format('[%s]Received GetState() error response', shortTxid(res.txid)));
-					return reject(new Error(res.payload.toString()));
-				} else {
-					let errMsg = util.format(
-						'[%s]Received incorrect chaincode in response to the GetState() call: type="%s", expecting "RESPONSE"',
-						shortTxid(res.txid), res.type);
-					logger.debug(errMsg);
-					return reject(new Error());
-				}
-			});
+	handlePutState(key, value, txId) {
+		let payload = new _serviceProto.PutStateInfo();
+		payload.setKey(key);
+		payload.setValue(value);
 
-			this._stream.write(msg);
-		});
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.PUT_STATE,
+			payload: payload.toBuffer(),
+			txid: txId
+		};
+
+		return this._askPeerAndListen(msg, 'PutState');
+	}
+
+	handleDeleteState(key, txId) {
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.DEL_STATE,
+			payload: Buffer.from(key),
+			txid: txId
+		};
+
+		return this._askPeerAndListen(msg, 'DeleteState');
+	}
+
+	handleGetStateByRange(startKey, endKey, txId) {
+		let payload = new _serviceProto.GetStateByRange();
+		payload.setStartKey(startKey);
+		payload.setEndKey(endKey);
+
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+			payload: payload.toBuffer(),
+			txid: txId
+		};
+
+		return this._askPeerAndListen(msg, 'GetStateByRange');
 	}
 
 	registerPeerListener(txId, cb) {
@@ -248,6 +267,18 @@ var ChaincodeSupportClient = class {
 	removePeerListener(txId) {
 		if (this._peerListeners[txId])
 			delete this._peerListeners[txId];
+	}
+
+	_askPeerAndListen(msg, method) {
+		let self = this;
+		return new Promise((resolve, reject) => {
+			self.registerPeerListener(msg.txid, (res) => {
+				self.removePeerListener(msg.txid);
+				peerResponded(res, method, resolve, reject);
+			});
+
+			self._stream.write(msg);
+		});
 	}
 
 	/**
@@ -306,12 +337,13 @@ function handleMessage(msg, client, action) {
 					resp.status));
 
 				if (resp.status >= Stub.RESPONSE_CODE.ERROR) {
-					logger.error(util.format('[%s]Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
-						shortTxid(msg.txid), method, resp.message));
+					let errMsg = util.format('[%s]Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
+						shortTxid(msg.txid), method, resp.message);
+					logger.error(errMsg);
 
 					nextStateMsg = {
 						type: _serviceProto.ChaincodeMessage.Type.ERROR,
-						payload: Buffer.from(resp.message),
+						payload: Buffer.from(errMsg),
 						txid: msg.txid
 					};
 				} else {
@@ -321,7 +353,8 @@ function handleMessage(msg, client, action) {
 					nextStateMsg = {
 						type: _serviceProto.ChaincodeMessage.Type.COMPLETED,
 						payload: resp.toBuffer(),
-						txid: msg.txid
+						txid: msg.txid,
+						chaincode_event: stub.chaincodeEvent
 					};
 				}
 
@@ -349,6 +382,30 @@ function shortTxid(txId) {
 		return txId;
 
 	return txId.substring(0, 8);
+}
+
+function peerResponded(res, method, resolve, reject) {
+	if (res.type === MSG_TYPE.RESPONSE) {
+		logger.debug(util.format('[%s]Received %s() successful response', shortTxid(res.txid), method));
+
+		// some methods have complex responses, decode the protobuf structure
+		// before returning to the client code
+		switch (method) {
+		case 'GetStateByRange':
+			return resolve(_serviceProto.QueryResponse.decode(res.payload));
+		}
+
+		return resolve(res.payload);
+	} else if (res.type === MSG_TYPE.ERROR) {
+		logger.debug(util.format('[%s]Received %s() error response', shortTxid(res.txid), method));
+		return reject(new Error(res.payload.toString()));
+	} else {
+		let errMsg = util.format(
+			'[%s]Received incorrect chaincode in response to the %s() call: type="%s", expecting "RESPONSE"',
+			shortTxid(res.txid), method, res.type);
+		logger.debug(errMsg);
+		return reject(new Error(errMsg));
+	}
 }
 
 module.exports = ChaincodeSupportClient;

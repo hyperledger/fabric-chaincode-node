@@ -9,6 +9,9 @@
   "engine-strict": true,
   "engineStrict": true,
   "license": "Apache-2.0",
+  "scripts": {
+    "test": "gulp test-headless"
+  },
   "dependencies": {
     "fabric-shim": "file:./src"
   },

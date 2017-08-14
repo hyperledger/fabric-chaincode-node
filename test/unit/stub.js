@@ -27,6 +27,11 @@ const _cclProto = grpc.load({
 	file: 'peer/chaincode.proto'
 }).protos;
 
+const _idProto = grpc.load({
+	root: path.join(__dirname, '../../src/lib/protos'),
+	file: 'msp/identities.proto'
+}).msp;
+
 test('Chaincode stub constructor tests', (t) => {
 	// arguments from the protobuf are an array of ByteBuffer objects
 	let buf1 = ByteBuffer.fromUTF8('invoke');
@@ -102,6 +107,7 @@ test('Chaincode stub constructor tests', (t) => {
 	);
 
 	let header = new _commonProto.Header();
+
 	header.setSignatureHeader(Buffer.from('dummySignatureHeader'));
 	sp.setHeader(header.toBuffer());
 
@@ -123,6 +129,29 @@ test('Chaincode stub constructor tests', (t) => {
 
 	let signatureHeader = new _commonProto.SignatureHeader();
 	signatureHeader.setNonce(Buffer.from('12345'));
+	signatureHeader.setCreator(Buffer.from('dummyCreator'));
+	header.setSignatureHeader(signatureHeader.toBuffer());
+	sp.setHeader(header.toBuffer());
+
+	t.throws(
+		() => {
+			new Stub(
+				'dummyClient',
+				'dummyTxid',
+				{
+					args: [buf1, buf2, buf3]
+				},
+				{
+					proposal_bytes: sp.toBuffer()
+				});
+		},
+		/Decoding SerializedIdentity failed/,
+		'Test proposal object with invalid creator'
+	);
+
+	signatureHeader = new _commonProto.SignatureHeader();
+	signatureHeader.setNonce(Buffer.from('12345'));
+	signatureHeader.setCreator(new _idProto.SerializedIdentity().toBuffer());
 	header.setSignatureHeader(signatureHeader.toBuffer());
 	sp.setHeader(header.toBuffer());
 	sp.setPayload(Buffer.from('dummy proposal payload'));
@@ -143,6 +172,29 @@ test('Chaincode stub constructor tests', (t) => {
 		'Test proposal object with invalid proposal payload'
 	);
 
+	header.setChannelHeader(Buffer.from('dummyChannelHeader'));
+	sp.setHeader(header.toBuffer());
+
+	t.throws(
+		() => {
+			new Stub(
+				'dummyClient',
+				'dummyTxid',
+				{
+					args: []
+				},
+				{
+					proposal_bytes: sp.toBuffer()
+				});
+		},
+		/Decoding ChannelHeader failed/,
+		'Test catching invalid ChannelHeader'
+	);
+
+	header = new _commonProto.Header();
+	header.setSignatureHeader(signatureHeader.toBuffer());
+	sp.setHeader(header.toBuffer());
+
 	let ccpayload = new _proposalProto.ChaincodeProposalPayload();
 	ccpayload.setInput(Buffer.from('dummyChaincodeInput'));
 	sp.setPayload(ccpayload.toBuffer());
@@ -157,21 +209,13 @@ test('Chaincode stub constructor tests', (t) => {
 		});
 	t.equal(stub.args[0], 'invoke', 'Test parsing first argument');
 	t.equal(stub.args[1], 'someKey', 'Test parsing second argument');
+	t.equal(stub.getTxID(), 'dummyTxid', 'Test getTxID()');
 
 	t.end();
 });
 
 test('Arguments JSON-ify Tests', (t) => {
 	let buf = ByteBuffer.fromUTF8('{\"a\":1,\"b\":2}');
-	let sp = new _proposalProto.Proposal();
-	let signatureHeader = new _commonProto.SignatureHeader();
-	signatureHeader.setNonce(Buffer.from('12345'));
-	let header = new _commonProto.Header();
-	header.setSignatureHeader(signatureHeader.toBuffer());
-	sp.setHeader(header.toBuffer());
-	let ccpayload = new _proposalProto.ChaincodeProposalPayload();
-	ccpayload.setInput(Buffer.from('dummyChaincodeInput'));
-	sp.setPayload(ccpayload.toBuffer());
 	let stub = new Stub(
 		'dummyClient',
 		'dummyTxid',
@@ -179,10 +223,89 @@ test('Arguments JSON-ify Tests', (t) => {
 			args: [buf]
 		},
 		{
-			proposal_bytes: sp.toBuffer()
+			proposal_bytes: newProposal().toBuffer()
 		});
 
 	t.equal(stub.args[0].a, 1, 'Test parsing JSON arguments payload: a');
 	t.equal(stub.args[0].b, 2, 'Test parsing JSON arguments payload: b');
 	t.end();
 });
+
+test('Arguments Tests', (t) => {
+	let buf1 = ByteBuffer.fromUTF8('invoke');
+	let buf2 = ByteBuffer.fromUTF8('key');
+	let buf3 = ByteBuffer.fromUTF8('value');
+	let stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: [buf1, buf2, buf3]
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+
+	t.equal(stub.getArgs().length, 3, 'Test getArgs() returns expected number of arguments');
+	t.equal(typeof stub.getArgs()[0], 'string', 'Test getArgs() returns the first argument as string');
+	t.equal(stub.getArgs()[1], 'key', 'Test getArgs() returns the 2nd argument as string "key"');
+	t.equal(stub.getStringArgs().length, 3, 'Test getStringArgs() returns expected number of arguments');
+	t.equal(stub.getStringArgs()[2], 'value', 'Test getStringArgs() returns 3rd argument as string "value"');
+	t.equal(typeof stub.getFunctionAndParameters(), 'object', 'Test getFunctionAndParameters() returns and object');
+	t.equal(stub.getFunctionAndParameters().fcn, 'invoke', 'Test getFunctionAndParameters() returns the function name properly');
+	t.equal(Array.isArray(stub.getFunctionAndParameters().params), true, 'Test getFunctionAndParameters() returns the params array');
+	t.equal(stub.getFunctionAndParameters().params.length, 2, 'Test getFunctionAndParameters() returns the params array with 2 elements');
+	t.equal(stub.getFunctionAndParameters().params[0], 'key', 'Test getFunctionAndParameters() returns the "key" string as the first param');
+	t.equal(stub.getFunctionAndParameters().params[1], 'value', 'Test getFunctionAndParameters() returns the "value" string as the 2nd param');
+
+	stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: [buf1]
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+	t.equal(stub.getFunctionAndParameters().fcn, 'invoke', 'Test getFunctionAndParameters() returns the function name properly');
+	t.equal(stub.getFunctionAndParameters().params.length, 0, 'Test getFunctionAndParameters() returns the params array with 0 elements');
+
+	stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer(),
+			signature: Buffer.from('dummyHex')
+		});
+	t.equal(stub.getFunctionAndParameters().fcn, '', 'Test getFunctionAndParameters() returns empty function name properly');
+	t.equal(stub.getFunctionAndParameters().params.length, 0, 'Test getFunctionAndParameters() returns the params array with 0 elements');
+
+	t.equal(stub.getCreator().getMspid(), 'dummyMSPId', 'Test getCreator() returns the expected buffer object');
+	t.equal(stub.getTransient().get('testKey').toBuffer().toString(), 'testValue', 'Test getTransient() returns the expected transient map object');
+
+	t.equal(stub.getSignedProposal().signature.toString(), 'dummyHex', 'Test getSignedProposal() returns valid signature');
+	t.equal(stub.getSignedProposal().proposal.header.signature_header.nonce.toString(), '12345', 'Test getSignedProposal() returns valid nonce');
+	t.equal(stub.getSignedProposal().proposal.header.signature_header.creator.mspid, 'dummyMSPId', 'Test getSignedProposal() returns valid mspid');
+
+	t.end();
+});
+
+function newProposal() {
+	let sp = new _proposalProto.Proposal();
+	let signatureHeader = new _commonProto.SignatureHeader();
+	let creator = new _idProto.SerializedIdentity();
+	creator.setMspid('dummyMSPId');
+	signatureHeader.setCreator(creator.toBuffer());
+	signatureHeader.setNonce(Buffer.from('12345'));
+	let header = new _commonProto.Header();
+	header.setSignatureHeader(signatureHeader.toBuffer());
+	sp.setHeader(header.toBuffer());
+	let ccpayload = new _proposalProto.ChaincodeProposalPayload();
+	ccpayload.setInput(Buffer.from('dummyChaincodeInput'));
+	ccpayload.setTransientMap({'testKey': Buffer.from('testValue')});
+	sp.setPayload(ccpayload.toBuffer());
+
+	return sp;
+}

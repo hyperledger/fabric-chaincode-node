@@ -3,6 +3,7 @@ docs/gen
 node_modules/*
 src/node_modules/*
 src/lib/protos/common/*
+src/lib/protos/msp/*
 src/lib/protos/peer/*
 npm-shrinkwrap.json
 npm-debug.log

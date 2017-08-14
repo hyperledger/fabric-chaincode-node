@@ -19,6 +19,16 @@ const _proposalProto = grpc.load({
 	file: 'peer/proposal.proto'
 }).protos;
 
+const _eventProto = grpc.load({
+	root: path.join(__dirname, './protos'),
+	file: 'peer/chaincode_event.proto'
+}).protos;
+
+const _idProto = grpc.load({
+	root: path.join(__dirname, './protos'),
+	file: 'msp/identities.proto'
+}).msp;
+
 const logger = require('./logger').getLogger('lib/chaincode.js');
 
 const RESPONSE_CODE = {
@@ -48,11 +58,17 @@ var Stub = class {
 			return ret;
 		});
 		this.handler = client;
-		this.signedProposal = signedProposal;
 
 		if (signedProposal) {
+			let decodedSP = {
+				signature: signedProposal.signature
+			};
+
+			let proposal;
 			try {
-				this.proposal = _proposalProto.Proposal.decode(signedProposal.proposal_bytes);
+				proposal = _proposalProto.Proposal.decode(signedProposal.proposal_bytes);
+				decodedSP.proposal = {};
+				this.proposal = proposal;
 			} catch(err) {
 				throw new Error(util.format('Failed extracting proposal from signedProposal. [%s]', err));
 			}
@@ -66,6 +82,7 @@ var Stub = class {
 			let header;
 			try {
 				header = _commonProto.Header.decode(this.proposal.header);
+				decodedSP.proposal.header = {};
 			} catch(err) {
 				throw new Error(util.format('Could not extract the header from the proposal: %s', err));
 			}
@@ -73,19 +90,40 @@ var Stub = class {
 			let signatureHeader;
 			try {
 				signatureHeader = _commonProto.SignatureHeader.decode(header.signature_header);
+				decodedSP.proposal.header.signature_header = { nonce: signatureHeader.getNonce().toBuffer() };
 			} catch(err) {
 				throw new Error(util.format('Decoding SignatureHeader failed: %s', err));
+			}
+
+			let creator;
+			try {
+				creator = _idProto.SerializedIdentity.decode(signatureHeader.creator);
+				decodedSP.proposal.header.signature_header.creator = creator;
+				this.creator = creator;
+			} catch(err) {
+				throw new Error(util.format('Decoding SerializedIdentity failed: %s', err));
+			}
+
+			let channelHeader;
+			try {
+				channelHeader = _commonProto.ChannelHeader.decode(header.channel_header);
+				decodedSP.proposal.header.channel_header = channelHeader;
+				this.txTimeStamp = channelHeader.timestamp;
+			} catch(err) {
+				throw new Error(util.format('Decoding ChannelHeader failed: %s', err));
 			}
 
 			let ccpp;
 			try {
 				ccpp = _proposalProto.ChaincodeProposalPayload.decode(this.proposal.payload);
+				decodedSP.proposal.payload = ccpp;
 			} catch(err) {
 				throw new Error(util.format('Decoding ChaincodeProposalPayload failed: %s', err));
 			}
 
-			this.creator = signatureHeader.creator;
-			this.transientMap = ccpp.transientMap;
+			this.transientMap = ccpp.getTransientMap();
+
+			this.signedProposal = decodedSP;
 
 			// TODO: compute binding based on nonce, creator and epoch
 			this.binding = '';
@@ -96,12 +134,71 @@ var Stub = class {
 		return this.args;
 	}
 
+	getStringArgs() {
+		return this.args.map((arg) => {
+			return arg.toString();
+		});
+	}
+
+	getFunctionAndParameters() {
+		let values = this.getStringArgs();
+		if (values.length >= 1) {
+			return {
+				fcn: values[0],
+				params: values.slice(1)
+			};
+		} else {
+			return {
+				fcn: '',
+				params: []
+			};
+		}
+	}
+
 	getTxID() {
 		return this.txId;
 	}
 
+	getCreator() {
+		return this.creator;
+	}
+
+	getTransient() {
+		return this.transientMap;
+	}
+
+	getSignedProposal() {
+		return this.signedProposal;
+	}
+
+	getTxTimestamp() {
+		return this.txTimestamp;
+	}
+
 	getState(key) {
 		return this.handler.handleGetState(key, this.txId);
+	}
+
+	putState(key, value) {
+		return this.handler.handlePutState(key, value, this.txId);
+	}
+
+	deleteState(key) {
+		return this.handler.handleDeleteState(key, this.txId);
+	}
+
+	getStateByRange(startKey, endKey) {
+		return this.handler.handleGetStateByRange(startKey, endKey, this.txId);
+	}
+
+	setEvent(name, payload) {
+		if (typeof name !== 'string' || name === '')
+			throw new Error('Event name must be a non-empty string');
+
+		let event = new _eventProto.ChaincodeEvent();
+		event.setEventName(name);
+		event.setPayload(payload);
+		this.chaincodeEvent = event;
 	}
 };
 
