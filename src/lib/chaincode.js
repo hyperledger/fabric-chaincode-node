@@ -44,7 +44,26 @@ var start = function(chaincode) {
 	if (typeof chaincode.Invoke !== 'function')
 		throw new Error('The "chaincode" argument must implement the "Invoke()" method');
 
-	let client = new Client(chaincode, opts['peer.address']);
+	let url = opts['peer.address'];
+	if (typeof url === 'undefined' || url === '') {
+		throw new Error('The "peer.address" program argument must be set to a legitimate value of <host>:<port>');
+	} else {
+		if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+			throw new Error('The "peer.address" program argument can not be set to an "http(s)" url, ' +
+				'use grpc(s) or omit the protocol');
+		} else {
+			// if the url has grpc(s) prefix, use it, otherwise decide based on the TLS enablement
+			if (url.indexOf('grpc://') !== 0 && url.indexOf('grpcs://') !== 0) {
+				let tls = process.env.CORE_PEER_TLS_ENABLED;
+				if (typeof tls === 'string' && tls.toLowerCase() === 'true')
+					url = 'grpcs://' + url;
+				else
+					url = 'grpc://' + url;
+			}
+		}
+	}
+
+	let client = new Client(chaincode, url);
 
 	let chaincodeName = process.env.CORE_CHAINCODE_ID_NAME;
 	let chaincodeID = new _chaincodeProto.ChaincodeID();

@@ -20,7 +20,7 @@ Pre-requisites:
 
 After cloning the fabric repo, you must also download a changeset that is required to run node.js chaincodes. It is still being worked on so for the time being you must manually download the changeset before building the fabric peer.
 ```
-git fetch ssh://<gerrit_id>@gerrit.hyperledger.org:29418/fabric refs/changes/23/11823/5 && git checkout FETCH_HEAD
+git fetch ssh://<gerrit id>@gerrit.hyperledger.org:29418/fabric refs/changes/15/12515/3 && git checkout FETCH_HEAD
 ```
 
 At this point you can proceed with one of the following two options to set up your local target network for testing.
