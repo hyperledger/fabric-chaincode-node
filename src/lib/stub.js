@@ -8,6 +8,7 @@
 const grpc = require('grpc');
 const path = require('path');
 const util = require('util');
+const utf8 = require('utf8');
 
 const _commonProto = grpc.load({
 	root: path.join(__dirname, './protos'),
@@ -43,7 +44,19 @@ const RESPONSE_CODE = {
 	ERROR: 500
 };
 
-var Stub = class {
+const MIN_UNICODE_RUNE_VALUE = '\u0000';
+const MAX_UNICODE_RUNE_VALUE = '\u0010\uffff';
+const COMPOSITEKEY_NS = '\x00';
+const EMPTY_KEY_SUBSTITUTE = '\x01';
+
+function _validateCompositeKeyAttribute(attr) {
+	if (typeof attr !== 'string' || attr.length === 0) {
+		throw new Error('object type or attribute not a non-zero length string');
+	}
+	utf8.decode(attr);
+}
+
+let Stub = class {
 	constructor(client, txId, chaincodeInput, signedProposal) {
 		this.txId = txId;
 		this.args = chaincodeInput.args.map((entry) => {
@@ -200,7 +213,42 @@ var Stub = class {
 		event.setPayload(payload);
 		this.chaincodeEvent = event;
 	}
+
+	/**
+	 * Create a composite key
+	 * @param {string} objectType
+	 * @param {array} attributes
+	 * @return {string} a composite key made up from the inputs
+	 */
+	createCompositeKey(objectType, attributes) {
+		_validateCompositeKeyAttribute(objectType);
+		if (!Array.isArray(attributes)) {
+			throw new Error('attributes must be an array');
+		}
+
+		let compositeKey = COMPOSITEKEY_NS + objectType + MIN_UNICODE_RUNE_VALUE;
+		attributes.forEach((attribute) => {
+			_validateCompositeKeyAttribute(attribute);
+			compositeKey = compositeKey + attribute + MIN_UNICODE_RUNE_VALUE;
+		});
+		return compositeKey;
+	}
+
+
+
+	/**
+	 * Return the various values for a partial key
+	 * @param {string} objectType
+	 * @param {array} attributes
+	 * @return {promise} a promise that resolves with the returned values, rejects if an error occurs
+	 */
+	getStateByPartialCompositeKey(objectType, attributes) {
+		let partialCompositeKey = this.createCompositeKey(objectType, attributes);
+		return this.getStateByRange(partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+	}
 };
 
 module.exports = Stub;
 module.exports.RESPONSE_CODE = RESPONSE_CODE;
+
+

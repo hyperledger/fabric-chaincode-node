@@ -7,6 +7,7 @@
 
 const ByteBuffer = require('bytebuffer');
 const test = require('../base.js');
+const sinon = require('sinon');
 
 const Stub = require('fabric-shim/lib/stub.js');
 const grpc = require('grpc');
@@ -229,6 +230,83 @@ test('Arguments JSON-ify Tests', (t) => {
 	t.equal(stub.args[0].a, 1, 'Test parsing JSON arguments payload: a');
 	t.equal(stub.args[0].b, 2, 'Test parsing JSON arguments payload: b');
 	t.end();
+});
+
+
+test('CreateCompositeKey', (t) => {
+	let stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+
+	t.throws(
+		() => {
+			stub.createCompositeKey();
+		},
+		/non-zero length/,
+		'Test catching invalid object type'
+	);
+
+	t.throws(
+		() => {
+			stub.createCompositeKey('key');
+		},
+		/must be an array/,
+		'Test catching invalid attributes'
+	);
+
+	t.throws(
+		() => {
+			stub.createCompositeKey('k\x99x33ey', []);
+		},
+		/Invalid UTF-8/,
+		'Test bad utf-8 in object type'
+	);
+
+	t.throws(
+		() => {
+			stub.createCompositeKey('type', ['k\x99x33ey']);
+		},
+		/Invalid UTF-8/,
+		'Test bad utf-8 in attributes'
+	);
+
+
+	t.equal(stub.createCompositeKey('key', []), '\u0000key\u0000', 'Test createCompositeKey with no attributes returns expected key');
+	t.equal(stub.createCompositeKey('key', ['attr1']), '\u0000key\u0000attr1\u0000', 'Test createCompositeKey with single attribute returns expected key');
+	t.equal(stub.createCompositeKey('key', ['attr1', 'attr2','attr3']), '\u0000key\u0000attr1\u0000attr2\u0000attr3\u0000', 'Test createCompositeKey with multiple attributes returns expected key');
+
+	t.end();
+});
+
+test('getStartByPartialCompositeKey', (t) => {
+	let stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		}
+	);
+
+	let expectedKey = '\u0000key\u0000attr1\u0000attr2\u0000';
+	let cckStub = sinon.stub(stub, 'createCompositeKey').returns(expectedKey);
+	let gsbrStub = sinon.stub(stub, 'getStateByRange');
+
+	stub.getStateByPartialCompositeKey('key', ['attr1', 'attr2']);
+	t.equal(cckStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls createCompositeKey once');
+	t.deepEqual(cckStub.firstCall.args, ['key', ['attr1', 'attr2']], 'Test getStateByPartialCompositeKey calls createCompositeKey with the correct parameters');
+	t.equal(gsbrStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls getStateByRange Once');
+	t.deepEqual(gsbrStub.firstCall.args, [expectedKey, expectedKey + '\u0010\uffff'], 'Test getStateByPartialCompositeKey calls getStateByRange with the right arguments');
+	t.end();
+
 });
 
 test('Arguments Tests', (t) => {
