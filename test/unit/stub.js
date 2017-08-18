@@ -232,7 +232,6 @@ test('Arguments JSON-ify Tests', (t) => {
 	t.end();
 });
 
-
 test('CreateCompositeKey', (t) => {
 	let stub = new Stub(
 		'dummyClient',

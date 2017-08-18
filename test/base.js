@@ -12,6 +12,8 @@ const _test = require('tape-promise').default;
 let test = _test(tape);
 
 let tempdir = path.join(os.tmpdir(), 'fabric-shim');
+let bnSamplesPath = path.join(__dirname, '../../fabric-samples/basic-network');
+let bnTestDir = path.join(tempdir, 'basic-network');
 
 test = ((context, f) => {
 	return function() {
@@ -22,3 +24,5 @@ test = ((context, f) => {
 
 module.exports = test;
 module.exports.tempdir = tempdir;
+module.exports.BasicNetworkSamplePath = bnSamplesPath;
+module.exports.BasicNetworkTestDir = bnTestDir;

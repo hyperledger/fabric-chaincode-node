@@ -154,6 +154,19 @@ In the output of the command, you should see the following indiciating successfu
 2017-08-14 16:24:04.225 EDT [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 00a Chaincode invoke successful. result: status:200 
 ```
 
+### Run the unit and integration tests
+
+The project is equipped with both unit tests (runs standalone) and integration tests (requires a target fabric network).
+* to run the unit tests:
+```
+gulp test-headless
+```
+* to run the integration tests:
+```
+DEVMODE=false gulp channel-init
+gulp test-e2e
+```
+
 ### Test the chaincode in peer network mode
 
 The above runs the peer in *chaincode dev mode*. It calls the locally launched chaincode process (the one started by the `node test/integration/test.js` command). You can also test chaincodes in real runtime mode meant for production, also known as the *network mode*.

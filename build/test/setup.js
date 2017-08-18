@@ -1,3 +1,8 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
 'use strict';
 
 const gulp = require('gulp');
@@ -10,7 +15,7 @@ const path = require('path');
 const shell = require('gulp-shell');
 const replace = require('gulp-replace');
 
-const test = require('../test/base.js');
+const test = require('../../test/base.js');
 
 // by default for running the tests print debug to a file
 let debugPath = path.join(test.tempdir, 'logs/test-debug.log');
@@ -34,9 +39,9 @@ gulp.task('clean-up', function() {
 
 // re-use the "basic-network" artifacts from fabric-samples
 // by copying them to the temp folder and override the
-// docker-compose.yml's image tags to "latest"
-let samplesPath = path.join(__dirname, '../../fabric-samples/basic-network');
-let testDir = path.join(test.tempdir, 'basic-network');
+// docker-compose.yml's content to fit the needs of the test environment
+let samplesPath = test.BasicNetworkSamplePath;
+let testDir = test.BasicNetworkTestDir;
 let devmode = process.env.DEVMODE ? process.env.DEVMODE : 'true';
 gulp.task('docker-copy', ['clean-up'], function() {
 	gulp.src([

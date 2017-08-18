@@ -3,9 +3,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-var gulp = require('gulp');
-var eslint = require('gulp-eslint');
-var path = require('path');
+const gulp = require('gulp');
+const eslint = require('gulp-eslint');
+const path = require('path');
 
 gulp.task('lint', function () {
 	return gulp.src([
