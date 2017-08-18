@@ -11,9 +11,8 @@ const urlParser = require('url');
 const path = require('path');
 const util = require('util');
 
-const logger = require('./logger').getLogger('lib/client.js');
-
-var Stub = require('./stub.js');
+const logger = require('./logger').getLogger('lib/handler.js');
+const Stub = require('./stub.js');
 
 const _serviceProto = grpc.load({
 	root: path.join(__dirname, './protos'),

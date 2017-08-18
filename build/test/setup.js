@@ -6,9 +6,6 @@
 'use strict';
 
 const gulp = require('gulp');
-const tape = require('gulp-tape');
-const tapColorize = require('tap-colorize');
-const istanbul = require('gulp-istanbul');
 const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
@@ -22,13 +19,6 @@ let debugPath = path.join(test.tempdir, 'logs/test-debug.log');
 console.log('\n####################################################');
 console.log(util.format('# debug log: %s', debugPath));
 console.log('####################################################\n');
-
-gulp.task('instrument', function() {
-	return gulp.src([
-		'node_modules/fabric-shim/lib/**/*.js'])
-		.pipe(istanbul())
-		.pipe(istanbul.hookRequire());
-});
 
 gulp.task('clean-up', function() {
 	// some tests create temporary files or directories
@@ -143,21 +133,3 @@ gulp.task('channel-init', ['docker-ready'], shell.task([
 	// create channel, join peer0 to the channel
 	'docker exec cli /etc/hyperledger/config/channel-init.sh'
 ]));
-
-gulp.task('test-headless', ['clean-up', 'lint', 'instrument', 'protos'], function() {
-	// this is needed to avoid a problem in tape-promise with adding
-	// too many listeners to the "unhandledRejection" event
-	process.setMaxListeners(0);
-
-	return gulp.src([
-		'test/unit/**/*.js'
-	])
-		.pipe(tape({
-			reporter: tapColorize()
-		}))
-		.pipe(istanbul.writeReports({
-			reporters: ['lcov', 'json', 'text',
-				'text-summary', 'cobertura']
-		}));
-});
-

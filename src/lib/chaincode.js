@@ -11,7 +11,7 @@ const path = require('path');
 const util = require('util');
 
 const logger = require('./logger').getLogger('lib/chaincode.js');
-const Client = require('./client.js');
+const Handler = require('./handler.js');
 const Stub = require('./stub.js');
 
 const argsDef = [{
@@ -63,7 +63,7 @@ var start = function(chaincode) {
 		}
 	}
 
-	let client = new Client(chaincode, url);
+	let client = new Handler(chaincode, url);
 
 	let chaincodeName = process.env.CORE_CHAINCODE_ID_NAME;
 	let chaincodeID = new _chaincodeProto.ChaincodeID();
