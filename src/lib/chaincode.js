@@ -17,7 +17,7 @@ const Stub = require('./stub.js');
 const argsDef = [{
 	name: 'peer.address', type: String
 }];
-const opts = CLIArgs(argsDef);
+let opts = CLIArgs(argsDef);
 
 const _chaincodeProto = grpc.load({
 	root: path.join(__dirname, './protos'),
@@ -44,7 +44,43 @@ var start = function(chaincode) {
 	if (typeof chaincode.Invoke !== 'function')
 		throw new Error('The "chaincode" argument must implement the "Invoke()" method');
 
-	let url = opts['peer.address'];
+	let url = parsePeerUrl(opts['peer.address']);
+
+	let client = new Handler(chaincode, url);
+
+	let chaincodeName = process.env.CORE_CHAINCODE_ID_NAME;
+	let chaincodeID = new _chaincodeProto.ChaincodeID();
+	chaincodeID.setName(chaincodeName);
+
+	logger.info(util.format('Registering with peer %s as chaincode "%s"', opts['peer.address'], chaincodeName));
+
+	client.chat({
+		type: _serviceProto.ChaincodeMessage.Type.REGISTER,
+		payload: chaincodeID.toBuffer()
+	});
+
+	// return the client object to give the calling code
+	// a handle to terminate pro-actively by calling client.close()
+	return client;
+};
+
+var success = function(payload) {
+	let ret = new _responseProto.Response();
+	ret.status = Stub.RESPONSE_CODE.OK;
+	ret.payload = payload ? payload : Buffer.from('');
+
+	return ret;
+};
+
+var error = function(msg) {
+	let ret = new _responseProto.Response();
+	ret.status = Stub.RESPONSE_CODE.ERROR;
+	ret.message = msg;
+
+	return ret;
+};
+
+function parsePeerUrl(url) {
 	if (typeof url === 'undefined' || url === '') {
 		throw new Error('The "peer.address" program argument must be set to a legitimate value of <host>:<port>');
 	} else {
@@ -63,35 +99,8 @@ var start = function(chaincode) {
 		}
 	}
 
-	let client = new Handler(chaincode, url);
-
-	let chaincodeName = process.env.CORE_CHAINCODE_ID_NAME;
-	let chaincodeID = new _chaincodeProto.ChaincodeID();
-	chaincodeID.setName(chaincodeName);
-
-	logger.info(util.format('Registering with peer %s as chaincode "%s"', opts['peer.address'], chaincodeName));
-
-	client.chat({
-		type: _serviceProto.ChaincodeMessage.Type.REGISTER,
-		payload: chaincodeID.toBuffer()
-	});
-};
-
-var success = function(payload) {
-	let ret = new _responseProto.Response();
-	ret.status = Stub.RESPONSE_CODE.OK;
-	ret.payload = payload ? payload : Buffer.from('');
-
-	return ret;
-};
-
-var error = function(msg) {
-	let ret = new _responseProto.Response();
-	ret.status = Stub.RESPONSE_CODE.ERROR;
-	ret.message = msg;
-
-	return ret;
-};
+	return url;
+}
 
 module.exports.start = start;
 module.exports.success = success;

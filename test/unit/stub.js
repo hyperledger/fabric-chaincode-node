@@ -216,6 +216,9 @@ test('Chaincode stub constructor tests', (t) => {
 });
 
 test('Arguments JSON-ify Tests', (t) => {
+	// emulate getting a byte array from a stringified JSON input
+	// in the transaction submission, and test that the stub
+	// properly decoded it to a native object
 	let buf = ByteBuffer.fromUTF8('{\"a\":1,\"b\":2}');
 	let stub = new Stub(
 		'dummyClient',

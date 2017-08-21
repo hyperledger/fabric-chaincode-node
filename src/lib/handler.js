@@ -111,6 +111,10 @@ var ChaincodeSupportClient = class {
 		this._peerListeners = {};
 	}
 
+	close() {
+		this._stream.end();
+	}
+
 	// this is a long-running method that does not return until
 	// the conversation b/w the chaincode program and the target
 	// peer has been completed

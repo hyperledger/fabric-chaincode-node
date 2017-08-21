@@ -28,9 +28,10 @@
     "gulp-wait": "0.0.2",
     "gulp-watch": "^4.3.11",
     "require-dir": "^0.3.2",
+    "rewire": "^2.5.2",
+    "sinon": "3.2.0",
     "tap-colorize": "^1.2.0",
     "tape": "^4.8.0",
-    "tape-promise": "^2.0.1",
-    "sinon": "3.2.0"
+    "tape-promise": "^2.0.1"
   }
 }
