@@ -20,6 +20,7 @@ const _serviceProto = grpc.load({
 }).protos;
 
 test('chaincode start() tests', (t) => {
+	let sandbox = sinon.sandbox.create();
 	t.throws(
 		() => {
 			Chaincode.start();
@@ -104,7 +105,7 @@ test('chaincode start() tests', (t) => {
 	// stub out the Handler.chat() method so it doesn't send
 	// out gRPC calls
 	let handlerClass = Chaincode.__get__('Handler');
-	let chat = sinon.stub(handlerClass.prototype, 'chat');
+	let chat = sandbox.stub(handlerClass.prototype, 'chat');
 	// set a proper value to the module-scoped variable
 	// that will be used by the "start()" method tested below
 	Chaincode.__set__('opts', {'peer.address': 'localhost:7051'});
@@ -115,6 +116,7 @@ test('chaincode start() tests', (t) => {
 	t.equal(args.length === 1 && typeof args[0] === 'object', true, 'Test handler.chat() gets called with one object');
 	t.equal(args[0].type, _serviceProto.ChaincodeMessage.Type.REGISTER, 'Test the argument has the right message type');
 	handler.close();
-
+	sandbox.restore();
 	t.end();
+
 });

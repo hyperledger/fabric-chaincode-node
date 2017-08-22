@@ -10,6 +10,7 @@ const grpc = require('grpc');
 const urlParser = require('url');
 const path = require('path');
 const util = require('util');
+const StateQueryIterator = require('./iterators').StateQueryIterator;
 
 const logger = require('./logger').getLogger('lib/handler.js');
 const Stub = require('./stub.js');
@@ -45,7 +46,7 @@ const MSG_TYPE = {
  *
  * @class
  */
-var ChaincodeSupportClient = class {
+let ChaincodeSupportClient = class {
 
 	/**
 	 * Constructs an object with the endpoint configuration settings.
@@ -263,6 +264,30 @@ var ChaincodeSupportClient = class {
 		return this._askPeerAndListen(msg, 'GetStateByRange');
 	}
 
+	handleQueryStateNext(id, txId) {
+		let payload = new _serviceProto.QueryStateNext();
+		payload.setId(id);
+
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+			payload: payload.toBuffer(),
+			txid: txId
+		};
+		return this._askPeerAndListen(msg, 'QueryStateNext');
+	}
+
+	handleQueryStateClose(id, txId) {
+		let payload = new _serviceProto.QueryStateClose();
+		payload.setId(id);
+
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+			payload: payload.toBuffer(),
+			txid: txId
+		};
+		return this._askPeerAndListen(msg, 'QueryStateClose');
+	}
+
 	registerPeerListener(txId, cb) {
 		this._peerListeners[txId] = cb;
 	}
@@ -277,7 +302,7 @@ var ChaincodeSupportClient = class {
 		return new Promise((resolve, reject) => {
 			self.registerPeerListener(msg.txid, (res) => {
 				self.removePeerListener(msg.txid);
-				peerResponded(res, method, resolve, reject);
+				peerResponded(self, res, method, resolve, reject);
 			});
 
 			self._stream.write(msg);
@@ -387,7 +412,7 @@ function shortTxid(txId) {
 	return txId.substring(0, 8);
 }
 
-function peerResponded(res, method, resolve, reject) {
+function peerResponded(handler, res, method, resolve, reject) {
 	if (res.type === MSG_TYPE.RESPONSE) {
 		logger.debug(util.format('[%s]Received %s() successful response', shortTxid(res.txid), method));
 
@@ -395,6 +420,9 @@ function peerResponded(res, method, resolve, reject) {
 		// before returning to the client code
 		switch (method) {
 		case 'GetStateByRange':
+			return resolve(new StateQueryIterator(handler, res.txid, _serviceProto.QueryResponse.decode(res.payload)));
+		case 'QueryStateNext':
+		case 'QueryStateClose':
 			return resolve(_serviceProto.QueryResponse.decode(res.payload));
 		}
 
@@ -416,7 +444,7 @@ module.exports = ChaincodeSupportClient;
 //
 // The Endpoint class represents a remote grpc or grpcs target
 //
-var Endpoint = class {
+let Endpoint = class {
 	constructor(url /*string*/ , pem /*string*/ ) {
 		var fs = require('fs'),
 			path = require('path');

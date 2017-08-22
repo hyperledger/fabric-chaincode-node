@@ -3,10 +3,25 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+'use strict';
 const shim = require('fabric-shim');
 const util = require('util');
+/*
+example using async/await for when node8 is available.
+async function getAllResults(iterator) {
+	while (true) {
+		let res = await iterator.next();
+		console.log(res.value.key);
+		console.log(res.value.value.toString('utf8'));
+		console.log(res.done);
 
-var Chaincode = class {
+		// process value
+		if (res.done) break;
+	}
+}
+*/
+
+let Chaincode = class {
 	Init(stub) {
 		return stub.putState('dummyKey', Buffer.from('dummyValue'))
 			.then(() => {
@@ -58,11 +73,56 @@ var Chaincode = class {
 					return shim.error(err);
 				});
 		} else if (ret.fcn === 'test3') {
-			return stub.getStateByRange('key1', 'key3')
-				.then((result) => {
-					console.log(util.format('Successfully getStateByRange(): %j', result));
+			return stub.getStateByRange('','')
+				.then((iterator) => {
+					// example using async/await pattern for when node 8 is ready
+					// return getAllResults(iterator);
+
+					// example using the emitter pattern: Start
+					iterator
+						.on('data', (iterator, res) => {
+							console.log(res.value.key);
+							console.log(res.value.value.toString('utf8'));
+							console.log(res.done);
+							iterator.next();
+						})
+						.on('end', (iterator) => {
+							console.log('end of data');
+							iterator.close();
+						});
+					iterator.next();
+					// emitter pattern: End
+				})
+				.then(() => {
 					return shim.success();
 				}).catch((err) => {
+					return shim.error(err);
+				});
+		} else if (ret.fcn === 'test4') {
+			return stub.getState('key1')
+				.then((res) => {
+					console.log(res.toString('utf8'));
+					return stub.getState('key2');
+				})
+				.then((res) => {
+					console.log(res.toString('utf8'));
+					return stub.getState('key3');
+				})
+				.then((res) => {
+					console.log(res.toString('utf8'));
+					return shim.success();
+				}).catch((err) => {
+					return shim.error(err);
+				});
+		} else if (ret.fcn === 'test5') {
+			if (ret.params.length !== 2) {
+				return shim.error('Incorrect no. of parameters');
+			}
+			return stub.putState(ret.params[0], Buffer.from(ret.params[1]))
+				.then(() => {
+					return shim.success('put ' + ret.params[1] + ' into ' + ret.params[0]);
+				})
+				.catch((err) => {
 					return shim.error(err);
 				});
 		}
