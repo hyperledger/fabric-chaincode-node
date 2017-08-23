@@ -86,7 +86,8 @@ class CommonIterator extends EventEmitter {
 						return this._createAndEmitResult();
 					});
 			}
-			// no more, just return EMCA spec defined responsd
+			// no more, just return EMCA spec defined response
+			this.emit('end', this);
 			return Promise.resolve({done: true});
 		}
 

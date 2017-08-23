@@ -6,20 +6,42 @@
 'use strict';
 const shim = require('fabric-shim');
 const util = require('util');
+
 /*
-example using async/await for when node8 is available.
+//example using async/await for when node8 is available.
 async function getAllResults(iterator) {
 	while (true) {
 		let res = await iterator.next();
 		console.log(res.value.key);
 		console.log(res.value.value.toString('utf8'));
 		console.log(res.done);
-
-		// process value
-		if (res.done) break;
+		if (res.done) {
+			console.log('end of data');
+			iterator.close();
+			return shim.success();
+			break;
+		}
 	}
 }
 */
+
+function getAllResults(iterator, resolve) {
+	iterator
+		.on('data', (iterator, res) => {
+			console.log(res.value.key);
+			console.log(res.value.value.toString('utf8'));
+			console.log(res.done);
+			if (!res.done) {
+				iterator.next();
+			}
+		})
+		.on('end', (iterator) => {
+			console.log('end of data');
+			iterator.close();
+			resolve(shim.success());
+		});
+	iterator.next();
+}
 
 let Chaincode = class {
 	Init(stub) {
@@ -61,43 +83,50 @@ let Chaincode = class {
 					return shim.error(err);
 				});
 		} else if (ret.fcn === 'test2') {
+			let a1 = {key: 'k1', value: 'value1'};
+			let a2 = {key: 'k2', value: 'value1'};
+			let a3 = {key: 'k3', value: 'value1'};
+
 			return stub.putState('key1', Buffer.from('value1'))
 				.then(() => {
 					return stub.putState('key2', Buffer.from('value2'));
 				}).then(() => {
 					return stub.putState('key3', Buffer.from('value3'));
 				}).then(() => {
-					console.log(util.format('Successfully putState() of key1, key2 and key3'));
+					return stub.putState('key4', Buffer.from(JSON.stringify(a1)));
+				}).then(() => {
+					return stub.putState('key5', Buffer.from(JSON.stringify(a2)));
+				}).then(() => {
+					return stub.putState('key6', Buffer.from(JSON.stringify(a3)));
+				}).then(() => {
+					console.log(util.format('Successfully putState() of key1, key2, key3, key4, key5, key6'));
 					return shim.success();
 				}).catch((err) => {
 					return shim.error(err);
 				});
 		} else if (ret.fcn === 'test3') {
-			return stub.getStateByRange('','')
+			/*
+			// example using async/await
+			return stub.getStateByRange('', '')
 				.then((iterator) => {
-					// example using async/await pattern for when node 8 is ready
-					// return getAllResults(iterator);
-
-					// example using the emitter pattern: Start
-					iterator
-						.on('data', (iterator, res) => {
-							console.log(res.value.key);
-							console.log(res.value.value.toString('utf8'));
-							console.log(res.done);
-							iterator.next();
-						})
-						.on('end', (iterator) => {
-							console.log('end of data');
-							iterator.close();
-						});
-					iterator.next();
-					// emitter pattern: End
+					return getAllResults(iterator);
 				})
-				.then(() => {
-					return shim.success();
-				}).catch((err) => {
+				.catch((err) => {
+					console.log(err);
 					return shim.error(err);
 				});
+			*/
+			return new Promise((resolve, reject) => {
+				stub.getStateByRange('','')
+					.then((iterator) => {
+						getAllResults(iterator, resolve);
+					})
+					.catch((err) => {
+						console.log(err);
+						reject(shim.error(err));
+					});
+
+			});
 		} else if (ret.fcn === 'test4') {
 			return stub.getState('key1')
 				.then((res) => {
@@ -125,6 +154,28 @@ let Chaincode = class {
 				.catch((err) => {
 					return shim.error(err);
 				});
+		} else if (ret.fcn === 'test6') {
+			let query = {
+				selector: {
+					key: {
+						$regex: 'k[2-9]'
+					}
+				}
+			};
+
+			// query gets rewritten as
+			//query={"limit":10000,"selector":{"$and":[{"chaincodeid":"mycc"},{"data.key":{"$regex":"k[2-9]"}}]},"skip":0}
+			return new Promise((resolve, reject) => {
+				stub.getQueryResult(JSON.stringify(query))
+					.then((iterator) => {
+						getAllResults(iterator, resolve);
+					})
+					.catch((err) => {
+						console.log(err);
+						reject(shim.error(err));
+					});
+
+			});
 		}
 
 	}

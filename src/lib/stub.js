@@ -188,6 +188,10 @@ let Stub = class {
 		return this.txTimestamp;
 	}
 
+	getBinding() {
+		return this.binding;
+	}
+
 	getState(key) {
 		return this.handler.handleGetState(key, this.txId);
 	}
@@ -202,6 +206,10 @@ let Stub = class {
 
 	getStateByRange(startKey, endKey) {
 		return this.handler.handleGetStateByRange(startKey, endKey, this.txId);
+	}
+
+	getQueryResult(query) {
+		return this.handler.handleGetQueryResult(query, this.txId);
 	}
 
 	setEvent(name, payload) {

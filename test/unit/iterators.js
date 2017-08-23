@@ -27,13 +27,47 @@ test('Iterator constructor tests', (t) => {
 	t.end();
 });
 
+test('next: Empty reponse', (t) => {
+	let mockHandler = sinon.createStubInstance(handler);
+	const emptyResponse = {
+		results: [],
+		has_more: false
+	};
+
+
+	let historyQI = new HistoryQueryIterator(mockHandler, 'tx1', emptyResponse);
+	let queryQI = new StateQueryIterator(mockHandler, 'tx2', emptyResponse);
+	let historyEmitStub = sinon.stub(historyQI, 'emit');
+	let queryEmitStub = sinon.stub(queryQI, 'emit');
+
+	let allproms = [];
+	let historyProm = historyQI.next()
+		.then((result) => {
+			t.equal(historyEmitStub.calledOnce, true, 'Test history end emitted');
+			t.deepEqual(historyEmitStub.firstCall.args, ['end', historyQI], 'Test history emit called with correct value');
+			t.deepEqual(result, {done: true}, 'Test history returns correct value');
+		});
+	allproms.push(historyProm);
+	let queryProm = queryQI.next()
+		.then((result) => {
+			t.equal(queryEmitStub.calledOnce, true, 'Test query end emitted');
+			t.deepEqual(queryEmitStub.firstCall.args, ['end', queryQI], 'Test query emit called with correct value');
+			t.deepEqual(result, {done: true}, 'Test query returns correct value');
+		});
+	allproms.push(queryProm);
+	Promise.all(allproms).then(() => {
+		t.end();
+	});
+
+});
+
 test('next: Simple data 1st entry, no more', (t) => {
 	let mockHandler = sinon.createStubInstance(handler);
 	const historyResponse = {
 		results: ['history1', 'history2'],
 		has_more: false
-
 	};
+
 	const queryResponse = {
 		results: ['query1', 'query2'],
 		has_more: false
@@ -376,7 +410,7 @@ test('Integration tests for iterators', (t) => {
 		})
 		.then((result) => {
 			t.deepEqual(result, {done: true}, 'history no further data');
-			t.equal(historyEmitStub.callCount, 4, 'history no further emits');
+			t.equal(historyEmitStub.callCount, 5, 'history no further emits');
 		});
 
 	let qr = queryQI.next()
@@ -401,7 +435,7 @@ test('Integration tests for iterators', (t) => {
 		})
 		.then((result) => {
 			t.deepEqual(result, {done: true}, 'query no further data');
-			t.equal(queryEmitStub.callCount, 4, 'query no further emits');
+			t.equal(queryEmitStub.callCount, 5, 'query no further emits');
 		});
 
 

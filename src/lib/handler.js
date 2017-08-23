@@ -269,7 +269,7 @@ let ChaincodeSupportClient = class {
 		payload.setId(id);
 
 		let msg = {
-			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+			type: _serviceProto.ChaincodeMessage.Type.QUERY_STATE_NEXT,
 			payload: payload.toBuffer(),
 			txid: txId
 		};
@@ -281,11 +281,23 @@ let ChaincodeSupportClient = class {
 		payload.setId(id);
 
 		let msg = {
-			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+			type: _serviceProto.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
 			payload: payload.toBuffer(),
 			txid: txId
 		};
 		return this._askPeerAndListen(msg, 'QueryStateClose');
+	}
+
+	handleGetQueryResult(query, txId) {
+		let payload = new _serviceProto.GetQueryResult();
+		payload.setQuery(query);
+
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
+			payload: payload.toBuffer(),
+			txid: txId
+		};
+		return this._askPeerAndListen(msg, 'GetQueryResult');
 	}
 
 	registerPeerListener(txId, cb) {
@@ -347,6 +359,7 @@ function handleMessage(msg, client, action) {
 			client._stream.write(nextStateMsg);
 		}
 
+		// TODO: We need more validation. a) init/invoke actually exist
 		if (stub) {
 			let promise, method;
 			if (action === 'init') {
@@ -357,6 +370,7 @@ function handleMessage(msg, client, action) {
 				method = 'Invoke';
 			}
 
+			//TODO: We should validate that a promise is returned.
 			promise.then((resp) => {
 				logger.debug(util.format(
 					'[%s]Calling chaincode %s(), response status: %s',
@@ -420,6 +434,7 @@ function peerResponded(handler, res, method, resolve, reject) {
 		// before returning to the client code
 		switch (method) {
 		case 'GetStateByRange':
+		case 'GetQueryResult':
 			return resolve(new StateQueryIterator(handler, res.txid, _serviceProto.QueryResponse.decode(res.payload)));
 		case 'QueryStateNext':
 		case 'QueryStateClose':
