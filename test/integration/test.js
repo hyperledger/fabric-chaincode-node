@@ -8,13 +8,23 @@ const shim = require('fabric-shim');
 const util = require('util');
 
 /*
+process.on('unhandledRejection', () => {
+	console.log(arguments);
+});
+*/
+
+/*
 //example using async/await for when node8 is available.
 async function getAllResults(iterator) {
 	while (true) {
 		let res = await iterator.next();
-		console.log(res.value.key);
+		if (res.value.namespace) console.log(res.value.namespace);
+		if (res.value.key) console.log(res.value.key);
+		if (res.value.tx_id) console.log(res.value.tx_id);
+		if (res.value.timestamp) console.log(res.value.timestamp);
+		if (res.value.is_delete) console.log(res.value.is_delete);
+
 		console.log(res.value.value.toString('utf8'));
-		console.log(res.done);
 		if (res.done) {
 			console.log('end of data');
 			iterator.close();
@@ -28,7 +38,15 @@ async function getAllResults(iterator) {
 function getAllResults(iterator, resolve) {
 	iterator
 		.on('data', (iterator, res) => {
-			console.log(res.value.key);
+			// namespace, key, value are query results
+			// tx_id, timestamp, is_delete, value are history results
+
+			if (res.value.namespace) console.log(res.value.namespace);
+			if (res.value.key) console.log(res.value.key);
+			if (res.value.tx_id) console.log(res.value.tx_id);
+			if (res.value.timestamp) console.log(res.value.timestamp);
+			if (res.value.is_delete) console.log(res.value.is_delete);
+
 			console.log(res.value.value.toString('utf8'));
 			console.log(res.done);
 			if (!res.done) {
@@ -176,6 +194,26 @@ let Chaincode = class {
 					});
 
 			});
+		} else if (ret.fcn === 'test7') {
+			return new Promise((resolve, reject) => {
+				stub.getHistoryForKey('key1')
+					.then((iterator) => {
+						getAllResults(iterator, resolve);
+					})
+					.catch((err) => {
+						console.log(err);
+						reject(shim.error(err));
+					});
+			});
+		} else if (ret.fcn === 'test8') {
+			console.log('invoking chaincode');
+			return stub.invokeChaincode('mycc2', ['test1'])
+				.then((results) => {
+					console.log(results);
+					return shim.success();
+				});
+		} else {
+			return shim.success();
 		}
 
 	}

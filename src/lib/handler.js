@@ -11,6 +11,7 @@ const urlParser = require('url');
 const path = require('path');
 const util = require('util');
 const StateQueryIterator = require('./iterators').StateQueryIterator;
+const HistoryQueryIterator = require('./iterators').HistoryQueryIterator;
 
 const logger = require('./logger').getLogger('lib/handler.js');
 const Stub = require('./stub.js');
@@ -23,6 +24,11 @@ const _serviceProto = grpc.load({
 const _chaincodeProto = grpc.load({
 	root: path.join(__dirname, './protos'),
 	file: 'peer/chaincode.proto'
+}).protos;
+
+const _responseProto = grpc.load({
+	root: path.join(__dirname, './protos'),
+	file: 'peer/proposal_response.proto'
 }).protos;
 
 const STATES = {
@@ -38,7 +44,8 @@ const MSG_TYPE = {
 	RESPONSE: 'RESPONSE',		// _serviceProto.ChaincodeMessage.Type.RESPONSE
 	ERROR: 'ERROR',				// _serviceProto.ChaincodeMessage.Type.ERROR
 	INIT: 'INIT',				// _serviceProto.ChaincodeMessage.Type.INIT
-	TRANSACTION: 'TRANSACTION'	// _serviceProto.ChaincodeMessage.Type.TRANSACTION
+	TRANSACTION: 'TRANSACTION',	// _serviceProto.ChaincodeMessage.Type.TRANSACTION
+	COMPLETED: 'COMPLETED',		// _serviceProto.ChaincodeMessage.Type.COMPLETED
 };
 
 /**
@@ -66,9 +73,9 @@ let ChaincodeSupportClient = class {
 	constructor(chaincode, url, opts) {
 		this.chaincode = chaincode;
 
-		var pem = null;
-		var ssl_target_name_override = '';
-		var default_authority = '';
+		let pem = null;
+		let ssl_target_name_override = '';
+		let default_authority = '';
 
 		if (opts && opts.pem) {
 			pem = opts.pem;
@@ -300,13 +307,55 @@ let ChaincodeSupportClient = class {
 		return this._askPeerAndListen(msg, 'GetQueryResult');
 	}
 
+	handleGetHistoryForKey(key, txId) {
+		let payload = new _serviceProto.GetHistoryForKey();
+		payload.setKey(key);
+
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
+			payload: payload.toBuffer(),
+			txid: txId
+		};
+		return this._askPeerAndListen(msg, 'GetHistoryForKey');
+	}
+
+	handleInvokeChaincode(chaincodeName, args, txId) {
+		let payload = new _chaincodeProto.ChaincodeSpec();
+		let chaincodeId = new _chaincodeProto.ChaincodeID();
+		let chaincodeInput = new _chaincodeProto.ChaincodeInput();
+		chaincodeId.setName(chaincodeName);
+		let inputArgs = [];
+		args.forEach((arg) => {
+			inputArgs.push(Buffer.from(arg, 'utf8'));
+		});
+		chaincodeInput.setArgs(inputArgs);
+		payload.setChaincodeId(chaincodeId);
+		payload.setInput(chaincodeInput);
+
+		let msg = {
+			type: _serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
+			payload: payload.toBuffer(),
+			txid: txId
+		};
+		return this._askPeerAndListen(msg, 'InvokeChaincode')
+			.then((message) => {
+				// here the message type comes back as an enumeration value rather than a string
+				// so need to use the enumerated value
+				if (message.type === _serviceProto.ChaincodeMessage.Type.COMPLETED) {
+					return _responseProto.Response.decode(message.payload);
+				}
+			});
+	}
+
+
 	registerPeerListener(txId, cb) {
 		this._peerListeners[txId] = cb;
 	}
 
 	removePeerListener(txId) {
-		if (this._peerListeners[txId])
+		if (this._peerListeners[txId]) {
 			delete this._peerListeners[txId];
+		}
 	}
 
 	_askPeerAndListen(msg, method) {
@@ -359,7 +408,6 @@ function handleMessage(msg, client, action) {
 			client._stream.write(nextStateMsg);
 		}
 
-		// TODO: We need more validation. a) init/invoke actually exist
 		if (stub) {
 			let promise, method;
 			if (action === 'init') {
@@ -370,7 +418,9 @@ function handleMessage(msg, client, action) {
 				method = 'Invoke';
 			}
 
-			//TODO: We should validate that a promise is returned.
+			//TODO: We should validate that a promise is returned, also that the resp has fields
+			//in it such as status, eg don't return shim.success() or shim.error() will cause
+			//unhandledPromiseRecection.
 			promise.then((resp) => {
 				logger.debug(util.format(
 					'[%s]Calling chaincode %s(), response status: %s',
@@ -436,9 +486,13 @@ function peerResponded(handler, res, method, resolve, reject) {
 		case 'GetStateByRange':
 		case 'GetQueryResult':
 			return resolve(new StateQueryIterator(handler, res.txid, _serviceProto.QueryResponse.decode(res.payload)));
+		case 'GetHistoryForKey':
+			return resolve (new HistoryQueryIterator(handler, res.txid, _serviceProto.QueryResponse.decode(res.payload)));
 		case 'QueryStateNext':
 		case 'QueryStateClose':
 			return resolve(_serviceProto.QueryResponse.decode(res.payload));
+		case 'InvokeChaincode':
+			return resolve(_serviceProto.ChaincodeMessage.decode(res.payload));
 		}
 
 		return resolve(res.payload);
@@ -461,11 +515,11 @@ module.exports = ChaincodeSupportClient;
 //
 let Endpoint = class {
 	constructor(url /*string*/ , pem /*string*/ ) {
-		var fs = require('fs'),
+		let fs = require('fs'),
 			path = require('path');
 
-		var purl = urlParser.parse(url, true);
-		var protocol;
+		let purl = urlParser.parse(url, true);
+		let protocol;
 		if (purl.protocol) {
 			protocol = purl.protocol.toLowerCase().slice(0, -1);
 		}
@@ -479,7 +533,7 @@ let Endpoint = class {
 			this.addr = purl.host;
 			this.creds = grpc.credentials.createSsl(new Buffer(pem));
 		} else {
-			var error = new Error();
+			let error = new Error();
 			error.name = 'InvalidProtocol';
 			error.message = 'Invalid protocol: ' + protocol + '.  URLs must begin with grpc:// or grpcs://';
 			throw error;

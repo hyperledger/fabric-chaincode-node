@@ -286,6 +286,41 @@ test('CreateCompositeKey', (t) => {
 	t.end();
 });
 
+test('splitCompositeKey: ', (t) => {
+	let objectType;
+	let attributes;
+	let stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+
+	// test splitting stuff that was created using the createCompositeKey calls
+	({objectType, attributes} = stub.splitCompositeKey(stub.createCompositeKey('key', [])));
+	t.equal(objectType, 'key', 'Test splitting of compositeKey with only object type, objecttype part');
+	t.deepEqual(attributes, [], 'Test splitting of compositeKey with only object type, attributes part');
+
+	({objectType, attributes} = stub.splitCompositeKey(stub.createCompositeKey('key', ['attr1'])));
+	t.equal(objectType, 'key', 'Test splitting of compositeKey with 1 attribute, objecttype part');
+	t.deepEqual(attributes, ['attr1'], 'Test splitting of compositeKey with 1 attribute, attributes part');
+
+	({objectType, attributes} = stub.splitCompositeKey(stub.createCompositeKey('key', ['attr1', 'attr2'])));
+	t.equal(objectType, 'key', 'Test splitting of compositeKey with >1 attributes, objecttype part');
+	t.deepEqual(attributes, ['attr1', 'attr2'], 'Test splitting of compositeKey with >1 attributes, attributes part');
+
+	// pass in duff values
+	t.deepEqual(stub.splitCompositeKey(), {objectType: null, attributes: []}, 'Test no value passed');
+	t.deepEqual(stub.splitCompositeKey('something'), {objectType: null, attributes: []}, 'Test no value passed');
+	t.deepEqual(stub.splitCompositeKey('something\u0000\hello'), {objectType: null, attributes: []}, 'Test no value passed');
+	t.deepEqual(stub.splitCompositeKey('\x00'), {objectType: null, attributes: []}, 'Test no value passed');
+
+	t.end();
+});
+
 test('getStartByPartialCompositeKey', (t) => {
 	let stub = new Stub(
 		'dummyClient',

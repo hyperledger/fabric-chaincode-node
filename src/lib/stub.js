@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+
+//TODO: Need to add parameter validation to all calls.
 'use strict';
 
 const grpc = require('grpc');
@@ -212,6 +214,17 @@ let Stub = class {
 		return this.handler.handleGetQueryResult(query, this.txId);
 	}
 
+	getHistoryForKey(key) {
+		return this.handler.handleGetHistoryForKey(key, this.txId);
+	}
+
+	invokeChaincode(chaincodeName, args, channel) {
+		if (channel && channel.length > 0) {
+			chaincodeName = chaincodeName + '/' + channel;
+		}
+		return this.handler.handleInvokeChaincode(chaincodeName, args, this.txId);
+	}
+
 	setEvent(name, payload) {
 		if (typeof name !== 'string' || name === '')
 			throw new Error('Event name must be a non-empty string');
@@ -240,6 +253,27 @@ let Stub = class {
 			compositeKey = compositeKey + attribute + MIN_UNICODE_RUNE_VALUE;
 		});
 		return compositeKey;
+	}
+
+	/**
+	 * Split a composite key
+	 * @param {string} compositeKey the composite key to split
+	 * @return {object} which has properties of 'objectType' and attributes
+	 */
+	splitCompositeKey(compositeKey) {
+		let result = {objectType: null, attributes: []};
+		if (compositeKey && compositeKey.length > 1 && compositeKey.charAt(0) === COMPOSITEKEY_NS) {
+			let splitKey = compositeKey.substring(1).split(MIN_UNICODE_RUNE_VALUE);
+			if (splitKey[0]) {
+				result.objectType = splitKey[0];
+				splitKey.pop();
+				if (splitKey.length > 1) {
+					splitKey.shift();
+					result.attributes = splitKey;
+				}
+			}
+		}
+		return result;
 	}
 
 
