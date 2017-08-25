@@ -115,7 +115,7 @@ test('chaincode start() tests', (t) => {
 	let args = chat.firstCall.args;
 	t.equal(args.length === 1 && typeof args[0] === 'object', true, 'Test handler.chat() gets called with one object');
 	t.equal(args[0].type, _serviceProto.ChaincodeMessage.Type.REGISTER, 'Test the argument has the right message type');
-	handler.close();
+
 	sandbox.restore();
 	t.end();
 

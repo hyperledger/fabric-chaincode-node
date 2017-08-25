@@ -71,6 +71,15 @@ let ChaincodeSupportClient = class {
 	 * <br>- any other standard grpc call options will be passed to the grpc service calls directly
 	 */
 	constructor(chaincode, url, opts) {
+		if (typeof chaincode !== 'object')
+			throw new Error('Missing required argument: chaincode');
+
+		if (typeof chaincode.Init !== 'function')
+			throw new Error('The chaincode argument must implement the mandatory "Init()" method');
+
+		if (typeof chaincode.Invoke !== 'function')
+			throw new Error('The chaincode argument must implement the mandatory "Invoke()" method');
+
 		this.chaincode = chaincode;
 
 		let pem = null;
@@ -97,10 +106,8 @@ let ChaincodeSupportClient = class {
 		}
 
 		for (let key in opts ? opts : {}) {
-			if (opts.hasOwnProperty(key)) {
-				if (key !== 'pem' && key !== 'ssl-target-name-override') {
-					this._options[key] = opts[key];
-				}
+			if (key !== 'pem' && key !== 'ssl-target-name-override') {
+				this._options[key] = opts[key];
 			}
 		}
 
@@ -115,7 +122,6 @@ let ChaincodeSupportClient = class {
 		}
 
 		this._client = new _serviceProto.ChaincodeSupport(this._endpoint.addr, this._endpoint.creds, this._options);
-		this._stream = this._client.register();
 		this._peerListeners = {};
 	}
 
@@ -127,6 +133,8 @@ let ChaincodeSupportClient = class {
 	// the conversation b/w the chaincode program and the target
 	// peer has been completed
 	chat(convStarterMsg) {
+		this._stream = this._client.register();
+
 		let stream = this._stream;
 		let self = this;
 		// the conversation is supposed to follow a certain protocol,
