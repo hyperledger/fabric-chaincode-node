@@ -6,6 +6,8 @@
 
 'use strict';
 
+process.env.GRPC_SSL_CIPHER_SUITES = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384';
+
 const grpc = require('grpc');
 const urlParser = require('url');
 const path = require('path');
@@ -82,27 +84,11 @@ let ChaincodeSupportClient = class {
 
 		this.chaincode = chaincode;
 
-		let pem = null;
-		let ssl_target_name_override = '';
-		let default_authority = '';
-
-		if (opts && opts.pem) {
-			pem = opts.pem;
-		}
-
-		if (opts && opts['ssl-target-name-override']) {
-			ssl_target_name_override = opts['ssl-target-name-override'];
-			default_authority = opts['ssl-target-name-override'];
-		}
-
 		// connection options
 		this._options = {};
-		if (ssl_target_name_override !== '') {
-			this._options['grpc.ssl_target_name_override'] = ssl_target_name_override;
-		}
-
-		if (default_authority !== '') {
-			this._options['grpc.default_authority'] = default_authority;
+		if (opts && opts['ssl-target-name-override'] && opts['ssl-target-name-override'] !== '') {
+			this._options['grpc.ssl_target_name_override'] = opts['ssl-target-name-override'];
+			this._options['grpc.default_authority'] = opts['ssl-target-name-override'];
 		}
 
 		for (let key in opts ? opts : {}) {
@@ -113,14 +99,13 @@ let ChaincodeSupportClient = class {
 
 		// service connection
 		this._url = url;
-		this._endpoint = new Endpoint(url, pem);
+		this._endpoint = new Endpoint(url, opts);
 
 		// node.js based timeout
 		this._request_timeout = 30000;
 		if(opts && opts['request-timeout']) {
 			this._request_timeout = opts['request-timeout'];
 		}
-
 		this._client = new _serviceProto.ChaincodeSupport(this._endpoint.addr, this._endpoint.creds, this._options);
 		this._peerListeners = {};
 	}
@@ -519,8 +504,8 @@ module.exports = ChaincodeSupportClient;
 // The Endpoint class represents a remote grpc or grpcs target
 //
 let Endpoint = class {
-	constructor(url /*string*/ , pem /*string*/ ) {
-		let fs = require('fs'),
+	constructor(url /*string*/, opts ) {
+		var fs = require('fs'),
 			path = require('path');
 
 		let purl = urlParser.parse(url, true);
@@ -532,11 +517,17 @@ let Endpoint = class {
 			this.addr = purl.host;
 			this.creds = grpc.credentials.createInsecure();
 		} else if (protocol === 'grpcs') {
-			if(!(typeof pem === 'string')) {
+			if(!opts || !opts.pem || !(typeof opts.pem === 'string')) {
 				throw new Error('PEM encoded certificate is required.');
 			}
+			if(!opts.key || !(typeof opts.key === 'string')) {
+				throw new Error('encoded Private key is required.');
+			}
+			if(!opts.cert || !(typeof opts.cert === 'string')) {
+				throw new Error('encoded client certificate is required.');
+			}
 			this.addr = purl.host;
-			this.creds = grpc.credentials.createSsl(new Buffer(pem));
+			this.creds = grpc.credentials.createSsl(Buffer.from(opts.pem), Buffer.from(opts.key,'base64'), Buffer.from(opts.cert,'base64'));
 		} else {
 			let error = new Error();
 			error.name = 'InvalidProtocol';

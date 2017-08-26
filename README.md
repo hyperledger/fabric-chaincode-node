@@ -154,7 +154,7 @@ CORE_LOGGING_PEER=debug ./build/bin/peer chaincode invoke -o localhost:7050 -C t
 
 In the output of the command, you should see the following indiciating successful completion of the transaction:
 ```
-2017-08-14 16:24:04.225 EDT [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 00a Chaincode invoke successful. result: status:200 
+2017-08-14 16:24:04.225 EDT [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 00a Chaincode invoke successful. result: status:200
 ```
 
 ### Run the unit and integration tests
@@ -164,11 +164,18 @@ The project is equipped with both unit tests (runs standalone) and integration t
 ```
 gulp test-headless
 ```
-* to run the integration tests:
+* to run the integration tests (TLS disabled):
 ```
 DEVMODE=false gulp channel-init
 gulp test-e2e
 ```
+* to run the integration tests with TLS:
+```
+TLS=true DEVMODE=false gulp channel-init
+TLS=true gulp test-e2e
+```
+
+**NOTE:** If both DEVMODE & TLS are *true* you will have to generate TLS Certs for the chaincode
 
 ### Test the chaincode in peer network mode
 
@@ -181,34 +188,37 @@ First of all, you need to provide all the necessary files for running the chainc
 To write your own chaincode is very easy. Create a file named `chaincode.js` anywhere in the file system, and put in it the following minimum implementation:
 ```
 const shim = require('fabric-shim');
+const util = require('util');
 
 var Chaincode = class {
-	Init(stub) {
-		return stub.putState('dummyKey', Buffer.from('dummyValue'))
-			.then(() => {
-				return shim.success();
-			}, () => {
-				return shim.error();
-			});
-	}
+        Init(stub) {
+                return stub.putState('dummyKey', Buffer.from('dummyValue'))
+                        .then(() => {
+                                console.info('Chaincode instantiation is successful');
+                                return shim.success();
+                        }, () => {
+                                return shim.error();
+                        });
+        }
 
-	Invoke(stub) {
-		console.info('Transaction ID: ' + stub.getTxID());
-		console.info(util.format('Args: %j', stub.getArgs()));
+        Invoke(stub) {
+                console.info('Transaction ID: ' + stub.getTxID());
+                console.info(util.format('Args: %j', stub.getArgs()));
 
-		let ret = stub.getFunctionAndParameters();
-		console.info('Calling function: ' + ret.fcn);
+                let ret = stub.getFunctionAndParameters();
+                console.info('Calling function: ' + ret.fcn);
 
-		return stub.getState('dummyKey')
-		.then((value) => {
-			if (value.toString() === 'dummyValue') {
-				return stub.success();
-			} else {
-				console.error('Failed to retrieve dummyKey or the retrieved value is not expected: ' + value);
-				return shim.error();
-			}
-		}
-	}
+                return stub.getState('dummyKey')
+                .then((value) => {
+                        if (value.toString() === 'dummyValue') {
+                                console.info(util.format('successfully retrieved value "%j" for the key "dummyKey"', value ));
+                                return shim.success();
+                        } else {
+                                console.error('Failed to retrieve dummyKey or the retrieved value is not expected: ' + value);
+                                return shim.error();
+                        }
+                });
+        }
 };
 
 shim.start(new Chaincode());
@@ -256,5 +266,5 @@ To further inspect the result of the chaincode instantiate command, run `docker 
 docker run -it dev-jdoe-mycc-v0 bash
 root@c188ae089ee5:/# ls /usr/local/src
 chaincode.js  fabric-shim  node_modules  package.json
-root@c188ae089ee5:/# 
+root@c188ae089ee5:/#
 ```

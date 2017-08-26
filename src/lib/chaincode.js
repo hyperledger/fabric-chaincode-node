@@ -13,10 +13,16 @@ const util = require('util');
 const logger = require('./logger').getLogger('lib/chaincode.js');
 const Handler = require('./handler.js');
 const Stub = require('./stub.js');
+const fs = require('fs');
 
 const argsDef = [{
 	name: 'peer.address', type: String
-}];
+},{
+	name: 'key', type: String
+},{
+	name: 'cert', type: String
+},];
+
 let opts = CLIArgs(argsDef);
 
 const _chaincodeProto = grpc.load({
@@ -45,9 +51,12 @@ var start = function(chaincode) {
 		throw new Error('The "chaincode" argument must implement the "Invoke()" method');
 
 	let url = parsePeerUrl(opts['peer.address']);
+	if (isTLS()){
+		opts.pem = fs.readFileSync(process.env.CORE_PEER_TLS_ROOTCERT_FILE).toString();
+	}
 
-	let client = new Handler(chaincode, url);
-
+	logger.debug(opts);
+	let client = new Handler(chaincode, url, opts);
 	let chaincodeName = process.env.CORE_CHAINCODE_ID_NAME;
 	let chaincodeID = new _chaincodeProto.ChaincodeID();
 	chaincodeID.setName(chaincodeName);
@@ -90,8 +99,7 @@ function parsePeerUrl(url) {
 		} else {
 			// if the url has grpc(s) prefix, use it, otherwise decide based on the TLS enablement
 			if (url.indexOf('grpc://') !== 0 && url.indexOf('grpcs://') !== 0) {
-				let tls = process.env.CORE_PEER_TLS_ENABLED;
-				if (typeof tls === 'string' && tls.toLowerCase() === 'true')
+				if (isTLS())
 					url = 'grpcs://' + url;
 				else
 					url = 'grpc://' + url;
@@ -100,6 +108,11 @@ function parsePeerUrl(url) {
 	}
 
 	return url;
+}
+
+function isTLS(){
+	let tls = process.env.CORE_PEER_TLS_ENABLED;
+	return typeof tls === 'string' && tls.toLowerCase() === 'true';
 }
 
 module.exports.start = start;

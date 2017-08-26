@@ -29,7 +29,17 @@ const packageJson = '{' +
 '    "fabric-shim": "file:./fabric-shim"' +
 '  }' +
 '}';
-
+const tls = process.env.TLS ? process.env.TLS : 'false';
+const CC_NAME = 'mycc';
+const CHANNEL_NAME = 'mychannel';
+function getTLSArgs() {
+	var args = '';
+	if (tls === 'true') {
+		args = util.format('--tls %s --cafile %s', tls,
+			'/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem');
+	}
+	return args;
+}
 gulp.task('copy-shim', () => {
 	// first ensure the chaincode folder has the latest shim code
 	let srcPath = path.join(__dirname, '../../src/**');
@@ -57,7 +67,7 @@ gulp.task('test-e2e-install-v0', ['copy-shim', 'copy-chaincode'], () => {
 	return gulp.src('*.js', {read: false})
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode install -l node -n %s -v v0 -p %s',
-				'mycc',
+				CC_NAME,
 				// the /etc/hyperledger/config has been mapped to the
 				// basic-network folder in the test setup for the CLI docker
 				'/etc/hyperledger/config/src/mycc.v0')
@@ -67,9 +77,11 @@ gulp.task('test-e2e-install-v0', ['copy-shim', 'copy-chaincode'], () => {
 gulp.task('test-e2e-instantiate-v0', ['test-e2e-install-v0'], () => {
 	return gulp.src('*.js', {read: false})
 		.pipe(shell([
-			util.format('docker exec cli peer chaincode instantiate -l node -C %s -n %s -v v0 -c %s -P %s',
-				'mychannel',
-				'mycc',
+			util.format('docker exec cli peer chaincode instantiate -o %s %s -l node -C %s -n %s -v v0 -c %s -P %s',
+				'orderer.example.com:7050',
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
 				'\'{"Args":["init"]}\'',
 				'\'OR ("Org1MSP.member")\'')
 		]));
@@ -84,13 +96,15 @@ gulp.task('test-e2e-invoke-v0-test1-test2', ['test-e2e-instantiate-v0'], () => {
 		.pipe(shell([
 			// test1 and test2 of the chaincode are independent of each other,
 			// can be called in parallel
-			util.format('docker exec cli peer chaincode invoke -C %s -n %s -c %s',
-				'mychannel',
-				'mycc',
+			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
 				'\'{"Args":["test1"]}\''),
-			util.format('docker exec cli peer chaincode invoke -C %s -n %s -c %s',
-				'mychannel',
-				'mycc',
+			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
 				'\'{"Args":["test2"]}\'')
 		]));
 });
@@ -101,9 +115,10 @@ gulp.task('test-e2e-invoke-v0-test3', ['test-e2e-invoke-v0-test1-test2'], () => 
 		.pipe(shell([
 			// test1 and test2 of the chaincode are independent of each other,
 			// can be called in parallel
-			util.format('docker exec cli peer chaincode invoke -C %s -n %s -c %s',
-				'mychannel',
-				'mycc',
+			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
 				'\'{"Args":["test3"]}\'')
 		]));
 });
@@ -112,9 +127,10 @@ gulp.task('test-e2e-invoke-v0-test6', ['test-e2e-invoke-v0-test3'], () => {
 	return gulp.src('*.js', {read: false})
 		.pipe(wait(3000))
 		.pipe(shell([
-			util.format('docker exec cli peer chaincode invoke -C %s -n %s -c %s',
-				'mychannel',
-				'mycc',
+			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
 				'\'{"Args":["test6"]}\'')
 		]));
 });
