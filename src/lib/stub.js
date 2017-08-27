@@ -276,8 +276,6 @@ let Stub = class {
 		return result;
 	}
 
-
-
 	/**
 	 * Return the various values for a partial key
 	 * @param {string} objectType

@@ -41,8 +41,7 @@ const DEPS = [
 gulp.task('protos', function() {
 	return gulp.src(DEPS, { base: baseDir })
 		.pipe(debug())
-		.pipe(gulp.dest(path.join(__dirname, '../src/lib/protos')))
-		.pipe(gulp.dest(path.join(__dirname, '../node_modules/fabric-shim/lib/protos')));
+		.pipe(gulp.dest(path.join(__dirname, '../src/lib/protos')));
 });
 
 module.exports.DEPS = DEPS;

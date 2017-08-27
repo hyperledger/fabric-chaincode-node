@@ -12,7 +12,7 @@ const istanbul = require('gulp-istanbul');
 
 gulp.task('instrument', function() {
 	return gulp.src([
-		'node_modules/fabric-shim/lib/**/*.js'])
+		'src/lib/**/*.js'])
 		.pipe(istanbul())
 		.pipe(istanbul.hookRequire());
 });

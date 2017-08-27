@@ -3,8 +3,8 @@
   "version": "1.0.0-snapshot",
   "description": "Test suite for fabric-shim",
   "engines": {
-    "node": ">=6.9.5 <7.0",
-    "npm": ">=3.10.10 <4.0"
+    "node": ">= 8.4.0",
+    "npm": ">=5.3.0"
   },
   "engine-strict": true,
   "engineStrict": true,
@@ -29,7 +29,7 @@
     "gulp-watch": "^4.3.11",
     "require-dir": "^0.3.2",
     "rewire": "^2.5.2",
-    "sinon": "3.2.0",
+    "sinon": "3.2.1",
     "tap-colorize": "^1.2.0",
     "tape": "^4.8.0",
     "tape-promise": "^2.0.1"

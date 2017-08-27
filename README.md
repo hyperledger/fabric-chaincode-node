@@ -6,16 +6,19 @@ This is the project for the fabric shim for node.js chaincodes development. The 
 
 The "src" folder contains the resources to become part of the npm package, including javascript files, protobuf definition files (.proto) that the code depends on, and a package.json to describe the package.
 
-The "test" folder contains the test code as well as any "build" steps. This being javascript there's no need to compile, but special build steps are still needed to accomplish the following:
+The "build" folder contains the "build" steps. This being javascript there's no need to compile, but special build steps are still needed to accomplish the following:
 * linting: to make sure we enforce a somewhat consistent coding style
 * dependency sharing: the proto files needed by the fabric-shim are a subset of what the fabric defines in the "protos" folder. They need to get copied to the proper locations for things to work, including the "src/lib/protos" folder so the code can load them
-* watch: a watcher can be set up for contributors so code changes can get propogated to node_modules automatically, so that code -> test cycles can go as smoothly as possible
+
+The "test" folder contains the unit and integration tests, as well as artifacts used by the tests
+
+*Note:* npm 5 resolves the dependency "fabric-shim": "file:./src" by simply linking the folder "node_modules/fabric-shim" to the src folder, which makes it unnecessary to use a watcher.
 
 ### Set up the target network
 
 Pre-requisites:
-* node engine: 6.9.x (7.0 or higher is not supported at this point)
-* npm: 3.10.x (usually comes with node install)
+* node engine: 8.4.0 or later
+* npm: 5.3.0 (usually comes with node install)
 * gulp: must be globally installed in order to use the "gulp" command, `sudo npm install -g gulp`
 
 After cloning the fabric repo, you must also download a changeset that is required to run node.js chaincodes. It is still being worked on so for the time being you must manually download the changeset before building the fabric peer.

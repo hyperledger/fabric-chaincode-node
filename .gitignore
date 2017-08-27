@@ -6,6 +6,7 @@ src/lib/protos/common/*
 src/lib/protos/msp/*
 src/lib/protos/peer/*
 npm-shrinkwrap.json
+package-lock.json
 npm-debug.log
 .DS_Store
 src/.DS_Store
