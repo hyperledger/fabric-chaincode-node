@@ -9,11 +9,16 @@ const gulp = require('gulp');
 const tape = require('gulp-tape');
 const tapColorize = require('tap-colorize');
 const istanbul = require('gulp-istanbul');
+const Instrumenter = require('istanbul-api');
+
+const instrumenter = function(opts) {
+	return Instrumenter.libInstrument.createInstrumenter(opts);
+};
 
 gulp.task('instrument', function() {
 	return gulp.src([
 		'src/lib/**/*.js'])
-		.pipe(istanbul())
+		.pipe(istanbul({instrumenter: instrumenter}))
 		.pipe(istanbul.hookRequire());
 });
 

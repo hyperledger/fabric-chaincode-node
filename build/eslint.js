@@ -20,7 +20,8 @@ gulp.task('lint', function () {
 			env: ['es6', 'node'],
 			extends: 'eslint:recommended',
 			parserOptions: {
-				sourceType: 'module'
+				sourceType: 'module',
+				ecmaVersion: 8,
 			},
 			rules: {
 				indent: ['error', 'tab'],

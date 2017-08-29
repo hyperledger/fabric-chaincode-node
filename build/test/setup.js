@@ -53,6 +53,11 @@ gulp.task('docker-copy', ['clean-up'], function() {
 			'- CORE_PEER_ID=cli',
 			'- CORE_PEER_ID=cli\n' +
 			'      - FABRIC_CFG_PATH=/etc/hyperledger/config'))
+		// add 7052 mapping which is new as of v1.1
+		.pipe(replace(
+			'- 7051:7051',
+			'- 7051:7051\n' +
+			'      - 7052:7052'))
 		.pipe(replace(
 			'command: peer node start',
 			util.format('command: peer node start --peer-chaincodedev=%s', devmode)))

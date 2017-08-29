@@ -194,35 +194,35 @@ let Stub = class {
 		return this.binding;
 	}
 
-	getState(key) {
-		return this.handler.handleGetState(key, this.txId);
+	async getState(key) {
+		return await this.handler.handleGetState(key, this.txId);
 	}
 
-	putState(key, value) {
-		return this.handler.handlePutState(key, value, this.txId);
+	async putState(key, value) {
+		return await this.handler.handlePutState(key, value, this.txId);
 	}
 
-	deleteState(key) {
-		return this.handler.handleDeleteState(key, this.txId);
+	async deleteState(key) {
+		return await this.handler.handleDeleteState(key, this.txId);
 	}
 
-	getStateByRange(startKey, endKey) {
-		return this.handler.handleGetStateByRange(startKey, endKey, this.txId);
+	async getStateByRange(startKey, endKey) {
+		return await this.handler.handleGetStateByRange(startKey, endKey, this.txId);
 	}
 
-	getQueryResult(query) {
-		return this.handler.handleGetQueryResult(query, this.txId);
+	async getQueryResult(query) {
+		return await this.handler.handleGetQueryResult(query, this.txId);
 	}
 
-	getHistoryForKey(key) {
-		return this.handler.handleGetHistoryForKey(key, this.txId);
+	async getHistoryForKey(key) {
+		return await this.handler.handleGetHistoryForKey(key, this.txId);
 	}
 
-	invokeChaincode(chaincodeName, args, channel) {
+	async invokeChaincode(chaincodeName, args, channel) {
 		if (channel && channel.length > 0) {
 			chaincodeName = chaincodeName + '/' + channel;
 		}
-		return this.handler.handleInvokeChaincode(chaincodeName, args, this.txId);
+		return await this.handler.handleInvokeChaincode(chaincodeName, args, this.txId);
 	}
 
 	setEvent(name, payload) {
@@ -282,9 +282,9 @@ let Stub = class {
 	 * @param {array} attributes
 	 * @return {promise} a promise that resolves with the returned values, rejects if an error occurs
 	 */
-	getStateByPartialCompositeKey(objectType, attributes) {
+	async getStateByPartialCompositeKey(objectType, attributes) {
 		let partialCompositeKey = this.createCompositeKey(objectType, attributes);
-		return this.getStateByRange(partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+		return await this.getStateByRange(partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
 	}
 };
 

@@ -214,7 +214,7 @@ let ChaincodeSupportClient = class {
 		});
 
 		stream.on('error', function (err) {
-			logger.debug('Chat stream with peer - on error: %j', err.stack ? err.stack : err);
+			logger.error('Chat stream with peer - on error: %j', err.stack ? err.stack : err);
 			stream.end();
 		});
 
@@ -231,17 +231,17 @@ let ChaincodeSupportClient = class {
 		handleMessage(msg, this, 'invoke');
 	}
 
-	handleGetState(key, txId) {
+	async handleGetState(key, txId) {
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE,
 			payload: Buffer.from(key),
 			txid: txId
 		};
 
-		return this._askPeerAndListen(msg, 'GetState');
+		return await this._askPeerAndListen(msg, 'GetState');
 	}
 
-	handlePutState(key, value, txId) {
+	async handlePutState(key, value, txId) {
 		let payload = new _serviceProto.PutStateInfo();
 		payload.setKey(key);
 		payload.setValue(value);
@@ -252,20 +252,20 @@ let ChaincodeSupportClient = class {
 			txid: txId
 		};
 
-		return this._askPeerAndListen(msg, 'PutState');
+		return await this._askPeerAndListen(msg, 'PutState');
 	}
 
-	handleDeleteState(key, txId) {
+	async handleDeleteState(key, txId) {
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.DEL_STATE,
 			payload: Buffer.from(key),
 			txid: txId
 		};
 
-		return this._askPeerAndListen(msg, 'DeleteState');
+		return await this._askPeerAndListen(msg, 'DeleteState');
 	}
 
-	handleGetStateByRange(startKey, endKey, txId) {
+	async handleGetStateByRange(startKey, endKey, txId) {
 		let payload = new _serviceProto.GetStateByRange();
 		payload.setStartKey(startKey);
 		payload.setEndKey(endKey);
@@ -276,10 +276,10 @@ let ChaincodeSupportClient = class {
 			txid: txId
 		};
 
-		return this._askPeerAndListen(msg, 'GetStateByRange');
+		return await this._askPeerAndListen(msg, 'GetStateByRange');
 	}
 
-	handleQueryStateNext(id, txId) {
+	async handleQueryStateNext(id, txId) {
 		let payload = new _serviceProto.QueryStateNext();
 		payload.setId(id);
 
@@ -288,10 +288,10 @@ let ChaincodeSupportClient = class {
 			payload: payload.toBuffer(),
 			txid: txId
 		};
-		return this._askPeerAndListen(msg, 'QueryStateNext');
+		return await this._askPeerAndListen(msg, 'QueryStateNext');
 	}
 
-	handleQueryStateClose(id, txId) {
+	async handleQueryStateClose(id, txId) {
 		let payload = new _serviceProto.QueryStateClose();
 		payload.setId(id);
 
@@ -300,10 +300,10 @@ let ChaincodeSupportClient = class {
 			payload: payload.toBuffer(),
 			txid: txId
 		};
-		return this._askPeerAndListen(msg, 'QueryStateClose');
+		return await this._askPeerAndListen(msg, 'QueryStateClose');
 	}
 
-	handleGetQueryResult(query, txId) {
+	async handleGetQueryResult(query, txId) {
 		let payload = new _serviceProto.GetQueryResult();
 		payload.setQuery(query);
 
@@ -312,10 +312,10 @@ let ChaincodeSupportClient = class {
 			payload: payload.toBuffer(),
 			txid: txId
 		};
-		return this._askPeerAndListen(msg, 'GetQueryResult');
+		return await this._askPeerAndListen(msg, 'GetQueryResult');
 	}
 
-	handleGetHistoryForKey(key, txId) {
+	async handleGetHistoryForKey(key, txId) {
 		let payload = new _serviceProto.GetHistoryForKey();
 		payload.setKey(key);
 
@@ -324,10 +324,10 @@ let ChaincodeSupportClient = class {
 			payload: payload.toBuffer(),
 			txid: txId
 		};
-		return this._askPeerAndListen(msg, 'GetHistoryForKey');
+		return await this._askPeerAndListen(msg, 'GetHistoryForKey');
 	}
 
-	handleInvokeChaincode(chaincodeName, args, txId) {
+	async handleInvokeChaincode(chaincodeName, args, txId) {
 		let payload = new _chaincodeProto.ChaincodeSpec();
 		let chaincodeId = new _chaincodeProto.ChaincodeID();
 		let chaincodeInput = new _chaincodeProto.ChaincodeInput();
@@ -345,14 +345,13 @@ let ChaincodeSupportClient = class {
 			payload: payload.toBuffer(),
 			txid: txId
 		};
-		return this._askPeerAndListen(msg, 'InvokeChaincode')
-			.then((message) => {
-				// here the message type comes back as an enumeration value rather than a string
-				// so need to use the enumerated value
-				if (message.type === _serviceProto.ChaincodeMessage.Type.COMPLETED) {
-					return _responseProto.Response.decode(message.payload);
-				}
-			});
+
+		let message = await this._askPeerAndListen(msg, 'InvokeChaincode');
+		// here the message type comes back as an enumeration value rather than a string
+		// so need to use the enumerated value
+		if (message.type === _serviceProto.ChaincodeMessage.Type.COMPLETED) {
+			return _responseProto.Response.decode(message.payload);
+		}
 	}
 
 
@@ -388,7 +387,7 @@ let ChaincodeSupportClient = class {
 	}
 };
 
-function handleMessage(msg, client, action) {
+async function handleMessage(msg, client, action) {
 	let nextStateMsg, input;
 	try {
 		input = _chaincodeProto.ChaincodeInput.decode(msg.payload);
@@ -417,49 +416,47 @@ function handleMessage(msg, client, action) {
 		}
 
 		if (stub) {
-			let promise, method;
+			let resp, method;
 			if (action === 'init') {
-				promise = client.chaincode.Init(stub);
+				resp = await client.chaincode.Init(stub);
 				method = 'Init';
 			} else {
-				promise = client.chaincode.Invoke(stub);
+				resp = await client.chaincode.Invoke(stub);
 				method = 'Invoke';
 			}
 
 			//TODO: We should validate that a promise is returned, also that the resp has fields
 			//in it such as status, eg don't return shim.success() or shim.error() will cause
 			//unhandledPromiseRecection.
-			promise.then((resp) => {
-				logger.debug(util.format(
-					'[%s]Calling chaincode %s(), response status: %s',
-					shortTxid(msg.txid),
-					method,
-					resp.status));
+			logger.debug(util.format(
+				'[%s]Calling chaincode %s(), response status: %s',
+				shortTxid(msg.txid),
+				method,
+				resp.status));
 
-				if (resp.status >= Stub.RESPONSE_CODE.ERROR) {
-					let errMsg = util.format('[%s]Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
-						shortTxid(msg.txid), method, resp.message);
-					logger.error(errMsg);
+			if (resp.status >= Stub.RESPONSE_CODE.ERROR) {
+				let errMsg = util.format('[%s]Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
+					shortTxid(msg.txid), method, resp.message);
+				logger.error(errMsg);
 
-					nextStateMsg = {
-						type: _serviceProto.ChaincodeMessage.Type.ERROR,
-						payload: Buffer.from(errMsg),
-						txid: msg.txid
-					};
-				} else {
-					logger.info(util.format('[%s]Calling chaincode %s() succeeded. Sending COMPLETED message back to peer',
-						shortTxid(msg.txid), method));
+				nextStateMsg = {
+					type: _serviceProto.ChaincodeMessage.Type.ERROR,
+					payload: Buffer.from(errMsg),
+					txid: msg.txid
+				};
+			} else {
+				logger.info(util.format('[%s]Calling chaincode %s() succeeded. Sending COMPLETED message back to peer',
+					shortTxid(msg.txid), method));
 
-					nextStateMsg = {
-						type: _serviceProto.ChaincodeMessage.Type.COMPLETED,
-						payload: resp.toBuffer(),
-						txid: msg.txid,
-						chaincode_event: stub.chaincodeEvent
-					};
-				}
+				nextStateMsg = {
+					type: _serviceProto.ChaincodeMessage.Type.COMPLETED,
+					payload: resp.toBuffer(),
+					txid: msg.txid,
+					chaincode_event: stub.chaincodeEvent
+				};
+			}
 
-				client._stream.write(nextStateMsg);
-			});
+			client._stream.write(nextStateMsg);
 		}
 	} else {
 		client._stream.write(nextStateMsg);

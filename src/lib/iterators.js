@@ -33,8 +33,8 @@ class CommonIterator extends EventEmitter {
 	 * @return {promise} A promise that is resolved with the close payload or rejected
 	 * if there is a problem
 	 */
-	close() {
-		return this.handler.handleQueryStateClose(this.response.id, this.txID);
+	async close() {
+		return await this.handler.handleQueryStateClose(this.response.id, this.txID);
 	}
 
 	/**
@@ -71,24 +71,22 @@ class CommonIterator extends EventEmitter {
 	 * @return {promise} a promise that is fulfilled with the next value or
 	 * is rejected otherwise
 	 */
-	next() {
+	async next() {
 		// check to see if there are some results left in the current result set
 		if (this.currentLoc < this.response.results.length) {
-			return Promise.resolve(this._createAndEmitResult());
+			return this._createAndEmitResult();
 		}
 		else {
 			// check to see if there is more and go fetch it
 			if (this.response.has_more) {
-				return this.handler.handleQueryStateNext(this.response.id, this.txID)
-					.then((response) => {
-						this.currentLoc = 0;
-						this.response = response;
-						return this._createAndEmitResult();
-					});
+				let response = await this.handler.handleQueryStateNext(this.response.id, this.txID);
+				this.currentLoc = 0;
+				this.response = response;
+				return this._createAndEmitResult();
 			}
 			// no more, just return EMCA spec defined response
 			this.emit('end', this);
-			return Promise.resolve({done: true});
+			return {done: true};
 		}
 
 	}

@@ -108,7 +108,7 @@ gulp.task('test-e2e-invoke-v0-test3', ['test-e2e-invoke-v0-test1-test2'], () => 
 		]));
 });
 
-gulp.task('test-e2e-invoke-v0-test6', ['test-e2e-invoke-v0-test1-test3'], () => {
+gulp.task('test-e2e-invoke-v0-test6', ['test-e2e-invoke-v0-test3'], () => {
 	return gulp.src('*.js', {read: false})
 		.pipe(wait(3000))
 		.pipe(shell([
