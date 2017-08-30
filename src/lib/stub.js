@@ -47,7 +47,7 @@ const RESPONSE_CODE = {
 };
 
 const MIN_UNICODE_RUNE_VALUE = '\u0000';
-const MAX_UNICODE_RUNE_VALUE = '\u0010\uffff';
+const MAX_UNICODE_RUNE_VALUE = '\uffff'; // Can't use '\u0010\uffff'
 const COMPOSITEKEY_NS = '\x00';
 const EMPTY_KEY_SUBSTITUTE = '\x01';
 
@@ -62,15 +62,7 @@ let Stub = class {
 	constructor(client, txId, chaincodeInput, signedProposal) {
 		this.txId = txId;
 		this.args = chaincodeInput.args.map((entry) => {
-			let ret;
-			// attempt to parse the input as JSON first
-			try {
-				ret = JSON.parse(entry.toBuffer());
-			} catch(err) {
-				ret = entry.toBuffer().toString();
-			}
-
-			return ret;
+			return entry.toBuffer().toString();
 		});
 		this.handler = client;
 
@@ -207,6 +199,9 @@ let Stub = class {
 	}
 
 	async getStateByRange(startKey, endKey) {
+		if (!startKey || startKey.length === 0) {
+			startKey = EMPTY_KEY_SUBSTITUTE;
+		}
 		return await this.handler.handleGetStateByRange(startKey, endKey, this.txId);
 	}
 

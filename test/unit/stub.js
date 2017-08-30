@@ -10,6 +10,10 @@ const test = require('../base.js');
 const sinon = require('sinon');
 
 const Stub = require('fabric-shim/lib/stub.js');
+const Handler = require('fabric-shim/lib/handler.js');
+const StateQueryIterator = require('fabric-shim/lib/iterators.js').StateQueryIterator;
+const HistoryQueryIterator = require('fabric-shim/lib/iterators.js').HistoryQueryIterator;
+
 const grpc = require('grpc');
 const path = require('path');
 
@@ -32,6 +36,8 @@ const _idProto = grpc.load({
 	root: path.join(__dirname, '../../src/lib/protos'),
 	file: 'msp/identities.proto'
 }).msp;
+
+const EXPECTED_MAX_RUNE = '\uffff';
 
 test('Chaincode stub constructor tests', (t) => {
 	// arguments from the protobuf are an array of ByteBuffer objects
@@ -215,23 +221,189 @@ test('Chaincode stub constructor tests', (t) => {
 	t.end();
 });
 
-test('Arguments JSON-ify Tests', (t) => {
-	// emulate getting a byte array from a stringified JSON input
-	// in the transaction submission, and test that the stub
-	// properly decoded it to a native object
-	let buf = ByteBuffer.fromUTF8('{\"a\":1,\"b\":2}');
+test('invokeChaincode', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
 	let stub = new Stub(
-		'dummyClient',
+		mockHandler,
 		'dummyTxid',
 		{
-			args: [buf]
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+	mockHandler.handleInvokeChaincode.resolves('response');
+
+	let dummyArgs = ['arg', 'arg2'];
+	let allProm = [];
+
+	await stub.invokeChaincode('mycc', dummyArgs);
+	t.deepEqual(mockHandler.handleInvokeChaincode.firstCall.args, ['mycc', dummyArgs, 'dummyTxid'], 'Test called with correct arguments');
+	await stub.invokeChaincode('mycc', dummyArgs, 'mychannel');
+	t.deepEqual(mockHandler.handleInvokeChaincode.secondCall.args, ['mycc/mychannel', dummyArgs, 'dummyTxid'], 'Test called with correct arguments');
+});
+
+test('getState', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let stub = new Stub(
+		mockHandler,
+		'dummyTxid',
+		{
+			args: []
 		},
 		{
 			proposal_bytes: newProposal().toBuffer()
 		});
 
-	t.equal(stub.args[0].a, 1, 'Test parsing JSON arguments payload: a');
-	t.equal(stub.args[0].b, 2, 'Test parsing JSON arguments payload: b');
+	// getState will return a Buffer object
+	mockHandler.handleGetState.withArgs('key1', 'dummyTxid').resolves(Buffer.from('response'));
+
+	let response = await stub.getState('key1');
+	t.equal(response.toString(), 'response', 'Test getState invokes correctly amd response is correct');
+});
+
+test('putState', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let stub = new Stub(
+		mockHandler,
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+	mockHandler.handlePutState.resolves('response');
+
+	// Must create a Buffer from your data.
+	let dataToPut = Buffer.from('some data');
+	await stub.putState('key1', dataToPut);
+	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['key1', dataToPut, 'dummyTxid'], 'Test call to handler is correct');
+});
+
+test('deleteState', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let stub = new Stub(
+		mockHandler,
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+	mockHandler.handleDeleteState.resolves('response');
+
+	await stub.deleteState('key1');
+	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['key1', 'dummyTxid'], 'Test call to handler is correct');
+});
+
+test('getHistoryForKey', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let mockIterator = sinon.createStubInstance(HistoryQueryIterator);
+	let stub = new Stub(
+		mockHandler,
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+	mockHandler.handleGetHistoryForKey.resolves(mockIterator);
+
+	let result = await stub.getHistoryForKey('key1');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetHistoryForKey.firstCall.args, ['key1', 'dummyTxid'], 'Test call to handler is correct');
+});
+
+test('getQueryResult', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let mockIterator = sinon.createStubInstance(StateQueryIterator);
+	let stub = new Stub(
+		mockHandler,
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+	mockHandler.handleGetQueryResult.resolves(mockIterator);
+
+	let result = await stub.getQueryResult('query1');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['query1', 'dummyTxid'], 'Test call to handler is correct');
+});
+
+
+test('getStateByRange', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let mockIterator = sinon.createStubInstance(StateQueryIterator);
+	let stub = new Stub(
+		mockHandler,
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+	mockHandler.handleGetStateByRange.resolves(mockIterator);
+
+	let result = await stub.getStateByRange('start', 'end');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['start', 'end', 'dummyTxid'], 'Test call to handler is correct');
+
+	result = await stub.getStateByRange('', 'end');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['\x01', 'end', 'dummyTxid'], 'Test call to handler is correct');
+
+	result = await stub.getStateByRange(null, 'end');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['\x01', 'end', 'dummyTxid'], 'Test call to handler is correct');
+});
+
+
+
+test('setEvent', (t) => {
+	let stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+
+	t.throws(
+		() => {
+			stub.setEvent();
+		},
+		/non-empty/,
+		'Test catching no parameters'
+	);
+
+	t.throws(
+		() => {
+			stub.setEvent('', 'some data');
+		},
+		/non-empty/,
+		'Test catching blank event name'
+	);
+
+	t.throws(
+		() => {
+			stub.setEvent(['arg'], 'some data');
+		},
+		/non-empty/,
+		'Test catching no string event name'
+	);
+
+	stub.setEvent('event1', Buffer.from('payload1'));
+	t.equal(stub.chaincodeEvent.getEventName(), 'event1', 'Test event name is correct');
+	t.deepEqual(stub.chaincodeEvent.getPayload().toString('utf8'), 'payload1', 'Test payload is correct');
 	t.end();
 });
 
@@ -314,9 +486,9 @@ test('splitCompositeKey: ', (t) => {
 
 	// pass in duff values
 	t.deepEqual(stub.splitCompositeKey(), {objectType: null, attributes: []}, 'Test no value passed');
-	t.deepEqual(stub.splitCompositeKey('something'), {objectType: null, attributes: []}, 'Test no value passed');
-	t.deepEqual(stub.splitCompositeKey('something\u0000\hello'), {objectType: null, attributes: []}, 'Test no value passed');
-	t.deepEqual(stub.splitCompositeKey('\x00'), {objectType: null, attributes: []}, 'Test no value passed');
+	t.deepEqual(stub.splitCompositeKey('something'), {objectType: null, attributes: []}, 'Test no delimited value passed');
+	t.deepEqual(stub.splitCompositeKey('something\u0000\hello'), {objectType: null, attributes: []}, 'Test incorrectly delimited value passed');
+	t.deepEqual(stub.splitCompositeKey('\x00'), {objectType: null, attributes: []}, 'Test on delimiter value passed');
 
 	t.end();
 });
@@ -341,7 +513,7 @@ test('getStartByPartialCompositeKey', (t) => {
 	t.equal(cckStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls createCompositeKey once');
 	t.deepEqual(cckStub.firstCall.args, ['key', ['attr1', 'attr2']], 'Test getStateByPartialCompositeKey calls createCompositeKey with the correct parameters');
 	t.equal(gsbrStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls getStateByRange Once');
-	t.deepEqual(gsbrStub.firstCall.args, [expectedKey, expectedKey + '\u0010\uffff'], 'Test getStateByPartialCompositeKey calls getStateByRange with the right arguments');
+	t.deepEqual(gsbrStub.firstCall.args, [expectedKey, expectedKey + EXPECTED_MAX_RUNE], 'Test getStateByPartialCompositeKey calls getStateByRange with the right arguments');
 	t.end();
 
 });
