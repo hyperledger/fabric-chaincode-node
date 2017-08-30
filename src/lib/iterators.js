@@ -59,15 +59,18 @@ class CommonIterator extends EventEmitter {
 		queryResult.value = this._getResultFromBytes(this.response.results[this.currentLoc]);
 		this.currentLoc++;
 		queryResult.done = !(this.currentLoc < this.response.results.length || this.response.has_more);
-		this.emit('data', this, queryResult);
-		if (queryResult.done) {
+		if (this.listenerCount('data') > 0) {
+			this.emit('data', this, queryResult);
+		}
+		if (queryResult.done && this.listenerCount('end') > 0) {
 			this.emit('end', this);
 		}
 		return queryResult;
 	}
 
 	/**
-	 * Get the next value
+	 * Get the next value and return it through a promise and also emit
+	 * it if event listeners have been registered.
 	 * @return {promise} a promise that is fulfilled with the next value or
 	 * is rejected otherwise
 	 */
@@ -79,13 +82,29 @@ class CommonIterator extends EventEmitter {
 		else {
 			// check to see if there is more and go fetch it
 			if (this.response.has_more) {
-				let response = await this.handler.handleQueryStateNext(this.response.id, this.txID);
-				this.currentLoc = 0;
-				this.response = response;
-				return this._createAndEmitResult();
+				try {
+					let response = await this.handler.handleQueryStateNext(this.response.id, this.txID);
+					this.currentLoc = 0;
+					this.response = response;
+					return this._createAndEmitResult();
+				}
+				catch(err) {
+					// if someone is utilising the event driven way to work with
+					// iterators (by explicitly checking for data here, not error)
+					// then emit an error event. This means it will emit an event
+					// even if no-one is listening for the error event. Error events
+					// are handled specially by Node.
+					if (this.listenerCount('data') > 0) {
+						this.emit('error', this, err);
+						return;
+					}
+					throw err;
+				}
 			}
 			// no more, just return EMCA spec defined response
-			this.emit('end', this);
+			if (this.listenerCount('end') > 0) {
+				this.emit('end', this);
+			}
 			return {done: true};
 		}
 
