@@ -16,6 +16,8 @@
     "fabric-shim": "file:./src"
   },
   "devDependencies": {
+    "chai": "^4.1.1",
+    "chai-as-promised": "^7.1.1",
     "fs-extra": "^4.0.1",
     "gulp": "^3.9.1",
     "gulp-debug": "^3.1.0",

@@ -17,6 +17,7 @@ const HistoryQueryIterator = require('./iterators').HistoryQueryIterator;
 
 const logger = require('./logger').getLogger('lib/handler.js');
 const Stub = require('./stub.js');
+const shim = require('./chaincode.js');
 
 const _serviceProto = grpc.load({
 	root: path.join(__dirname, './protos'),
@@ -410,9 +411,14 @@ async function handleMessage(msg, client, action) {
 				method = 'Invoke';
 			}
 
-			//TODO: We should validate that a promise is returned, also that the resp has fields
-			//in it such as status, eg don't return shim.success() or shim.error() will cause
-			//unhandledPromiseRecection.
+			// check that a response object has been returned otherwise assume an error.
+			if (!resp || !resp.status) {
+				let errMsg = util.format('[%s]Calling chaincode %s() has not called success or error.',
+					shortTxid(msg.txid), method);
+				logger.error(errMsg);
+				resp = shim.error(errMsg);
+			}
+
 			logger.debug(util.format(
 				'[%s]Calling chaincode %s(), response status: %s',
 				shortTxid(msg.txid),
