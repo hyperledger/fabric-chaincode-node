@@ -31,6 +31,7 @@ if (!fs.existsSync(baseDir)) {
 const DEPS = [
 	path.join(baseDir, 'common/common.proto'),
 	path.join(baseDir, 'msp/identities.proto'),
+	path.join(baseDir, 'ledger/queryresult/kv_query_result.proto'),
 	path.join(baseDir, 'peer/chaincode.proto'),
 	path.join(baseDir, 'peer/chaincode_event.proto'),
 	path.join(baseDir, 'peer/chaincode_shim.proto'),

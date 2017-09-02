@@ -5,6 +5,7 @@ src/node_modules/*
 src/lib/protos/common/*
 src/lib/protos/msp/*
 src/lib/protos/peer/*
+src/lib/protos/ledger/*
 npm-shrinkwrap.json
 package-lock.json
 npm-debug.log
