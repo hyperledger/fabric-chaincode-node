@@ -365,16 +365,14 @@ test('_createAndEmitResult: value creation and emission, last one and no more', 
 	t.deepEqual(historyQI._createAndEmitResult(), {value: 'history2', done: true}, 'Test history returned value is correct');
 	t.equal(historyGetResultStub.calledOnce, true, 'Test history getResultFromBytes called once');
 	t.deepEqual(historyGetResultStub.firstCall.args, ['history2'], 'Test history getResultFromBytes passed correct parameter');
-	t.equal(historyEmitStub.calledTwice, true, 'Test history emit was called');
+	t.equal(historyEmitStub.calledOnce, true, 'Test history emit was called only once');
 	t.deepEqual(historyEmitStub.firstCall.args, ['data', historyQI,{value: 'history2', done: true}], 'Test history emit was called with data');
-	t.deepEqual(historyEmitStub.secondCall.args, ['end', historyQI], 'Test history emit was called with data');
 
 	t.deepEqual(queryQI._createAndEmitResult(), {value: 'query2', done: true}, 'Test query returned value is correct');
 	t.equal(queryGetResultStub.calledOnce, true, 'Test query getResultFromBytes called once');
 	t.deepEqual(queryGetResultStub.firstCall.args, ['query2'], 'Test query getResultFromBytes passed correct parameter');
-	t.equal(queryEmitStub.calledTwice, true, 'Test query emit was called');
+	t.equal(queryEmitStub.calledOnce, true, 'Test query emit was called only once');
 	t.deepEqual(queryEmitStub.firstCall.args, ['data', queryQI,{value: 'query2', done: true}], 'Test query emit was called with data');
-	t.deepEqual(queryEmitStub.secondCall.args, ['end', queryQI], 'Test query emit was called with end');
 
 	t.end();
 });
@@ -467,12 +465,12 @@ test('Integration tests for iterators using event emitters', async (t) => {
 	t.deepEqual(historyEmitStub.secondCall.args, ['data', historyQI, {value: 'history2', done: false}], 'history emit should emit the right values');
 	result = await historyQI.next();
 	t.deepEqual(result, {value: 'history3', done: true}, 'history third value correct');
-	t.equal(historyEmitStub.callCount, 4, 'history 3 data emits plus end emit');
+	t.equal(historyEmitStub.callCount, 3, 'history 3 data emits');
 	t.deepEqual(historyEmitStub.thirdCall.args, ['data', historyQI, {value: 'history3', done: true}], 'history emit should emit the right values');
-	t.deepEqual(historyEmitStub.lastCall.args, ['end', historyQI], 'query end should be emitted');
 	result = await historyQI.next();
 	t.deepEqual(result, {done: true}, 'history no further data');
-	t.equal(historyEmitStub.callCount, 5, 'history no further emits');
+	t.deepEqual(historyEmitStub.lastCall.args, ['end', historyQI], 'history end should be emitted');
+	t.equal(historyEmitStub.callCount, 4, 'history emits an end');
 
 	result = await queryQI.next();
 	t.deepEqual(result, {value: 'query1', done: false}, 'query first value correct');
@@ -484,12 +482,12 @@ test('Integration tests for iterators using event emitters', async (t) => {
 	t.deepEqual(queryEmitStub.secondCall.args, ['data', queryQI, {value: 'query2', done: false}], 'query emit should emit the right values');
 	result = await queryQI.next();
 	t.deepEqual(result, {value: 'query3', done: true}, 'query third value correct');
-	t.equal(queryEmitStub.callCount, 4, 'query 3 data emits plus end emit');
+	t.equal(queryEmitStub.callCount, 3, 'query 3 data emits');
 	t.deepEqual(queryEmitStub.thirdCall.args, ['data', queryQI, {value: 'query3', done: true}], 'query emit should emit the right values');
-	t.deepEqual(queryEmitStub.lastCall.args, ['end', queryQI], 'query end should be emitted');
 	result = await queryQI.next();
 	t.deepEqual(result, {done: true}, 'query no further data');
-	t.equal(queryEmitStub.callCount, 5, 'query no further emits');
+	t.deepEqual(queryEmitStub.lastCall.args, ['end', queryQI], 'query end should be emitted');
+	t.equal(queryEmitStub.callCount, 4, 'query emits an end');
 
 });
 

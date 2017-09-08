@@ -62,9 +62,6 @@ class CommonIterator extends EventEmitter {
 		if (this.listenerCount('data') > 0) {
 			this.emit('data', this, queryResult);
 		}
-		if (queryResult.done && this.listenerCount('end') > 0) {
-			this.emit('end', this);
-		}
 		return queryResult;
 	}
 
