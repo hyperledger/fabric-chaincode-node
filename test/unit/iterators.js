@@ -7,8 +7,10 @@
 
 const test = require('../base.js');
 const sinon = require('sinon');
-const StateQueryIterator = require('fabric-shim/lib/iterators.js').StateQueryIterator;
-const HistoryQueryIterator = require('fabric-shim/lib/iterators.js').HistoryQueryIterator;
+const rewire = require('rewire');
+const Iterator = rewire('fabric-shim/lib/iterators.js');
+const StateQueryIterator = Iterator.StateQueryIterator;
+const HistoryQueryIterator = Iterator.HistoryQueryIterator;
 const handler = require('fabric-shim/lib/handler.js');
 
 test('Iterator constructor tests', (t) => {
@@ -195,12 +197,12 @@ test('next: reached end, getting more throws error, handling via event emitters'
 	historyQI.currentLoc = 2;
 	queryQI.currentLoc = 2;
 
-	let result = await historyQI.next();
+	await historyQI.next();
 	t.equal(mockHandlerHistory.handleQueryStateNext.calledOnce, true, 'Test history called handleQueryStateNext');
 	t.deepEqual(mockHandlerHistory.handleQueryStateNext.firstCall.args, [2, 'tx1']);
 	t.equal(historyEmitStub.calledOnce, true, 'Test history error emitted');
 	t.deepEqual(historyEmitStub.firstCall.args, ['error', historyQI, historyError], 'Test history error emit called with correct value');
-	result = await queryQI.next();
+	await queryQI.next();
 	t.deepEqual(mockHandlerQuery.handleQueryStateNext.firstCall.args, [3, 'tx2']);
 	t.equal(mockHandlerQuery.handleQueryStateNext.calledOnce, true, 'Test query called handleQueryStateNext');
 	t.equal(queryEmitStub.calledOnce, true, 'Test query error emitted');
@@ -377,7 +379,27 @@ test('_createAndEmitResult: value creation and emission, last one and no more', 
 	t.end();
 });
 
-test('close: Test close', (t) => {
+test('_getResultFromBytes', (t) => {
+	let QRProto = Iterator.__get__('_queryresultProto');
+	QRProto.KV.decode = sinon.stub().returns('decoded KV');
+	QRProto.KeyModification.decode = sinon.stub().returns('decoded Keymodification');
+
+	let historyQI = new HistoryQueryIterator();
+	let queryQI = new StateQueryIterator();
+
+	let queryRes = queryQI._getResultFromBytes({resultBytes:'query bytes'});
+	t.equal(queryRes, 'decoded KV', 'Test the right bytes a returned');
+	t.true(QRProto.KV.decode.calledOnce, 'Test KV Decode was called for query');
+	t.equal(QRProto.KV.decode.firstCall.args[0], 'query bytes');
+
+	let historyRes = historyQI._getResultFromBytes({resultBytes:'history bytes'});
+	t.equal(historyRes, 'decoded Keymodification', 'Test the right bytes a returned');
+	t.true(QRProto.KeyModification.decode.calledOnce, 'Test Keymodification Decode was called for query');
+	t.equal(QRProto.KeyModification.decode.firstCall.args[0], 'history bytes');
+	t.end();
+});
+
+test('close: Test close', async (t) => {
 	const historyResponse = {
 		id: 1,
 		results: ['history1', 'history2'],
@@ -396,22 +418,16 @@ test('close: Test close', (t) => {
 	let queryQI = new StateQueryIterator(mockHandlerQuery, 'tx2', queryResponse);
 	mockHandlerHistory.handleQueryStateClose.resolves('something1');
 	mockHandlerQuery.handleQueryStateClose.resolves('something2');
-	let allproms = [];
-	let hp = historyQI.close().then((res) => {
-		t.equal(res, 'something1', 'Test history close resolves to some data');
-		t.equal(mockHandlerHistory.handleQueryStateClose.calledOnce, true, 'Test history calls handle querystateclose once');
-		t.deepEqual(mockHandlerHistory.handleQueryStateClose.firstCall.args, [1, 'tx1'], 'Test history calls handlestateclose with correct parameters');
-	});
-	let qp = queryQI.close().then((res) => {
-		t.equal(res, 'something2', 'Test query close resolves to some data');
-		t.equal(mockHandlerQuery.handleQueryStateClose.calledOnce, true, 'Test query calls handle querystateclose once');
-		t.deepEqual(mockHandlerQuery.handleQueryStateClose.firstCall.args, [2, 'tx2'], 'Test query calls handlestateclose with correct parameters');
-	});
-	allproms.push(hp);
-	allproms.push(qp);
-	Promise.all(allproms).then(() => {
-		t.end();
-	});
+	let res = await historyQI.close();
+	t.equal(res, 'something1', 'Test history close resolves to some data');
+	t.equal(mockHandlerHistory.handleQueryStateClose.calledOnce, true, 'Test history calls handle querystateclose once');
+	t.deepEqual(mockHandlerHistory.handleQueryStateClose.firstCall.args, [1, 'tx1'], 'Test history calls handlestateclose with correct parameters');
+
+	res = await queryQI.close();
+	t.equal(res, 'something2', 'Test query close resolves to some data');
+	t.equal(mockHandlerQuery.handleQueryStateClose.calledOnce, true, 'Test query calls handle querystateclose once');
+	t.deepEqual(mockHandlerQuery.handleQueryStateClose.firstCall.args, [2, 'tx2'], 'Test query calls handlestateclose with correct parameters');
+	t.end();
 });
 
 test('Integration tests for iterators using event emitters', async (t) => {

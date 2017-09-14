@@ -40,7 +40,7 @@ const _responseProto = grpc.load({
 	file: 'peer/proposal_response.proto'
 }).protos;
 
-var start = function(chaincode) {
+let start = function(chaincode) {
 	if (typeof chaincode !== 'object' || chaincode === null)
 		throw new Error('Missing required argument: chaincode');
 
@@ -73,7 +73,7 @@ var start = function(chaincode) {
 	return client;
 };
 
-var success = function(payload) {
+let success = function(payload) {
 	let ret = new _responseProto.Response();
 	ret.status = Stub.RESPONSE_CODE.OK;
 	ret.payload = payload ? payload : Buffer.from('');
@@ -81,7 +81,7 @@ var success = function(payload) {
 	return ret;
 };
 
-var error = function(msg) {
+let error = function(msg) {
 	let ret = new _responseProto.Response();
 	ret.status = Stub.RESPONSE_CODE.ERROR;
 	ret.message = msg;

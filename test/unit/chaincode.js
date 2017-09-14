@@ -12,7 +12,6 @@ const grpc = require('grpc');
 const path = require('path');
 
 const Chaincode = rewire('fabric-shim/lib/chaincode.js');
-const Handler = rewire('fabric-shim/lib/handler.js');
 
 const _serviceProto = grpc.load({
 	root: path.join(__dirname, '../../src/lib/protos'),
@@ -119,4 +118,47 @@ test('chaincode start() tests', (t) => {
 	sandbox.restore();
 	t.end();
 
+});
+
+test('shim error tests', (t) => {
+	let respProto = Chaincode.__get__('_responseProto');
+	let Stub = Chaincode.__get__('Stub');
+	let mockResponse = sinon.createStubInstance(respProto.Response);
+	let saveClass = respProto.Response;
+	class MockResponse {
+		constructor() {
+			return mockResponse;
+		}
+	}
+	respProto.Response = MockResponse;
+	let result = Chaincode.error('error msg');
+	t.equal(result.message, 'error msg', 'Test the message is set to error message');
+	t.equal(result.status, Stub.RESPONSE_CODE.ERROR, 'Test the status is set correctly');
+
+	respProto.Response = saveClass;
+	t.end();
+});
+
+test('shim success tests', (t) => {
+	let respProto = Chaincode.__get__('_responseProto');
+	let Stub = Chaincode.__get__('Stub');
+	let mockResponse = sinon.createStubInstance(respProto.Response);
+	let saveClass = respProto.Response;
+	class MockResponse {
+		constructor() {
+			return mockResponse;
+		}
+	}
+	respProto.Response = MockResponse;
+	let result = Chaincode.success('msg');
+	t.equal(result.payload, 'msg', 'Test the message is set to error message');
+	t.equal(result.status, Stub.RESPONSE_CODE.OK, 'Test the status is set correctly');
+
+	result = Chaincode.success();
+	t.deepEqual(result.payload, Buffer.from(''), 'Test the message is set to error message');
+	t.equal(result.status, Stub.RESPONSE_CODE.OK, 'Test the status is set correctly');
+
+
+	respProto.Response = saveClass;
+	t.end();
 });

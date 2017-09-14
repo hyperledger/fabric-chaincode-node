@@ -151,6 +151,29 @@ let Chaincode = class {
 		results.payload.toString('utf8').should.equal('mycc2');
 	}
 
+	// this tests concurrent invocation support
+	test8(stub, args) {
+		let p1 = stub.getState('key1')
+			.then((res) => {
+				res.toString('utf8').should.equal('value1');
+			});
+
+		let p2 = stub.getState('key2')
+			.then((res) => {
+				res.toString('utf8').should.equal('value2');
+			});
+
+		let p3 = stub.getState('key3')
+			.then((res) => {
+				res.toString('utf8').should.equal('value3');
+			});
+
+		return Promise.all([p1, p2, p3])
+			.then(() => {
+				return 'I completed ok';
+			});
+	}
+
 
 	// useful helper transactions
 	async getKey(stub, args) {
