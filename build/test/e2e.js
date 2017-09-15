@@ -189,4 +189,4 @@ gulp.task('test-e2e-invoke-v0-test7', ['test-e2e-invoke-v0-test6'], () => {
 		]));
 });
 
-gulp.task('test-e2e', ['test-e2e-invoke-v0-test7']);
+gulp.task('test-e2e', ['test-e2e-invoke-v0-test7', 'protos']);

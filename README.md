@@ -21,9 +21,9 @@ Pre-requisites:
 * npm: 5.3.0 (usually comes with node install)
 * gulp: must be globally installed in order to use the "gulp" command, `sudo npm install -g gulp`
 
-After cloning the fabric repo, you must also download a changeset that is required to run node.js chaincodes. It is still being worked on so for the time being you must manually download the changeset before building the fabric peer.
+Clone the fabric repo. This is required until a fabric release is published that supports node.js chaincode.
 ```
-git fetch ssh://<gerrit id>@gerrit.hyperledger.org:29418/fabric refs/changes/15/12515/3 && git checkout FETCH_HEAD
+git clone ssh://<gerrit id>@gerrit.hyperledger.org:29418/fabric-chaincode-node
 ```
 
 At this point you can proceed with one of the following two options to set up your local target network for testing.
@@ -61,7 +61,7 @@ These are the docker images needed to execute the tests. You may have more image
 
 The follow script that brings up a fabric network is based on the *basic network* sample in the `fabric-samples` repository. You should clone it from the parent folder of the `fabric-chaincode-node` project, such that after cloning the two projects are next to each other in the file system:
 ```
-git clone ssh://jimthematrix@gerrit.hyperledger.org:29418/fabric-samples
+git clone ssh://<gerrit id>@gerrit.hyperledger.org:29418/fabric-samples
 ```
 
 The resulting folder structure should be:
