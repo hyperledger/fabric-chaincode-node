@@ -45,7 +45,7 @@ function getTLSArgs() {
 	}
 	return args;
 }
-gulp.task('copy-shim', () => {
+gulp.task('copy-shim', ['protos'], () => {
 	// first ensure the chaincode folder has the latest shim code
 	let srcPath = path.join(__dirname, '../../src/**');
 	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim');
@@ -54,7 +54,7 @@ gulp.task('copy-shim', () => {
 		.pipe(gulp.dest(destPath));
 });
 
-gulp.task('copy-chaincode', () => {
+gulp.task('copy-chaincode', ['copy-shim'], () => {
 	// create a package.json in the chaincode folder
 	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/package.json');
 	fs.writeFileSync(destPath, packageJson, 'utf8');
@@ -68,7 +68,7 @@ gulp.task('copy-chaincode', () => {
 });
 
 // make sure `gulp channel-init` is run first
-gulp.task('test-e2e-install-v0', ['copy-shim', 'copy-chaincode'], () => {
+gulp.task('test-e2e-install-v0', ['copy-chaincode'], () => {
 	return gulp.src('*.js', {read: false})
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode install -l node -n %s -v v0 -p %s',
@@ -189,4 +189,4 @@ gulp.task('test-e2e-invoke-v0-test7', ['test-e2e-invoke-v0-test6'], () => {
 		]));
 });
 
-gulp.task('test-e2e', ['test-e2e-invoke-v0-test7', 'protos']);
+gulp.task('test-e2e', ['test-e2e-invoke-v0-test7']);

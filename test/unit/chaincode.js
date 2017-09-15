@@ -10,6 +10,7 @@ const sinon = require('sinon');
 const rewire = require('rewire');
 const grpc = require('grpc');
 const path = require('path');
+const util = require('util');
 
 const Chaincode = rewire('fabric-shim/lib/chaincode.js');
 
@@ -109,12 +110,49 @@ test('chaincode start() tests', (t) => {
 	// that will be used by the "start()" method tested below
 	Chaincode.__set__('opts', {'peer.address': 'localhost:7051'});
 	process.env.CORE_CHAINCODE_ID_NAME = 'mycc';
+	process.env.CORE_PEER_TLS_ENABLED = true;
+	// use package.json in the place of the cert so it's easy to verify it's been properly loaded
+	let testfile = path.join(__dirname, '../../package.json');
+	process.env.CORE_PEER_TLS_ROOTCERT_FILE = testfile;
+
+	t.throws(
+		() => {
+			Chaincode.start({Init: function() {}, Invoke: function() {}});
+		},
+		/The client key and cert are needed when TLS is enabled, but environment variables specifying the paths to these files are missing/,
+		'Test verifying environment variables for TLS client key and cert'
+	);
+
+	process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
+
+	t.throws(
+		() => {
+			Chaincode.start({Init: function() {}, Invoke: function() {}});
+		},
+		/The client key and cert are needed when TLS is enabled, but environment variables specifying the paths to these files are missing/,
+		'Test verifying environment variables for TLS client key'
+	);
+
+	process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
+
+	// now have the chaincode shim process all the above during bootstrap and verify the result
 	let handler = Chaincode.start({Init: function() {}, Invoke: function() {}});
 	t.equal(chat.calledOnce, true, 'Test handler.chat() gets called on legit shim.start() invocation');
 	let args = chat.firstCall.args;
 	t.equal(args.length === 1 && typeof args[0] === 'object', true, 'Test handler.chat() gets called with one object');
 	t.equal(args[0].type, _serviceProto.ChaincodeMessage.Type.REGISTER, 'Test the argument has the right message type');
 
+	let opts = Chaincode.__get__('opts');
+	let testFcn = function(t, attr) {
+		t.equal(typeof opts[attr], 'string', util.format('Test the opts attribute "%s" has been properly loaded as string', attr));
+		let pkg = JSON.parse(opts[attr]);
+		t.equal(typeof pkg.name, 'string', util.format('Test the opts attribute "%s" content has a "name" property', attr));
+		t.equal(pkg.name, 'fabric-shim-test', util.format('Test the opts attribute "%s" content has the expected value', attr));
+	};
+
+	testFcn(t, 'pem');
+	testFcn(t, 'key');
+	testFcn(t, 'cert');
 	sandbox.restore();
 	t.end();
 

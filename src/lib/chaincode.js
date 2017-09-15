@@ -17,11 +17,7 @@ const fs = require('fs');
 
 const argsDef = [{
 	name: 'peer.address', type: String
-},{
-	name: 'key', type: String
-},{
-	name: 'cert', type: String
-},];
+}];
 
 let opts = CLIArgs(argsDef);
 
@@ -53,6 +49,17 @@ let start = function(chaincode) {
 	let url = parsePeerUrl(opts['peer.address']);
 	if (isTLS()){
 		opts.pem = fs.readFileSync(process.env.CORE_PEER_TLS_ROOTCERT_FILE).toString();
+
+		// the peer enforces mutual TLS, so we must have the client key and cert to proceed
+		let keyPath = process.env.CORE_TLS_CLIENT_KEY_PATH;
+		let certPath = process.env.CORE_TLS_CLIENT_CERT_PATH;
+		if (typeof keyPath !== 'string' || typeof certPath !== 'string') {
+			throw new Error('The client key and cert are needed when TLS is enabled, but environment ' +
+				'variables specifying the paths to these files are missing');
+		}
+
+		opts.key = fs.readFileSync(keyPath).toString();
+		opts.cert = fs.readFileSync(certPath).toString();
 	}
 
 	logger.debug(opts);
