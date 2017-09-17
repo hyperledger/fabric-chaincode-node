@@ -8,8 +8,9 @@
 const ByteBuffer = require('bytebuffer');
 const test = require('../base.js');
 const sinon = require('sinon');
+const rewire = require('rewire');
 
-const Stub = require('fabric-shim/lib/stub.js');
+const Stub = rewire('fabric-shim/lib/stub.js');
 const Handler = require('fabric-shim/lib/handler.js');
 const StateQueryIterator = require('fabric-shim/lib/iterators.js').StateQueryIterator;
 const HistoryQueryIterator = require('fabric-shim/lib/iterators.js').HistoryQueryIterator;
@@ -217,6 +218,55 @@ test('Chaincode stub constructor tests', (t) => {
 	t.equal(stub.args[0], 'invoke', 'Test parsing first argument');
 	t.equal(stub.args[1], 'someKey', 'Test parsing second argument');
 	t.equal(stub.getTxID(), 'dummyTxid', 'Test getTxID()');
+
+	// test the computeProposalBinding() method
+	let cHeader = new _commonProto.ChannelHeader();
+	cHeader.setEpoch(10);
+	let sHeader = new _commonProto.SignatureHeader();
+	sHeader.setNonce(Buffer.from('nonce'));
+	let sid = new _idProto.SerializedIdentity();
+	sid.setIdBytes(Buffer.from('creator'));
+	sid.setMspid('testMSP');
+	sHeader.setCreator(sid.toBuffer());
+	header = new _commonProto.Header();
+	header.setChannelHeader(cHeader.toBuffer());
+	header.setSignatureHeader(sHeader.toBuffer());
+	sp = new _proposalProto.Proposal();
+	sp.setHeader(header.toBuffer());
+	sp.setPayload(ccpayload.toBuffer());
+	stub = new Stub(
+		'dummyClient',
+		'dummyTxid',
+		{
+			args: [buf1, buf2, buf3]
+		},
+		{
+			proposal_bytes: sp.toBuffer()
+		});
+	t.equal(stub.binding, '81dd35bc764b01dd7f3f38513c6c0e5d5583d4e5568fa74c4847fd29228b51e4', 'Test computeProposalBinding() returning expected hex for the binding hash');
+
+	t.end();
+});
+
+test('computeProposalBinding', (t) => {
+	let sp = {
+		proposal: {
+			header: {
+				signature_header: {
+					nonce: Buffer.from('nonce'),
+					creator: {
+						toBuffer: function() { return Buffer.from('creator'); }
+					}
+				},
+				channel_header: {
+					epoch: { high: 0, low: 10 }
+				}
+			}
+		}
+	};
+	let fcn = Stub.__get__('computeProposalBinding');
+	let hex = fcn(sp);
+	t.equal(hex, '5093dd4f4277e964da8f4afbde0a9674d17f2a6a5961f0670fc21ae9b67f2983', 'Test computeProposalBinding() returning expected hex for the hash');
 
 	t.end();
 });

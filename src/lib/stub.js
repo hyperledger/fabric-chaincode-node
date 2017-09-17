@@ -11,6 +11,7 @@ const grpc = require('grpc');
 const path = require('path');
 const util = require('util');
 const utf8 = require('utf8');
+const crypto = require('crypto');
 
 const _commonProto = grpc.load({
 	root: path.join(__dirname, './protos'),
@@ -51,11 +52,32 @@ const MAX_UNICODE_RUNE_VALUE = '\uffff'; // Can't use '\u0010\uffff'
 const COMPOSITEKEY_NS = '\x00';
 const EMPTY_KEY_SUBSTITUTE = '\x01';
 
-function _validateCompositeKeyAttribute(attr) {
+function validateCompositeKeyAttribute(attr) {
 	if (typeof attr !== 'string' || attr.length === 0) {
 		throw new Error('object type or attribute not a non-zero length string');
 	}
 	utf8.decode(attr);
+}
+
+function computeProposalBinding(decodedSP) {
+	let nonce = decodedSP.proposal.header.signature_header.nonce;
+	let creator = decodedSP.proposal.header.signature_header.creator.toBuffer();
+	let epoch = decodedSP.proposal.header.channel_header.epoch;
+
+	// see github.com/hyperledger/fabric/protos/utils/proputils.go, computeProposalBindingInternal()
+
+	// the epoch will be encoded as little endian bytes of 8
+	// it's a Long number with high and low values (since JavaScript only supports
+	// 32bit unsigned integers)
+	let buf = Buffer.allocUnsafe(8);
+	buf.writeUInt32LE(epoch.low, 0);
+	buf.writeUInt32LE(epoch.high, 4);
+
+	let total = Buffer.concat([nonce, creator, buf], nonce.length + creator.length + 8);
+
+	const hash = crypto.createHash('sha256');
+	hash.update(total);
+	return hash.digest('hex');
 }
 
 let Stub = class {
@@ -132,8 +154,7 @@ let Stub = class {
 
 			this.signedProposal = decodedSP;
 
-			// TODO: compute binding based on nonce, creator and epoch
-			this.binding = '';
+			this.binding = computeProposalBinding(decodedSP);
 		}
 	}
 
@@ -237,14 +258,14 @@ let Stub = class {
 	 * @return {string} a composite key made up from the inputs
 	 */
 	createCompositeKey(objectType, attributes) {
-		_validateCompositeKeyAttribute(objectType);
+		validateCompositeKeyAttribute(objectType);
 		if (!Array.isArray(attributes)) {
 			throw new Error('attributes must be an array');
 		}
 
 		let compositeKey = COMPOSITEKEY_NS + objectType + MIN_UNICODE_RUNE_VALUE;
 		attributes.forEach((attribute) => {
-			_validateCompositeKeyAttribute(attribute);
+			validateCompositeKeyAttribute(attribute);
 			compositeKey = compositeKey + attribute + MIN_UNICODE_RUNE_VALUE;
 		});
 		return compositeKey;
