@@ -200,3 +200,15 @@ test('shim success tests', (t) => {
 	respProto.Response = saveClass;
 	t.end();
 });
+
+test('shim newLogger() tests', (t) => {
+	let oldValue = process.env['CORE_CHAINCODE_LOGGING_SHIM'];
+	process.env['CORE_CHAINCODE_LOGGING_SHIM'] = 'CRITICAL';
+	let logger = Chaincode.newLogger('testLogger');
+	t.equal(logger.level.levelStr, 'FATAL', 'Test logger level is properly set according to the env variable CORE_CHAINCODE_LOGGING_SHIM');
+	t.equal(typeof logger.info, 'function', 'Test returned logger has an info() method');
+
+	process.env['CORE_CHAINCODE_LOGGING_SHIM'] = oldValue;
+	t.end();
+});
+

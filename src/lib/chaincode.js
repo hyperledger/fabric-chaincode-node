@@ -9,8 +9,9 @@ const CLIArgs = require('command-line-args');
 const grpc = require('grpc');
 const path = require('path');
 const util = require('util');
+const Logger = require('./logger');
 
-const logger = require('./logger').getLogger('lib/chaincode.js');
+const logger = Logger.getLogger('lib/chaincode.js');
 const Handler = require('./handler.js');
 const Stub = require('./stub.js');
 const fs = require('fs');
@@ -80,7 +81,7 @@ let start = function(chaincode) {
 	return client;
 };
 
-let success = function(payload) {
+const success = function(payload) {
 	let ret = new _responseProto.Response();
 	ret.status = Stub.RESPONSE_CODE.OK;
 	ret.payload = payload ? payload : Buffer.from('');
@@ -88,12 +89,20 @@ let success = function(payload) {
 	return ret;
 };
 
-let error = function(msg) {
+const error = function(msg) {
 	let ret = new _responseProto.Response();
 	ret.status = Stub.RESPONSE_CODE.ERROR;
 	ret.message = msg;
 
 	return ret;
+};
+
+const newLogger = function(name) {
+	if (!name) {
+		name = 'shim';
+	}
+
+	return Logger.getLogger(name);
 };
 
 function parsePeerUrl(url) {
@@ -125,3 +134,4 @@ function isTLS(){
 module.exports.start = start;
 module.exports.success = success;
 module.exports.error = error;
+module.exports.newLogger = newLogger;

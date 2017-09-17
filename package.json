@@ -23,6 +23,7 @@
     "gulp-debug": "^3.1.0",
     "gulp-eslint": "^4.0.0",
     "gulp-istanbul": "^1.1.2",
+    "gulp-jsdoc3": "^1.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.6.1",
     "gulp-shell": "^0.6.3",
