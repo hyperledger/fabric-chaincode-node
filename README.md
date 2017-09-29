@@ -185,7 +185,7 @@ First of all, you need to provide all the necessary files for running the chainc
 
 #### Writing your own chaincode
 
-To write your own chaincode is very easy. Create a file named `chaincode.js` anywhere in the file system, and put in it the following minimum implementation:
+To write your own chaincode is very easy. Create a file named `mychaincode.js` anywhere in the file system, and put in it the following minimum implementation:
 ```
 const shim = require('fabric-shim');
 const util = require('util');
@@ -224,8 +224,6 @@ var Chaincode = class {
 shim.start(new Chaincode());
 ```
 
-At the same location, create a folder called `fabric-shim` and copy the files and folders from fabric-chaincode-node/src to fabric-shim. Normally these resources would be downloaded from npmjs.com by `npm install`, but the fabric-shim package has not been published yet. Until then, you need to manually install the package by copying the source files.
-
 Finally, create a file package.json at the same location, and put in the following content:
 ```
 {
@@ -233,14 +231,15 @@ Finally, create a file package.json at the same location, and put in the followi
 	"version": "1.0.0",
 	"description": "My first exciting chaincode implemented in node.js",
 	"engines": {
-		"node": ">=6.9.5 <7.0",
-		"npm": ">=3.10.10 <4.0"
+		"node": ">=8.4.0",
+		"npm": ">=5.3.0"
 	},
+        "scripts": { "start" : "node mychaincode.js" },
 	"engine-strict": true,
 	"engineStrict": true,
 	"license": "Apache-2.0",
 	"dependencies": {
-		"fabric-shim": "file:./fabric-shim"
+		"fabric-shim": "unastable"
 	}
 }
 ```

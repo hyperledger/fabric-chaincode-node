@@ -27,6 +27,7 @@ const packageJson = '{' +
 '  "version": "1.0.0-snapshot",' +
 '  "description": "Test suite for fabric-shim",' +
 '  "license": "Apache-2.0",' +
+'  "scripts": { "start" : "node test.js" },'+
 '  "dependencies": {' +
 '    "fabric-shim": "file:./fabric-shim",' +
 '    "chai": "^4.1.1",' +
@@ -59,11 +60,10 @@ gulp.task('copy-chaincode', ['copy-shim'], () => {
 	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/package.json');
 	fs.writeFileSync(destPath, packageJson, 'utf8');
 
-	// copy the test.js to chaincode folder as chaincode.js
+	// copy the test.js to chaincode folder
 	let srcPath = path.join(__dirname, '../../test/integration/test.js');
 	destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0');
 	return gulp.src(srcPath)
-		.pipe(rename('chaincode.js'))
 		.pipe(gulp.dest(destPath));
 });
 
