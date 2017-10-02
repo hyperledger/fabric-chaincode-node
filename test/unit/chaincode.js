@@ -12,12 +12,37 @@ const grpc = require('grpc');
 const path = require('path');
 const util = require('util');
 
-const Chaincode = rewire('fabric-shim/lib/chaincode.js');
-
 const _serviceProto = grpc.load({
 	root: path.join(__dirname, '../../src/lib/protos'),
 	file: 'peer/chaincode_shim.proto'
 }).protos;
+
+let Chaincode;
+
+test('Chaincode command line arguments tests', (t) => {
+	Chaincode = rewire('fabric-shim/lib/chaincode.js');
+	let opts = Chaincode.__get__('opts');
+	t.deepEqual(opts['peer.address'], undefined, 'Test zero argument');
+
+	process.argv.push('--peer.address');
+	process.argv.push('localhost:7051');
+	delete require.cache[require.resolve('fabric-shim/lib/chaincode.js')];
+	Chaincode = rewire('fabric-shim/lib/chaincode.js');
+	opts = Chaincode.__get__('opts');
+	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing only --peer.address argument');
+
+	process.argv.push('--test.another');
+	process.argv.push('dummyValue');
+	delete require.cache[require.resolve('fabric-shim/lib/chaincode.js')];
+	Chaincode = rewire('fabric-shim/lib/chaincode.js');
+	opts = Chaincode.__get__('opts');
+	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing two arguments and one is in the parsing definition');
+	t.deepEqual(opts['test.again'], undefined, 'Test passing two arguments and one is NOT in the parsing definition');
+
+	t.end();
+});
+
+Chaincode = rewire('fabric-shim/lib/chaincode.js');
 
 test('chaincode start() tests', (t) => {
 	let sandbox = sinon.sandbox.create();

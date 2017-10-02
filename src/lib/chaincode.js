@@ -20,7 +20,7 @@ const argsDef = [{
 	name: 'peer.address', type: String
 }];
 
-let opts = CLIArgs(argsDef);
+let opts = CLIArgs(argsDef, { partial: true });
 
 const _chaincodeProto = grpc.load({
 	root: path.join(__dirname, './protos'),
