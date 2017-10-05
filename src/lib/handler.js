@@ -199,10 +199,8 @@ class MsgQueueHandler {
 }
 
 
-/**
+/*
  * The ChaincodeSupportClient class represents a the base class for all remote nodes, Peer, Orderer , and MemberServicespeer.
- *
- * @class
  */
 class ChaincodeSupportClient {
 
@@ -586,7 +584,7 @@ async function handleMessage(msg, client, action) {
 	}
 }
 
-/**
+/*
  * function to create a new Stub, this is done to facilitate unit testing
  * 
  * @param {Handler} client an instance of the Handler class

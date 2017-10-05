@@ -80,7 +80,12 @@ function computeProposalBinding(decodedSP) {
 	return hash.digest('hex');
 }
 
-let Stub = class {
+/**
+ * The ChaincodeStub is implemented by the <code>fabric-shim</code>
+ * library and passed to the {@link ChaincodeInterface} calls by the Hyperledger Fabric platform.
+ * The stub encapsulates the APIs between the chaincode implementation and the Fabric peer
+ */
+class ChaincodeStub {
 	constructor(client, txId, chaincodeInput, signedProposal) {
 		this.txId = txId;
 		this.args = chaincodeInput.args.map((entry) => {
@@ -158,16 +163,35 @@ let Stub = class {
 		}
 	}
 
+	/**
+	 * Returns the arguments as array of strings from the chaincode invocation request.
+	 * Equivalent to [getStringArgs()]{@link ChaincodeStub#getStringArgs}
+	 * @returns {string[]}
+	 */
 	getArgs() {
 		return this.args;
 	}
 
+	/**
+	 * Returns the arguments as array of strings from the chaincode invocation request
+	 * @returns {string[]}
+	 */
 	getStringArgs() {
-		return this.args.map((arg) => {
-			return arg.toString();
-		});
+		return this.args;
 	}
 
+	/**
+	 * @typedef FunctionAndParameters
+	 * @property {string} fcn The function name, which by chaincode programming convention
+	 * is the first argument in the array of arguments
+	 * @property {string[]} params The rest of the arguments, as array of strings
+	 */
+
+	/**
+	 * Returns an object containing the chaincode function name to invoke, and the array
+	 * of arguments to pass to the target function
+	 * @returns {FunctionAndParameters}
+	 */
 	getFunctionAndParameters() {
 		let values = this.getStringArgs();
 		if (values.length >= 1) {
@@ -183,18 +207,105 @@ let Stub = class {
 		}
 	}
 
+	/**
+	 * Returns the transaction ID for the current chaincode invocation request. The transaction
+	 * ID uniquely identifies the transaction within the scope of the channel.
+	 */
 	getTxID() {
 		return this.txId;
 	}
 
+	/**
+	 * This object contains the essential identity information of the chaincode invocation's submitter,
+	 * including its organizational affiliation (mspid) and certificate (id_bytes)
+	 * @typedef {Object} ProposalCreator
+	 * @property {string} mspid The unique ID of the Membership Service Provider instance that is associated
+	 * to the identity's organization and is able to perform digital signing and signature verification
+	 */
+
+	/**
+	 * Returns the identity object of the chaincode invocation's submitter
+	 * @returns {ProposalCreator}
+	 */
 	getCreator() {
 		return this.creator;
 	}
 
+	/**
+	 * Returns the transient map that can be used by the chaincode but not
+	 * saved in the ledger, such as cryptographic information for encryption and decryption
+	 * @returns {Map<string:Buffer>}
+	 */
 	getTransient() {
 		return this.transientMap;
 	}
 
+	/**
+	 * The SignedProposal object represents the request object sent by the client application
+	 * to the chaincode.
+	 * @typedef {Object} SignedProposal
+	 * @property {Buffer} signature The signature over the proposal. This signature is to be verified against
+	 * the {@link ProposalCreator} returned by <code>getCreator()</code>. The signature will have already been
+	 * verified by the peer before the invocation request reaches the chaincode.
+	 * @property {Proposal} proposal The object containing the chaincode invocation request and metadata about the request
+	 */
+
+	/**
+	 * The essential content of the chaincode invocation request
+	 * @typedef {Object} Proposal
+	 * @property {Header} header The header object contains metadata describing key aspects of the invocation
+	 * request such as target channel, transaction ID, and submitter identity etc.
+	 * @property {ChaincodeProposalPayload} payload The payload object contains actual content of the invocation request
+	 */
+
+	/**
+	 * @typedef {Object} Header
+	 * @property {ChannelHeader} channel_header Channel header identifies the destination channel of the invocation
+	 * request and the type of request etc.
+	 * @property {SignatureHeader} signature_header Signature header has replay prevention and message authentication features
+	 */
+
+	/**
+	 * Channel header identifies the destination channel of the invocation
+	 * request and the type of request etc.
+	 * @typedef {Object} ChannelHeader
+	 * @property {number} type Any of the following:
+	 * <ul>
+	 * <li>MESSAGE = 0;                   // Used for messages which are signed but opaque
+     * <li>CONFIG = 1;                    // Used for messages which express the channel config
+     * <li>CONFIG_UPDATE = 2;             // Used for transactions which update the channel config
+     * <li>ENDORSER_TRANSACTION = 3;      // Used by the SDK to submit endorser based transactions
+     * <li>ORDERER_TRANSACTION = 4;       // Used internally by the orderer for management
+     * <li>DELIVER_SEEK_INFO = 5;         // Used as the type for Envelope messages submitted to instruct the Deliver API to seek
+     * <li>CHAINCODE_PACKAGE = 6;         // Used for packaging chaincode artifacts for install
+     * </ul>
+     * @property {number} version
+     * @property {google.protobuf.Timestamp} timestamp The local time when the message was created by the submitter
+     * @property {string} channel_id Identifier of the channel that this message bound for
+     * @property {string} tx_id Unique identifier used to track the transaction throughout the proposal endorsement, ordering,
+     * validation and committing to the ledger
+     * @property {number} epoch
+	 */
+
+	/**
+	 * @typedef {Object} SignatureHeader
+	 * @property {ProposalCreator} creator The submitter of the chaincode invocation request
+	 * @property {Buffer} nonce Arbitrary number that may only be used once. Can be used to detect replay attacks.
+	 */
+
+	/**
+	 * @typedef {Object} ChaincodeProposalPayload
+	 * @property {Buffer} input Input contains the arguments for this invocation. If this invocation
+	 * deploys a new chaincode, ESCC/VSCC are part of this field. This is usually a marshaled ChaincodeInvocationSpec
+	 * @property {Map<string:Buffer>} transientMap TransientMap contains data (e.g. cryptographic material) that might be used
+	 * to implement some form of application-level confidentiality. The contents of this field are supposed to always
+	 * be omitted from the transaction and excluded from the ledger.
+	 */
+
+	/**
+	 * Returns a fully decoded object of the signed transaction proposal
+	 * @returns {SignedProposal}
+	 */
 	getSignedProposal() {
 		return this.signedProposal;
 	}
@@ -304,7 +415,7 @@ let Stub = class {
 	}
 };
 
-module.exports = Stub;
+module.exports = ChaincodeStub;
 module.exports.RESPONSE_CODE = RESPONSE_CODE;
 
 

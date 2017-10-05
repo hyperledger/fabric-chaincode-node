@@ -8,7 +8,7 @@
 const log4js = require('log4js');
 
 module.exports.getLogger = function(name) {
-	let logger = log4js.getLogger();
+	let logger = log4js.getLogger(name);
 
 	// set the logging level based on the environment variable
 	// configured by the peer

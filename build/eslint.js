@@ -12,7 +12,8 @@ gulp.task('lint', function () {
 		'**/*.js',
 		'!src/node_modules/**',
 		'!test/node_modules/**',
-		'!coverage/**'
+		'!coverage/**',
+		'!docs/**'
 	], {
 		base: path.join(__dirname, '..')
 	}).pipe(eslint(

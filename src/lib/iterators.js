@@ -37,7 +37,7 @@ class CommonIterator extends EventEmitter {
 		return await this.handler.handleQueryStateClose(this.response.id, this.txID);
 	}
 
-	/**
+	/*
 	 * decode the payload depending on the type of iterator.
 	 * @param {object} bytes
 	 */
@@ -51,7 +51,7 @@ class CommonIterator extends EventEmitter {
 	}
 
 
-	/**
+	/*
 	 * creates a return value and emits an event
 	 */
 	_createAndEmitResult() {
