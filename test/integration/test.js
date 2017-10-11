@@ -13,9 +13,9 @@ chai.use(require('chai-as-promised'));
 const a1 = {key: 'k1', value: 'value1'};
 const a2 = {key: 'k2', value: 'value1'};
 const a3 = {key: 'k3', value: 'value1'};
+const assert = chai.assert;
 
-
-async function getAllResults(iterator) {
+async function getAllResults(iterator, getKeys) {
 	let allResults = [];
 	while (true) {
 		let res = await iterator.next();
@@ -24,7 +24,7 @@ async function getAllResults(iterator) {
 		if (res.value.tx_id) console.log(res.value.tx_id);
 		if (res.value.timestamp) console.log(res.value.timestamp);
 		if (res.value.is_delete) console.log(res.value.is_delete);
-		let theVal = res.value.value.toString('utf8');
+		let theVal = (getKeys) ? res.value.key : res.value.value.toString('utf8');
 		allResults.push(theVal);
 		console.log(theVal);
 		if (res.done) {
@@ -174,6 +174,57 @@ let Chaincode = class {
 			});
 	}
 
+	// this tests the composite key features - step 1: build the composite key and save to the ledger
+	test9(stub, args) {
+		let key1 = stub.createCompositeKey('color~name', ['blue', 'name1']);
+		let key2 = stub.createCompositeKey('color~name', ['blue', 'name2']);
+		let key3 = stub.createCompositeKey('color~name', ['red', 'name3']);
+
+		let p1 = stub.putState(key1, 'dummyValue')
+			.then((res) => {
+				assert.isOk(true, 'Successfully put a state using composite key ' + key1);
+			}, (err) => {
+				assert.fail('Failed to put a state using composite key ' + key1);
+			});
+
+		let p2 = stub.putState(key2, 'dummyValue')
+			.then((res) => {
+				assert.isOk(true, 'Successfully put a state using composite key ' + key2);
+			}, (err) => {
+				assert.fail('Failed to put a state using composite key ' + key2);
+			});
+
+		let p3 = stub.putState(key3, 'dummyValue')
+			.then((res) => {
+				assert.isOk(true, 'Successfully put a state using composite key ' + key3);
+			}, (err) => {
+				assert.fail('Failed to put a state using composite key ' + key3);
+			});
+
+		return Promise.all([p1, p2, p3])
+			.then(() => {
+				return 'I completed ok';
+			});
+	}
+
+	// this tests the composite key features - step 2: query back the composite key and validate its attributes
+	async test10(stub, args) {
+		let iterator = await stub.getStateByPartialCompositeKey('color~name', ['blue']);
+		let results = await getAllResults(iterator, true /* get keys instead of values */);
+		results.length.should.equal(2, 'Should return 2 composite key matching color "blue"');
+
+		let key1 = stub.splitCompositeKey(results[0]);
+		key1.objectType.should.equal('color~name', '"objectType" value of the returned composite key should be "color~name"');
+		key1.attributes.length.should.equal(2, '"attributes" value of the returned composite key should be array of size 2');
+		key1.attributes[0].should.equal('blue', 'first attribute value of the returned composite key should be "blue"');
+		key1.attributes[1].should.equal('name1', '2nd attribute value of the returned composite key should be "name1"');
+
+		let key2 = stub.splitCompositeKey(results[0]);
+		key2.objectType.should.equal('color~name', '"objectType" value of the returned composite key should be "color~name"');
+		key2.attributes.length.should.equal(2, '"attributes" value of the returned composite key should be array of size 2');
+		key2.attributes[0].should.equal('blue', 'first attribute value of the returned composite key should be "blue"');
+		key2.attributes[1].should.equal('name1', '2nd attribute value of the returned composite key should be "name2"');
+	}
 
 	// useful helper transactions
 	async getKey(stub, args) {

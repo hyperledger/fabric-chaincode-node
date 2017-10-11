@@ -48,7 +48,7 @@ const RESPONSE_CODE = {
 };
 
 const MIN_UNICODE_RUNE_VALUE = '\u0000';
-const MAX_UNICODE_RUNE_VALUE = '\uffff'; // Can't use '\u0010\uffff'
+const MAX_UNICODE_RUNE_VALUE = '\u{10ffff}';
 const COMPOSITEKEY_NS = '\x00';
 const EMPTY_KEY_SUBSTITUTE = '\x01';
 
@@ -310,26 +310,93 @@ class ChaincodeStub {
 		return this.signedProposal;
 	}
 
+	/**
+	 * Returns the timestamp when the transaction was created. This
+	 * is taken from the transaction {@link ChannelHeader}, therefore it will indicate the
+	 * client's timestamp, and will have the same value across all endorsers.
+	 */
 	getTxTimestamp() {
 		return this.txTimestamp;
 	}
 
+	/**
+	 * Returns a HEX-encoded string of SHA256 hash of the transaction's nonce, creator and epoch concatenated, as a
+	 * unique representation of the specific transaction. This value can be used to prevent replay attacks in chaincodes
+	 * that need to authenticate an identity independent of the transaction's submitter. In a chaincode proposal, the
+	 * submitter will have been authenticated by the peer such that the identity returned by
+	 * [stub.getCreator()]{@link ChaincodeStub#getCreator} can be trusted. But in some scenarios, the chaincode needs
+	 * to authenticate an identity independent of the proposal submitter.<br><br>
+	 *
+	 * For example, Alice is the administrator who installs and instantiates a chaincode that manages assets. During
+	 * instantiate Alice assigns the initial owner of the asset to Bob. The chaincode has a function called <code>
+	 * transfer()</code> that moves the asset to another identity by changing the asset's "owner" property to the
+	 * identity receiving the asset. Naturally only Bob, the current owner, is supposed to be able to call that function.
+	 * While the chaincode can rely on stub.getCreator() to check the submitter's identity and compare that with the
+	 * current owner, sometimes it's not always possible for the asset owner itself to submit the transaction. Let's suppose
+	 * Bob hires a broker agency to handle his trades. The agency participates in the blockchain network and carry out trades
+	 * on behalf of Bob. The chaincode must have a way to authenticate the transaction to ensure it has Bob's authorization
+	 * to do the asset transfer. This can be achieved by asking Bob to sign the message, so that the chaincode can use
+	 * Bob's certificate, which was obtained during the chaincode instantiate, to verify the signature and thus ensure
+	 * the trade was authorized by Bob.<br><br>
+	 *
+	 * Now, to prevent Bob's signature from being re-used in a malicious attack, we want to ensure the signature is unique.
+	 * This is where the <code>binding</code> concept comes in. As explained above, the binding string uniquely represents
+	 * the transaction where the trade proposal and Bob's authorization is submitted in. As long as Bob's signature is over
+	 * the proposal payload and the binding string concatenated together, namely <code>sigma=Sign(BobSigningKey, tx.Payload||tx.Binding)</code>,
+	 * it's guaranteed to be unique and can not be re-used in a different transaction for exploitation.<br><br>
+	 *
+	 * @returns {string} A HEX-encoded string of SHA256 hash of the transaction's nonce, creator and epoch concatenated
+	 */
 	getBinding() {
 		return this.binding;
 	}
 
+	/**
+	 * Retrieves the current value of the state variable <code>key</code>
+	 * @param {string} key State variable key to retrieve from the state store
+	 * @returns {Promise} Promise for the current value of the state variable
+	 */
 	async getState(key) {
 		return await this.handler.handleGetState(key, this.txId);
 	}
 
+	/**
+	 * Writes the state variable <code>key</code> of value <code>value</code>
+	 * to the state store. If the variable already exists, the value will be
+	 * overwritten.
+	 * @param {string} key State variable key to set the value for
+	 * @param {byte[]} value State variable value
+	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state update request
+	 * or rejected if any errors
+	 */
 	async putState(key, value) {
 		return await this.handler.handlePutState(key, value, this.txId);
 	}
 
+	/**
+	 * Deletes the state variable <code>key</code> from the state store.
+	 * @param {string} key State variable key to delete from the state store
+	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state delete request
+	 * or rejected if any errors
+	 */
 	async deleteState(key) {
 		return await this.handler.handleDeleteState(key, this.txId);
 	}
 
+	/**
+	 * Returns a range iterator over a set of keys in the
+	 * ledger. The iterator can be used to iterate over all keys
+	 * between the startKey (inclusive) and endKey (exclusive).
+	 * The keys are returned by the iterator in lexical order. Note
+	 * that startKey and endKey can be empty string, which implies unbounded range
+	 * query on start or end.<br><br>
+	 * Call close() on the returned {@link StateQueryIterator} object when done.
+	 * The query is re-executed during validation phase to ensure result set
+	 * has not changed since transaction endorsement (phantom reads detected).
+	 * @param {string} startKey State variable key as the start of the key range (inclusive)
+	 * @param {string} endKey State variable key as the end of the key range (exclusive)
+	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
+	 */
 	async getStateByRange(startKey, endKey) {
 		if (!startKey || startKey.length === 0) {
 			startKey = EMPTY_KEY_SUBSTITUTE;
@@ -337,14 +404,73 @@ class ChaincodeStub {
 		return await this.handler.handleGetStateByRange(startKey, endKey, this.txId);
 	}
 
+	/**
+	 * Performs a "rich" query against a state database. It is
+	 * only supported for state databases that support rich query,
+	 * e.g. CouchDB. The query string is in the native syntax
+	 * of the underlying state database. An {@link StateQueryIterator} is returned
+	 * which can be used to iterate (next) over the query result set.<br><br>
+	 * The query is NOT re-executed during validation phase, phantom reads are
+	 * not detected. That is, other committed transactions may have added,
+	 * updated, or removed keys that impact the result set, and this would not
+	 * be detected at validation/commit time.  Applications susceptible to this
+	 * should therefore not use GetQueryResult as part of transactions that update
+	 * ledger, and should limit use to read-only chaincode operations.
+	 * @param {string} query Query string native to the underlying state database
+	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
+	 */
 	async getQueryResult(query) {
 		return await this.handler.handleGetQueryResult(query, this.txId);
 	}
 
+	/**
+	 * Returns a history of key values across time.
+	 * For each historic key update, the historic value and associated
+	 * transaction id and timestamp are returned. The timestamp is the
+	 * timestamp provided by the client in the proposal header.
+	 * This method requires peer configuration
+	 * <code>core.ledger.history.enableHistoryDatabase</code> to be true.<br><br>
+	 * The query is NOT re-executed during validation phase, phantom reads are
+	 * not detected. That is, other committed transactions may have updated
+	 * the key concurrently, impacting the result set, and this would not be
+	 * detected at validation/commit time. Applications susceptible to this
+	 * should therefore not use GetHistoryForKey as part of transactions that
+	 * update ledger, and should limit use to read-only chaincode operations.
+	 * @param {string} key The state variable key
+	 * @returns {Promise} Promise for a {@link HistoryQueryIterator} object
+	 */
 	async getHistoryForKey(key) {
 		return await this.handler.handleGetHistoryForKey(key, this.txId);
 	}
 
+	/**
+	 * A Response object is returned from a chaincode invocation
+	 * @typedef {Object} Response
+	 * @property {number} status A status code that follows the HTTP status codes
+	 * @property {string} message A message associated with the response code
+	 * @property {byte[]} payload A payload that can be used to include metadata with this response
+	 */
+
+	/**
+	 * Locally calls the specified chaincode <code>invoke()</code> using the
+	 * same transaction context; that is, chaincode calling chaincode doesn't
+	 * create a new transaction message.<br><br>
+	 * If the called chaincode is on the same channel, it simply adds the called
+	 * chaincode read set and write set to the calling transaction.<br><br>
+	 * If the called chaincode is on a different channel,
+	 * only the Response is returned to the calling chaincode; any PutState calls
+	 * from the called chaincode will not have any effect on the ledger; that is,
+	 * the called chaincode on a different channel will not have its read set
+	 * and write set applied to the transaction. Only the calling chaincode's
+	 * read set and write set will be applied to the transaction. Effectively
+	 * the called chaincode on a different channel is a `Query`, which does not
+	 * participate in state validation checks in subsequent commit phase.<br><br>
+	 * If `channel` is empty, the caller's channel is assumed.
+	 * @param {string} chaincodeName Name of the chaincode to call
+	 * @param {byte[][]} args List of arguments to pass to the called chaincode
+	 * @param {string} channel Name of the channel where the target chaincode is active
+	 * @returns {Promise} Promise for a {@link Response} object returned by the called chaincode
+	 */
 	async invokeChaincode(chaincodeName, args, channel) {
 		if (channel && channel.length > 0) {
 			chaincodeName = chaincodeName + '/' + channel;
@@ -352,6 +478,17 @@ class ChaincodeStub {
 		return await this.handler.handleInvokeChaincode(chaincodeName, args, this.txId);
 	}
 
+	/**
+	 * Allows the chaincode to propose an event on the transaction proposal. When the transaction
+	 * is included in a block and the block is successfully committed to the ledger, the block event
+	 * will be delivered to the current event listeners that have been registered with the peer's
+	 * event producer. Note that the block event gets delivered to the listeners regardless of the
+	 * status of the included transactions (can be either valid or invalid), so client applications
+	 * are responsible for checking the validity code on each transaction. Consult each SDK's documentation
+	 * for details.
+	 * @param {string} name Name of the event
+	 * @param {byte[]} payload A payload can be used to include data about the event
+	 */
 	setEvent(name, payload) {
 		if (typeof name !== 'string' || name === '')
 			throw new Error('Event name must be a non-empty string');
@@ -363,10 +500,23 @@ class ChaincodeStub {
 	}
 
 	/**
-	 * Create a composite key
-	 * @param {string} objectType
-	 * @param {array} attributes
-	 * @return {string} a composite key made up from the inputs
+	 * Creates a composite key by combining the objectType string and the given `attributes` to form a composite
+	 * key. The objectType and attributes are expected to have only valid utf8 strings and should not contain 
+	 * U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point). The resulting composite key can be
+	 * used as the key in [putState()]{@link ChaincodeStub#putState}.<br><br>
+	 *
+	 * Hyperledger Fabric uses a simple key/value model for saving chaincode states. In some use case scenarios,
+	 * it is necessary to keep track of multiple attributes. Furthermore, it may be necessary to make the various
+	 * attributes searchable. Composite keys can be used to address these requirements. Similar to using composite
+	 * keys in a relational database table, here you would treat the searchable attributes as key columns that
+	 * make up the composite key. Values for the attributes become part of the key, thus they are searchable with
+	 * functions like [getStateByRange()]{@link ChaincodeStub#getStateByRange} and
+	 * [getStateByPartialCompositeKey()]{@link ChaincodeStub#getStateByPartialCompositeKey}.<br><br>
+	 *
+	 * @param {string} objectType A string used as the prefix of the resulting key
+	 * @param {string[]} attributes List of attribute values to concatenate into the key
+	 * @return {string} A composite key with the <code>objectType</code> and the array of <code>attributes</code>
+	 * joined together with special delimiters that will not be confused with values of the attributes
 	 */
 	createCompositeKey(objectType, attributes) {
 		validateCompositeKeyAttribute(objectType);
@@ -383,9 +533,13 @@ class ChaincodeStub {
 	}
 
 	/**
-	 * Split a composite key
-	 * @param {string} compositeKey the composite key to split
-	 * @return {object} which has properties of 'objectType' and attributes
+	 * Splits the specified key into attributes on which the composite key was formed.
+	 * Composite keys found during range queries or partial composite key queries can
+	 * therefore be split into their original composite parts, essentially recovering
+	 * the values of the attributes.
+	 * @param {string} compositeKey The composite key to split
+	 * @return {Object} An object which has properties of 'objectType' (string) and
+	 * 'attributes' (string[])
 	 */
 	splitCompositeKey(compositeKey) {
 		let result = {objectType: null, attributes: []};
@@ -404,10 +558,21 @@ class ChaincodeStub {
 	}
 
 	/**
-	 * Return the various values for a partial key
-	 * @param {string} objectType
-	 * @param {array} attributes
-	 * @return {promise} a promise that resolves with the returned values, rejects if an error occurs
+	 * Queries the state in the ledger based on a given partial composite key. This function returns an iterator
+	 * which can be used to iterate over all composite keys whose prefix matches the given partial composite key.
+	 * The `objectType` and attributes are expected to have only valid utf8 strings and should not contain
+	 * U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point).<br><br>
+	 *
+	 * See related functions [splitCompositeKey]{@link ChaincodeStub#splitCompositeKey} and
+	 * [createCompositeKey]{@link ChaincodeStub#createCompositeKey}.<br><br>
+	 *
+	 * Call close() on the returned {@link StateQueryIterator} object when done.<br><br>
+	 *
+	 * The query is re-executed during validation phase to ensure result set has not changed since transaction
+	 * endorsement (phantom reads detected).
+	 * @param {string} objectType A string used as the prefix of the resulting key
+	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
+	 * @return {Promise} A promise that resolves with a {@link StateQueryIterator}, rejects if an error occurs
 	 */
 	async getStateByPartialCompositeKey(objectType, attributes) {
 		let partialCompositeKey = this.createCompositeKey(objectType, attributes);
