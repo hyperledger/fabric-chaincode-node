@@ -118,7 +118,7 @@ class MsgQueueHandler {
 		}
 	}
 
-	/**
+	/*
 	 * Handle a response to a message. this looks at the top of
 	 * the queue for the specific txn id to get the message this
 	 * response is associated with so it can drive the promise waiting
@@ -204,7 +204,7 @@ class MsgQueueHandler {
  */
 class ChaincodeSupportClient {
 
-	/**
+	/*
 	 * Constructs an object with the endpoint configuration settings.
 	 *
 	 * @param {Object} chaincode The user-supplied object to handle chaincode interface calls Init() and Invoke()
@@ -477,7 +477,7 @@ class ChaincodeSupportClient {
 		}
 	}
 
-	/**
+	/*
 	 * send a message to the peer which returns a promise of the
 	 * response.
 	 * 
@@ -494,9 +494,9 @@ class ChaincodeSupportClient {
 	}
 
 
-	/**
-	* return a printable representation of this object
-	*/
+	/*
+	 * return a printable representation of this object
+	 */
 	toString() {
 		return 'ChaincodeSupportClient : {' +
 			'url:' + this._url +

@@ -38,7 +38,7 @@ const _idProto = grpc.load({
 	file: 'msp/identities.proto'
 }).msp;
 
-const EXPECTED_MAX_RUNE = '\uffff';
+const EXPECTED_MAX_RUNE = '\u{10ffff}';
 
 test('Chaincode stub constructor tests', (t) => {
 	// arguments from the protobuf are an array of ByteBuffer objects

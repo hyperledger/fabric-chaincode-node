@@ -133,7 +133,7 @@ gulp protos
 
 Run the following command to launch the test (replacing "192.168.1.64" with the IP address of the target peer):
 ```
-CORE_CHAINCODE_ID_NAME="mycc:v0" node test/integration/test.js --peer.address grpc://192.168.1.64:7051
+CORE_CHAINCODE_ID_NAME="mycc:v0" node test/integration/test.js --peer.address grpc://192.168.1.64:7052
 ```
 
 You should see a confirmation message in the peer's log about the REGISTER request being handled successfully.
