@@ -136,7 +136,7 @@ test('handler.js constructor tests', (t) => {
 			'pem': 'dummyPEMString',
 			'ssl-target-name-override': 'dummyHost',
 			'request-timeout': 12345,
-			'another-property': 'dummyValue',
+			'another-property': 'dummyValue7',
 			'key':'dummyKeyString',
 			'cert':'dummyCertString'
 		});
@@ -144,7 +144,7 @@ test('handler.js constructor tests', (t) => {
 	t.equal(handler._options['grpc.ssl_target_name_override'], 'dummyHost', 'Test converting opts.ssl-target-name-override to grpc.ssl_target_name_override');
 	t.equal(handler._options['grpc.default_authority'], 'dummyHost', 'Test converting opts.ssl-target-name-override to grpc.default_authority');
 	t.equal(handler._options['request-timeout'], 12345, 'Test processing request-time option');
-	t.equal(handler._options['another-property'], 'dummyValue', 'Test processing another-property option');
+	t.equal(handler._options['another-property'], 'dummyValue7', 'Test processing another-property option');
 
 	t.end();
 });
@@ -180,9 +180,12 @@ test('#handleGetState tests', async (t) => {
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
 	t.equal(askArgs[1], 'GetState', 'Test _askPeerAndListen was called with GetState parameter');
+	let payload = new serviceProto.GetState();
+	payload.setKey('theKey');
+
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.GET_STATE,
-		payload: Buffer.from('theKey'),
+		payload: payload.toBuffer(),
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -201,15 +204,15 @@ test('#handleGetState tests', async (t) => {
 
 test('#handlePutState tests', async (t) => {
 	let serviceProto = Handler.__get__('_serviceProto');
-	let putStateInfo = sinon.createStubInstance(serviceProto.PutStateInfo);
-	putStateInfo.toBuffer.returns('a buffer');
-	let saveClass = serviceProto.PutStateInfo;
-	class MockPutStateInfo {
+	let putState = sinon.createStubInstance(serviceProto.PutState);
+	putState.toBuffer.returns('a buffer');
+	let saveClass = serviceProto.PutState;
+	class MockPutState {
 		constructor() {
-			return putStateInfo;
+			return putState;
 		}
 	}
-	serviceProto.PutStateInfo = MockPutStateInfo;
+	serviceProto.PutState = MockPutState;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
 	let result = await testHandler.handlePutState('theKey', 'some value', 'theTxID');
@@ -223,10 +226,10 @@ test('#handlePutState tests', async (t) => {
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(putStateInfo.setKey.calledOnce, 'Test setKey was called');
-	t.deepEqual(putStateInfo.setKey.firstCall.args, ['theKey'], 'Test setKey was called with correct value');
-	t.true(putStateInfo.setValue.calledOnce, 'Test setValue was called');
-	t.deepEqual(putStateInfo.setValue.firstCall.args, ['some value'], 'Test setValue was called with correct value');
+	t.true(putState.setKey.calledOnce, 'Test setKey was called');
+	t.deepEqual(putState.setKey.firstCall.args, ['theKey'], 'Test setKey was called with correct value');
+	t.true(putState.setValue.calledOnce, 'Test setValue was called');
+	t.deepEqual(putState.setValue.firstCall.args, ['some value'], 'Test setValue was called with correct value');
 
 	sandbox.restore();
 	let error = new Error('some error');
@@ -239,7 +242,7 @@ test('#handlePutState tests', async (t) => {
 		t.equal(err, error, 'Tests that the error is thrown');
 	}
 	// restore everything back to what it was
-	serviceProto.PutStateInfo = saveClass;
+	serviceProto.PutState = saveClass;
 	sandbox.restore();
 });
 
@@ -251,9 +254,12 @@ test('#handleDeleteState tests', async (t) => {
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
 	t.equal(askArgs[1], 'DeleteState', 'Test _askPeerAndListen was called with DeleteState parameter');
+	let payload = new serviceProto.DelState();
+	payload.setKey('theKey');
+
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.DEL_STATE,
-		payload: Buffer.from('theKey'),
+		payload: payload.toBuffer(),
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -1049,5 +1055,3 @@ test('#MsgQueueHandler:_sendMsg', (t) => {
 
 	t.end();
 });
-
-

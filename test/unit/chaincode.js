@@ -32,7 +32,7 @@ test('Chaincode command line arguments tests', (t) => {
 	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing only --peer.address argument');
 
 	process.argv.push('--test.another');
-	process.argv.push('dummyValue');
+	process.argv.push('dummyValue9');
 	delete require.cache[require.resolve('fabric-shim/lib/chaincode.js')];
 	Chaincode = rewire('fabric-shim/lib/chaincode.js');
 	opts = Chaincode.__get__('opts');
@@ -236,4 +236,3 @@ test('shim newLogger() tests', (t) => {
 	process.env['CORE_CHAINCODE_LOGGING_SHIM'] = oldValue;
 	t.end();
 });
-

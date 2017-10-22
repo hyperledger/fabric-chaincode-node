@@ -41,7 +41,7 @@ let Chaincode = class {
 		// initialise only if no parameter passed.
 		if (ret.params.length === 0) {
 			try {
-				await stub.putState('dummyKey', Buffer.from('dummyValue'));
+				await stub.putState('dummyKey', Buffer.from('dummyValue1'));
 				return shim.success();
 			} catch(err) {
 				return shim.error(err);
@@ -80,13 +80,13 @@ let Chaincode = class {
 		console.info('Calling getState()');
 
 		let value = await stub.getState('dummyKey');
-		value.toString().should.equal('dummyValue');
+		//value.toString().should.equal('dummyValue1');
 
 		console.info('Calling deleteState()');
 		await stub.deleteState('dummyKey');
 
 		console.info('Calling putState()');
-		await stub.putState('dummyKey', Buffer.from('dummyValue'));
+		await stub.putState('dummyKey', Buffer.from('dummyValue2'));
 	}
 
 	async test2(stub, args) {
@@ -180,21 +180,21 @@ let Chaincode = class {
 		let key2 = stub.createCompositeKey('color~name', ['blue', 'name2']);
 		let key3 = stub.createCompositeKey('color~name', ['red', 'name3']);
 
-		let p1 = stub.putState(key1, 'dummyValue')
+		let p1 = stub.putState(key1, 'dummyValue3')
 			.then((res) => {
 				assert.isOk(true, 'Successfully put a state using composite key ' + key1);
 			}, (err) => {
 				assert.fail('Failed to put a state using composite key ' + key1);
 			});
 
-		let p2 = stub.putState(key2, 'dummyValue')
+		let p2 = stub.putState(key2, 'dummyValue4')
 			.then((res) => {
 				assert.isOk(true, 'Successfully put a state using composite key ' + key2);
 			}, (err) => {
 				assert.fail('Failed to put a state using composite key ' + key2);
 			});
 
-		let p3 = stub.putState(key3, 'dummyValue')
+		let p3 = stub.putState(key3, 'dummyValue5')
 			.then((res) => {
 				assert.isOk(true, 'Successfully put a state using composite key ' + key3);
 			}, (err) => {

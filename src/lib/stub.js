@@ -357,6 +357,7 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise for the current value of the state variable
 	 */
 	async getState(key) {
+		logger.debug('getState called with key:%s',key);
 		return await this.handler.handleGetState(key, this.txId);
 	}
 
@@ -501,7 +502,7 @@ class ChaincodeStub {
 
 	/**
 	 * Creates a composite key by combining the objectType string and the given `attributes` to form a composite
-	 * key. The objectType and attributes are expected to have only valid utf8 strings and should not contain 
+	 * key. The objectType and attributes are expected to have only valid utf8 strings and should not contain
 	 * U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point). The resulting composite key can be
 	 * used as the key in [putState()]{@link ChaincodeStub#putState}.<br><br>
 	 *
@@ -582,5 +583,3 @@ class ChaincodeStub {
 
 module.exports = ChaincodeStub;
 module.exports.RESPONSE_CODE = RESPONSE_CODE;
-
-

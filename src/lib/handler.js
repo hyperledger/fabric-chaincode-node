@@ -102,7 +102,7 @@ class MsgQueueHandler {
 	/*
 	 * Queue a message to be sent to the peer. If it is the first
 	 * message on the queue then send the message to the peer
-	 * 
+	 *
 	 * @param {QMsg} qMsg the message to queue
 	 */
 	queueMsg(qMsg) {
@@ -124,7 +124,7 @@ class MsgQueueHandler {
 	 * response is associated with so it can drive the promise waiting
 	 * on this message response. it then removes that message from the
 	 * queue and sends the next message on the queue if there is one.
-	 * 
+	 *
 	 * @param {any} response the received response
 	 */
 	handleMsgResponse(response) {
@@ -145,8 +145,8 @@ class MsgQueueHandler {
 	/**
 	 * Get the current message.
 	 * this returns the message at the top of the queue for the particular transaction.
-	 * 
-	 * @param {string} txId 
+	 *
+	 * @param {string} txId
 	 * @returns {QMsg} the message at the top of the queue
 	 */
 	_getCurrentMsg(txId) {
@@ -158,14 +158,14 @@ class MsgQueueHandler {
 		logger.error(errMsg);
 		//Throwing an error here will terminate the container and potentially lose logs
 		//This may be an error, but I don't know if this should abend the container or
-		//should just keep going. 
+		//should just keep going.
 		//throw new Error(errMsg);
 	}
 
 	/**
 	 * Remove the current message and send the next message in the queue if there is one.
 	 * delete the queue if there are no more messages.
-	 * 
+	 *
 	 * @param {any} txId the transaction id
 	 */
 	_removeCurrentAndSendNextMsg(txId) {
@@ -182,7 +182,7 @@ class MsgQueueHandler {
 
 	/**
 	 * send the current message to the peer.
-	 * 
+	 *
 	 * @param {any} txId the transaction id
 	 */
 	_sendMsg(txId) {
@@ -355,17 +355,20 @@ class ChaincodeSupportClient {
 	}
 
 	async handleGetState(key, txId) {
+		let payload = new _serviceProto.GetState();
+		payload.setKey(key);
+
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE,
-			payload: Buffer.from(key),
+			payload: payload.toBuffer(),
 			txid: txId
 		};
-
+		logger.debug('handleGetState - with key:',key);
 		return await this._askPeerAndListen(msg, 'GetState');
 	}
 
 	async handlePutState(key, value, txId) {
-		let payload = new _serviceProto.PutStateInfo();
+		let payload = new _serviceProto.PutState();
 		payload.setKey(key);
 		payload.setValue(value);
 
@@ -379,9 +382,12 @@ class ChaincodeSupportClient {
 	}
 
 	async handleDeleteState(key, txId) {
+		let payload = new _serviceProto.DelState();
+		payload.setKey(key);
+
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.DEL_STATE,
-			payload: Buffer.from(key),
+			payload: payload.toBuffer(),
 			txid: txId
 		};
 
@@ -480,7 +486,7 @@ class ChaincodeSupportClient {
 	/*
 	 * send a message to the peer which returns a promise of the
 	 * response.
-	 * 
+	 *
 	 * @param {string} msg the message to send to the peer
 	 * @param {string} method the name of the method being called
 	 * @returns {promise} returns a promise which is resolved with the response
@@ -586,7 +592,7 @@ async function handleMessage(msg, client, action) {
 
 /*
  * function to create a new Stub, this is done to facilitate unit testing
- * 
+ *
  * @param {Handler} client an instance of the Handler class
  * @param {string} txid transaction id
  * @param {any} input decoded message from peer
