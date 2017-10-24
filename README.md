@@ -1,6 +1,10 @@
 ## Hyperledger Fabric Shim for node.js chaincodes
 
-This is the project for the fabric shim for node.js chaincodes development. The following instructions are oriented to a contributor or an early adopter and describes the steps to build and test the library. In time a public npm package will be published for consumption, with proper documentation for application developers.
+This is the project for the fabric shim for node.js chaincodes development. The following instructions are oriented to a contributor or an early adopter and describes the steps to build and test the library.
+
+As an application developer, to learn about how to implement **"Smart Contracts"** for the Hyperledger Fabric using Node.js, Please visit the [documentation](https://fabric-shim.github.io/).
+
+This project publishes `fabric-shim` public npm package for developers consumption.
 
 ### Folder structure
 
