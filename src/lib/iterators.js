@@ -9,7 +9,8 @@ const _queryresultProto = grpc.load({
 }).queryresult;
 
 /**
- * A common iterator
+ * CommonIterator allows a chaincode to check whether any more result(s)
+ * need to be fetched from an iterator and close it when done.
  */
 class CommonIterator extends EventEmitter {
 
@@ -110,7 +111,8 @@ class CommonIterator extends EventEmitter {
 }
 
 /**
- * A State Query iterator
+ * A State Query iterator allows a chaincode to iterate over a
+ * set of key/value pairs returned by range and execute queries
  */
 class StateQueryIterator extends CommonIterator {
 	constructor(handler, txID, response) {
@@ -119,7 +121,8 @@ class StateQueryIterator extends CommonIterator {
 }
 
 /**
- * A History Query iterator
+ * A History Query iterator allows a chaincode to iterate over a
+ * set of key/value pairs returned by a history query
  */
 class HistoryQueryIterator extends CommonIterator {
 	constructor(handler, txID, response) {
