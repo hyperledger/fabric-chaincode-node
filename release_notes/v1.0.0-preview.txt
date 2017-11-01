@@ -1,0 +1,23 @@
+v1.0.0-preview November 1, 2017
+-------------------------------
+
+Release Notes
+-------------
+Initial release of Node.js chaincode support 
+https://jira.hyperledger.org/browse/FAB-5371
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-ca/blob/master/CHANGELOG.md#v110-preview

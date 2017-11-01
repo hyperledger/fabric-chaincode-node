@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim-test",
-  "version": "1.0.0-snapshot",
+  "version": "1.0.0-preview",
   "description": "Test suite for fabric-shim",
   "engines": {
     "node": ">= 8.4.0",
