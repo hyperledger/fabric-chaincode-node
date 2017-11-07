@@ -21,8 +21,8 @@ The "test" folder contains the unit and integration tests, as well as artifacts 
 ### Set up the target network
 
 Pre-requisites:
-* node engine: 8.4.0 or later
-* npm: 5.3.0 (usually comes with node install)
+* node engine: LTS (8.9.0 or later, up to but not including 9.0.0)
+* npm: 5.5.1 or later (usually comes with node install)
 * gulp: must be globally installed in order to use the "gulp" command, `sudo npm install -g gulp`
 
 Clone the fabric repo. This is required until a fabric release is published that supports node.js chaincode.
