@@ -53,7 +53,7 @@ const COMPOSITEKEY_NS = '\x00';
 const EMPTY_KEY_SUBSTITUTE = '\x01';
 
 function validateCompositeKeyAttribute(attr) {
-	if (typeof attr !== 'string' || attr.length === 0) {
+	if (!attr || typeof attr !== 'string' || attr.length === 0) {
 		throw new Error('object type or attribute not a non-zero length string');
 	}
 	utf8.decode(attr);
@@ -86,7 +86,8 @@ function computeProposalBinding(decodedSP) {
  * The stub encapsulates the APIs between the chaincode implementation and the Fabric peer
  */
 class ChaincodeStub {
-	constructor(client, txId, chaincodeInput, signedProposal) {
+	constructor(client, channel_id, txId, chaincodeInput, signedProposal) {
+		this.channel_id = channel_id;
 		this.txId = txId;
 		this.args = chaincodeInput.args.map((entry) => {
 			return entry.toBuffer().toString();
@@ -213,6 +214,16 @@ class ChaincodeStub {
 	 */
 	getTxID() {
 		return this.txId;
+	}
+
+	/**
+	 * Returns the channel ID for the proposal for chaincode to process.
+	 * This would be the 'channel_id' of the transaction proposal (see ChannelHeader
+	 * in protos/common/common.proto) except where the chaincode is calling another on
+	 * a different channel.
+	 */
+	getChannelID() {
+		return this.channel_id;
 	}
 
 	/**
@@ -358,7 +369,7 @@ class ChaincodeStub {
 	 */
 	async getState(key) {
 		logger.debug('getState called with key:%s',key);
-		return await this.handler.handleGetState(key, this.txId);
+		return await this.handler.handleGetState(key, this.channel_id, this.txId);
 	}
 
 	/**
@@ -371,7 +382,7 @@ class ChaincodeStub {
 	 * or rejected if any errors
 	 */
 	async putState(key, value) {
-		return await this.handler.handlePutState(key, value, this.txId);
+		return await this.handler.handlePutState(key, value, this.channel_id, this.txId);
 	}
 
 	/**
@@ -381,7 +392,7 @@ class ChaincodeStub {
 	 * or rejected if any errors
 	 */
 	async deleteState(key) {
-		return await this.handler.handleDeleteState(key, this.txId);
+		return await this.handler.handleDeleteState(key, this.channel_id, this.txId);
 	}
 
 	/**
@@ -402,7 +413,7 @@ class ChaincodeStub {
 		if (!startKey || startKey.length === 0) {
 			startKey = EMPTY_KEY_SUBSTITUTE;
 		}
-		return await this.handler.handleGetStateByRange(startKey, endKey, this.txId);
+		return await this.handler.handleGetStateByRange(startKey, endKey, this.channel_id, this.txId);
 	}
 
 	/**
@@ -421,7 +432,7 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
 	async getQueryResult(query) {
-		return await this.handler.handleGetQueryResult(query, this.txId);
+		return await this.handler.handleGetQueryResult(query, this.channel_id, this.txId);
 	}
 
 	/**
@@ -441,7 +452,7 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise for a {@link HistoryQueryIterator} object
 	 */
 	async getHistoryForKey(key) {
-		return await this.handler.handleGetHistoryForKey(key, this.txId);
+		return await this.handler.handleGetHistoryForKey(key, this.channel_id, this.txId);
 	}
 
 	/**
@@ -476,7 +487,7 @@ class ChaincodeStub {
 		if (channel && channel.length > 0) {
 			chaincodeName = chaincodeName + '/' + channel;
 		}
-		return await this.handler.handleInvokeChaincode(chaincodeName, args, this.txId);
+		return await this.handler.handleInvokeChaincode(chaincodeName, args, this.channel_id, this.txId);
 	}
 
 	/**

@@ -15,16 +15,18 @@ const handler = require('fabric-shim/lib/handler.js');
 
 test('Iterator constructor tests', (t) => {
 	let mockHandler = sinon.createStubInstance(handler);
-	let historyQI = new HistoryQueryIterator(mockHandler, 'tx1', 'somebytes');
-	let queryQI = new StateQueryIterator(mockHandler, 'tx2', 'someotherbytes');
+	let historyQI = new HistoryQueryIterator(mockHandler, 'mychannel', 'tx1', 'somebytes');
+	let queryQI = new StateQueryIterator(mockHandler, 'mychannel', 'tx2', 'someotherbytes');
 	t.equal(historyQI.type, 'HISTORY', 'Test History iterator construction');
 	t.equal(historyQI.handler, mockHandler, 'Test History iterator construction');
 	t.equal(historyQI.txID, 'tx1', 'Test History iterator construction');
+	t.equal(historyQI.channel_id, 'mychannel', 'Test History iterator construction');
 	t.equal(historyQI.response, 'somebytes', 'Test History iterator construction');
 
 	t.equal(queryQI.type, 'QUERY', 'Test Query iterator construction');
 	t.equal(queryQI.handler, mockHandler, 'Test Query iterator construction');
 	t.equal(queryQI.txID, 'tx2', 'Test Query iterator construction');
+	t.equal(queryQI.channel_id, 'mychannel', 'Test History iterator construction');
 	t.equal(queryQI.response, 'someotherbytes', 'Test Query iterator construction');
 	t.end();
 });
@@ -36,9 +38,9 @@ test('next: Empty response', async (t) => {
 		has_more: false
 	};
 
-	let historyQI = new HistoryQueryIterator(mockHandler, 'tx1', emptyResponse);
+	let historyQI = new HistoryQueryIterator(mockHandler, 'mychannel', 'tx1', emptyResponse);
 	historyQI.on('end', () => {});
-	let queryQI = new StateQueryIterator(mockHandler, 'tx2', emptyResponse);
+	let queryQI = new StateQueryIterator(mockHandler, 'mychannel', 'tx2', emptyResponse);
 	queryQI.on('end', ()=>{});
 	let historyEmitStub = sinon.stub(historyQI, 'emit');
 	let queryEmitStub = sinon.stub(queryQI, 'emit');
@@ -72,8 +74,8 @@ test('next: Simple data 1st entry, no more', async (t) => {
 		has_more: false
 	};
 
-	let historyQI = new HistoryQueryIterator(mockHandler, 'tx1', historyResponse);
-	let queryQI = new StateQueryIterator(mockHandler, 'tx2', queryResponse);
+	let historyQI = new HistoryQueryIterator(mockHandler, 'mychannel', 'tx1', historyResponse);
+	let queryQI = new StateQueryIterator(mockHandler, 'mychannel', 'tx2', queryResponse);
 	let historyCreateStub = sinon.stub(historyQI, '_createAndEmitResult').returns({value: 'history1', done: false});
 	let queryCreateStub = sinon.stub(queryQI, '_createAndEmitResult').returns({value: 'query1', done: false});
 
@@ -99,8 +101,8 @@ test('next: reached end, no more', async (t) => {
 		has_more: false
 	};
 
-	let historyQI = new HistoryQueryIterator(mockHandler, 'tx1', historyResponse);
-	let queryQI = new StateQueryIterator(mockHandler, 'tx2', queryResponse);
+	let historyQI = new HistoryQueryIterator(mockHandler, 'mychannel', 'tx1', historyResponse);
+	let queryQI = new StateQueryIterator(mockHandler, 'mychannel', 'tx2', queryResponse);
 	let historyCreateStub = sinon.stub(historyQI, '_createAndEmitResult').returns({value: 'history1', done: false});
 	let queryCreateStub = sinon.stub(queryQI, '_createAndEmitResult').returns({value: 'query1', done: false});
 	historyQI.currentLoc = 2;
@@ -142,8 +144,8 @@ test('next: reached end, has more', async (t) => {
 	};
 
 
-	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'tx1', historyResponse1);
-	let queryQI = new StateQueryIterator(mockHandlerQuery, 'tx2', queryResponse1);
+	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'mychannel', 'tx1', historyResponse1);
+	let queryQI = new StateQueryIterator(mockHandlerQuery, 'mychannel', 'tx2', queryResponse1);
 	let historyCreateStub = sinon.stub(historyQI, '_createAndEmitResult').returns({value: 'history3', done: false});
 	let queryCreateStub = sinon.stub(queryQI, '_createAndEmitResult').returns({value: 'query3', done: false});
 	mockHandlerHistory.handleQueryStateNext.resolves(historyResponse2);
@@ -153,13 +155,13 @@ test('next: reached end, has more', async (t) => {
 
 	let result = await historyQI.next();
 	t.equal(mockHandlerHistory.handleQueryStateNext.calledOnce, true, 'Test history called handleQueryStateNext');
-	t.deepEqual(mockHandlerHistory.handleQueryStateNext.firstCall.args, [2, 'tx1']);
+	t.deepEqual(mockHandlerHistory.handleQueryStateNext.firstCall.args, [2, 'mychannel', 'tx1']);
 	t.equal(historyQI.currentLoc, 0, 'Test history current location is reset');
 	t.deepEqual(historyQI.response, historyResponse2, 'Test history response is stored');
 	t.equal(historyCreateStub.calledOnce, true, 'Test history created and emitted');
 	t.deepEqual(result, {value: 'history3', done: false}, 'Test history returns correct value');
 	result = await queryQI.next();
-	t.deepEqual(mockHandlerQuery.handleQueryStateNext.firstCall.args, [3, 'tx2']);
+	t.deepEqual(mockHandlerQuery.handleQueryStateNext.firstCall.args, [3, 'mychannel', 'tx2']);
 	t.equal(mockHandlerQuery.handleQueryStateNext.calledOnce, true, 'Test query called handleQueryStateNext');
 	t.equal(queryQI.currentLoc, 0, 'Test query current location is reset');
 	t.deepEqual(queryQI.response, queryResponse2, 'Test query response is stored');
@@ -182,10 +184,10 @@ test('next: reached end, getting more throws error, handling via event emitters'
 		has_more: true
 	};
 
-	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'tx1', historyResponse1);
+	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'mychannel', 'tx1', historyResponse1);
 	historyQI.on('data', () => {});
 	historyQI.on('error', () => {});
-	let queryQI = new StateQueryIterator(mockHandlerQuery, 'tx2', queryResponse1);
+	let queryQI = new StateQueryIterator(mockHandlerQuery, 'mychannel', 'tx2', queryResponse1);
 	queryQI.on('data', () => {});
 	queryQI.on('error', () => {});
 	let historyEmitStub = sinon.stub(historyQI, 'emit');
@@ -199,11 +201,11 @@ test('next: reached end, getting more throws error, handling via event emitters'
 
 	await historyQI.next();
 	t.equal(mockHandlerHistory.handleQueryStateNext.calledOnce, true, 'Test history called handleQueryStateNext');
-	t.deepEqual(mockHandlerHistory.handleQueryStateNext.firstCall.args, [2, 'tx1']);
+	t.deepEqual(mockHandlerHistory.handleQueryStateNext.firstCall.args, [2, 'mychannel', 'tx1']);
 	t.equal(historyEmitStub.calledOnce, true, 'Test history error emitted');
 	t.deepEqual(historyEmitStub.firstCall.args, ['error', historyQI, historyError], 'Test history error emit called with correct value');
 	await queryQI.next();
-	t.deepEqual(mockHandlerQuery.handleQueryStateNext.firstCall.args, [3, 'tx2']);
+	t.deepEqual(mockHandlerQuery.handleQueryStateNext.firstCall.args, [3, 'mychannel', 'tx2']);
 	t.equal(mockHandlerQuery.handleQueryStateNext.calledOnce, true, 'Test query called handleQueryStateNext');
 	t.equal(queryEmitStub.calledOnce, true, 'Test query error emitted');
 	t.deepEqual(queryEmitStub.firstCall.args, ['error', queryQI, queryError], 'Test query error emit called with correct value');
@@ -224,8 +226,8 @@ test('next: reached end, getting more throws error, handling via promises', asyn
 		has_more: true
 	};
 
-	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'tx1', historyResponse1);
-	let queryQI = new StateQueryIterator(mockHandlerQuery, 'tx2', queryResponse1);
+	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'mychannel', 'tx1', historyResponse1);
+	let queryQI = new StateQueryIterator(mockHandlerQuery, 'mychannel', 'tx2', queryResponse1);
 	let historyEmitStub = sinon.stub(historyQI, 'emit');
 	let queryEmitStub = sinon.stub(queryQI, 'emit');
 	let historyError = new Error('1');
@@ -241,7 +243,7 @@ test('next: reached end, getting more throws error, handling via promises', asyn
 	}
 	catch(err) {
 		t.equal(mockHandlerHistory.handleQueryStateNext.calledOnce, true, 'Test history called handleQueryStateNext');
-		t.deepEqual(mockHandlerHistory.handleQueryStateNext.firstCall.args, [2, 'tx1']);
+		t.deepEqual(mockHandlerHistory.handleQueryStateNext.firstCall.args, [2, 'mychannel', 'tx1']);
 		t.equal(historyEmitStub.callCount, 0, 'Test history no error emitted');
 		t.deepEqual(err, historyError, 'Test history error emit called with correct value');
 	}
@@ -250,7 +252,7 @@ test('next: reached end, getting more throws error, handling via promises', asyn
 		t.fail('Query should have not got here');
 	}
 	catch(err) {
-		t.deepEqual(mockHandlerQuery.handleQueryStateNext.firstCall.args, [3, 'tx2']);
+		t.deepEqual(mockHandlerQuery.handleQueryStateNext.firstCall.args, [3, 'mychannel', 'tx2']);
 		t.equal(mockHandlerQuery.handleQueryStateNext.calledOnce, true, 'Test query called handleQueryStateNext');
 		t.equal(queryEmitStub.callCount, 0, 'Test query no error emitted');
 		t.deepEqual(err, queryError, 'Test query error emit called with correct value');
@@ -271,9 +273,9 @@ test('_createAndEmitResult: value creation and emission, not end', (t) => {
 		has_more: true
 	};
 
-	let historyQI = new HistoryQueryIterator(null, 'tx1', historyResponse1);
+	let historyQI = new HistoryQueryIterator(null, 'mychannel', 'tx1', historyResponse1);
 	historyQI.on('data', () => {});
-	let queryQI = new StateQueryIterator(null, 'tx2', queryResponse1);
+	let queryQI = new StateQueryIterator(null, 'mychannel', 'tx2', queryResponse1);
 	queryQI.on('data', () => {});
 	let historyGetResultStub = sinon.stub(historyQI, '_getResultFromBytes').returns('history1');
 	let queryGetResultStub = sinon.stub(queryQI, '_getResultFromBytes').returns('query1');
@@ -310,9 +312,9 @@ test('_createAndEmitResult: value creation and emission, last one but has more',
 		has_more: true
 	};
 
-	let historyQI = new HistoryQueryIterator(null, 'tx1', historyResponse1);
+	let historyQI = new HistoryQueryIterator(null, 'mychannel', 'tx1', historyResponse1);
 	historyQI.on('data', () => {});
-	let queryQI = new StateQueryIterator(null, 'tx2', queryResponse1);
+	let queryQI = new StateQueryIterator(null, 'mychannel', 'tx2', queryResponse1);
 	queryQI.on('data', () => {});
 	let historyGetResultStub = sinon.stub(historyQI, '_getResultFromBytes').returns('history2');
 	let queryGetResultStub = sinon.stub(queryQI, '_getResultFromBytes').returns('query2');
@@ -351,10 +353,10 @@ test('_createAndEmitResult: value creation and emission, last one and no more', 
 		has_more: false
 	};
 
-	let historyQI = new HistoryQueryIterator(null, 'tx1', historyResponse1);
+	let historyQI = new HistoryQueryIterator(null, 'mychannel', 'tx1', historyResponse1);
 	historyQI.on('data', () => {});
 	historyQI.on('end', () => {});
-	let queryQI = new StateQueryIterator(null, 'tx2', queryResponse1);
+	let queryQI = new StateQueryIterator(null, 'mychannel', 'tx2', queryResponse1);
 	queryQI.on('data', () => {});
 	queryQI.on('end', () => {});
 	let historyGetResultStub = sinon.stub(historyQI, '_getResultFromBytes').returns('history2');
@@ -414,19 +416,19 @@ test('close: Test close', async (t) => {
 
 	let mockHandlerHistory = sinon.createStubInstance(handler);
 	let mockHandlerQuery = sinon.createStubInstance(handler);
-	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'tx1', historyResponse);
-	let queryQI = new StateQueryIterator(mockHandlerQuery, 'tx2', queryResponse);
+	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'mychannel', 'tx1', historyResponse);
+	let queryQI = new StateQueryIterator(mockHandlerQuery, 'mychannel', 'tx2', queryResponse);
 	mockHandlerHistory.handleQueryStateClose.resolves('something1');
 	mockHandlerQuery.handleQueryStateClose.resolves('something2');
 	let res = await historyQI.close();
 	t.equal(res, 'something1', 'Test history close resolves to some data');
 	t.equal(mockHandlerHistory.handleQueryStateClose.calledOnce, true, 'Test history calls handle querystateclose once');
-	t.deepEqual(mockHandlerHistory.handleQueryStateClose.firstCall.args, [1, 'tx1'], 'Test history calls handlestateclose with correct parameters');
+	t.deepEqual(mockHandlerHistory.handleQueryStateClose.firstCall.args, [1, 'mychannel', 'tx1'], 'Test history calls handlestateclose with correct parameters');
 
 	res = await queryQI.close();
 	t.equal(res, 'something2', 'Test query close resolves to some data');
 	t.equal(mockHandlerQuery.handleQueryStateClose.calledOnce, true, 'Test query calls handle querystateclose once');
-	t.deepEqual(mockHandlerQuery.handleQueryStateClose.firstCall.args, [2, 'tx2'], 'Test query calls handlestateclose with correct parameters');
+	t.deepEqual(mockHandlerQuery.handleQueryStateClose.firstCall.args, [2, 'mychannel', 'tx2'], 'Test query calls handlestateclose with correct parameters');
 	t.end();
 });
 
@@ -458,10 +460,10 @@ test('Integration tests for iterators using event emitters', async (t) => {
 	};
 
 
-	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'tx1', historyResponse1);
+	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'mychannel', 'tx1', historyResponse1);
 	historyQI.on('data', () => {});
 	historyQI.on('end', () => {});
-	let queryQI = new StateQueryIterator(mockHandlerQuery, 'tx2', queryResponse1);
+	let queryQI = new StateQueryIterator(mockHandlerQuery, 'mychannel', 'tx2', queryResponse1);
 	queryQI.on('data', () => {});
 	queryQI.on('end', () => {});
 	mockHandlerHistory.handleQueryStateNext.resolves(historyResponse2);
@@ -536,8 +538,8 @@ test('Integration tests for iterators using promises', async (t) => {
 	};
 
 
-	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'tx1', historyResponse1);
-	let queryQI = new StateQueryIterator(mockHandlerQuery, 'tx2', queryResponse1);
+	let historyQI = new HistoryQueryIterator(mockHandlerHistory, 'mychannel', 'tx1', historyResponse1);
+	let queryQI = new StateQueryIterator(mockHandlerQuery, 'mychannel', 'tx2', queryResponse1);
 	mockHandlerHistory.handleQueryStateNext.resolves(historyResponse2);
 	mockHandlerQuery.handleQueryStateNext.resolves(queryResponse2);
 	let historyEmitStub = sinon.stub(historyQI, 'emit');

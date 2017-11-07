@@ -17,13 +17,15 @@ class CommonIterator extends EventEmitter {
 	/**
 	 * constructor
 	 * @param {ChaincodeSupportClient} handler client handler
+	 * @param {string} channel_id channel id
 	 * @param {string} txID transaction id
 	 * @param {object} response decoded payload
 	 */
-	constructor(handler, txID, response, type) {
+	constructor(handler, channel_id, txID, response, type) {
 		super();
 		this.type = type;
 		this.handler = handler;
+		this.channel_id = channel_id;
 		this.txID = txID;
 		this.response = response;
 		this.currentLoc = 0;
@@ -35,7 +37,7 @@ class CommonIterator extends EventEmitter {
 	 * if there is a problem
 	 */
 	async close() {
-		return await this.handler.handleQueryStateClose(this.response.id, this.txID);
+		return await this.handler.handleQueryStateClose(this.response.id, this.channel_id, this.txID);
 	}
 
 	/*
@@ -81,7 +83,7 @@ class CommonIterator extends EventEmitter {
 			// check to see if there is more and go fetch it
 			if (this.response.has_more) {
 				try {
-					let response = await this.handler.handleQueryStateNext(this.response.id, this.txID);
+					let response = await this.handler.handleQueryStateNext(this.response.id, this.channel_id, this.txID);
 					this.currentLoc = 0;
 					this.response = response;
 					return this._createAndEmitResult();
@@ -115,8 +117,8 @@ class CommonIterator extends EventEmitter {
  * set of key/value pairs returned by range and execute queries
  */
 class StateQueryIterator extends CommonIterator {
-	constructor(handler, txID, response) {
-		super(handler, txID, response, 'QUERY');
+	constructor(handler, channel_id, txID, response) {
+		super(handler, channel_id, txID, response, 'QUERY');
 	}
 }
 
@@ -125,8 +127,8 @@ class StateQueryIterator extends CommonIterator {
  * set of key/value pairs returned by a history query
  */
 class HistoryQueryIterator extends CommonIterator {
-	constructor(handler, txID, response) {
-		super(handler, txID, response, 'HISTORY');
+	constructor(handler, channel_id, txID, response) {
+		super(handler, channel_id, txID, response, 'HISTORY');
 	}
 }
 

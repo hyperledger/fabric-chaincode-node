@@ -175,7 +175,7 @@ test('#handleGetState tests', async (t) => {
 	let serviceProto = Handler.__get__('_serviceProto');
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetState('theKey', 'theTxID');
+	let result = await testHandler.handleGetState('theKey', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -186,6 +186,7 @@ test('#handleGetState tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.GET_STATE,
 		payload: payload.toBuffer(),
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -193,7 +194,7 @@ test('#handleGetState tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleGetState('theKey', 'theTxID');
+		await testHandler.handleGetState('theKey', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -215,7 +216,7 @@ test('#handlePutState tests', async (t) => {
 	serviceProto.PutState = MockPutState;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handlePutState('theKey', 'some value', 'theTxID');
+	let result = await testHandler.handlePutState('theKey', 'some value', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -223,6 +224,7 @@ test('#handlePutState tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.PUT_STATE,
 		payload: 'a buffer',
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -235,7 +237,7 @@ test('#handlePutState tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handlePutState('theKey', 'some value', 'theTxID');
+		await testHandler.handlePutState('theKey', 'some value', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -249,7 +251,7 @@ test('#handlePutState tests', async (t) => {
 test('#handleDeleteState tests', async (t) => {
 	let serviceProto = Handler.__get__('_serviceProto');
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleDeleteState('theKey', 'theTxID');
+	let result = await testHandler.handleDeleteState('theKey', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -260,6 +262,7 @@ test('#handleDeleteState tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.DEL_STATE,
 		payload: payload.toBuffer(),
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -267,7 +270,7 @@ test('#handleDeleteState tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleGetState('theKey', 'theTxID');
+		await testHandler.handleGetState('theKey', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -289,7 +292,7 @@ test('#handleGetStateByRange tests', async (t) => {
 	serviceProto.GetStateByRange = MockGetStateByRange;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetStateByRange('1stKey', '2ndKey', 'theTxID');
+	let result = await testHandler.handleGetStateByRange('1stKey', '2ndKey', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -297,6 +300,7 @@ test('#handleGetStateByRange tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
 		payload: 'a buffer',
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -309,7 +313,7 @@ test('#handleGetStateByRange tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleGetStateByRange('1stKey', '2nd', 'theTxID');
+		await testHandler.handleGetStateByRange('1stKey', '2nd', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -333,7 +337,7 @@ test('#handleQueryStateNext tests', async (t) => {
 	serviceProto.QueryStateNext = MockQueryStateNext;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleQueryStateNext('anID', 'theTxID');
+	let result = await testHandler.handleQueryStateNext('anID', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -341,6 +345,7 @@ test('#handleQueryStateNext tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_NEXT,
 		payload: 'a buffer',
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -351,7 +356,7 @@ test('#handleQueryStateNext tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleQueryStateNext('anID', 'theTxID');
+		await testHandler.handleQueryStateNext('anID', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -375,7 +380,7 @@ test('#handleQueryStateClose tests', async (t) => {
 	serviceProto.QueryStateClose = MockQueryStateClose;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleQueryStateClose('anID', 'theTxID');
+	let result = await testHandler.handleQueryStateClose('anID', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -383,6 +388,7 @@ test('#handleQueryStateClose tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
 		payload: 'a buffer',
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -393,7 +399,7 @@ test('#handleQueryStateClose tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleQueryStateNext('anID', 'theTxID');
+		await testHandler.handleQueryStateNext('anID', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -417,7 +423,7 @@ test('#handleGetQueryResult tests', async (t) => {
 	serviceProto.GetQueryResult = MockGetQueryResult;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetQueryResult('aQuery', 'theTxID');
+	let result = await testHandler.handleGetQueryResult('aQuery', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -425,6 +431,7 @@ test('#handleGetQueryResult tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
 		payload: 'a buffer',
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -435,7 +442,7 @@ test('#handleGetQueryResult tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleQueryStateNext('aQuery', 'theTxID');
+		await testHandler.handleQueryStateNext('aQuery', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -459,7 +466,7 @@ test('#handleGetHistoryForKey tests', async (t) => {
 	serviceProto.GetHistoryForKey = MockGetHistoryForKey;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetHistoryForKey('aKey', 'theTxID');
+	let result = await testHandler.handleGetHistoryForKey('aKey', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -467,6 +474,7 @@ test('#handleGetHistoryForKey tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
 		payload: 'a buffer',
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -477,7 +485,7 @@ test('#handleGetHistoryForKey tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleQueryStateNext('aKey', 'theTxID');
+		await testHandler.handleQueryStateNext('aKey', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -527,7 +535,7 @@ test('#handleInvokeChaincode tests', async (t) => {
 		type: serviceProto.ChaincodeMessage.Type.COMPLETED
 	};
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves(response);
-	let result = await testHandler.handleInvokeChaincode('ccname', ['arg1', 'arg2'], 'theTxID');
+	let result = await testHandler.handleInvokeChaincode('ccname', ['arg1', 'arg2'], 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -535,6 +543,7 @@ test('#handleInvokeChaincode tests', async (t) => {
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
 		payload: 'a buffer',
+		channel_id: 'theChannelID',
 		txid: 'theTxID'
 	};
 	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
@@ -548,14 +557,14 @@ test('#handleInvokeChaincode tests', async (t) => {
 	//t.equal(chaincodeSpec.setInput.firstCall.args, [chaincodeInput], 'Test setInput on chaincodeSpec was called with correct value');
 
 
-	await testHandler.handleInvokeChaincode('ccname', [], 'theTxID');
+	await testHandler.handleInvokeChaincode('ccname', [], 'theChannelID', 'theTxID');
 	t.deepEqual(chaincodeInput.setArgs.secondCall.args, [[]], 'Test setArgs was called with empty array');
 
 	sandbox.restore();
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleInvokeChaincode('', [], 'theTxID');
+		await testHandler.handleInvokeChaincode('', [], 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -585,6 +594,7 @@ test('#shortTxid tests', (t) => {
 test('#newErrorMsg tests', (t) => {
 	let newErrorMsg = Handler.__get__('newErrorMsg');
 	let msg = {
+		channel_id: 'theChannelID',
 		txid: 'aTX',
 		type: 'aType',
 		payload: 'aPayload'
@@ -593,6 +603,7 @@ test('#newErrorMsg tests', (t) => {
 	let response = {
 		type: 'ERROR',
 		payload: Buffer.from('an error string'),
+		channel_id: 'theChannelID',
 		txid: 'aTX'
 	};
 
@@ -643,6 +654,7 @@ test('#parseResponse', (t) => {
 	let res = {
 		type: MSG_TYPE.RESPONSE,
 		payload: 'a payload',
+		channel_id: 'theChannelID',
 		txid: 'aTx'
 	};
 
@@ -680,6 +692,7 @@ test('#parseResponse', (t) => {
 	res = {
 		type: MSG_TYPE.ERROR,
 		payload: Buffer.from('some error'),
+		channel_id: 'theChannelID',
 		txid: 'aTx'
 	};
 
@@ -695,6 +708,7 @@ test('#parseResponse', (t) => {
 	res = {
 		type: 98674,
 		payload: 'something',
+		channel_id: 'theChannelID',
 		txid: 'aTx'
 	};
 
@@ -729,6 +743,7 @@ test('#handleMessage', async (t) => {
 	//action=init,invoke
 	//msg:payload, txid, proposal
 	let msg = {
+		channel_id: 'theChannelID',
 		txid: 'aTX',
 		payload: 'some payload',
 		proposal: 'some proposal'
@@ -736,6 +751,7 @@ test('#handleMessage', async (t) => {
 	let expectedResponse = {
 		type: serviceProto.ChaincodeMessage.Type.COMPLETED,
 		payload: 'a buffered payload',
+		channel_id: 'theChannelID',
 		txid: msg.txid,
 		chaincode_event: undefined
 	};
@@ -757,6 +773,7 @@ test('#handleMessage', async (t) => {
 	expectedResponse = {
 		type: serviceProto.ChaincodeMessage.Type.COMPLETED,
 		payload: 'a buffered invoke payload',
+		channel_id: 'theChannelID',
 		txid: msg.txid,
 		chaincode_event: undefined
 	};
@@ -858,6 +875,7 @@ test('#stream:data event', (t) => {
 
 	// state should now be ready, can now accept: RESPONSE, ERROR, INIT, TRANSACTION
 	let initMsg = {
+		channel_id: 'theChannelID',
 		txid: 'sometx',
 		type: MSG_TYPE.INIT
 	};
@@ -866,6 +884,7 @@ test('#stream:data event', (t) => {
 	t.equal(handleInitStub.firstCall.args[0], initMsg, 'Check handleInit was called with right message');
 
 	let txnMsg = {
+		channel_id: 'theChannelID',
 		txid: 'sometx',
 		type: MSG_TYPE.TRANSACTION
 	};
@@ -874,6 +893,7 @@ test('#stream:data event', (t) => {
 	t.equal(handleTxnStub.firstCall.args[0], txnMsg, 'Check handleTransaction was called with right message');
 
 	let respMsg = {
+		channel_id: 'theChannelID',
 		txid: 'sometx',
 		type: MSG_TYPE.RESPONSE
 	};
@@ -884,6 +904,7 @@ test('#stream:data event', (t) => {
 	testHandler.msgQueueHandler.handleMsgResponse.reset();
 
 	let errorMsg = {
+		channel_id: 'theChannelID',
 		txid: 'sometx',
 		type: MSG_TYPE.ERROR
 	};
@@ -904,33 +925,36 @@ test('#MsgQueueHandler:queueMsg', (t) => {
 	let mockResolve = sinon.stub();
 	let mockReject = sinon.stub();
 	let msgToSend = {
+		channel_id: 'theChannelID',
 		txid: 'aTX',
 		payload: 'some payload'
 	};
 	let qMsg = new QMsg(msgToSend, mockResolve, mockReject);
 	qHandler.queueMsg(qMsg);
 	t.true(sendMsg.calledOnce, 'Test the first message queued is sent');
-	t.deepEqual(sendMsg.firstCall.args, ['aTX'], 'Test _sendMsg with the correct Txid is called');
-	t.equal(qHandler.txQueues['aTX'].length, 1, 'Test that message is added to queue');
+	t.deepEqual(sendMsg.firstCall.args, ['theChannelIDaTX'], 'Test _sendMsg with the correct txContextId is called');
+	t.equal(qHandler.txQueues['theChannelIDaTX'].length, 1, 'Test that message is added to queue');
 
 	let msgToSend2 = {
+		channel_id: 'theChannelID',
 		txid: 'aTX',
 		payload: 'another payload'
 	};
 	qMsg = new QMsg(msgToSend2, mockResolve, mockReject);
 	qHandler.queueMsg(qMsg);
 	t.true(sendMsg.calledOnce, 'Test the next message is just queued');
-	t.equal(qHandler.txQueues['aTX'].length, 2, 'Test that message is added to queue');
+	t.equal(qHandler.txQueues['theChannelIDaTX'].length, 2, 'Test that message is added to queue');
 	t.end();
 
 	let msgToSend3 = {
+		channel_id: 'theChannelID',
 		txid: '2TX',
 		payload: 'new payload for 2TX'
 	};
 	qMsg = new QMsg(msgToSend3, mockResolve, mockReject);
 	qHandler.queueMsg(qMsg);
 	t.true(sendMsg.calledTwice, 'Test this message was sent');
-	t.equal(qHandler.txQueues['2TX'].length, 1, 'Test that this message is added to queue');
+	t.equal(qHandler.txQueues['theChannelID2TX'].length, 1, 'Test that this message is added to queue');
 	t.end();
 });
 
@@ -943,6 +967,7 @@ test('#MsgQueueHandler:handleMsgResponse', (t) => {
 	let getCurMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
 	let remCurMsg = sinon.stub(qHandler, '_removeCurrentAndSendNextMsg');
 	let response = {
+		channel_id: 'theChannelID',
 		txid: 'aTX',
 		payload: 'some payload'
 	};
@@ -955,11 +980,11 @@ test('#MsgQueueHandler:handleMsgResponse', (t) => {
 
 	qHandler.handleMsgResponse(response);
 	t.true(getCurMsg.calledOnce, 'Test _getCurrentMsg was called');
-	t.deepEqual(getCurMsg.firstCall.args, ['aTX'], 'Test _getCurrentMsg with the correct Txid is called');
+	t.deepEqual(getCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _getCurrentMsg with the correct txContextId is called');
 	t.true(mockResolve.calledOnce, 'Test resolve was called');
 	t.deepEqual(mockResolve.firstCall.args, ['some payload'], 'Test resolve with the response is called');
 	t.true(remCurMsg.calledOnce, 'Test _removeCurrentAndSendNextMsg was called');
-	t.deepEqual(remCurMsg.firstCall.args, ['aTX'], 'Test _removeCurrentAndSendNextMsg with the correct Txid is called');
+	t.deepEqual(remCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _removeCurrentAndSendNextMsg with the correct txContextId is called');
 
 	Handler.__set__('parseResponse', saveParseResponse);
 	t.end();
@@ -1024,14 +1049,14 @@ test('#MsgQueueHandler:_sendMsg', (t) => {
 	let stream = {write: sinon.stub()};
 	let qHandler = new MsgQueueHandler(testHandler);
 	qHandler.stream = stream;
-	let msg = {txid: 'aTX', payload:'msgToSend'};
+	let msg = {channel_id: 'theChannelID', txid: 'aTX', payload:'msgToSend'};
 	let mockResolve = sinon.stub();
 	let mockReject = sinon.stub();
 	let mockQMsg = new QMsg(msg, mockResolve, mockReject);
 	let getCurMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
-	qHandler._sendMsg('aTX');
+	qHandler._sendMsg('theChannelIDaTX');
 	t.true(getCurMsg.calledOnce, 'Test _getCurrentMsg was called');
-	t.deepEqual(getCurMsg.firstCall.args, ['aTX'], 'Test _getCurrentMsg with the correct Txid is called');
+	t.deepEqual(getCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _getCurrentMsg with the correct txContextId is called');
 	t.true(stream.write.calledOnce, 'Test write was called');
 	t.deepEqual(stream.write.firstCall.args, [msg], 'Test write was passed the correct message');
 	t.equal(mockResolve.callCount, 0, 'Test resolve is never called');
@@ -1042,12 +1067,12 @@ test('#MsgQueueHandler:_sendMsg', (t) => {
 	stream = {write: sinon.stub().throws(error)};
 	qHandler = new MsgQueueHandler(testHandler);
 	qHandler.stream = stream;
-	msg = {txid: 'aTX', payload:'msgToSend'};
+	msg = {channel_id: 'theChannelID', txid: 'aTX', payload:'msgToSend'};
 	mockQMsg = new QMsg(msg, 'aMethod', mockResolve, mockReject);
 	getCurMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
-	qHandler._sendMsg('aTX');
+	qHandler._sendMsg('theChannelIDaTX');
 	t.true(getCurMsg.calledOnce, 'Test _getCurrentMsg was called');
-	t.deepEqual(getCurMsg.firstCall.args, ['aTX'], 'Test _getCurrentMsg with the correct Txid is called');
+	t.deepEqual(getCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _getCurrentMsg with the correct txContextId is called');
 	t.true(stream.write.calledOnce, 'Test write was called');
 	t.deepEqual(stream.write.firstCall.args, [msg], 'Test write was passed the correct message');
 	t.equal(mockResolve.callCount, 0, 'Test resolve is never called');
