@@ -14,7 +14,7 @@ gulp.task('clean', function(){
 
 gulp.task('docs', ['clean'], function () {
 	gulp.src([
-		'docs/index.md',
+		'src/README.md',
 		'src/lib/**/*.js'
 	], { read: false }).pipe(
 		jsdoc({

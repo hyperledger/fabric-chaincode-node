@@ -45,7 +45,7 @@ shim.start(new Chaincode());
 ```
 
 ## API Reference
-Click on "Classes" link in the navigation bar above to view the list of class APIs.
+Visit [fabric-shim.github.io](https://fabric-shim.github.io/) and click on "Classes" link in the navigation bar on the top to view the list of class APIs.
 
 ## Support
 Tested with node.js 8.9.0 (LTS).
