@@ -50,6 +50,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: [buf1, buf2, buf3]
@@ -66,6 +67,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: [buf1, buf2, buf3]
@@ -84,6 +86,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: [buf1, buf2, buf3]
@@ -102,6 +105,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: [buf1, buf2, buf3]
@@ -123,6 +127,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: [buf1, buf2, buf3]
@@ -145,6 +150,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: [buf1, buf2, buf3]
@@ -168,6 +174,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: [buf1, buf2, buf3]
@@ -187,6 +194,7 @@ test('Chaincode stub constructor tests', (t) => {
 		() => {
 			new Stub(
 				'dummyClient',
+				'dummyChanelId',
 				'dummyTxid',
 				{
 					args: []
@@ -208,6 +216,7 @@ test('Chaincode stub constructor tests', (t) => {
 	sp.setPayload(ccpayload.toBuffer());
 	let stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: [buf1, buf2, buf3]
@@ -218,6 +227,7 @@ test('Chaincode stub constructor tests', (t) => {
 	t.equal(stub.args[0], 'invoke', 'Test parsing first argument');
 	t.equal(stub.args[1], 'someKey', 'Test parsing second argument');
 	t.equal(stub.getTxID(), 'dummyTxid', 'Test getTxID()');
+	t.equal(stub.getChannelID(), 'dummyChanelId', 'Test getChannelID()');
 
 	// test the computeProposalBinding() method
 	let cHeader = new _commonProto.ChannelHeader();
@@ -236,6 +246,7 @@ test('Chaincode stub constructor tests', (t) => {
 	sp.setPayload(ccpayload.toBuffer());
 	stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: [buf1, buf2, buf3]
@@ -275,6 +286,7 @@ test('invokeChaincode', async (t) => {
 	let mockHandler = sinon.createStubInstance(Handler);
 	let stub = new Stub(
 		mockHandler,
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -288,15 +300,16 @@ test('invokeChaincode', async (t) => {
 	let allProm = [];
 
 	await stub.invokeChaincode('mycc', dummyArgs);
-	t.deepEqual(mockHandler.handleInvokeChaincode.firstCall.args, ['mycc', dummyArgs, 'dummyTxid'], 'Test called with correct arguments');
+	t.deepEqual(mockHandler.handleInvokeChaincode.firstCall.args, ['mycc', dummyArgs, 'dummyChanelId', 'dummyTxid'], 'Test called with correct arguments');
 	await stub.invokeChaincode('mycc', dummyArgs, 'mychannel');
-	t.deepEqual(mockHandler.handleInvokeChaincode.secondCall.args, ['mycc/mychannel', dummyArgs, 'dummyTxid'], 'Test called with correct arguments');
+	t.deepEqual(mockHandler.handleInvokeChaincode.secondCall.args, ['mycc/mychannel', dummyArgs, 'dummyChanelId', 'dummyTxid'], 'Test called with correct arguments');
 });
 
 test('getState', async (t) => {
 	let mockHandler = sinon.createStubInstance(Handler);
 	let stub = new Stub(
 		mockHandler,
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -306,7 +319,7 @@ test('getState', async (t) => {
 		});
 
 	// getState will return a Buffer object
-	mockHandler.handleGetState.withArgs('key1', 'dummyTxid').resolves(Buffer.from('response'));
+	mockHandler.handleGetState.withArgs('key1', 'dummyChanelId', 'dummyTxid').resolves(Buffer.from('response'));
 
 	let response = await stub.getState('key1');
 	t.equal(response.toString(), 'response', 'Test getState invokes correctly amd response is correct');
@@ -316,6 +329,7 @@ test('putState', async (t) => {
 	let mockHandler = sinon.createStubInstance(Handler);
 	let stub = new Stub(
 		mockHandler,
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -328,13 +342,14 @@ test('putState', async (t) => {
 	// Must create a Buffer from your data.
 	let dataToPut = Buffer.from('some data');
 	await stub.putState('key1', dataToPut);
-	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['key1', dataToPut, 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['key1', dataToPut, 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
 
 test('deleteState', async (t) => {
 	let mockHandler = sinon.createStubInstance(Handler);
 	let stub = new Stub(
 		mockHandler,
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -345,7 +360,7 @@ test('deleteState', async (t) => {
 	mockHandler.handleDeleteState.resolves('response');
 
 	await stub.deleteState('key1');
-	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['key1', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
 
 test('getHistoryForKey', async (t) => {
@@ -353,6 +368,7 @@ test('getHistoryForKey', async (t) => {
 	let mockIterator = sinon.createStubInstance(HistoryQueryIterator);
 	let stub = new Stub(
 		mockHandler,
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -364,7 +380,7 @@ test('getHistoryForKey', async (t) => {
 
 	let result = await stub.getHistoryForKey('key1');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetHistoryForKey.firstCall.args, ['key1', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetHistoryForKey.firstCall.args, ['key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
 
 test('getQueryResult', async (t) => {
@@ -372,6 +388,7 @@ test('getQueryResult', async (t) => {
 	let mockIterator = sinon.createStubInstance(StateQueryIterator);
 	let stub = new Stub(
 		mockHandler,
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -383,7 +400,7 @@ test('getQueryResult', async (t) => {
 
 	let result = await stub.getQueryResult('query1');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['query1', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['query1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
 
 
@@ -392,6 +409,7 @@ test('getStateByRange', async (t) => {
 	let mockIterator = sinon.createStubInstance(StateQueryIterator);
 	let stub = new Stub(
 		mockHandler,
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -403,15 +421,15 @@ test('getStateByRange', async (t) => {
 
 	let result = await stub.getStateByRange('start', 'end');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['start', 'end', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['start', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 
 	result = await stub.getStateByRange('', 'end');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['\x01', 'end', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 
 	result = await stub.getStateByRange(null, 'end');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['\x01', 'end', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
 
 
@@ -419,6 +437,7 @@ test('getStateByRange', async (t) => {
 test('setEvent', (t) => {
 	let stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -460,6 +479,7 @@ test('setEvent', (t) => {
 test('CreateCompositeKey', (t) => {
 	let stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -513,6 +533,7 @@ test('splitCompositeKey: ', (t) => {
 	let attributes;
 	let stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -546,6 +567,7 @@ test('splitCompositeKey: ', (t) => {
 test('getStartByPartialCompositeKey', (t) => {
 	let stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []
@@ -574,6 +596,7 @@ test('Arguments Tests', (t) => {
 	let buf3 = ByteBuffer.fromUTF8('value');
 	let stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: [buf1, buf2, buf3]
@@ -596,6 +619,7 @@ test('Arguments Tests', (t) => {
 
 	stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: [buf1]
@@ -608,6 +632,7 @@ test('Arguments Tests', (t) => {
 
 	stub = new Stub(
 		'dummyClient',
+		'dummyChanelId',
 		'dummyTxid',
 		{
 			args: []

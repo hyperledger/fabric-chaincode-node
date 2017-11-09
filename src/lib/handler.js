@@ -67,8 +67,8 @@ class QMsg {
 		return this.msg;
 	}
 
-	getMsgTxid() {
-		return this.msg.txid;
+	getMsgTxContextId() {
+		return this.msg.channel_id + this.msg.txid;
 	}
 
 	getMethod() {
@@ -106,15 +106,15 @@ class MsgQueueHandler {
 	 * @param {QMsg} qMsg the message to queue
 	 */
 	queueMsg(qMsg) {
-		let txId = qMsg.getMsgTxid();
-		let msgQueue = this.txQueues[txId];
+		let txContextId = qMsg.getMsgTxContextId();
+		let msgQueue = this.txQueues[txContextId];
 		if (!msgQueue) {
-			msgQueue = this.txQueues[txId] = [];
+			msgQueue = this.txQueues[txContextId] = [];
 		}
 
 		msgQueue.push(qMsg);
 		if (msgQueue.length === 1) {
-			this._sendMsg(txId);
+			this._sendMsg(txContextId);
 		}
 	}
 
@@ -129,7 +129,9 @@ class MsgQueueHandler {
 	 */
 	handleMsgResponse(response) {
 		let txId = response.txid;
-		let qMsg = this._getCurrentMsg(txId);
+		let channel_id = response.channel_id;
+		let txContextId = channel_id + txId;
+		let qMsg = this._getCurrentMsg(txContextId);
 		if (qMsg) {
 			try {
 				let parsedResponse = parseResponse(this.handler, response, qMsg.getMethod());
@@ -138,7 +140,7 @@ class MsgQueueHandler {
 			catch(err) {
 				qMsg.fail(err);
 			}
-			this._removeCurrentAndSendNextMsg(txId);
+			this._removeCurrentAndSendNextMsg(txContextId);
 		}
 	}
 
@@ -146,15 +148,15 @@ class MsgQueueHandler {
 	 * Get the current message.
 	 * this returns the message at the top of the queue for the particular transaction.
 	 *
-	 * @param {string} txId
+	 * @param {string} txContextId - the transaction context id
 	 * @returns {QMsg} the message at the top of the queue
 	 */
-	_getCurrentMsg(txId) {
-		let msgQueue = this.txQueues[txId];
+	_getCurrentMsg(txContextId) {
+		let msgQueue = this.txQueues[txContextId];
 		if (msgQueue) {
 			return msgQueue[0];
 		}
-		let errMsg = util.format('Failed to find a message for transaction %s', txId);
+		let errMsg = util.format('Failed to find a message for transaction context id %s', txContextId);
 		logger.error(errMsg);
 		//Throwing an error here will terminate the container and potentially lose logs
 		//This may be an error, but I don't know if this should abend the container or
@@ -166,16 +168,16 @@ class MsgQueueHandler {
 	 * Remove the current message and send the next message in the queue if there is one.
 	 * delete the queue if there are no more messages.
 	 *
-	 * @param {any} txId the transaction id
+	 * @param {any} txContextId - the transaction context id
 	 */
-	_removeCurrentAndSendNextMsg(txId) {
-		let msgQueue = this.txQueues[txId];
+	_removeCurrentAndSendNextMsg(txContextId) {
+		let msgQueue = this.txQueues[txContextId];
 		if (msgQueue && msgQueue.length > 0) {
 			msgQueue.shift();
 			if (msgQueue.length === 0) {
-				delete this.txQueues[txId];
+				delete this.txQueues[txContextId];
 			} else {
-				this._sendMsg(txId);
+				this._sendMsg(txContextId);
 			}
 		}
 	}
@@ -183,10 +185,10 @@ class MsgQueueHandler {
 	/**
 	 * send the current message to the peer.
 	 *
-	 * @param {any} txId the transaction id
+	 * @param {any} txContextId the transaction context id
 	 */
-	_sendMsg(txId) {
-		let qMsg = this._getCurrentMsg(txId);
+	_sendMsg(txContextId) {
+		let qMsg = this._getCurrentMsg(txContextId);
 		if (qMsg) {
 			try {
 				this.stream.write(qMsg.getMsg());
@@ -284,13 +286,13 @@ class ChaincodeSupportClient {
 					type !== MSG_TYPE.READY) {
 
 					if (type === MSG_TYPE.RESPONSE || type === MSG_TYPE.ERROR) {
-						logger.debug('[%s]Received %s,  handling good or error response', shortTxid(msg.txid), msg.type);
+						logger.debug('[%s-%s]Received %s,  handling good or error response', msg.channel_id, shortTxid(msg.txid), msg.type);
 						self.msgQueueHandler.handleMsgResponse(msg);
 					} else if (type === MSG_TYPE.INIT) {
-						logger.debug('[%s]Received %s, initializing chaincode', shortTxid(msg.txid), msg.type);
+						logger.debug('[%s-%s]Received %s, initializing chaincode', msg.channel_id, shortTxid(msg.txid), msg.type);
 						self.handleInit(msg);
 					} else if (type === MSG_TYPE.TRANSACTION) {
-						logger.debug('[%s]Received %s, invoking transaction on chaincode(state:%s)', shortTxid(msg.txid), msg.type, state);
+						logger.debug('[%s-%s]Received %s, invoking transaction on chaincode(state:%s)', msg.channel_id, shortTxid(msg.txid), msg.type, state);
 						self.handleTransaction(msg);
 					} else {
 						logger.error('Received unknown message from the peer. Exiting.');
@@ -354,20 +356,21 @@ class ChaincodeSupportClient {
 		handleMessage(msg, this, 'invoke');
 	}
 
-	async handleGetState(key, txId) {
+	async handleGetState(key, channel_id, txId) {
 		let payload = new _serviceProto.GetState();
 		payload.setKey(key);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id: channel_id
 		};
 		logger.debug('handleGetState - with key:',key);
 		return await this._askPeerAndListen(msg, 'GetState');
 	}
 
-	async handlePutState(key, value, txId) {
+	async handlePutState(key, value, channel_id, txId) {
 		let payload = new _serviceProto.PutState();
 		payload.setKey(key);
 		payload.setValue(value);
@@ -375,26 +378,28 @@ class ChaincodeSupportClient {
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.PUT_STATE,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id: channel_id
 		};
 
 		return await this._askPeerAndListen(msg, 'PutState');
 	}
 
-	async handleDeleteState(key, txId) {
+	async handleDeleteState(key, channel_id, txId) {
 		let payload = new _serviceProto.DelState();
 		payload.setKey(key);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.DEL_STATE,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id: channel_id
 		};
 
 		return await this._askPeerAndListen(msg, 'DeleteState');
 	}
 
-	async handleGetStateByRange(startKey, endKey, txId) {
+	async handleGetStateByRange(startKey, endKey, channel_id, txId) {
 		let payload = new _serviceProto.GetStateByRange();
 		payload.setStartKey(startKey);
 		payload.setEndKey(endKey);
@@ -402,61 +407,66 @@ class ChaincodeSupportClient {
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id: channel_id
 		};
 
 		return await this._askPeerAndListen(msg, 'GetStateByRange');
 	}
 
-	async handleQueryStateNext(id, txId) {
+	async handleQueryStateNext(id, channel_id, txId) {
 		let payload = new _serviceProto.QueryStateNext();
 		payload.setId(id);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.QUERY_STATE_NEXT,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id
 		};
 		return await this._askPeerAndListen(msg, 'QueryStateNext');
 	}
 
-	async handleQueryStateClose(id, txId) {
+	async handleQueryStateClose(id, channel_id, txId) {
 		let payload = new _serviceProto.QueryStateClose();
 		payload.setId(id);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id: channel_id
 		};
 		return await this._askPeerAndListen(msg, 'QueryStateClose');
 	}
 
-	async handleGetQueryResult(query, txId) {
+	async handleGetQueryResult(query, channel_id, txId) {
 		let payload = new _serviceProto.GetQueryResult();
 		payload.setQuery(query);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id: channel_id
 		};
 		return await this._askPeerAndListen(msg, 'GetQueryResult');
 	}
 
-	async handleGetHistoryForKey(key, txId) {
+	async handleGetHistoryForKey(key, channel_id, txId) {
 		let payload = new _serviceProto.GetHistoryForKey();
 		payload.setKey(key);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id, channel_id
 		};
 		return await this._askPeerAndListen(msg, 'GetHistoryForKey');
 	}
 
-	async handleInvokeChaincode(chaincodeName, args, txId) {
+	async handleInvokeChaincode(chaincodeName, args, channel_id, txId) {
 		let payload = new _chaincodeProto.ChaincodeSpec();
 		let chaincodeId = new _chaincodeProto.ChaincodeID();
 		let chaincodeInput = new _chaincodeProto.ChaincodeInput();
@@ -472,7 +482,8 @@ class ChaincodeSupportClient {
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
 			payload: payload.toBuffer(),
-			txid: txId
+			txid: txId,
+			channel_id,channel_id
 		};
 
 		let message = await this._askPeerAndListen(msg, 'InvokeChaincode');
@@ -515,24 +526,26 @@ async function handleMessage(msg, client, action) {
 	try {
 		input = _chaincodeProto.ChaincodeInput.decode(msg.payload);
 	} catch(err) {
-		logger.debug('[%s]Incorrect payload format. Sending ERROR message back to peer', shortTxid(msg.txid));
+		logger.error('[%s-%s]Incorrect payload format. Sending ERROR message back to peer', msg.channel_id, shortTxid(msg.txid));
 		nextStateMsg = {
 			type: _serviceProto.ChaincodeMessage.Type.ERROR,
 			payload: msg.payload,
-			txid: msg.txid
+			txid: msg.txid,
+			channel_id : msg.channel_id
 		};
 	}
 
 	if (input) {
 		let stub;
 		try {
-			stub = createStub(client, msg.txid, input, msg.proposal);
+			stub = createStub(client, msg.channel_id, msg.txid, input, msg.proposal);
 		} catch(err) {
 			logger.error(util.format('Failed to construct a chaincode stub instance from the INIT message: %s', err));
 			nextStateMsg = {
 				type: _serviceProto.ChaincodeMessage.Type.ERROR,
 				payload: Buffer.from(err.toString()),
-				txid: msg.txid
+				txid: msg.txid,
+				channel_id : msg.channel_id
 			};
 
 			client._stream.write(nextStateMsg);
@@ -549,36 +562,38 @@ async function handleMessage(msg, client, action) {
 			}
 			// check that a response object has been returned otherwise assume an error.
 			if (!resp || !resp.status) {
-				let errMsg = util.format('[%s]Calling chaincode %s() has not called success or error.',
-					shortTxid(msg.txid), method);
+				let errMsg = util.format('[%s-%s]Calling chaincode %s() has not called success or error.',
+					msg.channel_id, shortTxid(msg.txid), method);
 				logger.error(errMsg);
 				resp = shim.error(errMsg);
 			}
 
 			logger.debug(util.format(
-				'[%s]Calling chaincode %s(), response status: %s',
-				shortTxid(msg.txid),
+				'[%s-%s]Calling chaincode %s(), response status: %s',
+				msg.channel_id, shortTxid(msg.txid),
 				method,
 				resp.status));
 
 			if (resp.status >= Stub.RESPONSE_CODE.ERROR) {
-				let errMsg = util.format('[%s]Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
-					shortTxid(msg.txid), method, resp.message);
+				let errMsg = util.format('[%s-%s]Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
+					msg.channel_id, shortTxid(msg.txid), method, resp.message);
 				logger.error(errMsg);
 
 				nextStateMsg = {
 					type: _serviceProto.ChaincodeMessage.Type.ERROR,
 					payload: Buffer.from(errMsg),
-					txid: msg.txid
+					txid: msg.txid,
+					channel_id: msg.channel_id
 				};
 			} else {
-				logger.info(util.format('[%s]Calling chaincode %s() succeeded. Sending COMPLETED message back to peer',
-					shortTxid(msg.txid), method));
+				logger.info(util.format('[%s-%s]Calling chaincode %s() succeeded. Sending COMPLETED message back to peer',
+					msg.channel_id, shortTxid(msg.txid), method));
 
 				nextStateMsg = {
 					type: _serviceProto.ChaincodeMessage.Type.COMPLETED,
 					payload: resp.toBuffer(),
 					txid: msg.txid,
+					channel_id: msg.channel_id,
 					chaincode_event: stub.chaincodeEvent
 				};
 			}
@@ -594,23 +609,25 @@ async function handleMessage(msg, client, action) {
  * function to create a new Stub, this is done to facilitate unit testing
  *
  * @param {Handler} client an instance of the Handler class
+ * @param {string} channel_id channel id
  * @param {string} txid transaction id
  * @param {any} input decoded message from peer
  * @param {any} proposal the proposal
  * @returns a new Stub instance
  */
-function createStub(client, txid, input, proposal) {
-	return new Stub(client, txid, input, proposal);
+function createStub(client, channel_id, txid, input, proposal) {
+	return new Stub(client, channel_id, txid, input, proposal);
 }
 
 function newErrorMsg(msg, state) {
-	let errStr = util.format('[%s]Chaincode handler FSM cannot handle message (%s) with payload size (%d) while in state: %s',
-		msg.txid, msg.type, msg.payload.length, state);
+	let errStr = util.format('[%s-%s]Chaincode handler FSM cannot handle message (%s) with payload size (%d) while in state: %s',
+		msg.channel_id, msg.txid, msg.type, msg.payload.length, state);
 
 	return {
 		type: MSG_TYPE.ERROR,
 		payload: Buffer.from(errStr),
-		txid: msg.txid
+		txid: msg.txid,
+		channel_id: msg.channel_id
 	};
 }
 
@@ -623,16 +640,16 @@ function shortTxid(txId) {
 
 function parseResponse(handler, res, method) {
 	if (res.type === MSG_TYPE.RESPONSE) {
-		logger.debug(util.format('[%s]Received %s() successful response', shortTxid(res.txid), method));
+		logger.debug(util.format('[%s-%s]Received %s() successful response', res.channel_id, shortTxid(res.txid), method));
 
 		// some methods have complex responses, decode the protobuf structure
 		// before returning to the client code
 		switch (method) {
 		case 'GetStateByRange':
 		case 'GetQueryResult':
-			return new StateQueryIterator(handler, res.txid, _serviceProto.QueryResponse.decode(res.payload));
+			return new StateQueryIterator(handler, res.channel_id, res.txid, _serviceProto.QueryResponse.decode(res.payload));
 		case 'GetHistoryForKey':
-			return new HistoryQueryIterator(handler, res.txid, _serviceProto.QueryResponse.decode(res.payload));
+			return new HistoryQueryIterator(handler, res.channel_id, res.txid, _serviceProto.QueryResponse.decode(res.payload));
 		case 'QueryStateNext':
 		case 'QueryStateClose':
 			return _serviceProto.QueryResponse.decode(res.payload);
@@ -642,12 +659,12 @@ function parseResponse(handler, res, method) {
 
 		return res.payload;
 	} else if (res.type === MSG_TYPE.ERROR) {
-		logger.debug(util.format('[%s]Received %s() error response', shortTxid(res.txid), method));
+		logger.debug(util.format('[%s-%s]Received %s() error response', res.channel_id, shortTxid(res.txid), method));
 		throw new Error(res.payload.toString());
 	} else {
 		let errMsg = util.format(
-			'[%s]Received incorrect chaincode in response to the %s() call: type="%s", expecting "RESPONSE"',
-			shortTxid(res.txid), method, res.type);
+			'[%s-%s]Received incorrect chaincode in response to the %s() call: type="%s", expecting "RESPONSE"',
+			res.channel_id, shortTxid(res.txid), method, res.type);
 		logger.debug(errMsg);
 		throw new Error(errMsg);
 	}

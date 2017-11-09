@@ -22,6 +22,7 @@ async function getAllResults(iterator, getKeys) {
 		if (res.value.namespace) console.log(res.value.namespace);
 		if (res.value.key) console.log(res.value.key);
 		if (res.value.tx_id) console.log(res.value.tx_id);
+		if (res.value.channel_id) console.log(res.value.channel_id);
 		if (res.value.timestamp) console.log(res.value.timestamp);
 		if (res.value.is_delete) console.log(res.value.is_delete);
 		let theVal = (getKeys) ? res.value.key : res.value.value.toString('utf8');
@@ -37,6 +38,9 @@ async function getAllResults(iterator, getKeys) {
 
 let Chaincode = class {
 	async Init(stub) {
+		console.info('Transaction ID: ' + stub.getTxID());
+		console.info('Channel ID: ' + stub.getChannelID());
+
 		let ret = stub.getFunctionAndParameters();
 		// initialise only if no parameter passed.
 		if (ret.params.length === 0) {
@@ -58,6 +62,7 @@ let Chaincode = class {
 
 	async Invoke(stub) {
 		console.info('Transaction ID: ' + stub.getTxID());
+		console.info('Channel ID: ' + stub.getChannelID());
 		console.info(util.format('Args: %j', stub.getArgs()));
 
 		let ret = stub.getFunctionAndParameters();
