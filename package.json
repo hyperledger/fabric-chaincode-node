@@ -12,7 +12,8 @@
     "test": "gulp test-headless"
   },
   "dependencies": {
-    "fabric-shim": "file:./src"
+    "fabric-shim": "file:./src",
+    "jsrsasign": "^8.0.4"
   },
   "devDependencies": {
     "chai": "^4.1.1",

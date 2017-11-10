@@ -229,6 +229,11 @@ let Chaincode = class {
 		key2.attributes.length.should.equal(2, '"attributes" value of the returned composite key should be array of size 2');
 		key2.attributes[0].should.equal('blue', 'first attribute value of the returned composite key should be "blue"');
 		key2.attributes[1].should.equal('name1', '2nd attribute value of the returned composite key should be "name2"');
+
+		// test the ClientIdentiy class
+		let cid = new shim.ClientIdentity(stub);
+		cid.mspId.should.equal('Org1MSP', 'Test mspId value');
+		cid.getID().should.equal('x509::/C=US/ST=California/L=San Francisco/CN=Admin@org1.example.com::/C=US/ST=California/L=San Francisco/O=org1.example.com/CN=ca.org1.example.com', 'Test getID()');
 	}
 
 	// useful helper transactions
