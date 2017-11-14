@@ -143,7 +143,7 @@ class ChaincodeStub {
 			try {
 				channelHeader = _commonProto.ChannelHeader.decode(header.channel_header);
 				decodedSP.proposal.header.channel_header = channelHeader;
-				this.txTimeStamp = channelHeader.timestamp;
+				this.txTimestamp = channelHeader.timestamp;
 			} catch(err) {
 				throw new Error(util.format('Decoding ChannelHeader failed: %s', err));
 			}

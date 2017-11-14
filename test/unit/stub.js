@@ -38,6 +38,11 @@ const _idProto = grpc.load({
 	file: 'msp/identities.proto'
 }).msp;
 
+const _timestampProto = grpc.load({
+	root: path.join(__dirname, '../../src/lib/protos'),
+	file: 'google/protobuf/timestamp.proto'
+}).google.protobuf;
+
 const EXPECTED_MAX_RUNE = '\u{10ffff}';
 
 test('Chaincode stub constructor tests', (t) => {
@@ -255,6 +260,25 @@ test('Chaincode stub constructor tests', (t) => {
 			proposal_bytes: sp.toBuffer()
 		});
 	t.equal(stub.binding, '81dd35bc764b01dd7f3f38513c6c0e5d5583d4e5568fa74c4847fd29228b51e4', 'Test computeProposalBinding() returning expected hex for the binding hash');
+
+	t.end();
+});
+
+test('getTxTimestamp', (t) => {
+	let stub = new Stub(
+		'dummyClient',
+		'dummyChanelId',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: newProposal().toBuffer()
+		});
+
+	let ts = stub.getTxTimestamp();
+	t.equal(typeof ts.nanos, 'number', 'Test getTxTimestamp() returns propery value: has "nanos" {number} field');
+	t.equal(typeof ts.seconds, 'object', 'Test getTxTimestamp() returns propery value: has "seconds" {object} field');
 
 	t.end();
 });
@@ -655,19 +679,36 @@ test('Arguments Tests', (t) => {
 });
 
 function newProposal() {
-	let sp = new _proposalProto.Proposal();
-	let signatureHeader = new _commonProto.SignatureHeader();
 	let creator = new _idProto.SerializedIdentity();
 	creator.setMspid('dummyMSPId');
+
+	let signatureHeader = new _commonProto.SignatureHeader();
 	signatureHeader.setCreator(creator.toBuffer());
 	signatureHeader.setNonce(Buffer.from('12345'));
+
+	let cHeader = new _commonProto.ChannelHeader();
+	cHeader.setEpoch(10);
+	cHeader.setTimestamp(buildTimeStamp());
+
 	let header = new _commonProto.Header();
 	header.setSignatureHeader(signatureHeader.toBuffer());
-	sp.setHeader(header.toBuffer());
+	header.setChannelHeader(cHeader.toBuffer());
+
 	let ccpayload = new _proposalProto.ChaincodeProposalPayload();
 	ccpayload.setInput(Buffer.from('dummyChaincodeInput'));
 	ccpayload.setTransientMap({'testKey': Buffer.from('testValue')});
+
+	let sp = new _proposalProto.Proposal();
+	sp.setHeader(header.toBuffer());
 	sp.setPayload(ccpayload.toBuffer());
 
 	return sp;
+}
+
+function buildTimeStamp() {
+	var now = new Date();
+	var timestamp = new _timestampProto.Timestamp();
+	timestamp.setSeconds(now.getTime() / 1000);
+	timestamp.setNanos((now.getTime() % 1000) * 1000000);
+	return timestamp;
 }
