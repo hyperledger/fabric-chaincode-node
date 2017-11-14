@@ -33,6 +33,7 @@ class CommonIterator extends EventEmitter {
 
 	/**
 	 * close the iterator.
+	 * @async
 	 * @return {promise} A promise that is resolved with the close payload or rejected
 	 * if there is a problem
 	 */
@@ -71,6 +72,7 @@ class CommonIterator extends EventEmitter {
 	/**
 	 * Get the next value and return it through a promise and also emit
 	 * it if event listeners have been registered.
+	 * @async
 	 * @return {promise} a promise that is fulfilled with the next value or
 	 * is rejected otherwise
 	 */

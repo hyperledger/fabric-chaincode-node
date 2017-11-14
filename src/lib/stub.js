@@ -364,6 +364,7 @@ class ChaincodeStub {
 
 	/**
 	 * Retrieves the current value of the state variable <code>key</code>
+	 * @async
 	 * @param {string} key State variable key to retrieve from the state store
 	 * @returns {Promise} Promise for the current value of the state variable
 	 */
@@ -376,6 +377,7 @@ class ChaincodeStub {
 	 * Writes the state variable <code>key</code> of value <code>value</code>
 	 * to the state store. If the variable already exists, the value will be
 	 * overwritten.
+	 * @async
 	 * @param {string} key State variable key to set the value for
 	 * @param {byte[]} value State variable value
 	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state update request
@@ -387,6 +389,7 @@ class ChaincodeStub {
 
 	/**
 	 * Deletes the state variable <code>key</code> from the state store.
+	 * @async
 	 * @param {string} key State variable key to delete from the state store
 	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state delete request
 	 * or rejected if any errors
@@ -405,6 +408,7 @@ class ChaincodeStub {
 	 * Call close() on the returned {@link StateQueryIterator} object when done.
 	 * The query is re-executed during validation phase to ensure result set
 	 * has not changed since transaction endorsement (phantom reads detected).
+	 * @async
 	 * @param {string} startKey State variable key as the start of the key range (inclusive)
 	 * @param {string} endKey State variable key as the end of the key range (exclusive)
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
@@ -428,6 +432,7 @@ class ChaincodeStub {
 	 * be detected at validation/commit time.  Applications susceptible to this
 	 * should therefore not use GetQueryResult as part of transactions that update
 	 * ledger, and should limit use to read-only chaincode operations.
+	 * @async
 	 * @param {string} query Query string native to the underlying state database
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
@@ -448,6 +453,7 @@ class ChaincodeStub {
 	 * detected at validation/commit time. Applications susceptible to this
 	 * should therefore not use GetHistoryForKey as part of transactions that
 	 * update ledger, and should limit use to read-only chaincode operations.
+	 * @async
 	 * @param {string} key The state variable key
 	 * @returns {Promise} Promise for a {@link HistoryQueryIterator} object
 	 */
@@ -478,6 +484,7 @@ class ChaincodeStub {
 	 * the called chaincode on a different channel is a `Query`, which does not
 	 * participate in state validation checks in subsequent commit phase.<br><br>
 	 * If `channel` is empty, the caller's channel is assumed.
+	 * @async
 	 * @param {string} chaincodeName Name of the chaincode to call
 	 * @param {byte[][]} args List of arguments to pass to the called chaincode
 	 * @param {string} channel Name of the channel where the target chaincode is active
@@ -582,6 +589,7 @@ class ChaincodeStub {
 	 *
 	 * The query is re-executed during validation phase to ensure result set has not changed since transaction
 	 * endorsement (phantom reads detected).
+	 * @async
 	 * @param {string} objectType A string used as the prefix of the resulting key
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
 	 * @return {Promise} A promise that resolves with a {@link StateQueryIterator}, rejects if an error occurs

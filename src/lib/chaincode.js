@@ -40,29 +40,40 @@ const _responseProto = grpc.load({
 }).protos;
 
 /**
+ * Chaincodes must implement the methods in this interface. The Init() method is called during
+ * chaincode <code>instantiation</code> or <code>upgrade</code> to preform any necessary intitialization
+ * of the application state. Invoke() is called by <code>invoke transaction</code> or <code>query</code>
+ * requests. Both methods are provided with a [stub]{@link ChaincodeStub} object that can be used to
+ * discover information on the request (invoking identity, target channel, arguments, etc.) as well as
+ * talking with the peer to retrieve or update application state.
  * @class
  */
 class ChaincodeInterface {
 	/**
 	 * Called during chaincode instantiate and upgrade. This method can be used
 	 * to initialize asset states
+	 * @async
 	 * @param {ChaincodeStub} stub The chaincode stub is implemented by the <code>fabric-shim</code>
 	 * library and passed to the ChaincodeInterface calls by the Hyperledger Fabric platform. The stub
 	 * encapsulates the APIs between the chaincode implementation and the Fabric peer
 	 */
-	init(stub) {}
+	async Init(stub) {}
 
 	/**
 	 * called throughout the life time of the chaincode to carry out business
 	 * transaction logic and effect the asset states
+	 * @async
 	 * @param {ChaincodeStub} stub The chaincode stub is implemented by the <code>fabric-shim</code>
 	 * library and passed to the ChaincodeInterface calls by the Hyperledger Fabric platform. The stub
 	 * encapsulates the APIs between the chaincode implementation and the Fabric peer
 	 */
-	invoke(stub) {}
+	async Invoke(stub) {}
 }
 
 /**
+ * The shim class provides the service to register the chaincode with the target peer, and
+ * listen for incoming requests from the peer to dispatch to the chaincode in order to process
+ * transaction proposals or execute queries.
  * @class
  */
 class Shim {
@@ -71,6 +82,7 @@ class Shim {
 	 * pass the object to this function which will initiate a request to register the chaincode
 	 * with the target peer. The address of the target peer must be provided via a program
 	 * argument <code>--peer.address</code>
+	 * @static
 	 * @param {ChaincodeInterface} chaincode User-provided object that must implement the <code>ChaincodeInterface</code>
 	 */
 	static start(chaincode) {
@@ -125,6 +137,7 @@ class Shim {
 
 	/**
 	 * Returns a standard response object with status code 200 and an optional payload
+	 * @static
 	 * @param {Buffer} payload Can be any content the chaincode wish to return to the client
 	 * @returns {SuccessResponse}
 	 */
@@ -144,6 +157,7 @@ class Shim {
 
 	/**
 	 * Returns a standard response object with status code 200 and an optional payload
+	 * @static
 	 * @param {Buffer} msg A message describing the error
 	 * @returns {ErrorResponse}
 	 */
@@ -157,6 +171,7 @@ class Shim {
 
 	/**
 	 * Returns a log4js logger named after <code>name</code>
+	 * @static
 	 * @param {string} name Logger name used to label log messages produced by the returned logger
 	 * @returns {Object} log4js based logger. See log4js documentation for usage details
 	 */
@@ -174,13 +189,25 @@ const FABRIC_CERT_ATTR_OID = '1.2.3.4.5.6.7.8.1';
 
 /**
  * ClientIdentity represents information about the identity that submitted the
- * transaction
+ * transaction. Chaincodes can use this class to obtain information about the submitting
+ * identity including a unique ID, the MSP (Membership Service Provider) ID, and attributes.
+ * Such information is useful in enforcing access control by the chaincode.
+ *
+ * @example
+ * <caption>Check if the submitter is an auditor</caption>
+ * const ClientIdentity = require('fabric-shim').ClientIdentity;
+ *
+ * let cid = new ClientIdentity(stub); // "stub" is the ChaincodeStub object passed to Init() and Invoke() methods
+ * if (cid.assertAttributeValue('hf.role', 'auditor')) {
+ *    // proceed to carry out auditing
+ * }
+ *
  * @class
  */
 class ClientIdentity {
 	/**
 	 * Returns a new instance of ClientIdentity
-	 * @param {ChaincodeStub}
+	 * @param {ChaincodeStub} This is the stub object passed to Init() and Invoke() methods
 	 */
 	constructor(stub) {
 		this.stub = stub;
@@ -210,14 +237,14 @@ class ClientIdentity {
 	/**
 	 * getID returns the ID associated with the invoking identity.  This ID
 	 * is guaranteed to be unique within the MSP.
-	 * @returns {string} A string in the format: "x509::<subject DN>::<issuer DN>"
+	 * @returns {string} A string in the format: "x509::{subject DN}::{issuer DN}"
 	 */
 	getID() {
 		return this.id;
 	}
 
 	/**
-	 * Returns the MSP ID of the client
+	 * Returns the MSP ID of the invoking identity.
 	 * @returns {string}
 	 */
 	getMSPID() {
@@ -226,10 +253,12 @@ class ClientIdentity {
 
 	/**
 	 * getAttributeValue returns the value of the client's attribute named `attrName`.
-	 * If the client possesses the attribute, returns the value of the attribute.
-	 * If the client does not possess the attribute, returns null.
-	 * @param {string} attrName
-	 * @returns {string}
+	 * If the invoking identity possesses the attribute, returns the value of the attribute.
+	 * If the invoking identity does not possess the attribute, returns null.
+	 * @param {string} attrName Name of the attribute to retrieve the value from the
+	 *     identity's credentials (such as x.509 certificate for PKI-based MSPs).
+	 * @returns {string | null} Value of the attribute or null if the invoking identity
+	 *     does not possess the attribute.
 	 */
 	getAttributeValue(attrName) {
 		let attr = this.attrs[attrName];
@@ -238,11 +267,13 @@ class ClientIdentity {
 	}
 
 	/**
-	 * assertAttributeValue verifies that the client has the attribute named `attrName`
-	 * with a value of `attrValue`; otherwise, returns false.
-	 * @param {string} attrName
-	 * @param {string} attrValue
-	 * @returns {boolean}
+	 * assertAttributeValue verifies that the invoking identity has the attribute named `attrName`
+	 * with a value of `attrValue`.
+	 * @param {string} attrName Name of the attribute to retrieve the value from the
+	 *     identity's credentials (such as x.509 certificate for PKI-based MSPs)
+	 * @param {string} attrValue Expected value of the attribute
+	 * @returns {boolean} True if the invoking identity possesses the attribute and the attribute
+	 *     value matches the expected value. Otherwise, returns false.
 	 */
 	assertAttributeValue(attrName, attrValue) {
 		let attr = this.getAttributeValue(attrName);
@@ -255,9 +286,44 @@ class ClientIdentity {
 	}
 
 	/**
-	 * getX509Certificate returns the X509 certificate associated with the client,
-	 * or null if it was not identified by an X509 certificate.
-	 * @returns {object}
+	 * An object representing an x.509 certificate with the following structure:
+	 * <br><pre>
+	 * { subject: {
+     *     countryName: 'US',
+     *     postalCode: '10010',
+     *     stateOrProvinceName: 'NY',
+     *     localityName: 'New York',
+     *     streetAddress: '902 Broadway, 4th Floor',
+     *     organizationName: 'Nodejitsu',
+     *     organizationalUnitName: 'PremiumSSL Wildcard',
+     *     commonName: '*.nodejitsu.com'
+     *   },
+     *   issuer: {
+     *     countryName: 'GB',
+     *     stateOrProvinceName: 'Greater Manchester',
+     *     localityName: 'Salford',
+     *     organizationName: 'COMODO CA Limited',
+     *     commonName: 'COMODO High-Assurance Secure Server CA'
+     *   },
+     *   notBefore: Sun Oct 28 2012 20:00:00 GMT-0400 (EDT),
+     *   notAfter: Wed Nov 26 2014 18:59:59 GMT-0500 (EST),
+     *   altNames: [ '*.nodejitsu.com', 'nodejitsu.com' ],
+     *   signatureAlgorithm: 'sha1WithRSAEncryption',
+     *   fingerPrint: 'E4:7E:24:8E:86:D2:BE:55:C0:4D:41:A1:C2:0E:06:96:56:B9:8E:EC',
+     *   publicKey: {
+     *     algorithm: 'rsaEncryption',
+     *     e: '65537',
+     *     n: '.......'
+     *   }
+     * }
+	 * @typedef {object} X509Certificate
+	 */
+
+	/**
+	 * getX509Certificate returns the X509 certificate associated with the invoking identity,
+	 * or null if it was not identified by an X509 certificate, for instance if the MSP is
+	 * implemented with an alternative to PKI such as [Identity Mixer]{@link https://jira.hyperledger.org/browse/FAB-5673}.
+	 * @returns {X509Certificate | null}
 	 */
 	getX509Certificate() {
 		return this.cert;
