@@ -30,6 +30,7 @@ const packageJson = '{' +
 '  "scripts": { "start" : "node test.js" },'+
 '  "dependencies": {' +
 '    "fabric-shim": "file:./fabric-shim",' +
+'    "fabric-shim-crypto": "file:./fabric-shim-crypto",' +
 '    "chai": "^4.1.1",' +
 '    "chai-as-promised": "^7.1.1"' +
 '  }' +
@@ -55,7 +56,16 @@ gulp.task('copy-shim', ['protos'], () => {
 		.pipe(gulp.dest(destPath));
 });
 
-gulp.task('copy-chaincode', ['copy-shim'], () => {
+gulp.task('copy-shim-crypto', ['copy-shim'], () => {
+	// first ensure the chaincode folder has the latest shim code
+	let srcPath = path.join(__dirname, '../../fabric-shim-crypto/**');
+	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim-crypto');
+	fs.ensureDirSync(destPath);
+	return gulp.src(srcPath)
+		.pipe(gulp.dest(destPath));
+});
+
+gulp.task('copy-chaincode', ['copy-shim-crypto'], () => {
 	// create a package.json in the chaincode folder
 	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/package.json');
 	fs.writeFileSync(destPath, packageJson, 'utf8');
@@ -213,7 +223,6 @@ gulp.task('test-e2e-invoke-v0-test9', ['test-e2e-invoke-v0-test8'], () => {
 		]));
 });
 
-
 gulp.task('test-e2e-invoke-v0-test10', ['test-e2e-invoke-v0-test9'], () => {
 	return gulp.src('*.js', {read: false})
 		.pipe(wait(3000))
@@ -226,4 +235,80 @@ gulp.task('test-e2e-invoke-v0-test10', ['test-e2e-invoke-v0-test9'], () => {
 		]));
 });
 
-gulp.task('test-e2e', ['test-e2e-invoke-v0-test10']);
+// Test encryption support in fabric-shim-crypto
+gulp.task('test-e2e-invoke-v0-test11', ['test-e2e-invoke-v0-test10'], () => {
+	const cmd = 'docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --transient ' +
+				'\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
+
+	return gulp.src('*.js', {read: false})
+		.pipe(wait(3000))
+		.pipe(shell([
+			// values of "encrypt-key" and "iv" below are base64 encoded 32-byte and 16-byte strings respectively
+			util.format(cmd,
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
+				'\'{"Args":["test11","newkey","newvalue"]}\'')
+		]));
+});
+
+// Test decryption support in fabric-shim-crypto
+gulp.task('test-e2e-invoke-v0-test12', ['test-e2e-invoke-v0-test11'], () => {
+	const cmd = 'docker exec cli peer chaincode query %s -C %s -n %s -c %s --transient ' +
+				'\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
+
+	return gulp.src('*.js', {read: false})
+		.pipe(wait(3000))
+		.pipe(shell([
+			// values of "encrypt-key" and "iv" below must be the same as those used to encrypt
+			util.format(cmd,
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
+				'\'{"Args":["test12","newkey","newvalue"]}\'')
+		]));
+});
+
+// Test decryption support in fabric-shim-crypto
+gulp.task('test-e2e-invoke-v0-test13', ['test-e2e-invoke-v0-test12'], () => {
+	const cmd = 'docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --transient ' +
+				'\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
+				'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
+				'yWVNTY3FDdkFraWhSQU5DQUFTNkJoRmdXL3EwUHpya3dUNVJsV1R0NDFWZ1hMZ3VQdjZRS3ZHc1c3U3' +
+				'FLNlRrY0NmeHNXb1NqeTYvcjFTenpUTW5pM0o4aVFSb0ozcm9QbW94UExLNC0tLS0tRU5EIFBSSVZBV' +
+				'EUgS0VZLS0tLS0="}\'';
+
+	return gulp.src('*.js', {read: false})
+		.pipe(wait(3000))
+		.pipe(shell([
+			// value of "sign-key" below is a base64 encoded private key PEM
+			util.format(cmd,
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
+				'\'{"Args":["test13","newkey1","newvalue"]}\'')
+		]));
+});
+
+// Test decryption support in fabric-shim-crypto
+gulp.task('test-e2e-invoke-v0-test14', ['test-e2e-invoke-v0-test13'], () => {
+	const cmd = 'docker exec cli peer chaincode query %s -C %s -n %s -c %s --transient ' +
+				'\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
+				'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
+				'yWVNTY3FDdkFraWhSQU5DQUFTNkJoRmdXL3EwUHpya3dUNVJsV1R0NDFWZ1hMZ3VQdjZRS3ZHc1c3U3' +
+				'FLNlRrY0NmeHNXb1NqeTYvcjFTenpUTW5pM0o4aVFSb0ozcm9QbW94UExLNC0tLS0tRU5EIFBSSVZBV' +
+				'EUgS0VZLS0tLS0="}\'';
+
+	return gulp.src('*.js', {read: false})
+		.pipe(wait(3000))
+		.pipe(shell([
+			// value of "sign-key" below must be the same as those used to sign above
+			util.format(cmd,
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
+				'\'{"Args":["test14","newkey1","newvalue"]}\'')
+		]));
+});
+
+gulp.task('test-e2e', ['test-e2e-invoke-v0-test14']);

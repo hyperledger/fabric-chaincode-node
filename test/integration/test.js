@@ -5,6 +5,7 @@
 */
 'use strict';
 const shim = require('fabric-shim');
+const ChaincodeCrypto = require('fabric-shim-crypto');
 const util = require('util');
 const chai = require('chai');
 chai.should();
@@ -234,6 +235,48 @@ let Chaincode = class {
 		let cid = new shim.ClientIdentity(stub);
 		cid.mspId.should.equal('Org1MSP', 'Test mspId value');
 		cid.getID().should.equal('x509::/C=US/ST=California/L=San Francisco/CN=Admin@org1.example.com::/C=US/ST=California/L=San Francisco/O=org1.example.com/CN=ca.org1.example.com', 'Test getID()');
+	}
+
+	// tests the encryption of state values
+	async test11(stub, args) {
+		// construct the encrypter, the stub is required to contain a transient map
+		// with a key "encrypt-key", which will be used to encrypt the values
+		let encrypter = new ChaincodeCrypto(stub);
+		let ciphertext = encrypter.encrypt(Buffer.from(args[1])); // 2nd arg has the new value to encrypt
+		await stub.putState(args[0], ciphertext); // 1st arg has the key
+	}
+
+	// tests the descryption of state values
+	async test12(stub, args) {
+		// construct the decrypter, the stub is required to contain a transient map
+		// with a key "encKey", which will be used to decrypt the values
+		let decrypter = new ChaincodeCrypto(stub);
+		let ciphertext = await stub.getState(args[0]);
+		let value = decrypter.decrypt(ciphertext).toString();
+		value.should.equal(args[1], 'Test state value decryption with the ChaincodeCrypto library');
+	}
+
+	// test the signing of state values
+	async test13(stub, args) {
+		let signer = new ChaincodeCrypto(stub);
+		let signature = signer.sign(Buffer.from(args[1]));
+		let state = {
+			signature: signature,
+			value: args[1]
+		};
+
+		await stub.putState(args[0], Buffer.from(JSON.stringify(state)));
+	}
+
+	// test signature verifying
+	async test14(stub, args) {
+		let verifier = new ChaincodeCrypto(stub);
+		let stateRaw = await stub.getState(args[0]);
+		let json = JSON.parse(stateRaw.toString());
+		// signature is originally a buffer
+		let sig = Buffer.from(json.signature);
+		let result = verifier.verify(sig, json.value);
+		result.ok.should.equal(true, 'Test signature verification with the ChaincodeCrypto Library');
 	}
 
 	// useful helper transactions

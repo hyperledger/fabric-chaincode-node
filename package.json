@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "fabric-shim": "file:./src",
+    "fabric-shim-crypto": "file:./fabric-shim-crypto",
     "jsrsasign": "^8.0.4"
   },
   "devDependencies": {

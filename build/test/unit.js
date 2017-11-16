@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-'use strict';
 
 const gulp = require('gulp');
 const tape = require('gulp-tape');
@@ -17,7 +16,8 @@ const instrumenter = function(opts) {
 
 gulp.task('instrument', function() {
 	return gulp.src([
-		'src/lib/**/*.js'])
+		'src/lib/**/*.js',
+		'fabric-shim-crypto/lib/**.js'])
 		.pipe(istanbul({instrumenter: instrumenter}))
 		.pipe(istanbul.hookRequire());
 });
@@ -28,7 +28,8 @@ gulp.task('test-headless', ['clean-up', 'lint', 'instrument', 'protos'], functio
 	process.setMaxListeners(0);
 
 	return gulp.src([
-		'test/unit/**/*.js'
+		'test/unit/**/*.js',
+		'!test/unit/util.js'
 	])
 		.pipe(tape({
 			reporter: tapColorize()

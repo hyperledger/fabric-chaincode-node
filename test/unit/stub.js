@@ -9,6 +9,7 @@ const ByteBuffer = require('bytebuffer');
 const test = require('../base.js');
 const sinon = require('sinon');
 const rewire = require('rewire');
+const testutil = require('./util.js');
 
 const Stub = rewire('fabric-shim/lib/stub.js');
 const Handler = require('fabric-shim/lib/handler.js');
@@ -37,11 +38,6 @@ const _idProto = grpc.load({
 	root: path.join(__dirname, '../../src/lib/protos'),
 	file: 'msp/identities.proto'
 }).msp;
-
-const _timestampProto = grpc.load({
-	root: path.join(__dirname, '../../src/lib/protos'),
-	file: 'google/protobuf/timestamp.proto'
-}).google.protobuf;
 
 const EXPECTED_MAX_RUNE = '\u{10ffff}';
 
@@ -273,7 +269,7 @@ test('getTxTimestamp', (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 
 	let ts = stub.getTxTimestamp();
@@ -316,7 +312,7 @@ test('invokeChaincode', async (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 	mockHandler.handleInvokeChaincode.resolves('response');
 
@@ -339,7 +335,7 @@ test('getState', async (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 
 	// getState will return a Buffer object
@@ -359,7 +355,7 @@ test('putState', async (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 	mockHandler.handlePutState.resolves('response');
 
@@ -379,7 +375,7 @@ test('deleteState', async (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 	mockHandler.handleDeleteState.resolves('response');
 
@@ -398,7 +394,7 @@ test('getHistoryForKey', async (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 	mockHandler.handleGetHistoryForKey.resolves(mockIterator);
 
@@ -418,7 +414,7 @@ test('getQueryResult', async (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 	mockHandler.handleGetQueryResult.resolves(mockIterator);
 
@@ -439,7 +435,7 @@ test('getStateByRange', async (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 	mockHandler.handleGetStateByRange.resolves(mockIterator);
 
@@ -467,7 +463,7 @@ test('setEvent', (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 
 	t.throws(
@@ -509,7 +505,7 @@ test('CreateCompositeKey', (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 
 	t.throws(
@@ -563,7 +559,7 @@ test('splitCompositeKey: ', (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 
 	// test splitting stuff that was created using the createCompositeKey calls
@@ -597,7 +593,7 @@ test('getStartByPartialCompositeKey', (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		}
 	);
 
@@ -626,7 +622,7 @@ test('Arguments Tests', (t) => {
 			args: [buf1, buf2, buf3]
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 
 	t.equal(stub.getArgs().length, 3, 'Test getArgs() returns expected number of arguments');
@@ -649,7 +645,7 @@ test('Arguments Tests', (t) => {
 			args: [buf1]
 		},
 		{
-			proposal_bytes: newProposal().toBuffer()
+			proposal_bytes: testutil.newProposal().toBuffer()
 		});
 	t.equal(stub.getFunctionAndParameters().fcn, 'invoke', 'Test getFunctionAndParameters() returns the function name properly');
 	t.equal(stub.getFunctionAndParameters().params.length, 0, 'Test getFunctionAndParameters() returns the params array with 0 elements');
@@ -662,7 +658,7 @@ test('Arguments Tests', (t) => {
 			args: []
 		},
 		{
-			proposal_bytes: newProposal().toBuffer(),
+			proposal_bytes: testutil.newProposal(true).toBuffer(),
 			signature: Buffer.from('dummyHex')
 		});
 	t.equal(stub.getFunctionAndParameters().fcn, '', 'Test getFunctionAndParameters() returns empty function name properly');
@@ -677,38 +673,3 @@ test('Arguments Tests', (t) => {
 
 	t.end();
 });
-
-function newProposal() {
-	let creator = new _idProto.SerializedIdentity();
-	creator.setMspid('dummyMSPId');
-
-	let signatureHeader = new _commonProto.SignatureHeader();
-	signatureHeader.setCreator(creator.toBuffer());
-	signatureHeader.setNonce(Buffer.from('12345'));
-
-	let cHeader = new _commonProto.ChannelHeader();
-	cHeader.setEpoch(10);
-	cHeader.setTimestamp(buildTimeStamp());
-
-	let header = new _commonProto.Header();
-	header.setSignatureHeader(signatureHeader.toBuffer());
-	header.setChannelHeader(cHeader.toBuffer());
-
-	let ccpayload = new _proposalProto.ChaincodeProposalPayload();
-	ccpayload.setInput(Buffer.from('dummyChaincodeInput'));
-	ccpayload.setTransientMap({'testKey': Buffer.from('testValue')});
-
-	let sp = new _proposalProto.Proposal();
-	sp.setHeader(header.toBuffer());
-	sp.setPayload(ccpayload.toBuffer());
-
-	return sp;
-}
-
-function buildTimeStamp() {
-	var now = new Date();
-	var timestamp = new _timestampProto.Timestamp();
-	timestamp.setSeconds(now.getTime() / 1000);
-	timestamp.setNanos((now.getTime() % 1000) * 1000000);
-	return timestamp;
-}
