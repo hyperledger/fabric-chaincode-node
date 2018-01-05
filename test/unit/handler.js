@@ -66,7 +66,7 @@ test('handler.js constructor tests', (t) => {
 		() => {
 			new Handler(chaincodeObj);
 		},
-		/Parameter "url" must be a string/,
+		/Invalid URL: undefined/,
 		'Test error handling on missing "url" argument'
 	);
 
@@ -145,6 +145,10 @@ test('handler.js constructor tests', (t) => {
 	t.equal(handler._options['grpc.default_authority'], 'dummyHost', 'Test converting opts.ssl-target-name-override to grpc.default_authority');
 	t.equal(handler._options['request-timeout'], 12345, 'Test processing request-time option');
 	t.equal(handler._options['another-property'], 'dummyValue7', 'Test processing another-property option');
+
+	// The DNS can be case sensitive in some cases (eg Docker DNS)
+	handler = new Handler(chaincodeObj, 'grpc://Peer.Example.com:7051');
+	t.equal(handler._endpoint.addr, 'Peer.Example.com:7051', 'Test handler.addr value preserves casing');
 
 	t.end();
 });

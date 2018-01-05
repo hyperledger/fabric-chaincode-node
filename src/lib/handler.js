@@ -9,7 +9,7 @@
 process.env.GRPC_SSL_CIPHER_SUITES = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384';
 
 const grpc = require('grpc');
-const urlParser = require('url');
+const { URL } = require('url');
 const path = require('path');
 const util = require('util');
 const StateQueryIterator = require('./iterators').StateQueryIterator;
@@ -687,7 +687,7 @@ module.exports = ChaincodeSupportClient;
 //
 class Endpoint {
 	constructor(url /*string*/, opts ) {
-		let purl = urlParser.parse(url, true);
+		let purl = new URL(url);
 		let protocol;
 		if (purl.protocol) {
 			protocol = purl.protocol.toLowerCase().slice(0, -1);
