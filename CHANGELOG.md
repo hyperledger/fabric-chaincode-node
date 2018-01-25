@@ -1,4 +1,8 @@
-## v1.0.0-preview
+## v1.1.0-alpha
+Thu Jan 25 14:03:08 EST 2018
+
+
+## v1.1.0-preview
 Wed Nov  1 10:49:25 EDT 2017
 
 * [064d68d](https://github.com/hyperledger/fabric/commit/064d68d) [FAB-6802](https://jira.hyperledger.org/browse/FAB-6802) Update documentation for Iterators
@@ -34,4 +38,3 @@ Wed Nov  1 10:49:25 EDT 2017
 * [80a6d35](https://github.com/hyperledger/fabric/commit/80a6d35) [FAB-5699](https://jira.hyperledger.org/browse/FAB-5699) update src path in package.json
 * [906a87c](https://github.com/hyperledger/fabric/commit/906a87c) [FAB-5371](https://jira.hyperledger.org/browse/FAB-5371) node.js chaincode shim - part II
 * [2a4d157](https://github.com/hyperledger/fabric/commit/2a4d157) [FAB-5371](https://jira.hyperledger.org/browse/FAB-5371) node.js chaincode shim - part I
-

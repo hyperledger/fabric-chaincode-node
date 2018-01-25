@@ -1,9 +1,9 @@
-v1.0.0-preview November 1, 2017
+v1.1.0-preview November 1, 2017
 -------------------------------
 
 Release Notes
 -------------
-Initial release of Node.js chaincode support 
+Initial release of Node.js chaincode support
 https://jira.hyperledger.org/browse/FAB-5371
 
 Known Vulnerabilities
