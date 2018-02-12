@@ -222,14 +222,17 @@ class ChaincodeSupportClient {
 	 * <br>- any other standard grpc call options will be passed to the grpc service calls directly
 	 */
 	constructor(chaincode, url, opts) {
-		if (typeof chaincode !== 'object')
+		if (typeof chaincode !== 'object') {
 			throw new Error('Missing required argument: chaincode');
+		}
 
-		if (typeof chaincode.Init !== 'function')
+		if (typeof chaincode.Init !== 'function') {
 			throw new Error('The chaincode argument must implement the mandatory "Init()" method');
+		}
 
-		if (typeof chaincode.Invoke !== 'function')
+		if (typeof chaincode.Invoke !== 'function') {
 			throw new Error('The chaincode argument must implement the mandatory "Invoke()" method');
+		}
 
 		this.chaincode = chaincode;
 
@@ -461,7 +464,7 @@ class ChaincodeSupportClient {
 			type: _serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
 			payload: payload.toBuffer(),
 			txid: txId,
-			channel_id, channel_id
+			channel_id: channel_id
 		};
 		return await this._askPeerAndListen(msg, 'GetHistoryForKey');
 	}
@@ -483,7 +486,7 @@ class ChaincodeSupportClient {
 			type: _serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
 			payload: payload.toBuffer(),
 			txid: txId,
-			channel_id,channel_id
+			channel_id: channel_id
 		};
 
 		let message = await this._askPeerAndListen(msg, 'InvokeChaincode');
@@ -491,6 +494,12 @@ class ChaincodeSupportClient {
 		// so need to use the enumerated value
 		if (message.type === _serviceProto.ChaincodeMessage.Type.COMPLETED) {
 			return _responseProto.Response.decode(message.payload);
+		}
+
+		// Catch the transaction and rethrow the data
+		if (message.type === _serviceProto.ChaincodeMessage.Type.ERROR) {
+			const errorData = Buffer.from(message.payload.buffer).toString('utf8');
+			throw new Error(errorData);
 		}
 	}
 
@@ -519,7 +528,7 @@ class ChaincodeSupportClient {
 			'url:' + this._url +
 		'}';
 	}
-};
+}
 
 async function handleMessage(msg, client, action) {
 	let nextStateMsg, input;
@@ -632,8 +641,9 @@ function newErrorMsg(msg, state) {
 }
 
 function shortTxid(txId) {
-	if (txId.length < 8)
+	if (txId.length < 8) {
 		return txId;
+	}
 
 	return txId.substring(0, 8);
 }
@@ -677,9 +687,6 @@ module.exports = ChaincodeSupportClient;
 //
 class Endpoint {
 	constructor(url /*string*/, opts ) {
-		let fs = require('fs'),
-			path = require('path');
-
 		let purl = urlParser.parse(url, true);
 		let protocol;
 		if (purl.protocol) {

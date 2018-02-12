@@ -561,6 +561,23 @@ test('#handleInvokeChaincode tests', async (t) => {
 	t.deepEqual(chaincodeInput.setArgs.secondCall.args, [[]], 'Test setArgs was called with empty array');
 
 	sandbox.restore();
+	response = {
+		type: serviceProto.ChaincodeMessage.Type.ERROR,
+		payload: {
+			buffer: 'An Error occurred'
+		}
+	};
+
+	sandbox.stub(testHandler, '_askPeerAndListen').resolves(response);
+
+	try {
+		await testHandler.handleInvokeChaincode('ccname', [], 'theChannelID', 'theTxID');
+		t.fail('expected error to be thrown');
+	} catch(error) {
+		t.equal(error.message, 'An Error occurred', 'Tests that the error response from invokeChaincode was thrown');
+	}
+
+	sandbox.restore();
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {

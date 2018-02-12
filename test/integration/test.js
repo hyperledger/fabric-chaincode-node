@@ -151,8 +151,8 @@ let Chaincode = class {
 		// tricky one verify for now, just see if it runs without error
 	}
 
+	// test invoking chaincode where chaincode responds with a success.
 	async test7(stub, args) {
-		console.log('invoking chaincode');
 		let results = await stub.invokeChaincode('mycc2', ['getKey', 'whoami']);
 		results.payload.toString('utf8').should.equal('mycc2');
 	}
@@ -277,6 +277,18 @@ let Chaincode = class {
 		let sig = Buffer.from(json.signature);
 		let result = verifier.verify(sig, json.value);
 		result.ok.should.equal(true, 'Test signature verification with the ChaincodeCrypto Library');
+	}
+
+	// test invoking chaincode where chaincode throws an error.
+	async test15(stub, args) {
+		let error;
+		try {
+			let results = await stub.invokeChaincode('mycc2', ['getKey']);
+			results.should.be.false; // if we get here then we should fail
+		} catch(error_) {
+			error = error_;
+		}
+		error.message.should.match(/Incorrect no. of parameters/);
 	}
 
 	// useful helper transactions

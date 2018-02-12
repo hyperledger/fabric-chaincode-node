@@ -311,4 +311,17 @@ gulp.task('test-e2e-invoke-v0-test14', ['test-e2e-invoke-v0-test13'], () => {
 		]));
 });
 
-gulp.task('test-e2e', ['test-e2e-invoke-v0-test14']);
+// Test invoke where chaincode responds with an error
+gulp.task('test-e2e-invoke-v0-test15', ['test-e2e-invoke-v0-test14'], () => {
+	return gulp.src('*.js', {read: false})
+		.pipe(wait(3000))
+		.pipe(shell([
+			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
+				'\'{"Args":["test15"]}\'')
+		]));
+});
+
+gulp.task('test-e2e', ['test-e2e-invoke-v0-test15']);
