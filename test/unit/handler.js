@@ -563,9 +563,7 @@ test('#handleInvokeChaincode tests', async (t) => {
 	sandbox.restore();
 	response = {
 		type: serviceProto.ChaincodeMessage.Type.ERROR,
-		payload: {
-			buffer: 'An Error occurred'
-		}
+		payload: Buffer.from('An Error occurred')
 	};
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves(response);

@@ -498,7 +498,7 @@ class ChaincodeSupportClient {
 
 		// Catch the transaction and rethrow the data
 		if (message.type === _serviceProto.ChaincodeMessage.Type.ERROR) {
-			const errorData = Buffer.from(message.payload.buffer).toString('utf8');
+			const errorData = message.payload.toString('utf8');
 			throw new Error(errorData);
 		}
 	}
@@ -590,7 +590,7 @@ async function handleMessage(msg, client, action) {
 
 				nextStateMsg = {
 					type: _serviceProto.ChaincodeMessage.Type.ERROR,
-					payload: Buffer.from(errMsg),
+					payload: Buffer.from('' + resp.message),
 					txid: msg.txid,
 					channel_id: msg.channel_id
 				};
