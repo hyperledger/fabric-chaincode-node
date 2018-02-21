@@ -383,3 +383,7 @@ function normalizeX509(raw) {
 
 module.exports = Shim;
 module.exports.ClientIdentity = ClientIdentity;
+
+// expose the Stub and Iterators to allow ability to write unit tests for users of fabric chaincode node
+module.exports.Stub = Stub;
+module.exports.Iterators = require('./iterators');
