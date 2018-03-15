@@ -1,3 +1,13 @@
+## V1.1.0
+Thu Mar 15 18:01:43 EDT 2018
+
+* [82b7d3b](https://github.com/hyperledger/fabric/commit/82b7d3b) [FAB-8432](https://jira.hyperledger.org/browse/FAB-8432) Expose Stub and Iterator Classes
+* [caa2606](https://github.com/hyperledger/fabric/commit/caa2606) [FAB-7001](https://jira.hyperledger.org/browse/FAB-7001) Preserver casing of hostname
+* [79fbd72](https://github.com/hyperledger/fabric/commit/79fbd72) [FAB-8241](https://jira.hyperledger.org/browse/FAB-8241) NodeCC - add maintainer
+* [3033766](https://github.com/hyperledger/fabric/commit/3033766) [FAB-8236](https://jira.hyperledger.org/browse/FAB-8236) error message returned is the log entry
+* [22ce6d2](https://github.com/hyperledger/fabric/commit/22ce6d2) [FAB-8068](https://jira.hyperledger.org/browse/FAB-8068) Handle Errors from invoked chaincode
+* [3aee38d](https://github.com/hyperledger/fabric/commit/3aee38d) [FAB-7794](https://jira.hyperledger.org/browse/FAB-7794) prepare fabric-chaincode-node for next release
+
 ## v1.1.0-alpha
 Thu Jan 25 14:03:08 EST 2018
 
