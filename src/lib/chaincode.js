@@ -18,9 +18,12 @@ const Handler = require('./handler.js');
 const Stub = require('./stub.js');
 const fs = require('fs');
 
-const argsDef = [{
-	name: 'peer.address', type: String
-}];
+const argsDef = [
+	{name: 'peer.address', type: String},
+	{name: 'grpc.max_send_message_length', type: Number, defaultValue: -1},
+	{name: 'grpc.max_receive_message_length', type: Number, defaultValue: -1},
+	{name: 'ssl-target-name-override', type: String}
+];
 
 let opts = CLIArgs(argsDef, { partial: true });
 
