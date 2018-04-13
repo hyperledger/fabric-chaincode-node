@@ -12,3 +12,7 @@ npm-debug.log
 .DS_Store
 src/.DS_Store
 test/.DS_Store
+// ignore vscode config
+.vscode
+// ignore webstorm config
+.idea
