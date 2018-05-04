@@ -1,0 +1,22 @@
+v1.1.1 May, 2018
+-----------------------------
+
+Release Notes
+-------------
+Includes bug fixes since v1.1.0 release.
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.1/CHANGELOG.md#v111

@@ -1,3 +1,10 @@
+## v1.1.1
+Fri May  4 15:27:00 EDT 2018
+
+* [c55d765](https://github.com/hyperledger/fabric/commit/c55d765) [FAB-9897](https://jira.hyperledger.org/browse/FAB-9897) NodeShim - set grpc level
+* [bd16122](https://github.com/hyperledger/fabric/commit/bd16122) [FAB-9480](https://jira.hyperledger.org/browse/FAB-9480) Replace Log4Js with winston
+* [0e49461](https://github.com/hyperledger/fabric/commit/0e49461) [FAB-9378](https://jira.hyperledger.org/browse/FAB-9378) address 4Mb grpc message limit
+
 ## V1.1.0
 Thu Mar 15 18:01:43 EDT 2018
 
