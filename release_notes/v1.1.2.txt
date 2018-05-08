@@ -1,9 +1,10 @@
-v1.1.1 May, 2018
+v1.1.2 May, 2018
 -----------------------------
 
 Release Notes
 -------------
-Do not use this version, it has missing proto files.
+Rebuild of v1.1.1 due to missing proto files.
+No code changes.
 
 Known Vulnerabilities
 ---------------------

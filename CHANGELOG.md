@@ -1,4 +1,4 @@
-## v1.1.1
+## v1.1.2
 Fri May  4 15:27:00 EDT 2018
 
 * [c55d765](https://github.com/hyperledger/fabric/commit/c55d765) [FAB-9897](https://jira.hyperledger.org/browse/FAB-9897) NodeShim - set grpc level
