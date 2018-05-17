@@ -339,7 +339,7 @@ test('getState', async (t) => {
 		});
 
 	// getState will return a Buffer object
-	mockHandler.handleGetState.withArgs('key1', 'dummyChanelId', 'dummyTxid').resolves(Buffer.from('response'));
+	mockHandler.handleGetState.withArgs('', 'key1', 'dummyChanelId', 'dummyTxid').resolves(Buffer.from('response'));
 
 	let response = await stub.getState('key1');
 	t.equal(response.toString(), 'response', 'Test getState invokes correctly amd response is correct');
@@ -362,7 +362,7 @@ test('putState', async (t) => {
 	// Must create a Buffer from your data.
 	let dataToPut = Buffer.from('some data');
 	await stub.putState('key1', dataToPut);
-	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['key1', dataToPut, 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['', 'key1', dataToPut, 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
 
 test('deleteState', async (t) => {
@@ -380,7 +380,7 @@ test('deleteState', async (t) => {
 	mockHandler.handleDeleteState.resolves('response');
 
 	await stub.deleteState('key1');
-	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['', 'key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
 
 test('getHistoryForKey', async (t) => {
@@ -420,9 +420,8 @@ test('getQueryResult', async (t) => {
 
 	let result = await stub.getQueryResult('query1');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['query1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['', 'query1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
-
 
 test('getStateByRange', async (t) => {
 	let mockHandler = sinon.createStubInstance(Handler);
@@ -441,18 +440,16 @@ test('getStateByRange', async (t) => {
 
 	let result = await stub.getStateByRange('start', 'end');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['start', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['', 'start', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 
 	result = await stub.getStateByRange('', 'end');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 
 	result = await stub.getStateByRange(null, 'end');
 	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
 });
-
-
 
 test('setEvent', (t) => {
 	let stub = new Stub(
@@ -584,7 +581,7 @@ test('splitCompositeKey: ', (t) => {
 	t.end();
 });
 
-test('getStartByPartialCompositeKey', (t) => {
+test('getStateByPartialCompositeKey', async (t) => {
 	let stub = new Stub(
 		'dummyClient',
 		'dummyChanelId',
@@ -601,13 +598,12 @@ test('getStartByPartialCompositeKey', (t) => {
 	let cckStub = sinon.stub(stub, 'createCompositeKey').returns(expectedKey);
 	let gsbrStub = sinon.stub(stub, 'getStateByRange');
 
-	stub.getStateByPartialCompositeKey('key', ['attr1', 'attr2']);
+	await stub.getStateByPartialCompositeKey('key', ['attr1', 'attr2']);
 	t.equal(cckStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls createCompositeKey once');
 	t.deepEqual(cckStub.firstCall.args, ['key', ['attr1', 'attr2']], 'Test getStateByPartialCompositeKey calls createCompositeKey with the correct parameters');
 	t.equal(gsbrStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls getStateByRange Once');
 	t.deepEqual(gsbrStub.firstCall.args, [expectedKey, expectedKey + EXPECTED_MAX_RUNE], 'Test getStateByPartialCompositeKey calls getStateByRange with the right arguments');
 	t.end();
-
 });
 
 test('Arguments Tests', (t) => {
@@ -672,4 +668,227 @@ test('Arguments Tests', (t) => {
 	t.equal(stub.getSignedProposal().proposal.header.signature_header.creator.mspid, 'dummyMSPId', 'Test getSignedProposal() returns valid mspid');
 
 	t.end();
+});
+
+test('getPrivateData', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let stub = new Stub(
+		mockHandler,
+		'dummyChanelId',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: testutil.newProposal().toBuffer()
+		});
+
+	// getState will return a Buffer object
+	mockHandler.handleGetState.withArgs('testCollection', 'key1', 'dummyChanelId', 'dummyTxid').resolves(Buffer.from('response'));
+
+	try {
+		await stub.getPrivateData('', 'key1');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'collection must be a valid string');
+	}
+
+	try {
+		await stub.getPrivateData('key1');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'getPrivateData requires two arguments, collection and key');
+	}
+
+	let response = await stub.getPrivateData('testCollection', 'key1');
+	t.equal(response.toString(), 'response', 'Test getPrivateData invokes correctly amd response is correct');
+});
+
+test('putPrivateData', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let stub = new Stub(
+		mockHandler,
+		'dummyChanelId',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: testutil.newProposal().toBuffer()
+		});
+	mockHandler.handlePutState.resolves('response');
+
+	// Must create a Buffer from your data.
+	let dataToPut = Buffer.from('some data');
+	await stub.putPrivateData('testCollection', 'key1', dataToPut);
+	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['testCollection', 'key1', dataToPut, 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+
+	try {
+		await stub.putPrivateData('', 'key1', dataToPut);
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'collection must be a valid string');
+	}
+
+	try {
+		await stub.putPrivateData('testCollection', '', dataToPut);
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'key must be a valid string');
+	}
+
+	try {
+		await stub.putPrivateData('key1', dataToPut);
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'putPrivateData requires three arguments, collection, key and value');
+	}
+});
+
+test('deletePrivateData', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let stub = new Stub(
+		mockHandler,
+		'dummyChanelId',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: testutil.newProposal().toBuffer()
+		});
+	mockHandler.handleDeleteState.resolves('response');
+
+	await stub.deletePrivateData('testCollection', 'key1');
+	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['testCollection', 'key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+
+	try {
+		await stub.deletePrivateData('', 'key1');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'collection must be a valid string');
+	}
+
+	try {
+		await stub.deletePrivateData('key1');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'deletePrivateData requires two arguments, collection and key');
+	}
+});
+
+test('getPrivateDataByRange', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let mockIterator = sinon.createStubInstance(StateQueryIterator);
+	let stub = new Stub(
+		mockHandler,
+		'dummyChanelId',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: testutil.newProposal().toBuffer()
+		});
+	mockHandler.handleGetStateByRange.resolves(mockIterator);
+
+	let result = await stub.getPrivateDataByRange('testCollection', 'start', 'end');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['testCollection', 'start', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+
+	result = await stub.getPrivateDataByRange('testCollection', '', 'end');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['testCollection', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+
+	result = await stub.getPrivateDataByRange('testCollection', null, 'end');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['testCollection', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+
+	try {
+		await stub.getPrivateDataByRange('', 'start', 'end');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'collection must be a valid string');
+	}
+
+	try {
+		await stub.getPrivateDataByRange('start', 'end');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'getPrivateDataByRange requires three arguments, collection, startKey and endKey');
+	}
+});
+
+test('getPrivateDataByPartialCompositeKey', async (t) => {
+	let stub = new Stub(
+		'dummyClient',
+		'dummyChanelId',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: testutil.newProposal().toBuffer()
+		}
+	);
+
+	let expectedKey = '\u0000key\u0000attr1\u0000attr2\u0000';
+	let cckStub = sinon.stub(stub, 'createCompositeKey').returns(expectedKey);
+	let gsbrStub = sinon.stub(stub, 'getPrivateDataByRange');
+
+	await stub.getPrivateDataByPartialCompositeKey('testCollection', 'key', ['attr1', 'attr2']);
+	t.equal(cckStub.calledOnce, true, 'Test getPrivateDataByPartialCompositeKey calls createCompositeKey once');
+	t.deepEqual(cckStub.firstCall.args, ['key', ['attr1', 'attr2']], 'Test getPrivateDataByPartialCompositeKey calls createCompositeKey with the correct parameters');
+	t.equal(gsbrStub.calledOnce, true, 'Test getPrivateDataByPartialCompositeKey calls getStateByRange Once');
+	t.deepEqual(gsbrStub.firstCall.args, ['testCollection', expectedKey, expectedKey + EXPECTED_MAX_RUNE], 'Test getPrivateDataByPartialCompositeKey calls getStateByRange with the right arguments');
+
+	try {
+		await stub.getPrivateDataByPartialCompositeKey('', 'key', ['attr1', 'attr2']);
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'collection must be a valid string');
+	}
+
+	try {
+		await stub.getPrivateDataByPartialCompositeKey('key', ['attr1', 'attr2']);
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
+	}
+
+	t.end();
+});
+
+test('getPrivateDataQueryResult', async (t) => {
+	let mockHandler = sinon.createStubInstance(Handler);
+	let mockIterator = sinon.createStubInstance(StateQueryIterator);
+	let stub = new Stub(
+		mockHandler,
+		'dummyChanelId',
+		'dummyTxid',
+		{
+			args: []
+		},
+		{
+			proposal_bytes: testutil.newProposal().toBuffer()
+		});
+	mockHandler.handleGetQueryResult.resolves(mockIterator);
+
+	let result = await stub.getPrivateDataQueryResult('testCollection', 'query1');
+	t.equal(result, mockIterator, 'Test it returns an iterator');
+	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['testCollection', 'query1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+
+	try {
+		await stub.getPrivateDataQueryResult('', 'query1');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'collection must be a valid string');
+	}
+
+	try {
+		await stub.getPrivateDataQueryResult('query1');
+		t.fail('unexpected success when error should have occurred');
+	} catch (e) {
+		t.equal(e.message, 'getPrivateDataQueryResult requires two arguments, collection and query');
+	}
 });

@@ -16,3 +16,4 @@ test/.DS_Store
 .vscode
 // ignore webstorm config
 .idea
+yarn.lock

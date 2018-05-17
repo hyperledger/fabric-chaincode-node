@@ -359,9 +359,10 @@ class ChaincodeSupportClient {
 		handleMessage(msg, this, 'invoke');
 	}
 
-	async handleGetState(key, channel_id, txId) {
+	async handleGetState(collection, key, channel_id, txId) {
 		let payload = new _serviceProto.GetState();
 		payload.setKey(key);
+		payload.setCollection(collection);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE,
@@ -373,10 +374,11 @@ class ChaincodeSupportClient {
 		return await this._askPeerAndListen(msg, 'GetState');
 	}
 
-	async handlePutState(key, value, channel_id, txId) {
+	async handlePutState(collection, key, value, channel_id, txId) {
 		let payload = new _serviceProto.PutState();
 		payload.setKey(key);
 		payload.setValue(value);
+		payload.setCollection(collection);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.PUT_STATE,
@@ -388,9 +390,10 @@ class ChaincodeSupportClient {
 		return await this._askPeerAndListen(msg, 'PutState');
 	}
 
-	async handleDeleteState(key, channel_id, txId) {
+	async handleDeleteState(collection, key, channel_id, txId) {
 		let payload = new _serviceProto.DelState();
 		payload.setKey(key);
+		payload.setCollection(collection);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.DEL_STATE,
@@ -402,10 +405,11 @@ class ChaincodeSupportClient {
 		return await this._askPeerAndListen(msg, 'DeleteState');
 	}
 
-	async handleGetStateByRange(startKey, endKey, channel_id, txId) {
+	async handleGetStateByRange(collection, startKey, endKey, channel_id, txId) {
 		let payload = new _serviceProto.GetStateByRange();
 		payload.setStartKey(startKey);
 		payload.setEndKey(endKey);
+		payload.setCollection(collection);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
@@ -443,9 +447,10 @@ class ChaincodeSupportClient {
 		return await this._askPeerAndListen(msg, 'QueryStateClose');
 	}
 
-	async handleGetQueryResult(query, channel_id, txId) {
+	async handleGetQueryResult(collection, query, channel_id, txId) {
 		let payload = new _serviceProto.GetQueryResult();
 		payload.setQuery(query);
+		payload.setCollection(collection);
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,

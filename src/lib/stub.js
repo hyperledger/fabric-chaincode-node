@@ -86,6 +86,13 @@ function computeProposalBinding(decodedSP) {
  * The stub encapsulates the APIs between the chaincode implementation and the Fabric peer
  */
 class ChaincodeStub {
+	/**
+	 * @param {Handler} client an instance of the Handler class
+	 * @param {string} channel_id channel id
+	 * @param {string} txId transaction id
+	 * @param {any} chaincodeInput decoded message from peer
+	 * @param {any} signedProposal the proposal
+	 */
 	constructor(client, channel_id, txId, chaincodeInput, signedProposal) {
 		this.channel_id = channel_id;
 		this.txId = txId;
@@ -369,8 +376,10 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise for the current value of the state variable
 	 */
 	async getState(key) {
-		logger.debug('getState called with key:%s',key);
-		return await this.handler.handleGetState(key, this.channel_id, this.txId);
+		logger.debug('getState called with key:%s', key);
+		// Access public data by setting the collection to empty string
+		const collection = '';
+		return await this.handler.handleGetState(collection, key, this.channel_id, this.txId);
 	}
 
 	/**
@@ -384,7 +393,9 @@ class ChaincodeStub {
 	 * or rejected if any errors
 	 */
 	async putState(key, value) {
-		return await this.handler.handlePutState(key, value, this.channel_id, this.txId);
+		// Access public data by setting the collection to empty string
+		const collection = '';
+		return await this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
 	}
 
 	/**
@@ -395,7 +406,9 @@ class ChaincodeStub {
 	 * or rejected if any errors
 	 */
 	async deleteState(key) {
-		return await this.handler.handleDeleteState(key, this.channel_id, this.txId);
+		// Access public data by setting the collection to empty string
+		const collection = '';
+		return await this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
 	}
 
 	/**
@@ -417,7 +430,9 @@ class ChaincodeStub {
 		if (!startKey || startKey.length === 0) {
 			startKey = EMPTY_KEY_SUBSTITUTE;
 		}
-		return await this.handler.handleGetStateByRange(startKey, endKey, this.channel_id, this.txId);
+		// Access public data by setting the collection to empty string
+		const collection = '';
+		return await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
 	}
 
 	/**
@@ -429,7 +444,7 @@ class ChaincodeStub {
 	 * The query is NOT re-executed during validation phase, phantom reads are
 	 * not detected. That is, other committed transactions may have added,
 	 * updated, or removed keys that impact the result set, and this would not
-	 * be detected at validation/commit time.  Applications susceptible to this
+	 * be detected at validation/commit time. Applications susceptible to this
 	 * should therefore not use GetQueryResult as part of transactions that update
 	 * ledger, and should limit use to read-only chaincode operations.
 	 * @async
@@ -437,7 +452,9 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
 	async getQueryResult(query) {
-		return await this.handler.handleGetQueryResult(query, this.channel_id, this.txId);
+		// Access public data by setting the collection to empty string
+		const collection = '';
+		return await this.handler.handleGetQueryResult(collection, query, this.channel_id, this.txId);
 	}
 
 	/**
@@ -595,8 +612,171 @@ class ChaincodeStub {
 	 * @return {Promise} A promise that resolves with a {@link StateQueryIterator}, rejects if an error occurs
 	 */
 	async getStateByPartialCompositeKey(objectType, attributes) {
-		let partialCompositeKey = this.createCompositeKey(objectType, attributes);
+		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
 		return await this.getStateByRange(partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+	}
+
+	/**
+	 * getPrivateData returns the value of the specified `key` from the specified
+	 * `collection`. Note that GetPrivateData doesn't read data from the
+	 * private writeset, which has not been committed to the `collection`. In
+	 * other words, GetPrivateData doesn't consider data modified by PutPrivateData
+	 * that has not been committed.
+	 *
+	 * @param {string} collection The collection name
+	 * @param {string} key Private data variable key to retrieve from the state store
+	 */
+	async getPrivateData(collection, key) {
+		logger.debug('getPrivateData called with collection:%s, key:%s', collection, key);
+		if (arguments.length !== 2) {
+			throw new Error('getPrivateData requires two arguments, collection and key');
+		}
+		if (!collection) {
+			throw new Error('collection must be a valid string');
+		}
+
+		return await this.handler.handleGetState(collection, key, this.channel_id, this.txId);
+	}
+
+	/**
+	 * putPrivateData puts the specified `key` and `value` into the transaction's
+	 * private writeset. Note that only hash of the private writeset goes into the
+	 * transaction proposal response (which is sent to the client who issued the
+	 * transaction) and the actual private writeset gets temporarily stored in a
+	 * transient store. PutPrivateData doesn't effect the `collection` until the
+	 * transaction is validated and successfully committed. Simple keys must not be
+	 * an empty string and must not start with null character (0x00), in order to
+	 * avoid range query collisions with composite keys, which internally get
+	 * prefixed with 0x00 as composite key namespace.
+	 *
+	 * @param {string} collection The collection name
+	 * @param {string} key Private data variable key to set the value for
+	 * @param {string} value Private data variable value
+	 */
+	async putPrivateData(collection, key, value) {
+		logger.debug('putPrivateData called with collection:%s, key:%s', collection, key);
+		if (arguments.length !== 3) {
+			throw new Error('putPrivateData requires three arguments, collection, key and value');
+		}
+		if (!collection) {
+			throw new Error('collection must be a valid string');
+		}
+		if (!key) {
+			throw new Error('key must be a valid string');
+		}
+
+		return this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
+	}
+
+	/**
+	 * deletePrivateData records the specified `key` to be deleted in the private writeset of
+	 * the transaction. Note that only hash of the private writeset goes into the
+	 * transaction proposal response (which is sent to the client who issued the
+	 * transaction) and the actual private writeset gets temporarily stored in a
+	 * transient store. The `key` and its value will be deleted from the collection
+	 * when the transaction is validated and successfully committed.
+	 *
+	 * @param {string} collection The collection name
+	 * @param {string} key Private data variable key to delete from the state store
+	 */
+	async deletePrivateData(collection, key) {
+		logger.debug('deletePrivateData called with collection:%s, key:%s', collection, key);
+		if (arguments.length !== 2) {
+			throw new Error('deletePrivateData requires two arguments, collection and key');
+		}
+		if (!collection) {
+			throw new Error('collection must be a valid string');
+		}
+
+		return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
+	}
+
+	/**
+	 * getPrivateDataByRange returns a range iterator over a set of keys in a
+	 * given private collection. The iterator can be used to iterate over all keys
+	 * between the startKey (inclusive) and endKey (exclusive).
+	 * The keys are returned by the iterator in lexical order. Note
+	 * that startKey and endKey can be empty string, which implies unbounded range
+	 * query on start or end.
+	 * Call Close() on the returned StateQueryIteratorInterface object when done.
+	 * The query is re-executed during validation phase to ensure result set
+	 * has not changed since transaction endorsement (phantom reads detected).
+	 *
+	 * @param {string} collection The collection name
+	 * @param {string} startKey Private data variable key as the start of the key range (inclusive)
+	 * @param {string} endKey Private data variable key as the end of the key range (exclusive)
+	 */
+	async getPrivateDataByRange(collection, startKey, endKey) {
+		logger.debug('getPrivateDataByRange called with collection:%s, startKey:%s, endKey:%s', collection, startKey, endKey);
+		if (arguments.length !== 3) {
+			throw new Error('getPrivateDataByRange requires three arguments, collection, startKey and endKey');
+		}
+		if (!collection) {
+			throw new Error('collection must be a valid string');
+		}
+		if (!startKey || startKey.length === 0) {
+			startKey = EMPTY_KEY_SUBSTITUTE;
+		}
+
+		return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+	}
+
+	/**
+	 * getPrivateDataByPartialCompositeKey queries the state in a given private
+	 * collection based on a given partial composite key. This function returns
+	 * an iterator which can be used to iterate over all composite keys whose prefix
+	 * matches the given partial composite key. The `objectType` and attributes are
+	 * expected to have only valid utf8 strings and should not contain
+	 * U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point).
+	 * See related functions SplitCompositeKey and CreateCompositeKey.
+	 * Call Close() on the returned StateQueryIteratorInterface object when done.
+	 * The query is re-executed during validation phase to ensure result set
+	 * has not changed since transaction endorsement (phantom reads detected).
+	 *
+	 * @param {string} collection The collection name
+	 * @param {string} objectType A string used as the prefix of the resulting key
+	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
+	 */
+	async getPrivateDataByPartialCompositeKey(collection, objectType, attributes) {
+		logger.debug('getPrivateDataByRange called with collection:%s, objectType:%s, attributes:%j', collection, objectType, attributes);
+		if (arguments.length !== 3) {
+			throw new Error('getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
+		}
+		if (!collection) {
+			throw new Error('collection must be a valid string');
+		}
+		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
+
+		return this.getPrivateDataByRange(collection, partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+	}
+
+	/**
+	 * getPrivateDataQueryResult performs a "rich" query against a given private
+	 * collection. It is only supported for state databases that support rich query,
+	 * e.g.CouchDB. The query string is in the native syntax
+	 * of the underlying state database. An iterator is returned
+	 * which can be used to iterate (next) over the query result set.
+	 * The query is NOT re-executed during validation phase, phantom reads are
+	 * not detected. That is, other committed transactions may have added,
+	 * updated, or removed keys that impact the result set, and this would not
+	 * be detected at validation/commit time. Applications susceptible to this
+	 * should therefore not use GetQueryResult as part of transactions that update
+	 * ledger, and should limit use to read-only chaincode operations.
+	 *
+	 * @param {string} collection The collection name
+	 * @param {string} query The query to be performed
+	 * @returns {Promise} Promise for a {@link PrivateQueryIterator} object
+	 */
+	async getPrivateDataQueryResult(collection, query) {
+		logger.debug('getPrivateDataQueryResult called with collection:%s, query:%j', collection, query);
+		if (arguments.length !== 2) {
+			throw new Error('getPrivateDataQueryResult requires two arguments, collection and query');
+		}
+		if (!collection) {
+			throw new Error('collection must be a valid string');
+		}
+
+		return this.handler.handleGetQueryResult(collection, query, this.channel_id, this.txId);
 	}
 };
 

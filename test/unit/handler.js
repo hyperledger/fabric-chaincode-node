@@ -179,13 +179,14 @@ test('#handleGetState tests', async (t) => {
 	let serviceProto = Handler.__get__('_serviceProto');
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetState('theKey', 'theChannelID', 'theTxID');
+	let result = await testHandler.handleGetState('', 'theKey', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
 	t.equal(askArgs[1], 'GetState', 'Test _askPeerAndListen was called with GetState parameter');
 	let payload = new serviceProto.GetState();
 	payload.setKey('theKey');
+	payload.setCollection('');
 
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.GET_STATE,
@@ -198,7 +199,7 @@ test('#handleGetState tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleGetState('theKey', 'theChannelID', 'theTxID');
+		await testHandler.handleGetState('', 'theKey', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -220,7 +221,7 @@ test('#handlePutState tests', async (t) => {
 	serviceProto.PutState = MockPutState;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handlePutState('theKey', 'some value', 'theChannelID', 'theTxID');
+	let result = await testHandler.handlePutState('', 'theKey', 'some value', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -241,7 +242,7 @@ test('#handlePutState tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handlePutState('theKey', 'some value', 'theChannelID', 'theTxID');
+		await testHandler.handlePutState('', 'theKey', 'some value', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -255,13 +256,14 @@ test('#handlePutState tests', async (t) => {
 test('#handleDeleteState tests', async (t) => {
 	let serviceProto = Handler.__get__('_serviceProto');
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleDeleteState('theKey', 'theChannelID', 'theTxID');
+	let result = await testHandler.handleDeleteState('', 'theKey', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
 	t.equal(askArgs[1], 'DeleteState', 'Test _askPeerAndListen was called with DeleteState parameter');
 	let payload = new serviceProto.DelState();
 	payload.setKey('theKey');
+	payload.setCollection('');
 
 	let expectedMsg = {
 		type: serviceProto.ChaincodeMessage.Type.DEL_STATE,
@@ -274,7 +276,7 @@ test('#handleDeleteState tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleGetState('theKey', 'theChannelID', 'theTxID');
+		await testHandler.handleGetState('', 'theKey', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -296,7 +298,7 @@ test('#handleGetStateByRange tests', async (t) => {
 	serviceProto.GetStateByRange = MockGetStateByRange;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetStateByRange('1stKey', '2ndKey', 'theChannelID', 'theTxID');
+	let result = await testHandler.handleGetStateByRange('', '1stKey', '2ndKey', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
@@ -317,7 +319,7 @@ test('#handleGetStateByRange tests', async (t) => {
 	let error = new Error('some error');
 	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
 	try {
-		await testHandler.handleGetStateByRange('1stKey', '2nd', 'theChannelID', 'theTxID');
+		await testHandler.handleGetStateByRange('', '1stKey', '2nd', 'theChannelID', 'theTxID');
 		t.fail('unexpected success when error should have occurred');
 	}
 	catch(err) {
@@ -427,7 +429,7 @@ test('#handleGetQueryResult tests', async (t) => {
 	serviceProto.GetQueryResult = MockGetQueryResult;
 
 	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetQueryResult('aQuery', 'theChannelID', 'theTxID');
+	let result = await testHandler.handleGetQueryResult('', 'aQuery', 'theChannelID', 'theTxID');
 	t.equal(result, 'some response', 'Test we get the expected response');
 	let askArgs = testHandler._askPeerAndListen.firstCall.args;
 	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
