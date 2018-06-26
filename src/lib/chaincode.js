@@ -15,6 +15,7 @@ const Logger = require('./logger');
 
 const logger = Logger.getLogger('lib/chaincode.js');
 const Handler = require('./handler.js');
+const Iterators = require('./iterators.js');
 const Stub = require('./stub.js');
 const fs = require('fs');
 
@@ -385,8 +386,13 @@ function normalizeX509(raw) {
 };
 
 module.exports = Shim;
+// Double exported to provide better experience for TypeScript programmers.
+module.exports.Shim = Shim;
 module.exports.ClientIdentity = ClientIdentity;
 
 // expose the Stub and Iterators to allow ability to write unit tests for users of fabric chaincode node
 module.exports.Stub = Stub;
-module.exports.Iterators = require('./iterators');
+module.exports.Iterators = Iterators;
+module.exports.HistoryQueryIterator = Iterators.HistoryQueryIterator;
+module.exports.StateQueryIterator = Iterators.StateQueryIterator;
+module.exports.ChaincodeInterface = ChaincodeInterface;
