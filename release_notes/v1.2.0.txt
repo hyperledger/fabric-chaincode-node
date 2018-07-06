@@ -1,0 +1,24 @@
+v1.2.0 July 6, 2018
+-----------------------------
+
+Release Notes
+-------------
+Add support for private data APIs.
+Bug fixes.
+
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.2/CHANGELOG.md#v120
