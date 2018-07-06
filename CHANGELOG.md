@@ -1,3 +1,16 @@
+## v1.2.0
+Fri Jul  6 08:14:22 EDT 2018
+
+* [9c1a5bf](https://github.com/hyperledger/fabric/commit/9c1a5bf) Prepare for v1.2.0 release
+* [749584e](https://github.com/hyperledger/fabric/commit/749584e) [FAB-10863](https://jira.hyperledger.org/browse/FAB-10863) Export Shim class again to aid TypeScript
+* [eb5585f](https://github.com/hyperledger/fabric/commit/eb5585f) [FAB-9869](https://jira.hyperledger.org/browse/FAB-9869) Node Shim Private Data Support
+* [251528d](https://github.com/hyperledger/fabric/commit/251528d) [FAB-9897](https://jira.hyperledger.org/browse/FAB-9897) NodeShim - update grpc level
+* [88105f7](https://github.com/hyperledger/fabric/commit/88105f7) [FAB-9480](https://jira.hyperledger.org/browse/FAB-9480) Replace Log4Js with winston
+* [37424c4](https://github.com/hyperledger/fabric/commit/37424c4) [FAB-9378](https://jira.hyperledger.org/browse/FAB-9378) address 4Mb grpc message limit
+* [e3f2a7d](https://github.com/hyperledger/fabric/commit/e3f2a7d) [FAB-9358](https://jira.hyperledger.org/browse/FAB-9358) add CODE_OF_CONDUCT.md & other std docs
+* [227ed13](https://github.com/hyperledger/fabric/commit/227ed13) [FAB-9063](https://jira.hyperledger.org/browse/FAB-9063) Provide link to Fabric committers
+* [b192f80](https://github.com/hyperledger/fabric/commit/b192f80) [FAB-8896](https://jira.hyperledger.org/browse/FAB-8896) ChaincodeNode - prepare for V1.2.0
+
 ## V1.1.0
 Thu Mar 15 18:01:43 EDT 2018
 
