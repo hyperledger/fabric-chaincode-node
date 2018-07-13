@@ -4,8 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-const test = require('../base.js');
-const shim = require('fabric-shim/lib/chaincode.js');
+const shim = require('../../src/lib/chaincode.js');
+
+const chai = require('chai');
+const expect = chai.expect;
 
 const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
 'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
@@ -52,30 +54,80 @@ const certWithLongDNs = '-----BEGIN CERTIFICATE-----' +
 'KsFQrpVnF8O6hoHOYZQ=' +
 '-----END CERTIFICATE-----';
 
-test('Constructor test', (t) => {
-	let stub = mockStub(certWithAttrs);
+describe('Client-Identity', () => {
 
-	let cid = new shim.ClientIdentity(stub);
-	t.equal(cid.mspId, 'dummyId', 'Test mspId value');
-	t.equal(cid.getID(), 'x509::/CN=MyTestUserWithAttrs::/CN=fabric-ca-server', 'Test getID()');
-	t.equal(cid.attrs['attr1'], 'val1', 'Test attributes contained in the certificate');
-	t.equal(cid.getX509Certificate().serial, '1E4998E9F44FD00353BF3681C0A0A431964F5275', 'Test that the certificate was properly parsed by checking the serial');
-	t.equal(cid.getAttributeValue('attr1'), 'val1', 'Test getAttributeValue() method for known attribute');
-	t.equal(cid.getAttributeValue('unknown'), null, 'Test getAttributeValue() method for unknown attribute');
-	t.equal(cid.assertAttributeValue('attr1', 'val1'), true, 'Test assertAttributeValue() method for known attribute');
-	t.equal(cid.assertAttributeValue('unknown', 'val1'), false, 'Test assertAttributeValue() method for unknown attribute');
-	t.equal(cid.assertAttributeValue('attr1', 'wrongValue'), false, 'Test assertAttributeValue() method for known attribute but wrong value');
+	it ('should throw an error when using a bad cert', () => {
+		let stub = mockStub('I AM NOT A CERT');
+		expect(() => {
+			new shim.ClientIdentity(stub);
+		}).to.throw(/Failed to find start line or end line of the certificate./);
+	});
 
-	stub = mockStub(certWithoutAttrs);
-	cid = new shim.ClientIdentity(stub);
-	t.equal(cid.mspId, 'dummyId', 'Test mspId value');
-	t.deepEqual(cid.attrs, {}, 'Test empty attributes in the certificate');
+	describe('Certificate with values' ,() => {
+		let stub = mockStub(certWithAttrs);
+		let cid = new shim.ClientIdentity(stub);
 
-	stub = mockStub(certWithLongDNs);
-	cid = new shim.ClientIdentity(stub);
-	t.equal(cid.getID(), 'x509::/C=US/ST=California/L=San Francisco/CN=User1@org2.example.com::/C=US/ST=California/L=San Francisco/O=org2.example.com/CN=ca.org2.example.com', 'Test getID() with certificate having long DNs');
+		it ('should have correct mspId', () => {
+			expect(cid.getMSPID()).to.deep.equal('dummyId');
+		});
 
-	t.end();
+		it ('should return correct value on getID()', () => {
+			expect(cid.getID()).to.deep.equal('x509::/CN=MyTestUserWithAttrs::/CN=fabric-ca-server');
+		});
+
+		it ('should have correct attrs', () => {
+			expect(cid.attrs['attr1']).to.deep.equal('val1');
+		});
+
+		it ('should return correct value on getX509Certificate()', () => {
+			let x509 = cid.getX509Certificate();
+
+			expect(x509.subject.commonName).to.deep.equal('MyTestUserWithAttrs');
+			expect(x509.serial).to.deep.equal('1E4998E9F44FD00353BF3681C0A0A431964F5275');
+		});
+
+		it('should return the value when getAttributeValue() called with known attribute', () => {
+			expect(cid.getAttributeValue('attr1')).to.deep.equal('val1');
+		});
+
+		it('should return null when getAttributeValue() called with unknown attribute', () => {
+			expect(cid.getAttributeValue('unknown')).to.be.null;
+		});
+
+		it('should return true when value provided matches known attribute in assertAttributeValue()', () => {
+			expect(cid.assertAttributeValue('attr1', 'val1')).to.deep.equal(true);
+		});
+
+		it('should return false when value provided does not match known attribute in assertAttributeValue()', () => {
+			expect(cid.assertAttributeValue('attr1', 'val2')).to.deep.equal(false);
+		});
+
+		it('should return false when unknown attribute in assertAttributeValue()', () => {
+			expect(cid.assertAttributeValue('unknown', 'val1')).to.deep.equal(false);
+		});
+	});
+
+	describe('Certificate without values', () => {
+		let stub = mockStub(certWithoutAttrs);
+		let cid = new shim.ClientIdentity(stub);
+
+		it ('should have correct mspId', () => {
+			expect(cid.getMSPID()).to.deep.equal('dummyId');
+		});
+
+		it ('should have not attributes', () => {
+			expect(cid['attrs']).to.deep.equal({});
+		});
+	});
+
+	describe('Certificate with long DNs', () => {
+		let stub = mockStub(certWithLongDNs);
+		let cid = new shim.ClientIdentity(stub);
+
+		it ('should return correct value on getID()', () => {
+			expect(cid.getID()).to.deep.equal('x509::/C=US/ST=California/L=San Francisco/CN=User1@org2.example.com::/C=US/ST=California/L=San Francisco/O=org2.example.com/CN=ca.org2.example.com');
+		});
+	});
 });
 
 function mockStub(cert) {

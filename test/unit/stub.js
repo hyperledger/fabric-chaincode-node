@@ -1,894 +1,1008 @@
-/*
-# Copyright IBM Corp. All Rights Reserved.
-#
-# SPDX-License-Identifier: Apache-2.0
-*/
-'use strict';
-
 const ByteBuffer = require('bytebuffer');
-const test = require('../base.js');
 const sinon = require('sinon');
+const chai = require('chai');
+chai.use(require('chai-as-promised'));
+const expect = chai.expect;
 const rewire = require('rewire');
-const testutil = require('./util.js');
 
-const Stub = rewire('fabric-shim/lib/stub.js');
-const Handler = require('fabric-shim/lib/handler.js');
-const StateQueryIterator = require('fabric-shim/lib/iterators.js').StateQueryIterator;
-const HistoryQueryIterator = require('fabric-shim/lib/iterators.js').HistoryQueryIterator;
+const Stub = rewire('../../src/lib/stub.js');
 
-const grpc = require('grpc');
-const path = require('path');
+describe('Stub', () => {
+	describe('validateCompositeKeyAttribute', () => {
+		let validateCompositeKeyAttribute = Stub.__get__('validateCompositeKeyAttribute');
 
-const _commonProto = grpc.load({
-	root: path.join(__dirname, '../../src/lib/protos'),
-	file: 'common/common.proto'
-}).common;
-
-const _proposalProto = grpc.load({
-	root: path.join(__dirname, '../../src/lib/protos'),
-	file: 'peer/proposal.proto'
-}).protos;
-
-const _cclProto = grpc.load({
-	root: path.join(__dirname, '../../src/lib/protos'),
-	file: 'peer/chaincode.proto'
-}).protos;
-
-const _idProto = grpc.load({
-	root: path.join(__dirname, '../../src/lib/protos'),
-	file: 'msp/identities.proto'
-}).msp;
-
-const EXPECTED_MAX_RUNE = '\u{10ffff}';
-
-test('Chaincode stub constructor tests', (t) => {
-	// arguments from the protobuf are an array of ByteBuffer objects
-	let buf1 = ByteBuffer.fromUTF8('invoke');
-	let buf2 = ByteBuffer.fromUTF8('someKey');
-	let buf3 = ByteBuffer.fromUTF8('someValue');
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: [buf1, buf2, buf3]
-				},
-				'dummySignedProposal');
-		},
-		/Failed extracting proposal from signedProposal/,
-		'Test invalid proposal object'
-	);
-
-	let sp = new _proposalProto.Proposal();
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: [buf1, buf2, buf3]
-				},
-				{
-					proposal_bytes: sp.toBuffer()
-				});
-		},
-		/Proposal header is empty/,
-		'Test proposal object with empty header'
-	);
-
-	sp.setHeader(Buffer.from('dummyHeader'));
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: [buf1, buf2, buf3]
-				},
-				{
-					proposal_bytes: sp.toBuffer()
-				});
-		},
-		/Proposal payload is empty/,
-		'Test proposal object with empty payload'
-	);
-
-	sp.setPayload(Buffer.from('dummyPayload'));
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: [buf1, buf2, buf3]
-				},
-				{
-					proposal_bytes: sp.toBuffer()
-				});
-		},
-		/Could not extract the header from the proposal/,
-		'Test proposal object with invalid header'
-	);
-
-	let header = new _commonProto.Header();
-
-	header.setSignatureHeader(Buffer.from('dummySignatureHeader'));
-	sp.setHeader(header.toBuffer());
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: [buf1, buf2, buf3]
-				},
-				{
-					proposal_bytes: sp.toBuffer()
-				});
-		},
-		/Decoding SignatureHeader failed/,
-		'Test proposal object with invalid signature header'
-	);
-
-	let signatureHeader = new _commonProto.SignatureHeader();
-	signatureHeader.setNonce(Buffer.from('12345'));
-	signatureHeader.setCreator(Buffer.from('dummyCreator'));
-	header.setSignatureHeader(signatureHeader.toBuffer());
-	sp.setHeader(header.toBuffer());
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: [buf1, buf2, buf3]
-				},
-				{
-					proposal_bytes: sp.toBuffer()
-				});
-		},
-		/Decoding SerializedIdentity failed/,
-		'Test proposal object with invalid creator'
-	);
-
-	signatureHeader = new _commonProto.SignatureHeader();
-	signatureHeader.setNonce(Buffer.from('12345'));
-	signatureHeader.setCreator(new _idProto.SerializedIdentity().toBuffer());
-	header.setSignatureHeader(signatureHeader.toBuffer());
-	sp.setHeader(header.toBuffer());
-	sp.setPayload(Buffer.from('dummy proposal payload'));
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: [buf1, buf2, buf3]
-				},
-				{
-					proposal_bytes: sp.toBuffer()
-				});
-		},
-		/Decoding ChaincodeProposalPayload failed/,
-		'Test proposal object with invalid proposal payload'
-	);
-
-	header.setChannelHeader(Buffer.from('dummyChannelHeader'));
-	sp.setHeader(header.toBuffer());
-
-	t.throws(
-		() => {
-			new Stub(
-				'dummyClient',
-				'dummyChanelId',
-				'dummyTxid',
-				{
-					args: []
-				},
-				{
-					proposal_bytes: sp.toBuffer()
-				});
-		},
-		/Decoding ChannelHeader failed/,
-		'Test catching invalid ChannelHeader'
-	);
-
-	header = new _commonProto.Header();
-	header.setSignatureHeader(signatureHeader.toBuffer());
-	sp.setHeader(header.toBuffer());
-
-	let ccpayload = new _proposalProto.ChaincodeProposalPayload();
-	ccpayload.setInput(Buffer.from('dummyChaincodeInput'));
-	sp.setPayload(ccpayload.toBuffer());
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: [buf1, buf2, buf3]
-		},
-		{
-			proposal_bytes: sp.toBuffer()
-		});
-	t.equal(stub.args[0], 'invoke', 'Test parsing first argument');
-	t.equal(stub.args[1], 'someKey', 'Test parsing second argument');
-	t.equal(stub.getTxID(), 'dummyTxid', 'Test getTxID()');
-	t.equal(stub.getChannelID(), 'dummyChanelId', 'Test getChannelID()');
-
-	// test the computeProposalBinding() method
-	let cHeader = new _commonProto.ChannelHeader();
-	cHeader.setEpoch(10);
-	let sHeader = new _commonProto.SignatureHeader();
-	sHeader.setNonce(Buffer.from('nonce'));
-	let sid = new _idProto.SerializedIdentity();
-	sid.setIdBytes(Buffer.from('creator'));
-	sid.setMspid('testMSP');
-	sHeader.setCreator(sid.toBuffer());
-	header = new _commonProto.Header();
-	header.setChannelHeader(cHeader.toBuffer());
-	header.setSignatureHeader(sHeader.toBuffer());
-	sp = new _proposalProto.Proposal();
-	sp.setHeader(header.toBuffer());
-	sp.setPayload(ccpayload.toBuffer());
-	stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: [buf1, buf2, buf3]
-		},
-		{
-			proposal_bytes: sp.toBuffer()
-		});
-	t.equal(stub.binding, '81dd35bc764b01dd7f3f38513c6c0e5d5583d4e5568fa74c4847fd29228b51e4', 'Test computeProposalBinding() returning expected hex for the binding hash');
-
-	t.end();
-});
-
-test('getTxTimestamp', (t) => {
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+		it ('should throw an error if no attribute passed', () => {
+			expect(() => {
+				validateCompositeKeyAttribute();
+			}).to.throw(/object type or attribute not a non-zero length string/);
 		});
 
-	let ts = stub.getTxTimestamp();
-	t.equal(typeof ts.nanos, 'number', 'Test getTxTimestamp() returns propery value: has "nanos" {number} field');
-	t.equal(typeof ts.seconds, 'object', 'Test getTxTimestamp() returns propery value: has "seconds" {object} field');
+		it ('should throw an error if attribute not string', () => {
+			expect(() => {
+				validateCompositeKeyAttribute(100);
+			}).to.throw(/object type or attribute not a non-zero length string/);
+		});
 
-	t.end();
-});
+		it ('should throw an error if attribute empty string', () => {
+			expect(() => {
+				validateCompositeKeyAttribute('');
+			}).to.throw(/object type or attribute not a non-zero length string/);
+		});
 
-test('computeProposalBinding', (t) => {
-	let sp = {
-		proposal: {
-			header: {
-				signature_header: {
-					nonce: Buffer.from('nonce'),
-					creator: {
-						toBuffer: function() { return Buffer.from('creator'); }
+		it ('should call ut8.decode on attribute', () => {
+			const utf8 = Stub.__get__('utf8');
+			const decodeStub = sinon.stub(utf8, 'decode');
+
+			validateCompositeKeyAttribute('arg');
+
+			expect(decodeStub.calledOnce).to.be.ok;
+			expect(decodeStub.firstCall.args).to.deep.equal(['arg']);
+		});
+	});
+
+	describe('computeProposalBinding', () => {
+		it ('should return hash of decodedSP', () => {
+			let computeProposalBinding = Stub.__get__('computeProposalBinding');
+
+			let decodedSP = {
+				proposal: {
+					header: {
+						signature_header: {
+							nonce: Buffer.from('100'),
+							creator: {
+								toBuffer: () => {
+									return Buffer.from('some creator');
+								}
+							}
+						},
+						channel_header: {
+							epoch: {
+								high: 10,
+								low: 1
+							}
+						}
 					}
-				},
-				channel_header: {
-					epoch: { high: 0, low: 10 }
+				}
+			};
+
+			expect(computeProposalBinding(decodedSP)).to.deep.equal('44206e945c5cc2b752deacc05b2d6cd58a3799fec52143c986739bab57417aaf');
+		});
+	});
+
+	describe('ChaincodeStub', () => {
+		const sandbox = sinon.createSandbox();
+
+		const buf1 = ByteBuffer.fromUTF8('invoke');
+		const buf2 = ByteBuffer.fromUTF8('someKey');
+		const buf3 = ByteBuffer.fromUTF8('someValue');
+
+		const decodedProposal = {
+			header: {
+				toBuffer: () => {
+					return Buffer.from('some header');
+				}
+			},
+			payload: {
+				toBuffer: () => {
+					return Buffer.from('some payload');
 				}
 			}
-		}
-	};
-	let fcn = Stub.__get__('computeProposalBinding');
-	let hex = fcn(sp);
-	t.equal(hex, '5093dd4f4277e964da8f4afbde0a9674d17f2a6a5961f0670fc21ae9b67f2983', 'Test computeProposalBinding() returning expected hex for the hash');
+		};
 
-	t.end();
-});
+		const decodedCCPP = {
+			getTransientMap: () => {
+				return 'some transient map';
+			}
+		};
 
-test('invokeChaincode', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
-	mockHandler.handleInvokeChaincode.resolves('response');
+		const decodedHeader = {
+			signature_header: 'some signature header',
+			channel_header: 'somne channel header'
+		};
 
-	let dummyArgs = ['arg', 'arg2'];
-	let allProm = [];
+		const decodedSigHeader = {
+			getNonce: () => {
+				return {
+					toBuffer: () => {
+						return Buffer.from('some nonce');
+					}
+				};
+			},
+			creator: 'some creator'
+		};
 
-	await stub.invokeChaincode('mycc', dummyArgs);
-	t.deepEqual(mockHandler.handleInvokeChaincode.firstCall.args, ['mycc', dummyArgs, 'dummyChanelId', 'dummyTxid'], 'Test called with correct arguments');
-	await stub.invokeChaincode('mycc', dummyArgs, 'mychannel');
-	t.deepEqual(mockHandler.handleInvokeChaincode.secondCall.args, ['mycc/mychannel', dummyArgs, 'dummyChanelId', 'dummyTxid'], 'Test called with correct arguments');
-});
+		const decodedChannelHeader = {
+			timestamp: 'some timestamp'
+		};
 
-test('getState', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
+		const _proposalProto = Stub.__get__('_proposalProto');
+		let _proposalProtoProposalDecodeStub;
+		let _proposalProtoChaincodeProposalPayloadDecodeStub;
 
-	// getState will return a Buffer object
-	mockHandler.handleGetState.withArgs('', 'key1', 'dummyChanelId', 'dummyTxid').resolves(Buffer.from('response'));
+		const _commonProto = Stub.__get__('_commonProto');
+		let _commonProtoHeaderDecodeStub;
+		let _commonProtoSignatureHeaderDecodeStub;
+		let _commonProtoChannelHeaderDecodeStub;
 
-	let response = await stub.getState('key1');
-	t.equal(response.toString(), 'response', 'Test getState invokes correctly amd response is correct');
-});
+		const _idProto = Stub.__get__('_idProto');
+		let _idProtoSerializedIdentityDecodeStub;
 
-test('putState', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
-	mockHandler.handlePutState.resolves('response');
+		beforeEach(() => {
+			_proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').returns(decodedProposal);
+			_proposalProtoChaincodeProposalPayloadDecodeStub = sandbox.stub(_proposalProto.ChaincodeProposalPayload, 'decode').returns(decodedCCPP);
 
-	// Must create a Buffer from your data.
-	let dataToPut = Buffer.from('some data');
-	await stub.putState('key1', dataToPut);
-	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['', 'key1', dataToPut, 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-});
+			_commonProtoHeaderDecodeStub = sandbox.stub(_commonProto.Header, 'decode').returns(decodedHeader);
+			_commonProtoSignatureHeaderDecodeStub = sandbox.stub(_commonProto.SignatureHeader, 'decode').returns(decodedSigHeader);
+			_commonProtoChannelHeaderDecodeStub = sandbox.stub(_commonProto.ChannelHeader, 'decode').returns(decodedChannelHeader);
 
-test('deleteState', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
-	mockHandler.handleDeleteState.resolves('response');
-
-	await stub.deleteState('key1');
-	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['', 'key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-});
-
-test('getHistoryForKey', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let mockIterator = sinon.createStubInstance(HistoryQueryIterator);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
-	mockHandler.handleGetHistoryForKey.resolves(mockIterator);
-
-	let result = await stub.getHistoryForKey('key1');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetHistoryForKey.firstCall.args, ['key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-});
-
-test('getQueryResult', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let mockIterator = sinon.createStubInstance(StateQueryIterator);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
-	mockHandler.handleGetQueryResult.resolves(mockIterator);
-
-	let result = await stub.getQueryResult('query1');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['', 'query1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-});
-
-test('getStateByRange', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let mockIterator = sinon.createStubInstance(StateQueryIterator);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
-	mockHandler.handleGetStateByRange.resolves(mockIterator);
-
-	let result = await stub.getStateByRange('start', 'end');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['', 'start', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-
-	result = await stub.getStateByRange('', 'end');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-
-	result = await stub.getStateByRange(null, 'end');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-});
-
-test('setEvent', (t) => {
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			_idProtoSerializedIdentityDecodeStub = sandbox.stub(_idProto.SerializedIdentity, 'decode').returns('some creator');
 		});
 
-	t.throws(
-		() => {
-			stub.setEvent();
-		},
-		/non-empty/,
-		'Test catching no parameters'
-	);
-
-	t.throws(
-		() => {
-			stub.setEvent('', 'some data');
-		},
-		/non-empty/,
-		'Test catching blank event name'
-	);
-
-	t.throws(
-		() => {
-			stub.setEvent(['arg'], 'some data');
-		},
-		/non-empty/,
-		'Test catching no string event name'
-	);
-
-	stub.setEvent('event1', Buffer.from('payload1'));
-	t.equal(stub.chaincodeEvent.getEventName(), 'event1', 'Test event name is correct');
-	t.deepEqual(stub.chaincodeEvent.getPayload().toString('utf8'), 'payload1', 'Test payload is correct');
-	t.end();
-});
-
-test('CreateCompositeKey', (t) => {
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+		afterEach(() => {
+			sandbox.restore();
 		});
 
-	t.throws(
-		() => {
-			stub.createCompositeKey();
-		},
-		/non-zero length/,
-		'Test catching invalid object type'
-	);
+		it ('should set up the vars and do nothing more with no signed proposal', () => {
+			let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+				args: [buf1, buf2, buf3]
+			});
 
-	t.throws(
-		() => {
-			stub.createCompositeKey('key');
-		},
-		/must be an array/,
-		'Test catching invalid attributes'
-	);
-
-	t.throws(
-		() => {
-			stub.createCompositeKey('k\x99x33ey', []);
-		},
-		/Invalid UTF-8/,
-		'Test bad utf-8 in object type'
-	);
-
-	t.throws(
-		() => {
-			stub.createCompositeKey('type', ['k\x99x33ey']);
-		},
-		/Invalid UTF-8/,
-		'Test bad utf-8 in attributes'
-	);
-
-
-	t.equal(stub.createCompositeKey('key', []), '\u0000key\u0000', 'Test createCompositeKey with no attributes returns expected key');
-	t.equal(stub.createCompositeKey('key', ['attr1']), '\u0000key\u0000attr1\u0000', 'Test createCompositeKey with single attribute returns expected key');
-	t.equal(stub.createCompositeKey('key', ['attr1', 'attr2','attr3']), '\u0000key\u0000attr1\u0000attr2\u0000attr3\u0000', 'Test createCompositeKey with multiple attributes returns expected key');
-
-	t.end();
-});
-
-test('splitCompositeKey: ', (t) => {
-	let objectType;
-	let attributes;
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			expect(stub.handler).to.deep.equal('dummyClient');
+			expect(stub.channel_id).to.deep.equal('dummyChannelId');
+			expect(stub.txId).to.deep.equal('dummyTxid');
+			expect(stub.args).to.deep.equal([ 'invoke', 'someKey', 'someValue' ]);
 		});
 
-	// test splitting stuff that was created using the createCompositeKey calls
-	({objectType, attributes} = stub.splitCompositeKey(stub.createCompositeKey('key', [])));
-	t.equal(objectType, 'key', 'Test splitting of compositeKey with only object type, objecttype part');
-	t.deepEqual(attributes, [], 'Test splitting of compositeKey with only object type, attributes part');
+		it ('should throw an error for an invalid proposal', () => {
+			_proposalProtoProposalDecodeStub.restore();
+			_proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').throws();
 
-	({objectType, attributes} = stub.splitCompositeKey(stub.createCompositeKey('key', ['attr1'])));
-	t.equal(objectType, 'key', 'Test splitting of compositeKey with 1 attribute, objecttype part');
-	t.deepEqual(attributes, ['attr1'], 'Test splitting of compositeKey with 1 attribute, attributes part');
-
-	({objectType, attributes} = stub.splitCompositeKey(stub.createCompositeKey('key', ['attr1', 'attr2'])));
-	t.equal(objectType, 'key', 'Test splitting of compositeKey with >1 attributes, objecttype part');
-	t.deepEqual(attributes, ['attr1', 'attr2'], 'Test splitting of compositeKey with >1 attributes, attributes part');
-
-	// pass in duff values
-	t.deepEqual(stub.splitCompositeKey(), {objectType: null, attributes: []}, 'Test no value passed');
-	t.deepEqual(stub.splitCompositeKey('something'), {objectType: null, attributes: []}, 'Test no delimited value passed');
-	t.deepEqual(stub.splitCompositeKey('something\u0000\hello'), {objectType: null, attributes: []}, 'Test incorrectly delimited value passed');
-	t.deepEqual(stub.splitCompositeKey('\x00'), {objectType: null, attributes: []}, 'Test on delimiter value passed');
-
-	t.end();
-});
-
-test('getStateByPartialCompositeKey', async (t) => {
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		}
-	);
-
-	let expectedKey = '\u0000key\u0000attr1\u0000attr2\u0000';
-	let cckStub = sinon.stub(stub, 'createCompositeKey').returns(expectedKey);
-	let gsbrStub = sinon.stub(stub, 'getStateByRange');
-
-	await stub.getStateByPartialCompositeKey('key', ['attr1', 'attr2']);
-	t.equal(cckStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls createCompositeKey once');
-	t.deepEqual(cckStub.firstCall.args, ['key', ['attr1', 'attr2']], 'Test getStateByPartialCompositeKey calls createCompositeKey with the correct parameters');
-	t.equal(gsbrStub.calledOnce, true, 'Test getStateByPartialCompositeKey calls getStateByRange Once');
-	t.deepEqual(gsbrStub.firstCall.args, [expectedKey, expectedKey + EXPECTED_MAX_RUNE], 'Test getStateByPartialCompositeKey calls getStateByRange with the right arguments');
-	t.end();
-});
-
-test('Arguments Tests', (t) => {
-	let buf1 = ByteBuffer.fromUTF8('invoke');
-	let buf2 = ByteBuffer.fromUTF8('key');
-	let buf3 = ByteBuffer.fromUTF8('value');
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: [buf1, buf2, buf3]
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, 'badProposal');
+			}).to.throw(/Failed extracting proposal from signedProposal/);
 		});
 
-	t.equal(stub.getArgs().length, 3, 'Test getArgs() returns expected number of arguments');
-	t.equal(typeof stub.getArgs()[0], 'string', 'Test getArgs() returns the first argument as string');
-	t.equal(stub.getArgs()[1], 'key', 'Test getArgs() returns the 2nd argument as string "key"');
-	t.equal(stub.getStringArgs().length, 3, 'Test getStringArgs() returns expected number of arguments');
-	t.equal(stub.getStringArgs()[2], 'value', 'Test getStringArgs() returns 3rd argument as string "value"');
-	t.equal(typeof stub.getFunctionAndParameters(), 'object', 'Test getFunctionAndParameters() returns and object');
-	t.equal(stub.getFunctionAndParameters().fcn, 'invoke', 'Test getFunctionAndParameters() returns the function name properly');
-	t.equal(Array.isArray(stub.getFunctionAndParameters().params), true, 'Test getFunctionAndParameters() returns the params array');
-	t.equal(stub.getFunctionAndParameters().params.length, 2, 'Test getFunctionAndParameters() returns the params array with 2 elements');
-	t.equal(stub.getFunctionAndParameters().params[0], 'key', 'Test getFunctionAndParameters() returns the "key" string as the first param');
-	t.equal(stub.getFunctionAndParameters().params[1], 'value', 'Test getFunctionAndParameters() returns the "value" string as the 2nd param');
+		it ('should throw an error for a proposal with an empty header', () => {
+			_proposalProtoProposalDecodeStub.restore();
+			_proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').returns({});
 
-	stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: [buf1]
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		});
-	t.equal(stub.getFunctionAndParameters().fcn, 'invoke', 'Test getFunctionAndParameters() returns the function name properly');
-	t.equal(stub.getFunctionAndParameters().params.length, 0, 'Test getFunctionAndParameters() returns the params array with 0 elements');
-
-	stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal(true).toBuffer(),
-			signature: Buffer.from('dummyHex')
-		});
-	t.equal(stub.getFunctionAndParameters().fcn, '', 'Test getFunctionAndParameters() returns empty function name properly');
-	t.equal(stub.getFunctionAndParameters().params.length, 0, 'Test getFunctionAndParameters() returns the params array with 0 elements');
-
-	t.equal(stub.getCreator().getMspid(), 'dummyMSPId', 'Test getCreator() returns the expected buffer object');
-	t.equal(stub.getTransient().get('testKey').toBuffer().toString(), 'testValue', 'Test getTransient() returns the expected transient map object');
-
-	t.equal(stub.getSignedProposal().signature.toString(), 'dummyHex', 'Test getSignedProposal() returns valid signature');
-	t.equal(stub.getSignedProposal().proposal.header.signature_header.nonce.toString(), '12345', 'Test getSignedProposal() returns valid nonce');
-	t.equal(stub.getSignedProposal().proposal.header.signature_header.creator.mspid, 'dummyMSPId', 'Test getSignedProposal() returns valid mspid');
-
-	t.end();
-});
-
-test('getPrivateData', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, {
+					signature: 'some signature',
+					proposal_bytes: 'some bytes'
+				});
+			}).to.throw(/Proposal header is empty/);
 		});
 
-	// getState will return a Buffer object
-	mockHandler.handleGetState.withArgs('testCollection', 'key1', 'dummyChanelId', 'dummyTxid').resolves(Buffer.from('response'));
+		it ('should throw an error for a proposal with an empty payload', () => {
+			_proposalProtoProposalDecodeStub.restore();
+			_proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').returns({header: decodedProposal.header});
 
-	try {
-		await stub.getPrivateData('', 'key1');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'collection must be a valid string');
-	}
-
-	try {
-		await stub.getPrivateData('key1');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'getPrivateData requires two arguments, collection and key');
-	}
-
-	let response = await stub.getPrivateData('testCollection', 'key1');
-	t.equal(response.toString(), 'response', 'Test getPrivateData invokes correctly amd response is correct');
-});
-
-test('putPrivateData', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, {
+					signature: 'some signature',
+					proposal_bytes: 'some bytes'
+				});
+			}).to.throw(/Proposal payload is empty/);
 		});
-	mockHandler.handlePutState.resolves('response');
 
-	// Must create a Buffer from your data.
-	let dataToPut = Buffer.from('some data');
-	await stub.putPrivateData('testCollection', 'key1', dataToPut);
-	t.deepEqual(mockHandler.handlePutState.firstCall.args, ['testCollection', 'key1', dataToPut, 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+		it ('should throw an error for a proposal with an invalid header', () => {
+			_commonProtoHeaderDecodeStub.restore();
+			_commonProtoHeaderDecodeStub = sandbox.stub(_commonProto.Header, 'decode').throws();
 
-	try {
-		await stub.putPrivateData('', 'key1', dataToPut);
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'collection must be a valid string');
-	}
-
-	try {
-		await stub.putPrivateData('testCollection', '', dataToPut);
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'key must be a valid string');
-	}
-
-	try {
-		await stub.putPrivateData('key1', dataToPut);
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'putPrivateData requires three arguments, collection, key and value');
-	}
-});
-
-test('deletePrivateData', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, {
+					signature: 'some signature',
+					proposal_bytes: 'some bytes'
+				});
+			}).to.throw(/Could not extract the header from the proposal/);
 		});
-	mockHandler.handleDeleteState.resolves('response');
 
-	await stub.deletePrivateData('testCollection', 'key1');
-	t.deepEqual(mockHandler.handleDeleteState.firstCall.args, ['testCollection', 'key1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+		it ('should throw an error for a proposal with an invalid signature header', () => {
+			_commonProtoSignatureHeaderDecodeStub.restore();
+			_commonProtoSignatureHeaderDecodeStub = sandbox.stub(_commonProto.SignatureHeader, 'decode').throws();
 
-	try {
-		await stub.deletePrivateData('', 'key1');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'collection must be a valid string');
-	}
-
-	try {
-		await stub.deletePrivateData('key1');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'deletePrivateData requires two arguments, collection and key');
-	}
-});
-
-test('getPrivateDataByRange', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let mockIterator = sinon.createStubInstance(StateQueryIterator);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, {
+					signature: 'some signature',
+					proposal_bytes: 'some bytes'
+				});
+			}).to.throw(/Decoding SignatureHeader failed/);
 		});
-	mockHandler.handleGetStateByRange.resolves(mockIterator);
 
-	let result = await stub.getPrivateDataByRange('testCollection', 'start', 'end');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.firstCall.args, ['testCollection', 'start', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+		it ('should throw an error for a proposal with an invalid creator', () => {
+			_idProtoSerializedIdentityDecodeStub.restore();
+			_idProtoSerializedIdentityDecodeStub = sandbox.stub(_idProto.SerializedIdentity, 'decode').throws();
 
-	result = await stub.getPrivateDataByRange('testCollection', '', 'end');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.secondCall.args, ['testCollection', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-
-	result = await stub.getPrivateDataByRange('testCollection', null, 'end');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetStateByRange.thirdCall.args, ['testCollection', '\x01', 'end', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
-
-	try {
-		await stub.getPrivateDataByRange('', 'start', 'end');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'collection must be a valid string');
-	}
-
-	try {
-		await stub.getPrivateDataByRange('start', 'end');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'getPrivateDataByRange requires three arguments, collection, startKey and endKey');
-	}
-});
-
-test('getPrivateDataByPartialCompositeKey', async (t) => {
-	let stub = new Stub(
-		'dummyClient',
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
-		}
-	);
-
-	let expectedKey = '\u0000key\u0000attr1\u0000attr2\u0000';
-	let cckStub = sinon.stub(stub, 'createCompositeKey').returns(expectedKey);
-	let gsbrStub = sinon.stub(stub, 'getPrivateDataByRange');
-
-	await stub.getPrivateDataByPartialCompositeKey('testCollection', 'key', ['attr1', 'attr2']);
-	t.equal(cckStub.calledOnce, true, 'Test getPrivateDataByPartialCompositeKey calls createCompositeKey once');
-	t.deepEqual(cckStub.firstCall.args, ['key', ['attr1', 'attr2']], 'Test getPrivateDataByPartialCompositeKey calls createCompositeKey with the correct parameters');
-	t.equal(gsbrStub.calledOnce, true, 'Test getPrivateDataByPartialCompositeKey calls getStateByRange Once');
-	t.deepEqual(gsbrStub.firstCall.args, ['testCollection', expectedKey, expectedKey + EXPECTED_MAX_RUNE], 'Test getPrivateDataByPartialCompositeKey calls getStateByRange with the right arguments');
-
-	try {
-		await stub.getPrivateDataByPartialCompositeKey('', 'key', ['attr1', 'attr2']);
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'collection must be a valid string');
-	}
-
-	try {
-		await stub.getPrivateDataByPartialCompositeKey('key', ['attr1', 'attr2']);
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
-	}
-
-	t.end();
-});
-
-test('getPrivateDataQueryResult', async (t) => {
-	let mockHandler = sinon.createStubInstance(Handler);
-	let mockIterator = sinon.createStubInstance(StateQueryIterator);
-	let stub = new Stub(
-		mockHandler,
-		'dummyChanelId',
-		'dummyTxid',
-		{
-			args: []
-		},
-		{
-			proposal_bytes: testutil.newProposal().toBuffer()
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, {
+					signature: 'some signature',
+					proposal_bytes: 'some bytes'
+				});
+			}).to.throw(/Decoding SerializedIdentity failed/);
 		});
-	mockHandler.handleGetQueryResult.resolves(mockIterator);
 
-	let result = await stub.getPrivateDataQueryResult('testCollection', 'query1');
-	t.equal(result, mockIterator, 'Test it returns an iterator');
-	t.deepEqual(mockHandler.handleGetQueryResult.firstCall.args, ['testCollection', 'query1', 'dummyChanelId', 'dummyTxid'], 'Test call to handler is correct');
+		it ('should throw an error for a proposal with an invalid channelHeader', () => {
+			_commonProtoChannelHeaderDecodeStub.restore();
+			_commonProtoChannelHeaderDecodeStub = sandbox.stub(_commonProto.ChannelHeader, 'decode').throws();
 
-	try {
-		await stub.getPrivateDataQueryResult('', 'query1');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'collection must be a valid string');
-	}
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, {
+					signature: 'some signature',
+					proposal_bytes: 'some bytes'
+				});
+			}).to.throw(/Decoding ChannelHeader failed/);
+		});
 
-	try {
-		await stub.getPrivateDataQueryResult('query1');
-		t.fail('unexpected success when error should have occurred');
-	} catch (e) {
-		t.equal(e.message, 'getPrivateDataQueryResult requires two arguments, collection and query');
-	}
+		it ('should throw an error for a proposal with an invalid payload', () => {
+			_proposalProtoChaincodeProposalPayloadDecodeStub.restore();
+			sandbox.stub(_proposalProto.ChaincodeProposalPayload, 'decode').throws();
+
+			expect(() => {
+				new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				}, {
+					signature: 'some signature',
+					proposal_bytes: 'some bytes'
+				});
+			}).to.throw(/Decoding ChaincodeProposalPayload failed/);
+		});
+
+		it('should set all the env vars with a valid signed proposal', () => {
+			const saveComputeProposalBinding = Stub.__get__('computeProposalBinding');
+
+			let mockComputeProposalBinding = sinon.stub().returns('some proposal binding');
+			Stub.__set__('computeProposalBinding', mockComputeProposalBinding);
+
+			let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+				args: [buf1, buf2, buf3]
+			}, {
+				signature: 'some signature',
+				proposal_bytes: 'some bytes'
+			});
+
+			expect(stub.handler).to.deep.equal('dummyClient');
+			expect(stub.channel_id).to.deep.equal('dummyChannelId');
+			expect(stub.txId).to.deep.equal('dummyTxid');
+			expect(stub.args).to.deep.equal([ 'invoke', 'someKey', 'someValue' ]);
+			expect(stub.proposal).to.deep.equal(decodedProposal);
+			expect(stub.txTimestamp).to.deep.equal('some timestamp');
+			expect(stub.creator).to.deep.equal('some creator');
+			expect(stub.transientMap).to.deep.equal('some transient map');
+			expect(stub.signedProposal).to.deep.equal({
+				signature: 'some signature',
+				proposal: {
+					header: {
+						signature_header: {
+							creator: 'some creator',
+							nonce: Buffer.from('some nonce')
+						},
+						channel_header: decodedChannelHeader
+					},
+					payload: decodedCCPP
+				}
+			});
+			expect(stub.binding).to.deep.equal('some proposal binding');
+
+			expect(_proposalProtoProposalDecodeStub.calledOnce).to.be.ok;
+			expect(_proposalProtoProposalDecodeStub.firstCall.args).to.deep.equal(['some bytes']);
+			expect(_commonProtoHeaderDecodeStub.calledOnce).to.be.ok;
+			expect(_commonProtoHeaderDecodeStub.firstCall.args).to.deep.equal([decodedProposal.header]);
+			expect(_commonProtoSignatureHeaderDecodeStub.calledOnce).to.be.ok;
+			expect(_commonProtoSignatureHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.signature_header]);
+			expect(_idProtoSerializedIdentityDecodeStub.calledOnce).to.be.ok;
+			expect(_idProtoSerializedIdentityDecodeStub.firstCall.args).to.deep.equal([decodedSigHeader.creator]);
+			expect(_commonProtoChannelHeaderDecodeStub.calledOnce).to.be.ok;
+			expect(_commonProtoChannelHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.channel_header]);
+			expect(_proposalProtoChaincodeProposalPayloadDecodeStub.calledOnce).to.be.ok;
+			expect(_proposalProtoChaincodeProposalPayloadDecodeStub.firstCall.args).to.deep.equal([decodedProposal.payload]);
+
+			Stub.__set__('computeProposalBinding', saveComputeProposalBinding);
+		});
+
+		describe('getArgs', () => {
+			it ('should return the args', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				});
+
+				expect(stub.getArgs()).to.deep.equal([ 'invoke', 'someKey', 'someValue' ]);
+			});
+		});
+
+		describe('getStringArgs', () => {
+			it ('should return the args', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				});
+
+				expect(stub.getStringArgs()).to.deep.equal([ 'invoke', 'someKey', 'someValue' ]);
+			});
+		});
+
+		describe('getFunctionAndParameters', () => {
+			it ('should return the function name parameters', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1, buf2, buf3]
+				});
+
+				expect(stub.getFunctionAndParameters()).to.deep.equal({
+					fcn: 'invoke',
+					params: [ 'someKey', 'someValue' ]
+				});
+			});
+
+			it ('should return string for function and empty array as param if only one arg', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: [buf1]
+				});
+
+				expect(stub.getFunctionAndParameters()).to.deep.equal({
+					fcn: 'invoke',
+					params: []
+				});
+			});
+
+			it ('should return empty string for function and empty array for params if no args', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				expect(stub.getFunctionAndParameters()).to.deep.equal({
+					fcn: '',
+					params: []
+				});
+			});
+		});
+
+		describe('getTxID', () => {
+			it ('should return txId', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				expect(stub.getTxID()).to.deep.equal('dummyTxid');
+			});
+		});
+
+		describe('getChannelID', () => {
+			it ('should return channel_id', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				expect(stub.getChannelID()).to.deep.equal('dummyChannelId');
+			});
+		});
+
+		describe('getCreator', () => {
+			it ('should return creator', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				stub.creator = 'some creator';
+
+				expect(stub.getCreator()).to.deep.equal('some creator');
+			});
+		});
+
+		describe('getTransient', () => {
+			it ('should return transient map', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				stub.transientMap = 'some transient map';
+
+				expect(stub.getTransient()).to.deep.equal('some transient map');
+			});
+		});
+
+		describe('getSignedProposal', () => {
+			it ('should return signed proposal', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				stub.signedProposal = 'some signed proposal';
+
+				expect(stub.getSignedProposal()).to.deep.equal('some signed proposal');
+			});
+		});
+
+		describe('getTxTimestamp', () => {
+			it ('should return transaction timestamp', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				stub.txTimestamp = 'some timestamp';
+
+				expect(stub.getTxTimestamp()).to.deep.equal('some timestamp');
+			});
+		});
+
+		describe('getBinding', () => {
+			it ('should return binding', () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				stub.binding = 'some binding';
+
+				expect(stub.getBinding()).to.deep.equal('some binding');
+			});
+		});
+
+		describe('getState', () => {
+			it ('should return handler.handleGetState', async () => {
+				const handleGetStateStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handleGetState: handleGetStateStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getState('a key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateStub.calledOnce).to.be.ok;
+				expect(handleGetStateStub.firstCall.args).to.deep.equal(['', 'a key', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('putState', () => {
+			it ('should return handler.handlePutState', async () => {
+				const handlePutStateStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handlePutState: handlePutStateStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.putState('a key', 'a value');
+
+				expect(result).to.deep.equal('some state');
+				expect(handlePutStateStub.calledOnce).to.be.ok;
+				expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', 'a value', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('deleteState', () => {
+			it ('should return handler.handleDeleteState', async () => {
+				const handleDeleteStateStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handleDeleteState: handleDeleteStateStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.deleteState('a key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleDeleteStateStub.calledOnce).to.be.ok;
+				expect(handleDeleteStateStub.firstCall.args).to.deep.equal(['', 'a key', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('getStateByRange', () => {
+			it ('should return handler.handleGetStateByRange', async () => {
+				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getStateByRange('start key', 'end key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid']);
+			});
+
+			it ('should return handler.handleGetStateByRange using empty key substitute', async () => {
+				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				let EMPTY_KEY_SUBSTITUTE = Stub.__get__('EMPTY_KEY_SUBSTITUTE');
+
+				const result = await stub.getStateByRange(null, 'end key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', EMPTY_KEY_SUBSTITUTE, 'end key', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('getQueryResult', () => {
+			it ('should return handler.handleGetQueryResult', async () => {
+				const handleGetQueryResultStub = sinon.stub().resolves('some query result');
+
+				let stub = new Stub({
+					handleGetQueryResult: handleGetQueryResultStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getQueryResult('a query');
+
+				expect(result).to.deep.equal('some query result');
+				expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+				expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['', 'a query', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('getHistoryForKey', () => {
+			it ('should return handler.handleGetHistoryForKey', async () => {
+				const handleGetHistoryForKeyStub = sinon.stub().resolves('some history');
+
+				let stub = new Stub({
+					handleGetHistoryForKey: handleGetHistoryForKeyStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getHistoryForKey('a key');
+
+				expect(result).to.deep.equal('some history');
+				expect(handleGetHistoryForKeyStub.calledOnce).to.be.ok;
+				expect(handleGetHistoryForKeyStub.firstCall.args).to.deep.equal(['a key', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('invokeChaincode', () => {
+			let stub;
+			let handleInvokeChaincodeStub;
+
+			beforeEach(() => {
+				handleInvokeChaincodeStub = sinon.stub().resolves('invoked');
+
+				stub = new Stub({
+					handleInvokeChaincode: handleInvokeChaincodeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should return handler.handleInvokeChaincode', async () => {
+				const result = await stub.invokeChaincode('chaincodeName', ['some', 'args'], 'someChannel');
+
+				expect(result).to.deep.equal('invoked');
+				expect(handleInvokeChaincodeStub.calledOnce).to.be.ok;
+				expect(handleInvokeChaincodeStub.firstCall.args).to.deep.equal(['chaincodeName/someChannel', ['some', 'args'], 'dummyChannelId', 'dummyTxid']);
+			});
+
+			it ('should return handler.handleInvokeChaincode handling no channel passed', async () => {
+				const result = await stub.invokeChaincode('chaincodeName', ['some', 'args']);
+
+				expect(result).to.deep.equal('invoked');
+				expect(handleInvokeChaincodeStub.calledOnce).to.be.ok;
+				expect(handleInvokeChaincodeStub.firstCall.args).to.deep.equal(['chaincodeName', ['some', 'args'], 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('setEvent', () => {
+			let stub;
+
+			beforeEach(() => {
+				stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should throw an error when name is not a string', () => {
+				expect(() => {
+					stub.setEvent();
+				}).to.throw(/Event name must be a non-empty string/);
+			});
+
+			it ('should throw an error when name is empty string', () => {
+				expect(() => {
+					stub.setEvent('');
+				}).to.throw(/Event name must be a non-empty string/);
+			});
+
+			it ('should set an event', () => {
+				const saveEventProto = Stub.__get__('_eventProto');
+
+				const setEventNameSpy = sinon.spy();
+				const setPayloadSpy = sinon.spy();
+
+				function CustomEvent () {
+					this.setEventName = setEventNameSpy;
+					this.setPayload = setPayloadSpy;
+				};
+
+				let eventProtoStub = {
+					ChaincodeEvent: CustomEvent
+				};
+
+				Stub.__set__('_eventProto', eventProtoStub);
+
+				stub.setEvent('some name', 'some payload');
+
+				expect(stub.chaincodeEvent).to.deep.equal(new CustomEvent());
+				expect(setEventNameSpy.calledOnce).to.be.ok;
+				expect(setEventNameSpy.firstCall.args).to.deep.equal(['some name']);
+				expect(setPayloadSpy.calledOnce).to.be.ok;
+				expect(setPayloadSpy.firstCall.args).to.deep.equal(['some payload']);
+
+				Stub.__set__('_eventProto', saveEventProto);
+			});
+		});
+
+		describe('createCompositeKey', () => {
+			const saveValidate = Stub.__get__('validateCompositeKeyAttribute');
+
+			let stub;
+			let mockValidate;
+			beforeEach(() => {
+				mockValidate = sinon.stub().returns();
+				Stub.__set__('validateCompositeKeyAttribute', mockValidate);
+
+				stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			after(() => {
+				Stub.__set__('validateCompositeKeyAttribute', saveValidate);
+			});
+
+			it ('should throw an error if attributes is not an array', () => {
+				expect(() => {
+					stub.createCompositeKey('some type', 'some attributes');
+				}).to.throw(/attributes must be an array/);
+				expect(mockValidate.calledOnce).to.be.ok;
+				expect(mockValidate.firstCall.args).to.deep.equal(['some type']);
+			});
+
+			it ('should return a composite key', () => {
+				let COMPOSITEKEY_NS = Stub.__get__('COMPOSITEKEY_NS');
+				let MIN_UNICODE_RUNE_VALUE = Stub.__get__('MIN_UNICODE_RUNE_VALUE');
+
+				let result = stub.createCompositeKey('some type', ['attr1', 'attr2']);
+
+				expect(result).to.deep.equal(`${COMPOSITEKEY_NS}some type${MIN_UNICODE_RUNE_VALUE}attr1${MIN_UNICODE_RUNE_VALUE}attr2${MIN_UNICODE_RUNE_VALUE}`);
+				expect(mockValidate.calledThrice).to.be.ok;
+				expect(mockValidate.firstCall.args).to.deep.equal(['some type']);
+				expect(mockValidate.secondCall.args).to.deep.equal(['attr1']);
+				expect(mockValidate.thirdCall.args).to.deep.equal(['attr2']);
+			});
+		});
+
+		describe('splitCompositeKey', () => {
+			const COMPOSITEKEY_NS = Stub.__get__('COMPOSITEKEY_NS');
+			const MIN_UNICODE_RUNE_VALUE = Stub.__get__('MIN_UNICODE_RUNE_VALUE');
+
+			let stub;
+			beforeEach(() => {
+				stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should return object with empty values when no composite key', () => {
+				expect(stub.splitCompositeKey()).to.deep.equal({objectType: null, attributes: []});
+			});
+
+			it ('should return object with empty values when composite key only has one character', () => {
+				expect(stub.splitCompositeKey(COMPOSITEKEY_NS)).to.deep.equal({objectType: null, attributes: []});
+			});
+
+			it ('should return object with empty values when composite key does not have first character as COMPOSITEKEY_NS', () => {
+				expect(stub.splitCompositeKey(`some type${COMPOSITEKEY_NS}`)).to.deep.equal({objectType: null, attributes: []});
+			});
+
+			it ('should return object with objectType set but no attributes', () => {
+				expect(stub.splitCompositeKey(`${COMPOSITEKEY_NS}some type`)).to.deep.equal({objectType: 'some type', attributes: []});
+			});
+
+			it ('should return object with objectType set and array of attributes', () => {
+				expect(
+					stub.splitCompositeKey(`${COMPOSITEKEY_NS}some type${MIN_UNICODE_RUNE_VALUE}attr1${MIN_UNICODE_RUNE_VALUE}attr2${MIN_UNICODE_RUNE_VALUE}`)
+				).to.deep.equal({objectType: 'some type', attributes: ['attr1', 'attr2']});
+			});
+		});
+
+		describe('getStateByPartialCompositeKey', () => {
+			const MAX_UNICODE_RUNE_VALUE = Stub.__get__('MAX_UNICODE_RUNE_VALUE');
+
+			it ('should return getStateByRange using composite key', async () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const createCompositeKeyStub = sinon.stub(stub, 'createCompositeKey').returns('some composite key');
+				const getStateByRangeStub = sinon.stub(stub, 'getStateByRange').resolves('some state by range');
+
+				const result = await stub.getStateByPartialCompositeKey('some type', ['attr1', 'attr2']);
+				expect(result).to.deep.equal('some state by range');
+				expect(createCompositeKeyStub.calledOnce).to.be.ok;
+				expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
+				expect(getStateByRangeStub.calledOnce).to.be.ok;
+				expect(getStateByRangeStub.firstCall.args).to.deep.equal(['some composite key', `some composite key${MAX_UNICODE_RUNE_VALUE}`]);
+			});
+		});
+
+		describe('getPrivateData', () => {
+			let handleGetStateStub;
+			let stub;
+
+			beforeEach(() => {
+				handleGetStateStub = sinon.stub().resolves('some state');
+				stub = new Stub({
+					handleGetState: handleGetStateStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should throw an error if no arguments supplied', async () => {
+				const result = stub.getPrivateData();
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateData requires two arguments, collection and key');
+			});
+
+			it ('should throw an error if one argument supplied', async () => {
+				const result = stub.getPrivateData('some arg');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateData requires two arguments, collection and key');
+			});
+
+			it ('should throw an error if collection null', async () => {
+				const result = stub.getPrivateData(null, 'some key');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+			});
+
+			it ('should return handler.handleGetState', async () => {
+				const result = await stub.getPrivateData('some collection', 'some key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateStub.calledOnce).to.be.ok;
+				expect(handleGetStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('putPrivateData', () => {
+			let handlePutStateStub;
+			let stub;
+
+			beforeEach(() => {
+				handlePutStateStub = sinon.stub().resolves('some state');
+				stub = new Stub({
+					handlePutState: handlePutStateStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should throw an error if no arguments supplied', async () => {
+				const result = stub.putPrivateData();
+				await expect(result).to.eventually.be.rejectedWith(Error, 'putPrivateData requires three arguments, collection, key and value');
+			});
+
+			it ('should throw an error if one argument supplied', async () => {
+				const result = stub.putPrivateData('some arg');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'putPrivateData requires three arguments, collection, key and value');
+			});
+
+			it ('should throw an error if two arguments supplied', async () => {
+				const result = stub.putPrivateData('some arg1', 'some arg2');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'putPrivateData requires three arguments, collection, key and value');
+			});
+
+			it ('should throw an error if collection null', async () => {
+				const result = stub.putPrivateData(null, 'some key', 'some value');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+			});
+
+			it ('should throw an error if key null', async () => {
+				const result = stub.putPrivateData('some collection', null, 'some value');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
+			});
+
+			it ('should return handler.handlePutState', async () => {
+				const result = await stub.putPrivateData('some collection', 'some key', 'some value');
+
+				expect(result).to.deep.equal('some state');
+				expect(handlePutStateStub.calledOnce).to.be.ok;
+				expect(handlePutStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'some value', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('deletePrivateData', () => {
+			let handleDeleteStateStub;
+			let stub;
+
+			beforeEach(() => {
+				handleDeleteStateStub = sinon.stub().resolves('some state');
+				stub = new Stub({
+					handleDeleteState: handleDeleteStateStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should throw an error if no arguments supplied', async () => {
+				const result = stub.deletePrivateData();
+				await expect(result).to.eventually.be.rejectedWith(Error, 'deletePrivateData requires two arguments, collection and key');
+			});
+
+			it ('should throw an error if one argument supplied', async () => {
+				const result = stub.deletePrivateData('some arg');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'deletePrivateData requires two arguments, collection and key');
+			});
+
+			it ('should throw an error if collection null', async () => {
+				const result = stub.deletePrivateData(null, 'some key');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+			});
+
+			it ('should return handler.handleDeleteState', async () => {
+				const result = await stub.deletePrivateData('some collection', 'some key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleDeleteStateStub.calledOnce).to.be.ok;
+				expect(handleDeleteStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('getPrivateDataByRange', () => {
+			let handleGetStateByRangeStub;
+			let stub;
+
+			beforeEach(() => {
+				handleGetStateByRangeStub = sinon.stub().resolves('some state');
+				stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should throw an error if no arguments supplied', async () => {
+				const result = stub.getPrivateDataByRange();
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataByRange requires three arguments, collection, startKey and endKey');
+			});
+
+			it ('should throw an error if one argument supplied', async () => {
+				const result = stub.getPrivateDataByRange('some arg');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataByRange requires three arguments, collection, startKey and endKey');
+			});
+
+			it ('should throw an error if two arguments supplied', async () => {
+				const result = stub.getPrivateDataByRange('some arg1', 'some arg2');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataByRange requires three arguments, collection, startKey and endKey');
+			});
+
+			it ('should throw an error if collection null', async () => {
+				const result = stub.getPrivateDataByRange(null, 'some start key', 'some end key');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+			});
+
+			it ('should use a substitute start key if none provided', async () => {
+				const EMPTY_KEY_SUBSTITUTE = Stub.__get__('EMPTY_KEY_SUBSTITUTE');
+
+				const result = await stub.getPrivateDataByRange('some collection', null, 'some end key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['some collection', EMPTY_KEY_SUBSTITUTE, 'some end key', 'dummyChannelId', 'dummyTxid']);
+			});
+
+			it ('should return handler.handleGetStateByRange', async () => {
+				const result = await stub.getPrivateDataByRange('some collection', 'some start key', 'some end key');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['some collection', 'some start key', 'some end key', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('getPrivateDataByPartialCompositeKey', () => {
+			let stub;
+
+			beforeEach(() => {
+				stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should throw an error if no arguments supplied', async () => {
+				const result = stub.getPrivateDataByPartialCompositeKey();
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
+			});
+
+			it ('should throw an error if one argument supplied', async () => {
+				const result = stub.getPrivateDataByPartialCompositeKey('some arg');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
+			});
+
+			it ('should throw an error if two arguments supplied', async () => {
+				const result = stub.getPrivateDataByPartialCompositeKey('some arg1', 'some arg2');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
+			});
+
+			it ('should throw an error if collection null', async () => {
+				const result = stub.getPrivateDataByPartialCompositeKey(null, 'some type', ['arg1', 'arg2']);
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+			});
+
+			it ('should return stub.getPrivateDataByRange', async () => {
+				const MAX_UNICODE_RUNE_VALUE = Stub.__get__('MAX_UNICODE_RUNE_VALUE');
+
+				const createCompositeKeyStub = sinon.stub(stub, 'createCompositeKey').returns('some composite key');
+				const getPrivateDataByRangeStub = sinon.stub(stub, 'getPrivateDataByRange').resolves('some data by range');
+
+				const result = await stub.getPrivateDataByPartialCompositeKey('some collection', 'some type', ['arg1', 'arg2']);
+
+				expect(result).to.deep.equal('some data by range');
+				expect(createCompositeKeyStub.calledOnce).to.be.ok;
+				expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['arg1', 'arg2']]);
+				expect(getPrivateDataByRangeStub.calledOnce).to.be.ok;
+				expect(getPrivateDataByRangeStub.firstCall.args).to.deep.equal(['some collection', 'some composite key', `some composite key${MAX_UNICODE_RUNE_VALUE}`]);
+			});
+		});
+
+		describe('getPrivateDataQueryResult', () => {
+			let handleGetQueryResultStub;
+			let stub;
+
+			beforeEach(() => {
+				handleGetQueryResultStub = sinon.stub().resolves('some query result');
+				stub = new Stub({
+					handleGetQueryResult: handleGetQueryResultStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+			});
+
+			it ('should throw an error if no arguments supplied', async () => {
+				const result = stub.getPrivateDataQueryResult();
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataQueryResult requires two arguments, collection and query');
+			});
+
+			it ('should throw an error if one argument supplied', async () => {
+				const result = stub.getPrivateDataQueryResult('some arg');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateDataQueryResult requires two arguments, collection and query');
+			});
+
+			it ('should throw an error if collection null', async () => {
+				const result = stub.getPrivateDataQueryResult(null, 'some query');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+			});
+
+			it ('should return handler.handleGetQueryResult', async () => {
+				const result = await stub.getPrivateDataQueryResult('some collection', 'some query');
+
+				expect(result).to.deep.equal('some query result');
+				expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+				expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['some collection', 'some query', 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+	});
 });

@@ -561,7 +561,6 @@ async function handleMessage(msg, client, action) {
 				txid: msg.txid,
 				channel_id : msg.channel_id
 			};
-
 			client._stream.write(nextStateMsg);
 		}
 
@@ -646,10 +645,6 @@ function newErrorMsg(msg, state) {
 }
 
 function shortTxid(txId) {
-	if (txId.length < 8) {
-		return txId;
-	}
-
 	return txId.substring(0, 8);
 }
 

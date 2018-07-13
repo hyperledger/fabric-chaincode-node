@@ -3,1101 +3,1722 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+
 'use strict';
 
-const test = require('../base.js');
 const sinon = require('sinon');
+const chai = require('chai');
+chai.use(require('chai-as-promised'));
+const expect = chai.expect;
 const rewire = require('rewire');
-const Handler = rewire('fabric-shim/lib/handler.js');
-const Stub = require('fabric-shim/lib/stub.js');
+let Handler = rewire('../../src/lib/handler.js');
+
+const Stub = require('../../src/lib/stub.js');
 const MsgQueueHandler = Handler.__get__('MsgQueueHandler');
 const QMsg = Handler.__get__('QMsg');
+const StateQueryIterator = require('../../src/lib/iterators.js').StateQueryIterator;
+const HistoryQueryIterator = require('../../src/lib/iterators.js').HistoryQueryIterator;
 
 const grpc = require('grpc');
-const path = require('path');
 
-const StateQueryIterator = require('fabric-shim/lib/iterators.js').StateQueryIterator;
-const HistoryQueryIterator = require('fabric-shim/lib/iterators.js').HistoryQueryIterator;
+let sandbox = sinon.createSandbox();
 
-//chaincode object to handle chaincode interface calls Init() and Invoke()
-const chaincodeObj = {
+const mockChaincodeImpl = {
 	Init: function() {},
 	Invoke: function() {}
 };
 
-function getPeerAddress(isSecure) {
-	let address = 'grpc://localhost:7051';
-	if (isSecure && isSecure === true) {
-		address = address.replace(/grpc/gi, 'grpcs');
-	}
-	return address;
-}
-let sandbox = sinon.sandbox.create();
-let testHandler = new Handler(chaincodeObj, getPeerAddress(false));
+const mockOpts = {
+	pem: 'dummy pem string',
+	key: 'dummy key',
+	cert: 'dummy cert'
+};
 
-test('handler.js constructor tests', (t) => {
-	t.throws(
-		() => {
-			new Handler();
-		},
-		/Missing required argument: chaincode/,
-		'Test error handling on missing chaincode argument'
-	);
+const mockPeerAddress = {
+	base: 'localhost:7051',
+	unsecure: 'grpc://localhost:7051',
+	secure: 'grpcs://localhost:7051'
+};
 
-	t.throws(
-		() => {
-			new Handler({});
-		},
-		/The chaincode argument must implement the mandatory "Init\(\)" method/,
-		'Test error handling on chaincode argument missing Init() method implementation'
-	);
+describe('Handler', () => {
+	describe('QMsg', () => {
+		let resolve;
+		let reject;
 
-	t.throws(
-		() => {
-			new Handler({
-				Init: function() {}
-			});
-		},
-		/The chaincode argument must implement the mandatory "Invoke\(\)" method/,
-		'Test error handling on chaincode argument missing Invoke() method implementation'
-	);
+		let qMsg;
 
-	t.throws(
-		() => {
-			new Handler(chaincodeObj);
-		},
-		/Invalid URL: undefined/,
-		'Test error handling on missing "url" argument'
-	);
+		let msg = {
+			channel_id: 'theChannelID',
+			txid: 'aTx'
+		};
 
-	t.throws(
-		() => {
-			new Handler(chaincodeObj, 'https://localhost:7051',
-				{
-					'pem': 'dummyPEMString',
-					'ssl-target-name-override': 'dummyHost',
-					'request-timeout': 12345,
-					'another-property': 'dummyValue'
-				});
-		},
-		/Invalid protocol: https.  URLs must begin with grpc:\/\/ or grpcs:\/\//,
-		'Test error handling on invalid "https" url argument'
-	);
+		beforeEach(() => {
+			resolve = sinon.stub();
+			reject = sinon.stub();
 
-	let handler;
-	t.doesNotThrow(
-		() => {
-			handler = new Handler(chaincodeObj, getPeerAddress(false));
-		},
-		null,
-		'Test positive handling of valid url argument'
-	);
-
-	t.equal(handler._endpoint.addr, 'localhost:7051', 'Test handler.addr value is properly set');
-	t.equal(typeof handler._client !== 'undefined' && handler._client !== null, true, 'Test handler._client is properly set');
-
-	t.throws(
-		() => {
-			new Handler(chaincodeObj, getPeerAddress(true));
-		},
-		/PEM encoded certificate is required/,
-		'Test error handling on missing opts.pem when using grpcs://'
-	);
-	t.throws(
-		() => {
-			new Handler(chaincodeObj, getPeerAddress(true),
-				{
-					'pem': 'dummyPEMString',
-					'ssl-target-name-override': 'dummyHost',
-					'request-timeout': 12345,
-					'another-property': 'dummyValue',
-					'cert':'dummyCertString'
-				});
-		},
-		/encoded Private key is required/,
-		'Test error handling on missing opts.key when using grpcs://'
-	);
-	t.throws(
-		() => {
-			new Handler(chaincodeObj, getPeerAddress(true),
-				{
-					'pem': 'dummyPEMString',
-					'ssl-target-name-override': 'dummyHost',
-					'request-timeout': 12345,
-					'another-property': 'dummyValue',
-					'key':'dummyKeyString'
-				});
-		},
-		/encoded client certificate is required/,
-		'Test error handling on missing opts.cert when using grpcs://'
-	);
-	handler = new Handler(chaincodeObj, getPeerAddress(true),
-		{
-			'pem': 'dummyPEMString',
-			'ssl-target-name-override': 'dummyHost',
-			'request-timeout': 12345,
-			'another-property': 'dummyValue7',
-			'key':'dummyKeyString',
-			'cert':'dummyCertString'
+			qMsg = new QMsg(msg, 'some method', resolve, reject);
 		});
 
-	t.equal(handler._options['grpc.ssl_target_name_override'], 'dummyHost', 'Test converting opts.ssl-target-name-override to grpc.ssl_target_name_override');
-	t.equal(handler._options['grpc.default_authority'], 'dummyHost', 'Test converting opts.ssl-target-name-override to grpc.default_authority');
-	t.equal(handler._options['request-timeout'], 12345, 'Test processing request-time option');
-	t.equal(handler._options['another-property'], 'dummyValue7', 'Test processing another-property option');
-
-	// The DNS can be case sensitive in some cases (eg Docker DNS)
-	handler = new Handler(chaincodeObj, 'grpc://Peer.Example.com:7051');
-	t.equal(handler._endpoint.addr, 'Peer.Example.com:7051', 'Test handler.addr value preserves casing');
-
-	t.end();
-});
-
-test('#handleInit tests', (t) => {
-	let saveHandleMessage = Handler.__get__('handleMessage');
-	let handleMessage = sinon.stub();
-	Handler.__set__('handleMessage', handleMessage);
-	testHandler.handleInit('some message');
-	t.true(handleMessage.calledOnce, 'Test handleMessage was called');
-	t.deepEqual(handleMessage.firstCall.args, ['some message', testHandler, 'init'], 'Test handleMessage was called with correct values');
-	Handler.__set__('handleMessage', saveHandleMessage);
-	t.end();
-});
-
-test('#handleTransaction tests', (t) => {
-	let saveHandleMessage = Handler.__get__('handleMessage');
-	let handleMessage = sinon.stub();
-	Handler.__set__('handleMessage', handleMessage);
-	testHandler.handleTransaction('some message');
-	t.true(handleMessage.calledOnce, 'Test handleMessage was called');
-	t.deepEqual(handleMessage.firstCall.args, ['some message', testHandler, 'invoke'], 'Test handleMessage was called with correct values');
-	Handler.__set__('handleMessage', saveHandleMessage);
-	t.end();
-});
-
-test('#handleGetState tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetState('', 'theKey', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'GetState', 'Test _askPeerAndListen was called with GetState parameter');
-	let payload = new serviceProto.GetState();
-	payload.setKey('theKey');
-	payload.setCollection('');
-
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.GET_STATE,
-		payload: payload.toBuffer(),
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleGetState('', 'theKey', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	sandbox.restore();
-});
-
-test('#handlePutState tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let putState = sinon.createStubInstance(serviceProto.PutState);
-	putState.toBuffer.returns('a buffer');
-	let saveClass = serviceProto.PutState;
-	class MockPutState {
-		constructor() {
-			return putState;
-		}
-	}
-	serviceProto.PutState = MockPutState;
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handlePutState('', 'theKey', 'some value', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'PutState', 'Test _askPeerAndListen was called with PutState parameter');
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.PUT_STATE,
-		payload: 'a buffer',
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(putState.setKey.calledOnce, 'Test setKey was called');
-	t.deepEqual(putState.setKey.firstCall.args, ['theKey'], 'Test setKey was called with correct value');
-	t.true(putState.setValue.calledOnce, 'Test setValue was called');
-	t.deepEqual(putState.setValue.firstCall.args, ['some value'], 'Test setValue was called with correct value');
-
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handlePutState('', 'theKey', 'some value', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	// restore everything back to what it was
-	serviceProto.PutState = saveClass;
-	sandbox.restore();
-});
-
-test('#handleDeleteState tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleDeleteState('', 'theKey', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'DeleteState', 'Test _askPeerAndListen was called with DeleteState parameter');
-	let payload = new serviceProto.DelState();
-	payload.setKey('theKey');
-	payload.setCollection('');
-
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.DEL_STATE,
-		payload: payload.toBuffer(),
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleGetState('', 'theKey', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	sandbox.restore();
-});
-
-test('#handleGetStateByRange tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let rangeState = sinon.createStubInstance(serviceProto.GetStateByRange);
-	rangeState.toBuffer.returns('a buffer');
-	let saveClass = serviceProto.GetStateByRange;
-	class MockGetStateByRange {
-		constructor() {
-			return rangeState;
-		}
-	}
-	serviceProto.GetStateByRange = MockGetStateByRange;
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetStateByRange('', '1stKey', '2ndKey', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'GetStateByRange', 'Test _askPeerAndListen was called with GetState parameter');
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
-		payload: 'a buffer',
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(rangeState.setStartKey.calledOnce, 'Test setStartKey was called');
-	t.deepEqual(rangeState.setStartKey.firstCall.args, ['1stKey'], 'Test setStartKey was called with correct value');
-	t.true(rangeState.setEndKey.calledOnce, 'Test setEndKey was called');
-	t.deepEqual(rangeState.setEndKey.firstCall.args, ['2ndKey'], 'Test setEndKey was called with correct value');
-
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleGetStateByRange('', '1stKey', '2nd', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	// restore everything back to what it was
-	serviceProto.GetStateByRange = saveClass;
-	sandbox.restore();
-});
-
-test('#handleQueryStateNext tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let queryState = sinon.createStubInstance(serviceProto.QueryStateNext);
-	queryState.toBuffer.returns('a buffer');
-	let saveClass = serviceProto.QueryStateNext;
-	class MockQueryStateNext {
-		constructor() {
-			return queryState;
-		}
-	}
-	serviceProto.QueryStateNext = MockQueryStateNext;
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleQueryStateNext('anID', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'QueryStateNext', 'Test _askPeerAndListen was called with QueryStateNext parameter');
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_NEXT,
-		payload: 'a buffer',
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(queryState.setId.calledOnce, 'Test setId was called');
-	t.deepEqual(queryState.setId.firstCall.args, ['anID'], 'Test setId was called with correct value');
-
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleQueryStateNext('anID', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	// restore everything back to what it was
-	serviceProto.QueryStateNext = saveClass;
-	sandbox.restore();
-});
-
-test('#handleQueryStateClose tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let queryClose = sinon.createStubInstance(serviceProto.QueryStateClose);
-	queryClose.toBuffer.returns('a buffer');
-	let saveClass = serviceProto.QueryStateClose;
-	class MockQueryStateClose {
-		constructor() {
-			return queryClose;
-		}
-	}
-	serviceProto.QueryStateClose = MockQueryStateClose;
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleQueryStateClose('anID', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'QueryStateClose', 'Test _askPeerAndListen was called with QueryStateClose parameter');
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
-		payload: 'a buffer',
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(queryClose.setId.calledOnce, 'Test setId was called');
-	t.deepEqual(queryClose.setId.firstCall.args, ['anID'], 'Test setId was called with correct value');
-
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleQueryStateNext('anID', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	// restore everything back to what it was
-	serviceProto.QueryStateClose = saveClass;
-	sandbox.restore();
-});
-
-test('#handleGetQueryResult tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let queryResult = sinon.createStubInstance(serviceProto.GetQueryResult);
-	queryResult.toBuffer.returns('a buffer');
-	let saveClass = serviceProto.GetQueryResult;
-	class MockGetQueryResult {
-		constructor() {
-			return queryResult;
-		}
-	}
-	serviceProto.GetQueryResult = MockGetQueryResult;
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetQueryResult('', 'aQuery', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'GetQueryResult', 'Test _askPeerAndListen was called with GetQueryResult parameter');
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
-		payload: 'a buffer',
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(queryResult.setQuery.calledOnce, 'Test setQuery was called');
-	t.deepEqual(queryResult.setQuery.firstCall.args, ['aQuery'], 'Test setQuery was called with correct value');
-
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleQueryStateNext('aQuery', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	// restore everything back to what it was
-	serviceProto.GetQueryResult = saveClass;
-	sandbox.restore();
-});
-
-test('#handleGetHistoryForKey tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let historyForKey = sinon.createStubInstance(serviceProto.GetHistoryForKey);
-	historyForKey.toBuffer.returns('a buffer');
-	let saveClass = serviceProto.GetHistoryForKey;
-	class MockGetHistoryForKey {
-		constructor() {
-			return historyForKey;
-		}
-	}
-	serviceProto.GetHistoryForKey = MockGetHistoryForKey;
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves('some response');
-	let result = await testHandler.handleGetHistoryForKey('aKey', 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'GetHistoryForKey', 'Test _askPeerAndListen was called with GetHistoryForKey parameter');
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
-		payload: 'a buffer',
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(historyForKey.setKey.calledOnce, 'Test setKey was called');
-	t.deepEqual(historyForKey.setKey.firstCall.args, ['aKey'], 'Test setKey was called with correct value');
-
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleQueryStateNext('aKey', 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	// restore everything back to what it was
-	serviceProto.GetHistoryForKey = saveClass;
-	sandbox.restore();
-});
-
-test('#handleInvokeChaincode tests', async (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let chaincodeProto = Handler.__get__('_chaincodeProto');
-	let responseProto = Handler.__get__('_responseProto');
-	sandbox.stub(responseProto.Response, 'decode').returns('some response');
-
-	let chaincodeSpec = sinon.createStubInstance(chaincodeProto.ChaincodeSpec);
-	class MockChaincodeSpec {
-		constructor() {
-			return chaincodeSpec;
-		}
-	}
-	let saveChaincodeSpec = chaincodeProto.ChaincodeSpec;
-	chaincodeProto.ChaincodeSpec = MockChaincodeSpec;
-	chaincodeSpec.toBuffer.returns('a buffer');
-
-	let chaincodeId = sinon.createStubInstance(chaincodeProto.ChaincodeID);
-	class MockChaincodeID {
-		constructor() {
-			return chaincodeId;
-		}
-	}
-	let saveChaincodeId = chaincodeProto.ChaincodeID;
-	chaincodeProto.ChaincodeID = MockChaincodeID;
-
-	let chaincodeInput = sinon.createStubInstance(chaincodeProto.ChaincodeInput);
-	class MockChaincodeInput {
-		constructor() {
-			return chaincodeInput;
-		}
-	}
-	let saveChaincodeInput = chaincodeProto.ChaincodeInput;
-	chaincodeProto.ChaincodeInput = MockChaincodeInput;
-
-
-	let response = {
-		type: serviceProto.ChaincodeMessage.Type.COMPLETED
-	};
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves(response);
-	let result = await testHandler.handleInvokeChaincode('ccname', ['arg1', 'arg2'], 'theChannelID', 'theTxID');
-	t.equal(result, 'some response', 'Test we get the expected response');
-	let askArgs = testHandler._askPeerAndListen.firstCall.args;
-	t.equal(askArgs.length, 2, 'Test _askPeerAndListen was called with correct number of arguments');
-	t.equal(askArgs[1], 'InvokeChaincode', 'Test _askPeerAndListen was called with GetHistoryForKey parameter');
-	let expectedMsg = {
-		type: serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
-		payload: 'a buffer',
-		channel_id: 'theChannelID',
-		txid: 'theTxID'
-	};
-	t.deepEqual(askArgs[0], expectedMsg, 'Test _askPeerAndListen was given the correct message');
-	t.true(chaincodeId.setName.calledOnce, 'Test setName on chaincodeID was called');
-	t.deepEqual(chaincodeId.setName.firstCall.args, ['ccname'], 'Test setName was called with correct value');
-	t.true(chaincodeInput.setArgs.calledOnce, 'Test setArgs on chaincodeInput was called');
-	t.deepEqual(chaincodeInput.setArgs.firstCall.args, [[Buffer.from('arg1'), Buffer.from('arg2')]], 'Test setArgs was called with correct value');
-	t.true(chaincodeSpec.setChaincodeId.calledOnce, 'Test setChaincodeId on chaincodeSpec was called');
-	//t.equal(chaincodeSpec.setChaincodeId.firstCall.args, [chaincodeId], 'Test setChaincodeId on chaincodeSpec was called with correct value');
-	t.true(chaincodeSpec.setInput.calledOnce, 'Test setInput on chaincodeSpec was called');
-	//t.equal(chaincodeSpec.setInput.firstCall.args, [chaincodeInput], 'Test setInput on chaincodeSpec was called with correct value');
-
-
-	await testHandler.handleInvokeChaincode('ccname', [], 'theChannelID', 'theTxID');
-	t.deepEqual(chaincodeInput.setArgs.secondCall.args, [[]], 'Test setArgs was called with empty array');
-
-	sandbox.restore();
-	response = {
-		type: serviceProto.ChaincodeMessage.Type.ERROR,
-		payload: Buffer.from('An Error occurred')
-	};
-
-	sandbox.stub(testHandler, '_askPeerAndListen').resolves(response);
-
-	try {
-		await testHandler.handleInvokeChaincode('ccname', [], 'theChannelID', 'theTxID');
-		t.fail('expected error to be thrown');
-	} catch(error) {
-		t.equal(error.message, 'An Error occurred', 'Tests that the error response from invokeChaincode was thrown');
-	}
-
-	sandbox.restore();
-	let error = new Error('some error');
-	sandbox.stub(testHandler, '_askPeerAndListen').rejects(error);
-	try {
-		await testHandler.handleInvokeChaincode('', [], 'theChannelID', 'theTxID');
-		t.fail('unexpected success when error should have occurred');
-	}
-	catch(err) {
-		t.equal(err, error, 'Tests that the error is thrown');
-	}
-	// restore everything back to what it was
-	chaincodeProto.ChaincodeSpec = saveChaincodeSpec;
-	chaincodeProto.ChaincodeID = saveChaincodeId;
-	chaincodeProto.ChaincodeInput = saveChaincodeInput;
-	sandbox.restore();
-});
-
-test('#toString tests', (t) => {
-	t.equal(testHandler.toString(), 'ChaincodeSupportClient : {url:grpc://localhost:7051}');
-	t.end();
-});
-
-test('#shortTxid tests', (t) => {
-	let shortTxid = Handler.__get__('shortTxid');
-	t.equal(shortTxid('1234567'), '1234567');
-	t.equal(shortTxid('12345678'), '12345678');
-	t.equal(shortTxid('123456789'), '12345678');
-	t.equal(shortTxid(''), '');
-	t.end();
-});
-
-test('#newErrorMsg tests', (t) => {
-	let newErrorMsg = Handler.__get__('newErrorMsg');
-	let msg = {
-		channel_id: 'theChannelID',
-		txid: 'aTX',
-		type: 'aType',
-		payload: 'aPayload'
-	};
-	let result = newErrorMsg(msg, 'aState');
-	let response = {
-		type: 'ERROR',
-		payload: Buffer.from('an error string'),
-		channel_id: 'theChannelID',
-		txid: 'aTX'
-	};
-
-	let str = result.payload.toString();
-	let test = str.includes('aTX') && str.includes('aType') && str.includes('aState');
-
-	t.equal(result.type, response.type, 'Tests the response is correct');
-	t.true(test, 'Test payload includes info about the message');
-	t.equal(result.txid, response.txid, 'Tests the response is correct');
-
-	sandbox.restore();
-	t.end();
-});
-
-test('#_askPeerAndListen', async (t) => {
-	testHandler.msgQueueHandler = sinon.createStubInstance(MsgQueueHandler);
-	testHandler.msgQueueHandler.queueMsg.callsFake((qMsg) => {
-		qMsg.success('a payload');
-	});
-	let result = await testHandler._askPeerAndListen('some message', 'callMethod');
-	t.equal(result, 'a payload', 'Test a resolved promise with payload is returned');
-
-	t.end();
-});
-
-test('#close', (t) => {
-	testHandler._stream = {end: sinon.stub()};
-	testHandler.close();
-	t.true(testHandler._stream.end.calledOnce,'Test end was called on the stream');
-	t.end();
-});
-
-
-test('#parseResponse', (t) => {
-	let serviceProto = Handler.__get__('_serviceProto');
-	let parseResponse = Handler.__get__('parseResponse');
-	let MSG_TYPE = Handler.__get__('MSG_TYPE');
-	let saveQReso = serviceProto.QueryResponse;
-	let saveCCMsg = serviceProto.ChaincodeMessage;
-	serviceProto.QueryResponse = {
-		decode: sinon.stub().returns('qr decoded payload')
-	};
-
-	serviceProto.ChaincodeMessage = {
-		decode: sinon.stub().returns('cc decoded payload')
-	};
-
-	let res = {
-		type: MSG_TYPE.RESPONSE,
-		payload: 'a payload',
-		channel_id: 'theChannelID',
-		txid: 'aTx'
-	};
-
-	let result = parseResponse(testHandler, res, 'GetState');
-	t.equal(result, res.payload, 'Test we get the right payload back');
-	result = parseResponse(testHandler, res, 'PutState');
-	t.equal(result, res.payload, 'Test we get the right payload back');
-
-	result = parseResponse(testHandler, res, 'QueryStateClose');
-	t.equal(result, 'qr decoded payload', 'Test we get the right payload back');
-	result = parseResponse(testHandler, res, 'QueryStateNext');
-	t.equal(result, 'qr decoded payload', 'Test we get the right payload back');
-	result = parseResponse(testHandler, res, 'InvokeChaincode');
-	t.equal(result, 'cc decoded payload', 'Test we get the right payload back');
-
-	serviceProto.QueryResponse.decode.reset();
-	result = parseResponse(testHandler, res, 'GetStateByRange');
-	t.true(result instanceof StateQueryIterator);
-	t.true(serviceProto.QueryResponse.decode.calledOnce, 'Test queryresponse decode was called');
-	t.deepEqual(serviceProto.QueryResponse.decode.firstCall.args, [res.payload], 'Test queryresponse decode was called');
-
-	serviceProto.QueryResponse.decode.reset();
-	result = parseResponse(testHandler, res, 'GetQueryResult');
-	t.true(result instanceof StateQueryIterator);
-	t.true(serviceProto.QueryResponse.decode.calledOnce, 'Test queryresponse decode was called');
-	t.deepEqual(serviceProto.QueryResponse.decode.firstCall.args, [res.payload], 'Test queryresponse decode was called');
-
-	serviceProto.QueryResponse.decode.reset();
-	result = parseResponse(testHandler, res, 'GetHistoryForKey');
-	t.true(result instanceof HistoryQueryIterator);
-	t.true(serviceProto.QueryResponse.decode.calledOnce, 'Test queryresponse decode was called');
-	t.deepEqual(serviceProto.QueryResponse.decode.firstCall.args, [res.payload], 'Test queryresponse decode was called');
-
-	// test error response
-	res = {
-		type: MSG_TYPE.ERROR,
-		payload: Buffer.from('some error'),
-		channel_id: 'theChannelID',
-		txid: 'aTx'
-	};
-
-	try {
-		parseResponse(testHandler, res, 'GetHistoryForKey');
-		t.fail('unexpected success when error expected to be thrown');
-	}
-	catch(err) {
-		t.true(err.toString().includes('some error'), 'Test expected error to be returned');
-	}
-
-	// test unknown response
-	res = {
-		type: 98674,
-		payload: 'something',
-		channel_id: 'theChannelID',
-		txid: 'aTx'
-	};
-
-	try {
-		parseResponse(testHandler, res, 'GetHistoryForKey');
-		t.fail('unexpected success when error expected to be thrown');
-	}
-	catch(err) {
-		t.true(err.toString().includes('GetHistoryForKey'), 'Test expected error to be returned');
-	}
-
-	serviceProto.QueryResponse = saveQReso;
-	serviceProto.ChaincodeMessage = saveCCMsg;
-	t.end();
-});
-
-test('#handleMessage', async (t) => {
-	const handleMessage = Handler.__get__('handleMessage');
-	const chaincodeProto = Handler.__get__('_chaincodeProto');
-	const serviceProto = Handler.__get__('_serviceProto');
-	const saveCCInput = chaincodeProto.ChaincodeInput;
-	chaincodeProto.ChaincodeInput = {decode: sinon.stub()};
-
-	const saveCreateStub = Handler.__get__('createStub');
-	let stubCtr = sinon.stub();
-	Handler.__set__('createStub', () => {return stubCtr;});
-
-	let mockHandler = {};
-	mockHandler._stream = {write: sinon.stub()};
-	mockHandler.chaincode = {Init: sinon.stub(), Invoke: sinon.stub()};
-
-	//action=init,invoke
-	//msg:payload, txid, proposal
-	let msg = {
-		channel_id: 'theChannelID',
-		txid: 'aTX',
-		payload: 'some payload',
-		proposal: 'some proposal'
-	};
-	let expectedResponse = {
-		type: serviceProto.ChaincodeMessage.Type.COMPLETED,
-		payload: 'a buffered payload',
-		channel_id: 'theChannelID',
-		txid: msg.txid,
-		chaincode_event: undefined
-	};
-
-	chaincodeProto.ChaincodeInput.decode.returns('decoded payload');
-	mockHandler.chaincode.Init.resolves({status: Stub.RESPONSE_CODE.OK, toBuffer: () => {
-		return 'a buffered payload';
-	}});
-	mockHandler.chaincode.Invoke.resolves({status: Stub.RESPONSE_CODE.OK, toBuffer: () => {
-		return 'a buffered invoke payload';
-	}});
-
-	await handleMessage(msg, mockHandler, 'init');
-	t.true(mockHandler._stream.write.calledOnce, 'Test init a response is written to a stream');
-	t.deepEqual(mockHandler._stream.write.firstCall.args, [expectedResponse], 'Test init a correct response written to stream');
-
-
-	mockHandler._stream.write.reset();
-	expectedResponse = {
-		type: serviceProto.ChaincodeMessage.Type.COMPLETED,
-		payload: 'a buffered invoke payload',
-		channel_id: 'theChannelID',
-		txid: msg.txid,
-		chaincode_event: undefined
-	};
-	await handleMessage(msg, mockHandler, 'invoke');
-	t.true(mockHandler._stream.write.calledOnce, 'Test invoke a response is written to a stream');
-	t.deepEqual(mockHandler._stream.write.firstCall.args, [expectedResponse], 'Test invoke a correct response written to stream');
-
-	chaincodeProto.ChaincodeInput = saveCCInput;
-	Handler.__set__('createStub', saveCreateStub);
-	t.end();
-
-
-});
-
-test('#chat', (t) => {
-	testHandler.msgQueueHandler = null;
-	let mockStream = {write: sinon.stub(), on: sinon.stub()};
-	testHandler._client = {register: () => {
-		return mockStream;
-	}};
-	testHandler.chat('initial message');
-	t.true(mockStream.write.calledOnce, 'Test stream was written to');
-	t.deepEqual(mockStream.write.firstCall.args, ['initial message'], 'Test correct message is sent');
-	t.true(testHandler.msgQueueHandler instanceof MsgQueueHandler, 'Test Message queue handler is set up');
-	t.equal(testHandler.msgQueueHandler.handler, testHandler, 'Test message queue handler is access to handler instance');
-	t.equal(testHandler.msgQueueHandler.stream, mockStream, 'Test message queue handler is access to stream instance');
-	t.equal(mockStream.on.callCount, 3, 'Test stream listeners registered');
-	t.equal(mockStream.on.firstCall.args[0], 'data', 'Test we register for the data event');
-	t.equal(mockStream.on.secondCall.args[0], 'end', 'Test we register for the end event');
-	t.equal(mockStream.on.thirdCall.args[0], 'error', 'Test we register for the error event');
-	t.end();
-});
-
-test('#stream:end event', (t) => {
-	let eventReg = {};
-	let mockEventEmitter = (event, cb) => {
-		eventReg[event] = cb;
-	};
-
-	let mockStream = {write: sinon.stub(), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
-	testHandler._client = {register: () => {
-		return mockStream;
-	}};
-	testHandler.chat('initial message');
-	eventReg['end']();
-
-	t.true(mockStream.cancel.calledOnce, 'Test stream was ended');
-	t.end();
-});
-
-test('#stream:error event', (t) => {
-	let eventReg = {};
-	let mockEventEmitter = (event, cb) => {
-		eventReg[event] = cb;
-	};
-
-	let mockStream = {write: sinon.stub(), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
-	testHandler._client = {register: () => {
-		return mockStream;
-	}};
-	testHandler.chat('initial message');
-	eventReg['error']({});
-
-	t.true(mockStream.end.calledOnce, 'Test stream was ended');
-	t.end();
-});
-
-test('#stream:data event', (t) => {
-	let MSG_TYPE = Handler.__get__('MSG_TYPE');
-	// state machine created-->established-->Ready
-	// initial state is created
-	// first test a complete valid sequence
-	let eventReg = {};
-	let mockEventEmitter = (event, cb) => {
-		eventReg[event] = cb;
-	};
-
-	let mockStream = {write: sinon.stub(), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
-	testHandler._client = {register: () => {
-		return mockStream;
-	}};
-	let handleInitStub = sinon.stub(testHandler, 'handleInit');
-	let handleTxnStub = sinon.stub(testHandler, 'handleTransaction');
-
-	testHandler.chat('initial message');
-	testHandler.msgQueueHandler = sinon.createStubInstance(MsgQueueHandler);
-
-	let registeredMsg = {
-		type: MSG_TYPE.REGISTERED
-	};
-
-	eventReg['data'](registeredMsg);
-
-	// state should now be established
-	let readyMsg = {
-		type: MSG_TYPE.READY
-	};
-	eventReg['data'](readyMsg);
-
-	// state should now be ready, can now accept: RESPONSE, ERROR, INIT, TRANSACTION
-	let initMsg = {
-		channel_id: 'theChannelID',
-		txid: 'sometx',
-		type: MSG_TYPE.INIT
-	};
-	eventReg['data'](initMsg);
-	t.true(handleInitStub.calledOnce, 'Check handleInit was called');
-	t.equal(handleInitStub.firstCall.args[0], initMsg, 'Check handleInit was called with right message');
-
-	let txnMsg = {
-		channel_id: 'theChannelID',
-		txid: 'sometx',
-		type: MSG_TYPE.TRANSACTION
-	};
-	eventReg['data'](txnMsg);
-	t.true(handleTxnStub.calledOnce, 'Check handleTransaction was called');
-	t.equal(handleTxnStub.firstCall.args[0], txnMsg, 'Check handleTransaction was called with right message');
-
-	let respMsg = {
-		channel_id: 'theChannelID',
-		txid: 'sometx',
-		type: MSG_TYPE.RESPONSE
-	};
-	eventReg['data'](respMsg);
-	console.log(testHandler.msgQueueHandler);
-	t.true(testHandler.msgQueueHandler.handleMsgResponse.calledOnce, 'Check handleTransaction was called');
-	t.equal(testHandler.msgQueueHandler.handleMsgResponse.firstCall.args[0], respMsg, 'Check handleTransaction was called with right message');
-	testHandler.msgQueueHandler.handleMsgResponse.reset();
-
-	let errorMsg = {
-		channel_id: 'theChannelID',
-		txid: 'sometx',
-		type: MSG_TYPE.ERROR
-	};
-	eventReg['data'](errorMsg);
-	console.log(testHandler.msgQueueHandler);
-	t.true(testHandler.msgQueueHandler.handleMsgResponse.calledOnce, 'Check handleTransaction was called');
-	t.equal(testHandler.msgQueueHandler.handleMsgResponse.firstCall.args[0], errorMsg, 'Check handleTransaction was called with right message');
-	testHandler.msgQueueHandler.handleMsgResponse.reset();
-
-	t.end();
-
-});
-
-
-test('#MsgQueueHandler:queueMsg', (t) => {
-	let qHandler = new MsgQueueHandler(testHandler);
-	let sendMsg = sinon.stub(qHandler, '_sendMsg');
-	let mockResolve = sinon.stub();
-	let mockReject = sinon.stub();
-	let msgToSend = {
-		channel_id: 'theChannelID',
-		txid: 'aTX',
-		payload: 'some payload'
-	};
-	let qMsg = new QMsg(msgToSend, mockResolve, mockReject);
-	qHandler.queueMsg(qMsg);
-	t.true(sendMsg.calledOnce, 'Test the first message queued is sent');
-	t.deepEqual(sendMsg.firstCall.args, ['theChannelIDaTX'], 'Test _sendMsg with the correct txContextId is called');
-	t.equal(qHandler.txQueues['theChannelIDaTX'].length, 1, 'Test that message is added to queue');
-
-	let msgToSend2 = {
-		channel_id: 'theChannelID',
-		txid: 'aTX',
-		payload: 'another payload'
-	};
-	qMsg = new QMsg(msgToSend2, mockResolve, mockReject);
-	qHandler.queueMsg(qMsg);
-	t.true(sendMsg.calledOnce, 'Test the next message is just queued');
-	t.equal(qHandler.txQueues['theChannelIDaTX'].length, 2, 'Test that message is added to queue');
-	t.end();
-
-	let msgToSend3 = {
-		channel_id: 'theChannelID',
-		txid: '2TX',
-		payload: 'new payload for 2TX'
-	};
-	qMsg = new QMsg(msgToSend3, mockResolve, mockReject);
-	qHandler.queueMsg(qMsg);
-	t.true(sendMsg.calledTwice, 'Test this message was sent');
-	t.equal(qHandler.txQueues['theChannelID2TX'].length, 1, 'Test that this message is added to queue');
-	t.end();
-});
-
-test('#MsgQueueHandler:handleMsgResponse', (t) => {
-	const saveParseResponse = Handler.__get__('parseResponse');
-	let mockResolve = sinon.stub();
-	let mockReject = sinon.stub();
-	let qHandler = new MsgQueueHandler(testHandler);
-	let mockQMsg = new QMsg('msgToSend', 'aMethod', mockResolve, mockReject);
-	let getCurMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
-	let remCurMsg = sinon.stub(qHandler, '_removeCurrentAndSendNextMsg');
-	let response = {
-		channel_id: 'theChannelID',
-		txid: 'aTX',
-		payload: 'some payload'
-	};
-	Handler.__set__('parseResponse', (handler, res, method) => {
-		t.equal(handler, testHandler, 'Test the handler passed is correct');
-		t.deepEqual(res, response, 'Test the response passed is correct');
-		t.equal(method, 'aMethod', 'Test the method passed is correct');
-		return 'some payload';
+		it ('should set its variables with values passed in the constructor', () => {
+			expect(qMsg.msg).to.deep.equal(msg);
+			expect(qMsg.method).to.deep.equal('some method');
+			expect(qMsg.resolve).to.deep.equal(resolve);
+			expect(qMsg.reject).to.deep.equal(reject);
+		});
+
+		describe('getMsg', () => {
+			it ('should return the value of msg', () => {
+				expect(qMsg.getMsg()).to.deep.equal(msg);
+			});
+		});
+
+		describe('getMsgTxContextId', () => {
+			it ('should return the value of msg.channel_id concatenated with msg.txid', () => {
+				expect(qMsg.getMsgTxContextId()).to.deep.equal(msg.channel_id+msg.txid);
+			});
+		});
+
+		describe('getMethod', () => {
+			it ('should return the value of method', () => {
+				expect(qMsg.getMethod()).to.deep.equal('some method');
+			});
+		});
+
+		describe('success', () => {
+			it ('should call the resolve function', () => {
+				qMsg.success('response');
+
+				expect(resolve.calledOnce).to.be.ok;
+				expect(resolve.firstCall.args).to.deep.equal(['response']);
+			});
+		});
+
+		describe('fail', () => {
+			it ('should call the reject function', () => {
+				qMsg.fail('err');
+
+				expect(reject.calledOnce).to.be.ok;
+				expect(reject.firstCall.args).to.deep.equal(['err']);
+			});
+		});
 	});
 
-	qHandler.handleMsgResponse(response);
-	t.true(getCurMsg.calledOnce, 'Test _getCurrentMsg was called');
-	t.deepEqual(getCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _getCurrentMsg with the correct txContextId is called');
-	t.true(mockResolve.calledOnce, 'Test resolve was called');
-	t.deepEqual(mockResolve.firstCall.args, ['some payload'], 'Test resolve with the response is called');
-	t.true(remCurMsg.calledOnce, 'Test _removeCurrentAndSendNextMsg was called');
-	t.deepEqual(remCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _removeCurrentAndSendNextMsg with the correct txContextId is called');
+	describe('MsgQueueHandler', () => {
+		let txContextId = 'theChannelIDaTX';
 
-	Handler.__set__('parseResponse', saveParseResponse);
-	t.end();
+		let mockHandler;
+		let qHandler;
 
-});
+		beforeEach(() => {
+			mockHandler = {_stream: {write: sinon.stub()}};
+			qHandler = new MsgQueueHandler(mockHandler);
+		});
 
-test('#MsgQueueHandler:_getCurrentMsg', (t) => {
-	let qHandler = new MsgQueueHandler(testHandler);
-	qHandler.txQueues = {};
-	qHandler.txQueues.aTX = ['top', 'middle', 'bottom'];
-	qHandler.txQueues['2TX'] = ['left', 'right'];
-	t.equal(qHandler._getCurrentMsg('aTX'), 'top', 'Test it get\'s the current message for aTX');
-	t.equal(qHandler._getCurrentMsg('2TX'), 'left', 'Test it get\'s the current message for 2TX');
-	t.end();
-});
+		it ('should setup its variables on construction', () => {
+			expect(qHandler.handler).to.deep.equal(mockHandler);
+			expect(qHandler.stream).to.deep.equal(mockHandler._stream);
+			expect(qHandler.txQueues).to.deep.equal({});
+		});
 
-test('#MsgQueueHandler:_removeCurrentAndSendNextMsg', (t) => {
-	let qHandler = new MsgQueueHandler(testHandler);
-	qHandler.txQueues = {};
-	qHandler.txQueues.aTX = ['top', 'middle', 'bottom'];
-	qHandler.txQueues['2TX'] = ['left', 'right'];
+		describe('queueMsg', () => {
+			let qMsg = {
+				getMsgTxContextId: () => {
+					return txContextId;
+				}
+			};
 
-	let sendMsg = sinon.stub(qHandler, '_sendMsg');
+			let mockSendMsg;
 
-	// remove from aTX first
-	qHandler._removeCurrentAndSendNextMsg('aTX');
-	t.deepEqual(qHandler.txQueues.aTX, ['middle', 'bottom'], 'Test current message was removed');
-	t.deepEqual(qHandler.txQueues['2TX'], ['left', 'right'], 'Test other queue not touched');
-	t.equal(sendMsg.callCount, 1, 'Test send message was called');
-	t.deepEqual(sendMsg.getCall(0).args, ['aTX'], 'Test send message was called with correct TXid');
+			beforeEach(() => {
+				mockSendMsg = sinon.stub(qHandler, '_sendMsg');
+			});
 
-	// remove from 2TX next
-	qHandler._removeCurrentAndSendNextMsg('2TX');
-	t.deepEqual(qHandler.txQueues.aTX, ['middle', 'bottom'], 'Test other queue not touched');
-	t.deepEqual(qHandler.txQueues['2TX'], ['right'], 'current message was removed');
-	t.equal(sendMsg.callCount, 2, 'Test send message was called');
-	t.deepEqual(sendMsg.getCall(sendMsg.callCount-1).args, ['2TX'], 'Test send message was called with correct TXid');
+			it ('should add message to the queue and call sendMsg and handle when txContentId not in txQueues', () => {
+				qHandler.queueMsg(qMsg);
 
-	// remove from 2TX again
-	qHandler._removeCurrentAndSendNextMsg('2TX');
-	t.deepEqual(qHandler.txQueues.aTX, ['middle', 'bottom'], 'Test other queue not touched');
-	t.equal(qHandler.txQueues['2TX'], undefined, 'current message was removed and queue deleted');
-	t.equal(sendMsg.callCount, 2, 'Test no further send occurred');
+				expect(mockSendMsg.calledOnce).to.be.ok;
+				expect(mockSendMsg.firstCall.args).to.deep.equal([txContextId]);
+				expect(qHandler.txQueues[txContextId]).to.deep.equal([qMsg]);
+			});
 
-	// remove from aTX
-	qHandler._removeCurrentAndSendNextMsg('aTX');
-	t.deepEqual(qHandler.txQueues.aTX, ['bottom'], 'current message was removed');
-	t.equal(qHandler.txQueues['2TX'], undefined, 'other queue still doesn\'t exist');
-	t.equal(sendMsg.callCount, 3, 'Test send message was called');
-	t.deepEqual(sendMsg.getCall(sendMsg.callCount-1).args, ['aTX'], 'Test send message was called with correct TXid');
+			it ('should add message to the queue and not call call sendMsg when txContentId in txQueues and is empty array', () => {
+				qHandler.txQueues[txContextId] = [];
 
-	// try to remove from 2TX
-	qHandler._removeCurrentAndSendNextMsg('2TX');
-	t.deepEqual(qHandler.txQueues.aTX, ['bottom'], 'other queue not touched');
-	t.equal(qHandler.txQueues['2TX'], undefined, 'queue still doesn\'t exist');
-	t.equal(sendMsg.callCount, 3, 'Test send message was never called');
+				qHandler.queueMsg(qMsg);
 
-	t.end();
-});
+				expect(mockSendMsg.calledOnce).to.be.ok;
+				expect(mockSendMsg.firstCall.args).to.deep.equal([txContextId]);
+				expect(qHandler.txQueues[txContextId]).to.deep.equal([qMsg]);
+			});
 
-test('#MsgQueueHandler:_sendMsg', (t) => {
-	let stream = {write: sinon.stub()};
-	let qHandler = new MsgQueueHandler(testHandler);
-	qHandler.stream = stream;
-	let msg = {channel_id: 'theChannelID', txid: 'aTX', payload:'msgToSend'};
-	let mockResolve = sinon.stub();
-	let mockReject = sinon.stub();
-	let mockQMsg = new QMsg(msg, mockResolve, mockReject);
-	let getCurMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
-	qHandler._sendMsg('theChannelIDaTX');
-	t.true(getCurMsg.calledOnce, 'Test _getCurrentMsg was called');
-	t.deepEqual(getCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _getCurrentMsg with the correct txContextId is called');
-	t.true(stream.write.calledOnce, 'Test write was called');
-	t.deepEqual(stream.write.firstCall.args, [msg], 'Test write was passed the correct message');
-	t.equal(mockResolve.callCount, 0, 'Test resolve is never called');
-	t.equal(mockReject.callCount, 0, 'Test reject is never called');
+			it ('should add message to the queue and not call call sendMsg when txContentId in txQueues and already has value in array', () => {
+				qHandler.txQueues[txContextId] = ['some qMsg'];
 
-	// now test write throwing an error
-	let error = new Error('write error');
-	stream = {write: sinon.stub().throws(error)};
-	qHandler = new MsgQueueHandler(testHandler);
-	qHandler.stream = stream;
-	msg = {channel_id: 'theChannelID', txid: 'aTX', payload:'msgToSend'};
-	mockQMsg = new QMsg(msg, 'aMethod', mockResolve, mockReject);
-	getCurMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
-	qHandler._sendMsg('theChannelIDaTX');
-	t.true(getCurMsg.calledOnce, 'Test _getCurrentMsg was called');
-	t.deepEqual(getCurMsg.firstCall.args, ['theChannelIDaTX'], 'Test _getCurrentMsg with the correct txContextId is called');
-	t.true(stream.write.calledOnce, 'Test write was called');
-	t.deepEqual(stream.write.firstCall.args, [msg], 'Test write was passed the correct message');
-	t.equal(mockResolve.callCount, 0, 'Test resolve is never called');
-	t.equal(mockReject.callCount, 1, 'Test reject is called');
+				qHandler.queueMsg(qMsg);
 
-	t.end();
+				expect(mockSendMsg.notCalled).to.be.ok;
+				expect(qHandler.txQueues[txContextId]).to.deep.equal(['some qMsg', qMsg]);
+			});
+		});
+
+		describe('handleMsgResponse', () => {
+			const saveParseResponse = Handler.__get__('parseResponse');
+
+			let response = {
+				channel_id: 'theChannelID',
+				txid: 'aTx'
+			};
+
+			let qMsg;
+
+			let mockGetCurrMsg;
+			let mockRemoveCurrentAndSendNextMsg;
+
+			beforeEach(() => {
+				qMsg = {
+					success: sinon.spy(),
+					fail: sinon.spy(),
+					getMethod: () => {
+						return 'some method';
+					}
+				};
+
+				mockGetCurrMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(qMsg);
+				mockRemoveCurrentAndSendNextMsg = sinon.stub(qHandler, '_removeCurrentAndSendNextMsg');
+			});
+
+			afterEach(() => {
+				Handler.__set__('parseResponse', saveParseResponse);
+				mockGetCurrMsg.restore();
+				mockRemoveCurrentAndSendNextMsg.restore();
+			});
+
+			it ('should do nothing if qMsg does not exist for txContextId', () => {
+				let mockParseResponse = sinon.stub().returns('parsed response');
+				Handler.__set__('parseResponse', mockParseResponse);
+
+				mockGetCurrMsg.restore();
+				mockGetCurrMsg = sinon.stub(qHandler, '_getCurrentMsg').returns(null);
+
+				qHandler.handleMsgResponse(response);
+
+				expect(mockGetCurrMsg.calledOnce).to.be.ok;
+				expect(mockGetCurrMsg.firstCall.args).to.deep.equal([response.channel_id+response.txid]);
+				expect(mockParseResponse.notCalled).to.be.ok;
+				expect(qMsg.success.notCalled).to.be.ok;
+				expect(qMsg.fail.notCalled).to.be.ok;
+				expect(mockRemoveCurrentAndSendNextMsg.notCalled).to.be.ok;
+			});
+
+			it ('should call qMsg success when parseResponse does not throw an error _removeCurrentAndSendNextMsg', () => {
+				let mockParseResponse = sinon.stub().returns('parsed response');
+				Handler.__set__('parseResponse', mockParseResponse);
+
+				qHandler.handleMsgResponse(response);
+
+				expect(mockGetCurrMsg.calledOnce).to.be.ok;
+				expect(mockGetCurrMsg.firstCall.args).to.deep.equal([response.channel_id+response.txid]);
+				expect(mockParseResponse.calledOnce).to.be.ok;
+				expect(mockParseResponse.firstCall.args).to.deep.equal([mockHandler, response, 'some method']);
+				expect(qMsg.success.calledOnce).to.be.ok;
+				expect(qMsg.success.firstCall.args).to.deep.equal(['parsed response']);
+				expect(qMsg.fail.notCalled).to.be.ok;
+				expect(mockRemoveCurrentAndSendNextMsg.calledOnce).to.be.ok;
+				expect(mockRemoveCurrentAndSendNextMsg.firstCall.args).to.deep.equal([response.channel_id+response.txid]);
+			});
+
+			it ('should call qMsg fail when parseResponse does throw an error _removeCurrentAndSendNextMsg', () => {
+				let err = new Error('parse error');
+				let mockParseResponse = sinon.stub().throws(err);
+				Handler.__set__('parseResponse', mockParseResponse);
+
+				qHandler.handleMsgResponse(response);
+
+				expect(mockGetCurrMsg.calledOnce).to.be.ok;
+				expect(mockGetCurrMsg.firstCall.args).to.deep.equal([response.channel_id+response.txid]);
+				expect(mockParseResponse.calledOnce).to.be.ok;
+				expect(mockParseResponse.firstCall.args).to.deep.equal([mockHandler, response, 'some method']);
+				expect(qMsg.success.notCalled).to.be.ok;
+				expect(qMsg.fail.calledOnce).to.be.ok;
+				expect(qMsg.fail.firstCall.args).to.deep.equal([err]);
+				expect(mockRemoveCurrentAndSendNextMsg.calledOnce).to.be.ok;
+				expect(mockRemoveCurrentAndSendNextMsg.firstCall.args).to.deep.equal([response.channel_id+response.txid]);
+			});
+		});
+
+		describe('_getCurrentMsg', () => {
+			it ('should get the message at the top of the queue for a txContextId', () => {
+				qHandler.txQueues[txContextId] = ['message1', 'message2'];
+
+				expect(qHandler._getCurrentMsg(txContextId)).to.deep.equal('message1');
+			});
+
+			it ('should return undefined when queue is empty for a txContextId', () => {
+				qHandler.txQueues[txContextId] = [];
+
+				expect(qHandler._getCurrentMsg(txContextId)).to.be.undefined;
+			});
+
+			it ('should return undefined when queue does not exist for a txContextId', () => {
+				qHandler.txQueues[txContextId] = null;
+
+				expect(qHandler._getCurrentMsg(txContextId)).to.be.undefined;
+			});
+		});
+
+		describe('_removeCurrentAndSendNextMsg', () => {
+			let sendMsg;
+
+			let alternateTxContextId = 'theChannelIDanotherTX';
+
+			beforeEach(() => {
+				sendMsg = sinon.stub(qHandler, '_sendMsg');
+				qHandler.txQueues[alternateTxContextId] = ['message3', 'message4'];
+			});
+
+			afterEach(() => {
+				sendMsg.restore();
+			});
+
+			it ('should delete the current message and send the next for a txContentId', () => {
+				qHandler.txQueues[txContextId] = ['message1', 'message2'];
+
+				qHandler._removeCurrentAndSendNextMsg(txContextId);
+
+				expect(sendMsg.calledOnce).to.be.ok;
+				expect(qHandler.txQueues[txContextId]).to.deep.equal(['message2']);
+				expect(qHandler.txQueues[alternateTxContextId]).to.deep.equal(['message3', 'message4']);
+			});
+
+			it ('should delete the queue if no messages left after current is deleted for a txContentId', () => {
+				qHandler.txQueues[txContextId] = ['message1'];
+
+				qHandler._removeCurrentAndSendNextMsg(txContextId);
+
+				expect(sendMsg.notCalled).to.be.ok;
+				expect(qHandler.txQueues[txContextId]).to.be.undefined;
+				expect(qHandler.txQueues[alternateTxContextId]).to.deep.equal(['message3', 'message4']);
+			});
+
+			it ('should do nothing if no queue is found for a txContentId', () => {
+				qHandler.txQueues[txContextId] = null;
+
+				qHandler._removeCurrentAndSendNextMsg(txContextId);
+
+				expect(sendMsg.notCalled).to.be.ok;
+				expect(qHandler.txQueues[txContextId]).to.be.null;
+				expect(qHandler.txQueues[alternateTxContextId]).to.deep.equal(['message3', 'message4']);
+			});
+		});
+
+		describe('_sendMsg', () => {
+			let mockQMsg = {
+				getMsg: () => {
+					return 'some message';
+				},
+				fail: sinon.spy()
+			};
+
+			it ('should do nothing if no QMsg found for a txContextId', () => {
+				let getCurrStub = sinon.stub(qHandler, '_getCurrentMsg').returns(null);
+
+				qHandler._sendMsg(txContextId);
+
+				expect(getCurrStub.calledOnce).to.be.ok;
+				expect(getCurrStub.firstCall.args).to.deep.equal([txContextId]);
+				expect(qHandler.stream.write.notCalled).to.be.ok;
+				expect(mockQMsg.fail.notCalled).to.be.ok;
+			});
+
+			it ('should write to the stream the current message', () => {
+				let getCurrStub = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
+
+				qHandler._sendMsg(txContextId);
+
+				expect(getCurrStub.calledOnce).to.be.ok;
+				expect(getCurrStub.firstCall.args).to.deep.equal([txContextId]);
+				expect(qHandler.stream.write.calledOnce).to.be.ok;
+				expect(qHandler.stream.write.firstCall.args).to.deep.equal(['some message']);
+				expect(mockQMsg.fail.notCalled).to.be.ok;
+			});
+
+			it ('should call fail on the QMsg if stream write errors', () => {
+				let err = new Error('some error');
+				qHandler.stream.write = sinon.stub().throws(err);
+
+				let getCurrStub = sinon.stub(qHandler, '_getCurrentMsg').returns(mockQMsg);
+
+				qHandler._sendMsg(txContextId);
+
+				expect(getCurrStub.calledOnce).to.be.ok;
+				expect(getCurrStub.firstCall.args).to.deep.equal([txContextId]);
+				expect(mockQMsg.fail.calledOnce).to.be.ok;
+				expect(mockQMsg.fail.firstCall.args).to.deep.equal([err]);
+			});
+		});
+	});
+
+	describe('ChaincodeSupportClient', () => {
+		it ('should throw an error when chaincode not passed', () => {
+			expect(() => {
+				new Handler();
+			}).to.throw(/Missing required argument: chaincode/);
+		});
+
+		it ('should throw an error if argument does not match chaincode format', () => {
+			expect(() => {
+				new Handler({});
+			}).to.throw(/The chaincode argument must implement the mandatory "Init\(\)" method/);
+		});
+
+		it ('should throw an error if argument only part matches chaincode format', () => {
+			expect(() => {
+				new Handler({
+					Init: function() {}
+				});
+			}).to.throw(/The chaincode argument must implement the mandatory "Invoke\(\)" method/);
+		});
+
+		it ('should throw an error if argument missing URL argument', () => {
+			expect(() => {
+				new Handler(mockChaincodeImpl);
+			}).to.throw(/Invalid URL: undefined/);
+		});
+
+		it ('should throw an error if URL argument does not use grpc as protocol', () => {
+			expect(() => {
+				new Handler(mockChaincodeImpl, 'https://'+mockPeerAddress.base);
+			}).to.throw(/Invalid protocol: https. {2}URLs must begin with grpc:\/\/ or grpcs:\/\//);
+		});
+
+		it ('should set endpoint, client and default timeout', () => {
+			let credsSpy = sinon.spy(grpc.credentials, 'createInsecure');
+
+			let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+
+			expect(handler['_request_timeout']).to.deep.equal(30000);
+			expect(handler['_endpoint'].addr).to.deep.equal(mockPeerAddress.base);
+			expect(credsSpy.calledOnce).to.be.ok;
+			expect(handler['_endpoint'].creds.constructor.name).to.deep.equal('ChannelCredentials');
+			expect(handler['_client'].constructor.name).to.deep.equal('ServiceClient');
+
+			credsSpy.restore();
+		});
+
+		it ('should override the default request timeout if value passed', () => {
+			let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure, {
+				'request-timeout': 123456
+			});
+
+			expect(handler['_request_timeout']).to.deep.equal(123456);
+		});
+
+		it ('should store additional options', () => {
+			let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure, {
+				'another-value': 'another string'
+			});
+
+			expect(handler['_options']['another-value']).to.deep.equal('another string');
+		});
+
+		it ('should preserve casing in handler addr', () => {
+			let handler = new Handler(mockChaincodeImpl, 'grpc://'+mockPeerAddress.base.toUpperCase());
+
+			expect(handler['_endpoint'].addr).to.deep.equal(mockPeerAddress.base.toUpperCase());
+		});
+
+		it ('should throw an error if connection secure and certificate not passed', () => {
+			expect(() => {
+				new Handler(mockChaincodeImpl, mockPeerAddress.secure);
+			}).to.throw(/PEM encoded certificate is required./);
+		});
+
+		it ('should throw an error if connection secure encoded private key not passed as opt', () => {
+			expect(() => {
+				new Handler(mockChaincodeImpl, mockPeerAddress.secure, {
+					pem: 'dummy pem string'
+				});
+			}).to.throw(/encoded Private key is required./);
+		});
+
+		it ('should throw an error if connection secure encoded private key not passed as opt', () => {
+			expect(() => {
+				new Handler(mockChaincodeImpl, mockPeerAddress.secure, {
+					pem: 'dummy pem string',
+					key: 'dummy key'
+				});
+			}).to.throw(/encoded client certificate is required./);
+		});
+
+		it ('should set endpoint, client and default timeout for a secure connection', () => {
+			let credsSpy = sinon.spy(grpc.credentials, 'createSsl');
+
+			let handler = new Handler(mockChaincodeImpl, mockPeerAddress.secure, mockOpts);
+
+			expect(handler['_options'].cert).to.deep.equal(mockOpts.cert);
+			expect(handler['_request_timeout']).to.deep.equal(30000);
+			expect(handler['_endpoint'].addr).to.deep.equal(mockPeerAddress.base);
+			expect(credsSpy.calledOnce).to.be.ok;
+			expect(credsSpy.calledWith(Buffer.from(mockOpts.pem), Buffer.from(mockOpts.key,'base64'), Buffer.from(mockOpts.cert,'base64'))).to.be.ok;
+			expect(handler['_endpoint'].creds.constructor.name).to.deep.equal('ChannelCredentials');
+			expect(handler['_client'].constructor.name).to.deep.equal('ServiceClient');
+		});
+
+		it ('should set grpc ssl options when ssl-target-name-override passed', () => {
+			let opts = Object.assign({}, mockOpts);
+			opts['ssl-target-name-override'] = 'dummy override';
+
+			let handler = new Handler(mockChaincodeImpl, mockPeerAddress.secure, opts);
+
+			expect(handler['_options']['grpc.ssl_target_name_override']).to.deep.equal('dummy override');
+			expect(handler['_options']['grpc.default_authority']).to.deep.equal('dummy override');
+		});
+
+		describe('close', () => {
+			it ('should call end on the stream', () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				handler._stream = {end: sinon.stub()};
+
+				handler.close();
+
+				expect(handler._stream.end.calledOnce).to.be.ok;
+			});
+		});
+
+		describe('chat', () => {
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+			});
+
+			it ('should create instance of MsgQueueHandler, register the client, setup listeners and write', () => {
+				let mockMsgQueueHandler = sinon.spy(() => {
+					return sinon.createStubInstance(MsgQueueHandler);
+				});
+
+				Handler.__set__('MsgQueueHandler', mockMsgQueueHandler);
+
+				let mockStream = {write: sinon.stub(), on: sinon.stub()};
+
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				handler._client.register = sinon.stub().returns(mockStream);
+
+				handler.chat('some starter message');
+
+				expect(handler._client.register.calledOnce).to.be.ok;
+				expect(mockMsgQueueHandler.calledWithNew).to.been.ok;
+				expect(handler._stream).to.deep.equal(mockStream);
+				expect(handler.msgQueueHandler).to.deep.equal(new mockMsgQueueHandler(handler));
+
+				expect(mockStream.write.calledOnce).to.be.ok;
+				expect(mockStream.write.firstCall.args).to.deep.equal(['some starter message']);
+				expect(mockStream.on.callCount).to.deep.equal(3);
+				expect(mockStream.on.firstCall.args[0]).to.deep.equal('data');
+				expect(mockStream.on.secondCall.args[0]).to.deep.equal('end');
+				expect(mockStream.on.thirdCall.args[0]).to.deep.equal('error');
+			});
+
+			describe('stream.on.data', () => {
+
+				let MSG_TYPE = Handler.__get__('MSG_TYPE');
+
+				let registeredMsg = {
+					type: MSG_TYPE.REGISTERED
+				};
+
+				let establishedMsg = {
+					type: MSG_TYPE.READY
+				};
+
+				let eventReg = {};
+				let mockEventEmitter = (event, cb) => {
+					eventReg[event] = cb;
+				};
+
+				let mockStream;
+				let mockNewErrorMsg;
+
+				let handler;
+
+				let mockMsgQueueHandler;
+
+				let handleMsgResponseSpy;
+				let handleInitSpy;
+				let handleTransactionSpy;
+
+				beforeEach(() => {
+
+					handleMsgResponseSpy = sinon.spy();
+
+					mockMsgQueueHandler = sinon.spy(() => {
+						let mock = sinon.createStubInstance(MsgQueueHandler);
+						mock.handleMsgResponse = handleMsgResponseSpy;
+
+						return mock;
+					});
+
+					let shortTxidStub = sandbox.stub().returns('a short txId');
+
+					mockNewErrorMsg = sinon.stub().returns('some error');
+
+					Handler.__set__('MsgQueueHandler', mockMsgQueueHandler);
+					Handler.__set__('shortTxid', shortTxidStub);
+					Handler.__set__('newErrorMsg', mockNewErrorMsg);
+
+					mockStream = {write: (sinon.stub()), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
+
+					handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+					handler._client.register = sinon.stub().returns(mockStream);
+					handler.chat('some starter message');
+
+					handleInitSpy = sinon.spy();
+					handleTransactionSpy = sinon.spy();
+
+					handler.handleInit = handleInitSpy;
+					handler.handleTransaction = handleTransactionSpy;
+				});
+
+				it ('should throw error when in state created and MSG_TYPE not REGISTERED', () => {
+					let badRegisteredMsg = {
+						type: 'NOT REGISTERED'
+					};
+
+					eventReg['data'](badRegisteredMsg);
+
+					expect(mockStream.write.calledTwice).to.be.ok;
+					expect(mockNewErrorMsg.calledOnce).to.be.ok;
+					expect(mockStream.write.secondCall.args).to.deep.equal(['some error']);
+					expect(mockNewErrorMsg.firstCall.args).to.deep.equal([badRegisteredMsg, 'created']);
+				});
+
+				it ('should throw error when in state established and MSG_TYPE not READY', () => {
+					let badEstablishedMsg = {
+						type: 'NOT REGISTERED'
+					};
+
+					eventReg['data'](registeredMsg);
+					eventReg['data'](badEstablishedMsg);
+
+					expect(mockStream.write.calledTwice).to.be.ok;
+					expect(mockNewErrorMsg.calledOnce).to.be.ok;
+					expect(mockStream.write.secondCall.args).to.deep.equal(['some error']);
+					expect(mockNewErrorMsg.firstCall.args).to.deep.equal([badEstablishedMsg, 'established']);
+				});
+
+				it ('should do nothing when in state ready and MSG_TYPE equals REGISTERED', () => {
+					eventReg['data'](registeredMsg);
+					eventReg['data'](establishedMsg);
+					eventReg['data'](registeredMsg);
+
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockNewErrorMsg.notCalled).to.be.ok;
+					expect(handleMsgResponseSpy.notCalled).to.be.ok;
+					expect(handleInitSpy.notCalled).to.be.ok;
+					expect(handleTransactionSpy.notCalled).to.be.ok;
+				});
+
+				it ('should do nothing when in state ready and MSG_TYPE equals READY', () => {
+					eventReg['data'](registeredMsg);
+					eventReg['data'](establishedMsg);
+					eventReg['data'](establishedMsg);
+
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockNewErrorMsg.notCalled).to.be.ok;
+					expect(handleMsgResponseSpy.notCalled).to.be.ok;
+					expect(handleInitSpy.notCalled).to.be.ok;
+					expect(handleTransactionSpy.notCalled).to.be.ok;
+				});
+
+				it ('should call handleMsgResponse when in state ready and MSG_TYPE equals RESPONSE', () => {
+					eventReg['data'](registeredMsg);
+					eventReg['data'](establishedMsg);
+
+					let readyMsg = {
+						type: MSG_TYPE.RESPONSE
+					};
+
+					eventReg['data'](readyMsg);
+
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockNewErrorMsg.notCalled).to.be.ok;
+					expect(handleMsgResponseSpy.calledOnce).to.be.ok;
+					expect(handleMsgResponseSpy.firstCall.args).to.deep.equal([readyMsg]);
+					expect(handleInitSpy.notCalled).to.be.ok;
+					expect(handleTransactionSpy.notCalled).to.be.ok;
+				});
+
+				it ('should call handleMsgResponse when in state ready and MSG_TYPE equals ERROR', () => {
+					eventReg['data'](registeredMsg);
+					eventReg['data'](establishedMsg);
+
+					let readyMsg = {
+						type: MSG_TYPE.ERROR
+					};
+
+					eventReg['data'](readyMsg);
+
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockNewErrorMsg.notCalled).to.be.ok;
+					expect(handleMsgResponseSpy.calledOnce).to.be.ok;
+					expect(handleMsgResponseSpy.firstCall.args).to.deep.equal([readyMsg]);
+					expect(handleInitSpy.notCalled).to.be.ok;
+					expect(handleTransactionSpy.notCalled).to.be.ok;
+				});
+
+				it ('should call handleInit when in state ready and MSG_TYPE equals INIT', () => {
+					eventReg['data'](registeredMsg);
+					eventReg['data'](establishedMsg);
+
+					let readyMsg = {
+						type: MSG_TYPE.INIT
+					};
+
+					eventReg['data'](readyMsg);
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockNewErrorMsg.notCalled).to.be.ok;
+					expect(handleMsgResponseSpy.notCalled).to.be.ok;
+					expect(handleInitSpy.calledOnce).to.be.ok;
+					expect(handleInitSpy.firstCall.args).to.deep.equal([readyMsg]);
+					expect(handleTransactionSpy.notCalled).to.be.ok;
+				});
+
+				it ('should call handleTransaction when in state ready and MSG_TYPE equals TRANSACTION', () => {
+					eventReg['data'](registeredMsg);
+					eventReg['data'](establishedMsg);
+
+					let readyMsg = {
+						type: MSG_TYPE.TRANSACTION
+					};
+
+					eventReg['data'](readyMsg);
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockNewErrorMsg.notCalled).to.be.ok;
+					expect(handleMsgResponseSpy.notCalled).to.be.ok;
+					expect(handleInitSpy.notCalled).to.be.ok;
+					expect(handleTransactionSpy.calledOnce).to.be.ok;
+					expect(handleTransactionSpy.firstCall.args).to.deep.equal([readyMsg]);
+				});
+
+				it ('should end the process with value 1', () => {
+					let processStub = sinon.stub(process, 'exit');
+
+					eventReg['data'](registeredMsg);
+					eventReg['data'](establishedMsg);
+
+					let readyMsg = {
+						type: 'something else'
+					};
+
+					eventReg['data'](readyMsg);
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockNewErrorMsg.notCalled).to.be.ok;
+					expect(handleMsgResponseSpy.notCalled).to.be.ok;
+					expect(handleInitSpy.notCalled).to.be.ok;
+					expect(handleTransactionSpy.notCalled).to.be.ok;
+					expect(processStub.calledOnce).to.be.ok;
+					expect(processStub.firstCall.args).to.deep.equal([1]);
+
+					processStub.restore();
+				});
+			});
+
+			describe('stream.on.end', () => {
+				it ('should cancel the stream', () => {
+					let eventReg = {};
+					let mockEventEmitter = (event, cb) => {
+						eventReg[event] = cb;
+					};
+
+					let mockStream = {write: sinon.stub(), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
+
+					let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+					handler._client.register = sinon.stub().returns(mockStream);
+					handler.chat('some starter message');
+
+					eventReg['end']();
+
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockStream.cancel.calledOnce).to.be.ok;
+				});
+			});
+
+			describe('stream.on.error', () => {
+				it ('should end the stream', () => {
+					let eventReg = {};
+					let mockEventEmitter = (event, cb) => {
+						eventReg[event] = cb;
+					};
+
+					let mockStream = {write: sinon.stub(), on: mockEventEmitter, end: sinon.stub()};
+
+					let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+					handler._client.register = sinon.stub().returns(mockStream);
+					handler.chat('some starter message');
+
+					eventReg['error']({});
+
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockStream.end.calledOnce).to.be.ok;
+				});
+			});
+		});
+
+		describe('handleInit', () => {
+			it ('should call handleMessage', () => {
+				const savedHandleMessage = Handler.__get__('handleMessage');
+
+				let handleMessage = sinon.spy();
+				Handler.__set__('handleMessage', handleMessage);
+
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				handler.handleInit('some message');
+
+				expect(handleMessage.calledOnce).to.be.ok;
+				expect(handleMessage.firstCall.args).to.deep.equal(['some message', handler, 'init']);
+
+				Handler.__set__('handleMessage', savedHandleMessage);
+			});
+		});
+
+		describe('handleTransaction', () => {
+			it ('should call handleMessage', () => {
+				const savedHandleMessage = Handler.__get__('handleMessage');
+
+				let handleMessage = sinon.spy();
+				Handler.__set__('handleMessage', handleMessage);
+
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				handler.handleTransaction('some message');
+
+				expect(handleMessage.calledOnce).to.be.ok;
+				expect(handleMessage.firstCall.args).to.deep.equal(['some message', handler, 'invoke']);
+
+				Handler.__set__('handleMessage', savedHandleMessage);
+			});
+		});
+
+		describe('handleGetState', () => {
+			let key = 'theKey';
+			let collection = '';
+
+			let expectedMsg;
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.GetState();
+				payload.setKey(key);
+				payload.setCollection(collection);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.GET_STATE,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handleGetState(collection, key, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetState');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handleGetState(collection, key, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetState');
+			});
+		});
+
+		describe('handlePutState', () => {
+			let key = 'theKey';
+			let value = 'some value';
+			let collection = 'some collection';
+
+			let expectedMsg;
+
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.PutState();
+				payload.setKey(key);
+				payload.setValue(value);
+				payload.setCollection(collection);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.PUT_STATE,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handlePutState(collection, key, value, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('PutState');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handlePutState(collection, key, value, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('PutState');
+			});
+		});
+
+		describe('handleDeleteState', () => {
+			let key = 'theKey';
+			let collection = '';
+
+			let expectedMsg;
+
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.DelState();
+				payload.setKey(key);
+				payload.setCollection(collection);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.DEL_STATE,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handleDeleteState(collection, key, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('DeleteState');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handleDeleteState(collection, key, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('DeleteState');
+			});
+		});
+
+		describe('handleGetState', () => {
+			let startKey = 'theStartKey';
+			let endKey = 'theEndKey';
+			let collection = '';
+
+			let expectedMsg;
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.GetStateByRange();
+				payload.setStartKey(startKey);
+				payload.setEndKey(endKey);
+				payload.setCollection(collection);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handleGetStateByRange(collection, startKey, endKey, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetStateByRange');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handleGetStateByRange(collection, startKey, endKey, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetStateByRange');
+			});
+		});
+
+		describe('handleQueryStateNext', () => {
+			let id = 'theID';
+
+			let expectedMsg;
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.QueryStateNext();
+				payload.setId(id);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_NEXT,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handleQueryStateNext(id, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('QueryStateNext');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handleQueryStateNext(id, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('QueryStateNext');
+			});
+		});
+
+		describe('handleQueryStateClose', () => {
+			let id = 'theID';
+
+			let expectedMsg;
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.QueryStateClose();
+				payload.setId(id);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handleQueryStateClose(id, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('QueryStateClose');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handleQueryStateClose(id, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('QueryStateClose');
+			});
+		});
+
+		describe('handleGetQueryResult', () => {
+			let collection = 'some collection';
+			let query = 'some query';
+
+			let expectedMsg;
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.GetQueryResult();
+				payload.setQuery(query);
+				payload.setCollection(collection);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handleGetQueryResult(collection, query, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetQueryResult');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handleGetQueryResult(collection, query, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetQueryResult');
+			});
+		});
+
+		describe('handleGetQueryResult', () => {
+			let key = 'theKey';
+
+			let expectedMsg;
+			before(() => {
+				let serviceProto = Handler.__get__('_serviceProto');
+
+				let payload = new serviceProto.GetHistoryForKey();
+				payload.setKey(key);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should resolve when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+				let result = await handler.handleGetHistoryForKey(key, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetHistoryForKey');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+				let result = handler.handleGetHistoryForKey(key, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetHistoryForKey');
+			});
+		});
+
+		describe('handleInvokeChaincode', () => {
+			let chaincodeName = 'myChaincode';
+			let args = ['duck', 'duck', 'goose'];
+
+			let serviceProto = Handler.__get__('_serviceProto');
+
+			let expectedMsg;
+			before(() => {
+				let chaincodeProto = Handler.__get__('_chaincodeProto');
+
+				let payload = new chaincodeProto.ChaincodeSpec();
+				let chaincodeId = new chaincodeProto.ChaincodeID();
+				let chaincodeInput = new chaincodeProto.ChaincodeInput();
+				chaincodeId.setName(chaincodeName);
+				let inputArgs = [];
+				args.forEach((arg) => {
+					inputArgs.push(Buffer.from(arg, 'utf8'));
+				});
+				chaincodeInput.setArgs(inputArgs);
+				payload.setChaincodeId(chaincodeId);
+				payload.setInput(chaincodeInput);
+
+				expectedMsg = {
+					type: serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
+					payload: payload.toBuffer(),
+					channel_id: 'theChannelID',
+					txid: 'theTxID'
+				};
+			});
+
+			afterEach(() => {
+				Handler = rewire('../../src/lib/handler.js');
+				sandbox.restore();
+			});
+
+			it ('should return decoded response when chaincode message type COMPLETED', async () => {
+				let responseProto = Handler.__get__('_responseProto');
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: serviceProto.ChaincodeMessage.Type.COMPLETED, payload: 'some payload'});
+				let decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+
+				let result = await handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal('some response');
+				expect(decodeStub.firstCall.args.length).to.deep.equal(1);
+				expect(decodeStub.firstCall.args[0]).to.deep.equal('some payload');
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('InvokeChaincode');
+			});
+
+			it ('should throw an error when _askPeerAndListen resolves with an error', async () => {
+				let responseProto = Handler.__get__('_responseProto');
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: serviceProto.ChaincodeMessage.Type.ERROR, payload: 'some payload'});
+				let decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+
+				let result = handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejectedWith('some payload');
+				expect(decodeStub.called).to.deep.equal(false);
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('InvokeChaincode');
+			});
+
+			it ('should reject when _askPeerAndListen resolves', async () => {
+				let responseProto = Handler.__get__('_responseProto');
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+				let decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+
+				let result = handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
+
+				await expect(result).to.eventually.be.rejected;
+				expect(decodeStub.called).to.deep.equal(false);
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('InvokeChaincode');
+			});
+
+			it ('should return nothing chaincode message type not COMPLETED or ERROR', async () => {
+				let responseProto = Handler.__get__('_responseProto');
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+				let _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: serviceProto.ChaincodeMessage.Type.SOMETHING_ELSE, payload: 'some payload'});
+				let decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+
+				let result = await handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
+
+				expect(result).to.deep.equal(undefined);
+				expect(decodeStub.called).to.deep.equal(false);
+				expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+				expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+				expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('InvokeChaincode');
+			});
+		});
+
+		describe('_askPeerAndListen', () => {
+			it ('should return a new promise with value of queueMsg result', async () => {
+				let msg = 'some message';
+				let method = 'SomeMethod';
+
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+
+				handler.msgQueueHandler = sinon.createStubInstance(MsgQueueHandler);
+				handler.msgQueueHandler.queueMsg.callsFake((qMsg) => {
+					qMsg.success('a payload');
+				});
+
+				let result = await handler._askPeerAndListen(msg, method);
+
+				expect(result).to.deep.equal('a payload');
+				expect(handler.msgQueueHandler.queueMsg.firstCall.args[0].constructor.name).to.deep.equal('QMsg');
+				expect(handler.msgQueueHandler.queueMsg.firstCall.args[0].msg).to.deep.equal(msg);
+				expect(handler.msgQueueHandler.queueMsg.firstCall.args[0].method).to.deep.equal(method);
+			});
+		});
+
+		describe('toString', () => {
+			it ('should return ChaincodeSupportClient object as a string with the URL', () => {
+				let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+
+				expect(handler.toString()).to.deep.equal(`ChaincodeSupportClient : {url:${mockPeerAddress.unsecure}}`);
+			});
+		});
+	});
+
+	describe('handleMessage', () => {
+
+		let handleMessage;
+		let chaincodeProto;
+		let serviceProto;
+
+		let decodeStub;
+
+		let msg = {
+			channel_id: 'theChannelID',
+			txid: 'aTX',
+			payload: 'some payload',
+			proposal: 'some proposal'
+		};
+
+		let mockHandler = {};
+		mockHandler.chaincode = {};
+
+		let mockStub = sinon.createStubInstance(Stub);
+		mockStub.chaincodeEvent = 'some event';
+
+		let shimErrorStub;
+
+		let saveCreateStub;
+		let saveShortTxid;
+
+		before(() => {
+			saveCreateStub = Handler.__get__('createStub');
+			saveShortTxid = Handler.__get__('shortTxid');
+		});
+
+		beforeEach(() => {
+			handleMessage = Handler.__get__('handleMessage');
+			chaincodeProto = Handler.__get__('_chaincodeProto');
+			serviceProto = Handler.__get__('_serviceProto');
+
+			mockHandler._stream = {write: sinon.stub()};
+
+			decodeStub = sandbox.stub(chaincodeProto.ChaincodeInput, 'decode').returns('some message');
+
+			let createStubStub = sandbox.stub().returns(mockStub);
+			Handler.__set__('createStub', createStubStub);
+
+			let shortTxidStub = sandbox.stub().returns('a short txId');
+			Handler.__set__('shortTxid', shortTxidStub);
+
+			shimErrorStub = sandbox.stub(Handler.__get__('shim'), 'error').returns({status: Stub.RESPONSE_CODE.ERROR, message: 'shim message'});
+		});
+
+		afterEach(() => {
+			Handler.__set__('createStub', saveCreateStub);
+			Handler.__set__('shortTxid', saveShortTxid);
+			sandbox.restore();
+		});
+
+		describe('Error', () => {
+			let expectedResponse;
+
+			beforeEach(() => {
+				expectedResponse = {
+					type: serviceProto.ChaincodeMessage.Type.ERROR,
+					payload: Buffer.from('shim message'),
+					channel_id: msg.channel_id,
+					txid: msg.txid
+				};
+			});
+
+			it ('should handle an error decoding the payload', async () => {
+				decodeStub.restore();
+				decodeStub = sandbox.stub(chaincodeProto.ChaincodeInput, 'decode').throws('some error');
+
+				expectedResponse.payload = msg.payload;
+
+				await handleMessage(msg, mockHandler, 'init');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+
+			it ('should handle error creating a chaincode stub', async () => {
+				let createStubStub = sandbox.stub().throws('an error');
+				Handler.__set__('createStub', createStubStub);
+
+				expectedResponse.payload = Buffer.from('an error');
+
+				await handleMessage(msg, mockHandler, 'init');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+
+			it ('should handle chaincode.Init returning nothing', async () => {
+				mockHandler.chaincode.Init = sandbox.stub().resolves();
+
+				await handleMessage(msg, mockHandler, 'init');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
+				expect(shimErrorStub.calledOnce).to.be.ok;
+				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Init\(\) has not called success or error./);
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+
+			it ('should handle chaincode.Invoke returning nothing', async () => {
+				mockHandler.chaincode.Invoke = sandbox.stub().resolves();
+
+				await handleMessage(msg, mockHandler, 'invoke');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
+				expect(shimErrorStub.calledOnce).to.be.ok;
+				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Invoke\(\) has not called success or error./);
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+
+			it ('should handle chaincode.Init returning no status', async () => {
+				mockHandler.chaincode.Init = sandbox.stub().resolves({});
+
+				await handleMessage(msg, mockHandler, 'init');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
+				expect(shimErrorStub.calledOnce).to.be.ok;
+				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Init\(\) has not called success or error./);
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+
+			it ('should handle chaincode.Invoke returning no status', async () => {
+				mockHandler.chaincode.Invoke = sandbox.stub().resolves({});
+
+				await handleMessage(msg, mockHandler, 'invoke');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
+				expect(shimErrorStub.calledOnce).to.be.ok;
+				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Invoke\(\) has not called success or error./);
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+		});
+
+		describe('Complete', () => {
+			let expectedResponse;
+
+			beforeEach(() => {
+				expectedResponse = {
+					type: serviceProto.ChaincodeMessage.Type.COMPLETED,
+					payload: 'a buffered payload',
+					channel_id: msg.channel_id,
+					txid: msg.txid,
+					chaincode_event: mockStub.chaincodeEvent
+				};
+			});
+
+			it ('should write a COMPLETE message when successful init', async () => {
+				mockHandler.chaincode.Init = sandbox.stub().resolves({status: Stub.RESPONSE_CODE.OK, toBuffer: () => {
+					return 'a buffered payload';
+				}});
+
+				await handleMessage(msg, mockHandler, 'init');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
+				expect(shimErrorStub.notCalled).to.be.ok;
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+
+			it ('should write a COMPLETE message when successful invoke', async () => {
+				mockHandler.chaincode.Invoke = sandbox.stub().resolves({status: Stub.RESPONSE_CODE.OK, toBuffer: () => {
+					return 'a buffered payload';
+				}});
+
+				await handleMessage(msg, mockHandler, 'invoke');
+
+				expect(decodeStub.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
+				expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
+				expect(shimErrorStub.notCalled).to.be.ok;
+				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+			});
+		});
+	});
+
+	describe('createStub', () => {
+		it ('should return a new instance of Stub', () => {
+			let saveStub = Handler.__get__('Stub');
+
+			let mockStub = sinon.spy(() => {
+				return sinon.createStubInstance(Stub);
+			});
+			Handler.__set__('Stub', mockStub);
+
+			const createStub = Handler.__get__('createStub');
+			createStub({}, 'channelID', 'txID', 'some input', 'some proposal');
+
+			expect(mockStub.calledWithNew).to.be.ok;
+			expect(mockStub.firstCall.args[0]).to.deep.equal({});
+			expect(mockStub.firstCall.args[1]).to.deep.equal('channelID');
+			expect(mockStub.firstCall.args[2]).to.deep.equal('txID');
+			expect(mockStub.firstCall.args[3]).to.deep.equal('some input');
+			expect(mockStub.firstCall.args[4]).to.deep.equal('some proposal');
+
+			Handler.__set__('Stub', saveStub);
+		});
+	});
+
+	describe('newErrorMsg', () => {
+		it ('should return an object for the error message', () => {
+			const newErrorMsg = Handler.__get__('newErrorMsg');
+
+			const msg = {
+				channel_id: 'theChannelID',
+				txid: 'aTX',
+				type: 'aType',
+				payload: 'aPayload'
+			};
+
+			const state = 'aState';
+
+			const result = newErrorMsg(msg, state);
+
+			const expectedResponse = {
+				type: 'ERROR',
+				payload: Buffer.from(`[${msg.channel_id}-${msg.txid}]Chaincode handler FSM cannot handle message (${msg.type}) with payload size (8) while in state: ${state}`),
+				channel_id: 'theChannelID',
+				txid: 'aTX'
+			};
+
+			expect(result).to.deep.equal(expectedResponse);
+		});
+	});
+
+	describe('shortTxid', () => {
+		let shortTxid = Handler.__get__('shortTxid');
+
+		it ('should shorten txids over 8 letters', () => {
+			expect(shortTxid('123456789')).to.deep.equal('12345678');
+		});
+
+		it ('should leave txids shorter than 8 as was', () => {
+			expect(shortTxid('1234567')).to.deep.equal('1234567');
+		});
+
+		it ('should leave txids exactly 8 letters as was', () => {
+			expect(shortTxid('12345678')).to.deep.equal('12345678');
+		});
+	});
+
+	describe('parseResponse', () => {
+		let qrDecodedPayload = 'qr decoded payload';
+		let ccDecodedPayload = 'cc decoded payload';
+
+		let MSG_TYPE;
+
+		let serviceProto;
+		let parseResponse;
+
+		let handler;
+		let res;
+
+		let saveStateQueryIterator;
+		let saveHistoryQueryIterator;
+
+		before(() => {
+			saveStateQueryIterator = Handler.__get__('StateQueryIterator');
+			saveHistoryQueryIterator = Handler.__get__('HistoryQueryIterator');
+
+			MSG_TYPE = Handler.__get__('MSG_TYPE');
+
+			serviceProto = Handler.__get__('_serviceProto');
+			serviceProto.QueryResponse = {
+				decode: sinon.stub().returns(qrDecodedPayload)
+			};
+			serviceProto.ChaincodeMessage = {
+				decode: sinon.stub().returns(ccDecodedPayload)
+			};
+
+			parseResponse = Handler.__get__('parseResponse');
+		});
+
+		beforeEach(() => {
+			res = {
+				type: MSG_TYPE.RESPONSE,
+				payload: 'some payload',
+				channel_id: 'theChannelID',
+				txid: 'aTx'
+			};
+
+			handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+		});
+
+		after(() => {
+			Handler.__set__('StateQueryIterator', saveStateQueryIterator);
+			Handler.__set__('HistoryQueryIterator', saveHistoryQueryIterator);
+		});
+
+		it ('should throw an error when type not MSG_TYPE RESPONSE or ERROR', () => {
+			res.type = 'some bad type';
+
+			expect(() => {
+				parseResponse(handler, res, 'some method');
+			}).to.throw(/\[theChannelID-aTx\]Received incorrect chaincode in response to the some method\(\) call: type=\"some bad type\", expecting \"RESPONSE\"/);
+		});
+
+		it ('should throw an error when type MSG_TYPE ERROR', () => {
+			res.type = MSG_TYPE.ERROR;
+
+			let regEx = new RegExp(res.payload);
+
+			expect(() => {
+				parseResponse(handler, res, 'some method');
+			}).to.throw(regEx);
+		});
+
+		it ('should return the payload when using an unknown method', () => {
+			let result = parseResponse(handler, res, 'some method');
+
+			expect(result).to.deep.equal(res.payload);
+		});
+
+		it ('should return the payload when using GetState for method', () => {
+			let result = parseResponse(handler, res, 'GetState');
+
+			expect(result).to.deep.equal(res.payload);
+		});
+
+		it ('should return the payload when using PutState for method', () => {
+			let result = parseResponse(handler, res, 'PutState');
+
+			expect(result).to.deep.equal(res.payload);
+		});
+
+		it ('should return QueryResponse.decoded payload for QueryStateClose', () => {
+			let result = parseResponse(handler, res, 'QueryStateClose');
+
+			expect(result).to.deep.equal(qrDecodedPayload);
+		});
+
+		it ('should return QueryResponse.decoded payload for QueryStateNext', () => {
+			let result = parseResponse(handler, res, 'QueryStateNext');
+
+			expect(result).to.deep.equal(qrDecodedPayload);
+		});
+
+		it ('should return ChaincodeMessage.decoded payload for InvokeChaincode', () => {
+			let result = parseResponse(handler, res, 'InvokeChaincode');
+
+			expect(result).to.deep.equal(ccDecodedPayload);
+		});
+
+		it ('should return a StateQueryIterator for GetStateByRange', () => {
+			let mockStateQueryIterator = sinon.spy(() => {
+				return sinon.createStubInstance(StateQueryIterator);
+			});
+			Handler.__set__('StateQueryIterator', mockStateQueryIterator);
+
+			parseResponse(handler, res, 'GetStateByRange');
+
+			expect(mockStateQueryIterator.calledWithNew).to.be.ok;
+			expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
+		});
+
+		it ('should return a StateQueryIterator for GetQueryResult', () => {
+			let mockStateQueryIterator = sinon.spy(() => {
+				return sinon.createStubInstance(StateQueryIterator);
+			});
+			Handler.__set__('StateQueryIterator', mockStateQueryIterator);
+
+			parseResponse(handler, res, 'GetQueryResult');
+
+			expect(mockStateQueryIterator.calledWithNew).to.be.ok;
+			expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
+		});
+
+		it ('should return a HistoryQueryIterator for GetHistoryForKey', () => {
+			let mockHistoryQueryIterator = sinon.spy(() => {
+				return sinon.createStubInstance(HistoryQueryIterator);
+			});
+			Handler.__set__('HistoryQueryIterator', mockHistoryQueryIterator);
+
+			parseResponse(handler, res, 'GetHistoryForKey');
+
+			expect(mockHistoryQueryIterator.calledWithNew).to.be.ok;
+			expect(mockHistoryQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
+		});
+	});
 });

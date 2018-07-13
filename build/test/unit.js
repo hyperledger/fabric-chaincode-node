@@ -5,8 +5,7 @@
 */
 
 const gulp = require('gulp');
-const tape = require('gulp-tape');
-const tapColorize = require('tap-colorize');
+const mocha = require('gulp-mocha');
 const istanbul = require('gulp-istanbul');
 const Instrumenter = require('istanbul-api');
 
@@ -17,7 +16,7 @@ const instrumenter = function(opts) {
 gulp.task('instrument', function() {
 	return gulp.src([
 		'src/lib/**/*.js',
-		'fabric-shim-crypto/lib/**.js'])
+		'fabric-shim-crypto/lib/*.js'])
 		.pipe(istanbul({instrumenter: instrumenter}))
 		.pipe(istanbul.hookRequire());
 });
@@ -31,12 +30,11 @@ gulp.task('test-headless', ['clean-up', 'lint', 'instrument', 'protos'], functio
 		'test/unit/**/*.js',
 		'!test/unit/util.js'
 	])
-		.pipe(tape({
-			reporter: tapColorize()
+		.pipe(mocha({
+			reporter: 'list'
 		}))
 		.pipe(istanbul.writeReports({
 			reporters: ['lcov', 'json', 'text',
 				'text-summary', 'cobertura']
 		}));
 });
-

@@ -5,20 +5,53 @@
 */
 'use strict';
 
-const test = require('../base.js');
+const chai = require('chai');
+const expect = chai.expect;
+
 const theModule = require('../../src');
 
-test('module export tests', (t) => {
-	t.equal(typeof theModule.start, 'function', 'should export top level Shim function');
-	t.equal(typeof theModule.success, 'function', 'should export top level Shim function');
-	t.equal(typeof theModule.error, 'function', 'should export top level Shim function');
-	t.equal(typeof theModule.Shim, 'function', 'should export Shim class');
-	t.equal(typeof theModule.Stub, 'function', 'should export Stub class');
-	t.equal(typeof theModule.ChaincodeInterface, 'function', 'should export ChaincodeInterface class');
-	t.equal(typeof theModule.ClientIdentity, 'function', 'should export ClientIdentity class');
-	t.equal(typeof theModule.Iterators.HistoryQueryIterator, 'function', 'should export Iterators.HistoryQueryIterator class');
-	t.equal(typeof theModule.HistoryQueryIterator, 'function', 'should export HistoryQueryIterator class');
-	t.equal(typeof theModule.Iterators.StateQueryIterator, 'function', 'should export Iterators.StateQueryIterator class');
-	t.equal(typeof theModule.StateQueryIterator, 'function', 'should export StateQueryIterator class');
-	t.end();
+describe('Exports', () => {
+	it ('should export the start function', () => {
+		expect(typeof theModule.start).to.deep.equal('function');
+	});
+
+	it ('should export the success function', () => {
+		expect(typeof theModule.success).to.deep.equal('function');
+	});
+
+	it ('should export the error function', () => {
+		expect(typeof theModule.error).to.deep.equal('function');
+	});
+
+	it ('should export the Shim class', () => {
+		expect(typeof theModule.Shim).to.deep.equal('function');
+	});
+
+	it ('should export the Stub class', () => {
+		expect(typeof theModule.Stub).to.deep.equal('function');
+	});
+
+	it ('should export the ChaincodeInterface class', () => {
+		expect(typeof theModule.ChaincodeInterface).to.deep.equal('function');
+	});
+
+	it ('should export the ClientIdentity class', () => {
+		expect(typeof theModule.ClientIdentity).to.deep.equal('function');
+	});
+
+	it ('should export the Iterators.HistoryQueryIterator class', () => {
+		expect(typeof theModule.Iterators.HistoryQueryIterator).to.deep.equal('function');
+	});
+
+	it ('should export the HistoryQueryIterator class', () => {
+		expect(typeof theModule.HistoryQueryIterator).to.deep.equal('function');
+	});
+
+	it ('should export the Iterators.StateQueryIterator class', () => {
+		expect(typeof theModule.Iterators.StateQueryIterator).to.deep.equal('function');
+	});
+
+	it ('should export the StateQueryIterator class', () => {
+		expect(typeof theModule.StateQueryIterator).to.deep.equal('function');
+	});
 });

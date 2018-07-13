@@ -14,13 +14,12 @@
 
 const gulp = require('gulp');
 const shell = require('gulp-shell');
-const rename = require('gulp-rename');
 const wait = require('gulp-wait');
 const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
 
-const test = require('../../test/base.js');
+const constants = require('../../test/constants.js');
 
 const packageJson = '{' +
 '  "name": "fabric-shim-test",' +
@@ -50,7 +49,7 @@ function getTLSArgs() {
 gulp.task('copy-shim', ['protos'], () => {
 	// first ensure the chaincode folder has the latest shim code
 	let srcPath = path.join(__dirname, '../../src/**');
-	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim');
+	let destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim');
 	fs.ensureDirSync(destPath);
 	return gulp.src(srcPath)
 		.pipe(gulp.dest(destPath));
@@ -59,7 +58,7 @@ gulp.task('copy-shim', ['protos'], () => {
 gulp.task('copy-shim-crypto', ['copy-shim'], () => {
 	// first ensure the chaincode folder has the latest shim code
 	let srcPath = path.join(__dirname, '../../fabric-shim-crypto/**');
-	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim-crypto');
+	let destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim-crypto');
 	fs.ensureDirSync(destPath);
 	return gulp.src(srcPath)
 		.pipe(gulp.dest(destPath));
@@ -67,12 +66,12 @@ gulp.task('copy-shim-crypto', ['copy-shim'], () => {
 
 gulp.task('copy-chaincode', ['copy-shim-crypto'], () => {
 	// create a package.json in the chaincode folder
-	let destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0/package.json');
+	let destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/package.json');
 	fs.writeFileSync(destPath, packageJson, 'utf8');
 
 	// copy the test.js to chaincode folder
 	let srcPath = path.join(__dirname, '../../test/integration/test.js');
-	destPath = path.join(test.BasicNetworkTestDir, 'src/mycc.v0');
+	destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0');
 	return gulp.src(srcPath)
 		.pipe(gulp.dest(destPath));
 });

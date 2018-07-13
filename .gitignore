@@ -17,3 +17,4 @@ test/.DS_Store
 // ignore webstorm config
 .idea
 yarn.lock
+.nyc_output

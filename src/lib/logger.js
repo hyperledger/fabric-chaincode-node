@@ -21,10 +21,10 @@ function createLogger(level, name) {
 				handleExceptions: true,
 				formatter: (options) => {
 					return `${options.timestamp()} ${
-            				config.colorize(options.level, options.level.toUpperCase())} ${
-            				name ? config.colorize(options.level, `[${name}]`) : ''
-          					} ${options.message ? options.message : ''} ${
-            				options.meta && Object.keys(options.meta).length ? `\n\t${JSON.stringify(options.meta)}` : ''}`;
+						config.colorize(options.level, options.level.toUpperCase())} ${
+						name ? config.colorize(options.level, `[${name}]`) : ''
+					} ${options.message ? options.message : ''} ${
+						options.meta && Object.keys(options.meta).length ? `\n\t${JSON.stringify(options.meta)}` : ''}`;
 				}
 			})
 		],
