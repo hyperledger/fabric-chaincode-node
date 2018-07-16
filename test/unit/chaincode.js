@@ -3,236 +3,326 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+
 'use strict';
 
-const test = require('../base.js');
 const sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
 const rewire = require('rewire');
 const grpc = require('grpc');
 const path = require('path');
-const util = require('util');
+
+const Logger = require('../../src/lib/logger');
+
+const chaincodePath = '../../src/lib/chaincode.js';
 
 const _serviceProto = grpc.load({
 	root: path.join(__dirname, '../../src/lib/protos'),
 	file: 'peer/chaincode_shim.proto'
 }).protos;
 
-let Chaincode;
+describe('Chaincode', () => {
+	describe('Command line arguments', () => {
+		it ('should return undefined for zero argument', () => {
+			let Chaincode = rewire(chaincodePath);
+			let opts = Chaincode.__get__('opts');
 
-test('Chaincode command line arguments tests', (t) => {
-	Chaincode = rewire('fabric-shim/lib/chaincode.js');
-	let opts = Chaincode.__get__('opts');
-	t.deepEqual(opts['peer.address'], undefined, 'Test zero argument');
+			expect(opts['peer.address']).to.be.an('undefined');
+		});
 
-	process.argv.push('--peer.address');
-	process.argv.push('localhost:7051');
-	delete require.cache[require.resolve('fabric-shim/lib/chaincode.js')];
-	Chaincode = rewire('fabric-shim/lib/chaincode.js');
-	opts = Chaincode.__get__('opts');
-	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing only --peer.address argument');
+		it ('shout set value when peer.address argument set', () => {
+			process.argv.push('--peer.address');
+			process.argv.push('localhost:7051');
+			delete require.cache[require.resolve(chaincodePath)];
+			let Chaincode = rewire(chaincodePath);
+			let opts = Chaincode.__get__('opts');
 
-	process.argv.push('--test.another');
-	process.argv.push('dummyValue9');
-	delete require.cache[require.resolve('fabric-shim/lib/chaincode.js')];
-	Chaincode = rewire('fabric-shim/lib/chaincode.js');
-	opts = Chaincode.__get__('opts');
-	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing two arguments and one is in the parsing definition');
-	t.deepEqual(opts['test.again'], undefined, 'Test passing two arguments and one is NOT in the parsing definition');
+			expect(opts['peer.address']).to.deep.equal('localhost:7051');
+		});
 
-	t.end();
-});
+		it ('should ignore non expected arguments arguments', () => {
+			process.argv.push('--peer.address');
+			process.argv.push('localhost:7051');
+			process.argv.push('--test.again');
+			process.argv.push('dummyValue9');
 
-Chaincode = rewire('fabric-shim/lib/chaincode.js');
+			delete require.cache[require.resolve(chaincodePath)];
+			let Chaincode = rewire(chaincodePath);
+			let opts = Chaincode.__get__('opts');
 
-test('chaincode start() tests', (t) => {
-	let sandbox = sinon.sandbox.create();
-	t.throws(
-		() => {
-			Chaincode.start();
-		},
-		/Missing required argument: chaincode/,
-		'Test without any arguments'
-	);
-	t.throws(
-		() => {
-			Chaincode.start('fakeChaincodeClass');
-		},
-		/Missing required argument: chaincode/,
-		'Test with a string argument for the chaincode class'
-	);
+			expect(opts['peer.address']).to.deep.equal('localhost:7051');
+			expect(opts['test.again']).to.be.an('undefined');
+		});
+	});
 
-	t.throws(
-		() => {
-			Chaincode.start(null);
-		},
-		/Missing required argument: chaincode/,
-		'Test with a null value for the chaincode class'
-	);
+	describe('Start()', () => {
+		let Chaincode;
 
-	t.throws(
-		() => {
-			Chaincode.start({});
-		},
-		/The "chaincode" argument must implement the "Init\(\)" method/,
-		'Test with an object without the Init() method'
-	);
+		beforeEach(() => {
+			Chaincode = rewire(chaincodePath);
+		});
 
-	t.throws(
-		() => {
-			Chaincode.start({Init: function() {}});
-		},
-		/The "chaincode" argument must implement the "Invoke\(\)" method/,
-		'Test with an object without the Invoke() method'
-	);
+		it ('should throw an error if no arguments passed', () => {
+			expect(() => {
+				Chaincode.start();
+			}).to.throw(/Missing required argument: chaincode/);
+		});
 
-	let parsePeerUrlFcn = Chaincode.__get__('parsePeerUrl');
+		it ('should throw an error if string argument passed', () => {
+			expect(() => {
+				Chaincode.start('fakeChaincodeClass');
+			}).to.throw(/Missing required argument: chaincode/);
+		});
 
-	t.throws(
-		() => {
-			parsePeerUrlFcn();
-		},
-		/The "peer.address" program argument must be set to a legitimate value of/,
-		'Test peer url parsing without an argument'
-	);
+		it ('should throw an error if null argument passed', () => {
+			expect(() => {
+				Chaincode.start(null);
+			}).to.throw(/Missing required argument: chaincode/);
+		});
 
-	t.throws(
-		() => {
-			parsePeerUrlFcn('http://dummyUrl');
-		},
-		/The "peer.address" program argument can not be set to an "http\(s\)" url/,
-		'Test peer url parsing with an http:// value'
-	);
+		it ('should throw an error if object missing init passed as argument', () => {
+			expect(() => {
+				Chaincode.start({});
+			}).to.throw(/The "chaincode" argument must implement the "Init\(\)" method/);
+		});
 
-	t.throws(
-		() => {
-			parsePeerUrlFcn('http://dummyUrl');
-		},
-		/The "peer.address" program argument can not be set to an "http\(s\)" url/,
-		'Test peer url parsing with an http:// value'
-	);
+		it ('should throw an error if object missing invoke passed as argument', () => {
+			expect(() => {
+				Chaincode.start({
+					Init: () => {}
+				});
+			}).to.throw(/The "chaincode" argument must implement the "Invoke\(\)" method/);
+		});
 
-	process.env.CORE_PEER_TLS_ENABLED = true;
-	let url = parsePeerUrlFcn('localhost:7051');
-	t.equal(url, 'grpcs://localhost:7051', 'Test appending grpcs:// when CORE_PEER_TLS_ENABLED env var is set to true');
+		it ('should start when passed init and invoke', () => {
+			let handlerClass = Chaincode.__get__('Handler');
+			let chat = sinon.stub(handlerClass.prototype, 'chat');
 
-	process.env.CORE_PEER_TLS_ENABLED = 'TRUE';
-	url = parsePeerUrlFcn('localhost:7051');
-	t.equal(url, 'grpcs://localhost:7051', 'Test appending grpcs:// when CORE_PEER_TLS_ENABLED env var is set to TRUE');
+			Chaincode.__set__('opts', {'peer.address': 'localhost:7051'});
+			process.env.CORE_CHAINCODE_ID_NAME = 'mycc';
 
-	process.env.CORE_PEER_TLS_ENABLED = false;
-	url = parsePeerUrlFcn('localhost:7051');
-	t.equal(url, 'grpc://localhost:7051', 'Test appending grpcs:// when CORE_PEER_TLS_ENABLED env var is set to false');
-
-	process.env.CORE_PEER_TLS_ENABLED = 'FALSE';
-	url = parsePeerUrlFcn('localhost:7051');
-	t.equal(url, 'grpc://localhost:7051', 'Test appending grpcs:// when CORE_PEER_TLS_ENABLED env var is set to FALSE');
-
-	// stub out the Handler.chat() method so it doesn't send
-	// out gRPC calls
-	let handlerClass = Chaincode.__get__('Handler');
-	let chat = sandbox.stub(handlerClass.prototype, 'chat');
-	// set a proper value to the module-scoped variable
-	// that will be used by the "start()" method tested below
-	Chaincode.__set__('opts', {'peer.address': 'localhost:7051'});
-	process.env.CORE_CHAINCODE_ID_NAME = 'mycc';
-	process.env.CORE_PEER_TLS_ENABLED = true;
-	// use package.json in the place of the cert so it's easy to verify it's been properly loaded
-	let testfile = path.join(__dirname, '../../package.json');
-	process.env.CORE_PEER_TLS_ROOTCERT_FILE = testfile;
-
-	t.throws(
-		() => {
 			Chaincode.start({Init: function() {}, Invoke: function() {}});
-		},
-		/The client key and cert are needed when TLS is enabled, but environment variables specifying the paths to these files are missing/,
-		'Test verifying environment variables for TLS client key and cert'
-	);
 
-	process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
+			expect(chat.calledOnce).to.be.ok;
 
-	t.throws(
-		() => {
-			Chaincode.start({Init: function() {}, Invoke: function() {}});
-		},
-		/The client key and cert are needed when TLS is enabled, but environment variables specifying the paths to these files are missing/,
-		'Test verifying environment variables for TLS client key'
-	);
+			let args = chat.firstCall.args;
+			expect(args.length).to.deep.equal(1);
+			expect(typeof args[0]).to.deep.equal('object');
+			expect(args[0].type).to.deep.equal(_serviceProto.ChaincodeMessage.Type.REGISTER);
 
-	process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
+			chat.restore();
+			delete process.env.CORE_CHAINCODE_ID_NAME;
+		});
 
-	// now have the chaincode shim process all the above during bootstrap and verify the result
-	let handler = Chaincode.start({Init: function() {}, Invoke: function() {}});
-	t.equal(chat.calledOnce, true, 'Test handler.chat() gets called on legit shim.start() invocation');
-	let args = chat.firstCall.args;
-	t.equal(args.length === 1 && typeof args[0] === 'object', true, 'Test handler.chat() gets called with one object');
-	t.equal(args[0].type, _serviceProto.ChaincodeMessage.Type.REGISTER, 'Test the argument has the right message type');
+		describe('TLS handling', () => {
+			let Chaincode = rewire(chaincodePath);
 
-	let opts = Chaincode.__get__('opts');
-	let testFcn = function(t, attr) {
-		t.equal(typeof opts[attr], 'string', util.format('Test the opts attribute "%s" has been properly loaded as string', attr));
-		let pkg = JSON.parse(opts[attr]);
-		t.equal(typeof pkg.name, 'string', util.format('Test the opts attribute "%s" content has a "name" property', attr));
-		t.equal(pkg.name, 'fabric-shim-test', util.format('Test the opts attribute "%s" content has the expected value', attr));
-	};
+			let testfile = path.join(__dirname, '../../package.json');
 
-	testFcn(t, 'pem');
-	testFcn(t, 'key');
-	testFcn(t, 'cert');
-	sandbox.restore();
-	t.end();
+			Chaincode.__set__('opts', {'peer.address': 'localhost:7051'});
 
-});
+			before(() => {
+				process.env.CORE_CHAINCODE_ID_NAME = 'mycc';
+				process.env.CORE_PEER_TLS_ENABLED = true;
+				process.env.CORE_PEER_TLS_ROOTCERT_FILE = testfile;
+			});
 
-test('shim error tests', (t) => {
-	let respProto = Chaincode.__get__('_responseProto');
-	let Stub = Chaincode.__get__('Stub');
-	let mockResponse = sinon.createStubInstance(respProto.Response);
-	let saveClass = respProto.Response;
-	class MockResponse {
-		constructor() {
-			return mockResponse;
-		}
-	}
-	respProto.Response = MockResponse;
-	let result = Chaincode.error('error msg');
-	t.equal(result.message, 'error msg', 'Test the message is set to error message');
-	t.equal(result.status, Stub.RESPONSE_CODE.ERROR, 'Test the status is set correctly');
+			afterEach(() => {
+				delete process.env.CORE_TLS_CLIENT_KEY_PATH;
+				delete process.env.CORE_TLS_CLIENT_CERT_PATH;
+			});
 
-	respProto.Response = saveClass;
-	t.end();
-});
+			after(() => {
+				delete process.env.CORE_CHAINCODE_ID_NAME;
+				delete process.env.CORE_PEER_TLS_ENABLED;
+				delete process.env.CORE_PEER_TLS_ROOTCERT_FILE;
+			});
 
-test('shim success tests', (t) => {
-	let respProto = Chaincode.__get__('_responseProto');
-	let Stub = Chaincode.__get__('Stub');
-	let mockResponse = sinon.createStubInstance(respProto.Response);
-	let saveClass = respProto.Response;
-	class MockResponse {
-		constructor() {
-			return mockResponse;
-		}
-	}
-	respProto.Response = MockResponse;
-	let result = Chaincode.success('msg');
-	t.equal(result.payload, 'msg', 'Test the message is set to error message');
-	t.equal(result.status, Stub.RESPONSE_CODE.OK, 'Test the status is set correctly');
+			it ('should throw an error when CORE_TLS_CLIENT_KEY_PATH env var not set', () => {
+				expect(() => {
+					Chaincode.start({Init: function() {}, Invoke: function() {}});
+				}).to.throw(/The client key and cert are needed when TLS is enabled, but environment variables specifying the paths to these files are missing/);
+			});
 
-	result = Chaincode.success();
-	t.deepEqual(result.payload, Buffer.from(''), 'Test the message is set to error message');
-	t.equal(result.status, Stub.RESPONSE_CODE.OK, 'Test the status is set correctly');
+			it ('should throw an error when CORE_TLS_CLIENT_KEY_PATH env var set but CORE_TLS_CLIENT_CERT_PATH env var not set', () => {
+				process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
+				expect(() => {
+					Chaincode.start({Init: function() {}, Invoke: function() {}});
+				}).to.throw(/The client key and cert are needed when TLS is enabled, but environment variables specifying the paths to these files are missing/);
+			});
 
+			it ('should call handler.chat() with the correct object and output a message', () => {
 
-	respProto.Response = saveClass;
-	t.end();
-});
+				let handlerClass = Chaincode.__get__('Handler');
+				let chat = sinon.stub(handlerClass.prototype, 'chat');
 
-test('shim newLogger() tests', (t) => {
-	let oldValue = process.env['CORE_CHAINCODE_LOGGING_SHIM'];
-	process.env['CORE_CHAINCODE_LOGGING_SHIM'] = 'CRITICAL';
-	let logger = Chaincode.newLogger('testLogger');
-	t.equal(logger.level, 'fatal', 'Test logger level is properly set according to the env variable CORE_CHAINCODE_LOGGING_SHIM');
-	t.equal(typeof logger.info, 'function', 'Test returned logger has an info() method');
+				process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
+				process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
 
-	process.env['CORE_CHAINCODE_LOGGING_SHIM'] = oldValue;
-	t.end();
+				Chaincode.start({Init: function() {}, Invoke: function() {}});
+
+				expect(chat.calledOnce).to.be.ok;
+
+				let args = chat.firstCall.args;
+				expect(args.length).to.deep.equal(1);
+				expect(typeof args[0]).to.deep.equal('object');
+				expect(args[0].type).to.deep.equal(_serviceProto.ChaincodeMessage.Type.REGISTER);
+
+				chat.restore();
+			});
+
+			it ('should load the opts certificate attributes as JSON strings with the correct properties', () => {
+				let handlerClass = Chaincode.__get__('Handler');
+				let chat = sinon.stub(handlerClass.prototype, 'chat');
+
+				process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
+				process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
+
+				Chaincode.start({Init: function() {}, Invoke: function() {}});
+
+				let opts = Chaincode.__get__('opts');
+
+				let attributes = ['pem', 'cert', 'key'];
+
+				attributes.forEach((attr) => {
+					expect(typeof opts[attr]).to.deep.equal('string');
+
+					let json = JSON.parse(opts[attr]);
+					expect(json.name).to.deep.equal('fabric-shim-test');
+				});
+
+				chat.restore();
+			});
+		});
+	});
+
+	describe('parsePeerUrlFcn' ,() => {
+		let parsePeerUrlFcn;
+		let Chaincode = rewire(chaincodePath);
+
+		beforeEach(() => {
+			parsePeerUrlFcn = Chaincode.__get__('parsePeerUrl');
+		});
+
+		it ('should throw an error if peer.address not set', () => {
+			expect(() => {
+				parsePeerUrlFcn();
+			}).to.throw(/The "peer.address" program argument must be set to a legitimate value of/);
+		});
+
+		it ('should throw an error if peer.address set to url', () => {
+			expect(() => {
+				parsePeerUrlFcn('http://dummyUrl');
+			}).to.throw(/The "peer.address" program argument can not be set to an "http\(s\)" url/);
+		});
+
+		it ('should use grpc when URL already has that prefix', () => {
+			expect(parsePeerUrlFcn('grpc://localhost:7051')).to.deep.equal('grpc://localhost:7051');
+		});
+
+		it ('should use grpcs when URL already has that prefix', () => {
+			expect(parsePeerUrlFcn('grpcs://localhost:7051')).to.deep.equal('grpcs://localhost:7051');
+		});
+
+		it ('should use grpc when CORE_PEER_TLS_ENABLED env var is not set', () => {
+			process.env.CORE_PEER_TLS_ENABLED = undefined;
+			expect(parsePeerUrlFcn('localhost:7051')).to.deep.equal('grpc://localhost:7051');
+		});
+
+		it ('should use grpc when CORE_PEER_TLS_ENABLED env var is set to false', () => {
+			process.env.CORE_PEER_TLS_ENABLED = false;
+			expect(parsePeerUrlFcn('localhost:7051')).to.deep.equal('grpc://localhost:7051');
+		});
+
+		it ('should use grpc when CORE_PEER_TLS_ENABLED env var is set to a string FALSE', () => {
+			process.env.CORE_PEER_TLS_ENABLED = 'FALSE';
+			expect(parsePeerUrlFcn('localhost:7051')).to.deep.equal('grpc://localhost:7051');
+		});
+
+		it ('should use grpcs when CORE_PEER_TLS_ENABLED env var is set to true', () => {
+			process.env.CORE_PEER_TLS_ENABLED = true;
+			expect(parsePeerUrlFcn('localhost:7051')).to.deep.equal('grpcs://localhost:7051');
+		});
+
+		it ('should use grpcs when CORE_PEER_TLS_ENABLED env var is set to a string TRUE', () => {
+			process.env.CORE_PEER_TLS_ENABLED = 'TRUE';
+			expect(parsePeerUrlFcn('localhost:7051')).to.deep.equal('grpcs://localhost:7051');
+		});
+	});
+
+	describe('reponse', () => {
+		let Chaincode;
+		let respProto;
+		let Stub;
+		let mockResponse;
+		let saveClass;
+
+		beforeEach(() => {
+			Chaincode = rewire(chaincodePath);
+
+			respProto = Chaincode.__get__('_responseProto');
+			Stub = Chaincode.__get__('Stub');
+			mockResponse = sinon.createStubInstance(respProto.Response);
+			saveClass = respProto.Response;
+
+			class MockResponse {
+				constructor() {
+					return mockResponse;
+				}
+			}
+
+			respProto.Response = MockResponse;
+		});
+
+		after(() => {
+			respProto.Response = saveClass;
+		});
+
+		it ('should let the code response an error', () => {
+			let result = Chaincode.error('error msg');
+
+			expect(result.message).to.deep.equal('error msg');
+			expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.ERROR);
+		});
+
+		it ('should handle an empty success', () => {
+			let result = Chaincode.success();
+
+			expect(result.payload).to.deep.equal(Buffer.from(''));
+			expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.OK);
+		});
+
+		it ('should handle a success with message', () => {
+			let result = Chaincode.success('msg');
+
+			expect(result.payload).to.deep.equal('msg');
+			expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.OK);
+		});
+	});
+
+	describe('newLogger()', () => {
+		let Chaincode = rewire(chaincodePath);
+		it ('should use shim when calling getLogger and no name passed', () => {
+			let loggerStub = sinon.stub(Logger, 'getLogger');
+
+			Chaincode.newLogger();
+
+			expect(loggerStub.calledOnce).to.be.ok;
+			expect(loggerStub.getCall(0).args[0]).to.deep.equal('shim');
+
+			Logger.getLogger.restore();
+		});
+
+		it ('should use shim when calling getLogger and name passed', () => {
+			let loggerStub = sinon.stub(Logger, 'getLogger');
+
+			Chaincode.newLogger('testLogger');
+
+			expect(loggerStub.calledOnce).to.be.ok;
+			expect(loggerStub.getCall(0).args[0]).to.deep.equal('testLogger');
+
+			Logger.getLogger.restore();
+		});
+	});
 });

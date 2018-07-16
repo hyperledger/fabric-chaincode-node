@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+
 'use strict';
 
 const CLIArgs = require('command-line-args');
@@ -383,7 +384,7 @@ function normalizeX509(raw) {
 	// make sure '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----' are in their own lines
 	// and that it ends in a new line
 	return matches.join('\n') + '\n';
-};
+}
 
 module.exports = Shim;
 // Double exported to provide better experience for TypeScript programmers.

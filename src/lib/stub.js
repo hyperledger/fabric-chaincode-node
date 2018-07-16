@@ -778,7 +778,7 @@ class ChaincodeStub {
 
 		return this.handler.handleGetQueryResult(collection, query, this.channel_id, this.txId);
 	}
-};
+}
 
 module.exports = ChaincodeStub;
 module.exports.RESPONSE_CODE = RESPONSE_CODE;

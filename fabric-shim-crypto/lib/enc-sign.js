@@ -149,23 +149,17 @@ function importKey(raw) {
 	try {
 		key = KEYUTIL.getKey(pemString);
 	} catch(err) {
-		error = new Error('Failed to parse key from PEM: ' + err);
+		throw new Error('Failed to parse key from PEM: ' + err);
 	}
 
 	if (key) {
 		if (key.type && key.type === 'EC') {
-			theKey = new ECDSAKey(key);
+			return new ECDSAKey(key);
 		}
 		else {
-			error = new Error('Does not understand PEM contents other than ECDSA private keys and certificates');
+			throw new Error('Does not understand PEM contents other than ECDSA private keys and certificates');
 		}
 	}
-
-	if (error) {
-		throw error;
-	}
-
-	return theKey;
 }
 
 // Utilitly method to make sure the start and end markers are correct
@@ -196,9 +190,10 @@ const halfOrdersForCurve = {
 };
 
 function _preventMalleability(sig, curveParams) {
-	var halfOrder = halfOrdersForCurve[curveParams.name];
+	let curve = curveParams.name;
+	var halfOrder = halfOrdersForCurve[curve];
 	if (!halfOrder) {
-		throw new Error('Can not find the half order needed to calculate "s" value for immalleable signatures. Unsupported curve name: ' + curve);
+		throw new Error(`Can not find the half order needed to calculate "s" value for immalleable signatures. Unsupported curve name: ${curve}`);
 	}
 
 	// in order to guarantee 's' falls in the lower range of the order, as explained in the above link,
@@ -213,9 +208,10 @@ function _preventMalleability(sig, curveParams) {
 }
 
 function _checkMalleability(sig, curveParams) {
-	var halfOrder = halfOrdersForCurve[curveParams.name];
+	let curve = curveParams.name;
+	var halfOrder = halfOrdersForCurve[curve];
 	if (!halfOrder) {
-		throw new Error('Can not find the half order needed to calculate "s" value for immalleable signatures. Unsupported curve name: ' + curve);
+		throw new Error(`Can not find the half order needed to calculate "s" value for immalleable signatures. Unsupported curve name: ${curve}`);
 	}
 
 	// first need to unmarshall the signature bytes into the object with r and s values
