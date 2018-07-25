@@ -163,7 +163,7 @@ class Shim {
 	/**
 	 * Returns a standard response object with status code 200 and an optional payload
 	 * @static
-	 * @param {Buffer} msg A message describing the error
+	 * @param {string} msg A message describing the error
 	 * @returns {ErrorResponse}
 	 */
 	static error(msg) {
