@@ -481,7 +481,7 @@ describe('Stub', () => {
 
 				expect(result).to.deep.equal('some state');
 				expect(handlePutStateStub.calledOnce).to.be.ok;
-				expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', 'a value', 'dummyChannelId', 'dummyTxid']);
+				expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', Buffer.from('a value'), 'dummyChannelId', 'dummyTxid']);
 			});
 		});
 
@@ -765,12 +765,12 @@ describe('Stub', () => {
 
 			it ('should throw an error if no arguments supplied', async () => {
 				const result = stub.getPrivateData();
-				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateData requires two arguments, collection and key');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
 			});
 
 			it ('should throw an error if one argument supplied', async () => {
 				const result = stub.getPrivateData('some arg');
-				await expect(result).to.eventually.be.rejectedWith(Error, 'getPrivateData requires two arguments, collection and key');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
 			});
 
 			it ('should throw an error if collection null', async () => {
@@ -802,17 +802,17 @@ describe('Stub', () => {
 
 			it ('should throw an error if no arguments supplied', async () => {
 				const result = stub.putPrivateData();
-				await expect(result).to.eventually.be.rejectedWith(Error, 'putPrivateData requires three arguments, collection, key and value');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
 			});
 
 			it ('should throw an error if one argument supplied', async () => {
 				const result = stub.putPrivateData('some arg');
-				await expect(result).to.eventually.be.rejectedWith(Error, 'putPrivateData requires three arguments, collection, key and value');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
 			});
 
 			it ('should throw an error if two arguments supplied', async () => {
 				const result = stub.putPrivateData('some arg1', 'some arg2');
-				await expect(result).to.eventually.be.rejectedWith(Error, 'putPrivateData requires three arguments, collection, key and value');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'value must be valid');
 			});
 
 			it ('should throw an error if collection null', async () => {
@@ -830,7 +830,7 @@ describe('Stub', () => {
 
 				expect(result).to.deep.equal('some state');
 				expect(handlePutStateStub.calledOnce).to.be.ok;
-				expect(handlePutStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'some value', 'dummyChannelId', 'dummyTxid']);
+				expect(handlePutStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', Buffer.from('some value'), 'dummyChannelId', 'dummyTxid']);
 			});
 		});
 
@@ -849,12 +849,12 @@ describe('Stub', () => {
 
 			it ('should throw an error if no arguments supplied', async () => {
 				const result = stub.deletePrivateData();
-				await expect(result).to.eventually.be.rejectedWith(Error, 'deletePrivateData requires two arguments, collection and key');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
 			});
 
 			it ('should throw an error if one argument supplied', async () => {
 				const result = stub.deletePrivateData('some arg');
-				await expect(result).to.eventually.be.rejectedWith(Error, 'deletePrivateData requires two arguments, collection and key');
+				await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
 			});
 
 			it ('should throw an error if collection null', async () => {

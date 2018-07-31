@@ -111,7 +111,7 @@ class ChaincodeStub {
 				proposal = _proposalProto.Proposal.decode(signedProposal.proposal_bytes);
 				decodedSP.proposal = {};
 				this.proposal = proposal;
-			} catch(err) {
+			} catch (err) {
 				throw new Error(util.format('Failed extracting proposal from signedProposal. [%s]', err));
 			}
 
@@ -125,15 +125,15 @@ class ChaincodeStub {
 			try {
 				header = _commonProto.Header.decode(this.proposal.header);
 				decodedSP.proposal.header = {};
-			} catch(err) {
+			} catch (err) {
 				throw new Error(util.format('Could not extract the header from the proposal: %s', err));
 			}
 
 			let signatureHeader;
 			try {
 				signatureHeader = _commonProto.SignatureHeader.decode(header.signature_header);
-				decodedSP.proposal.header.signature_header = { nonce: signatureHeader.getNonce().toBuffer() };
-			} catch(err) {
+				decodedSP.proposal.header.signature_header = {nonce: signatureHeader.getNonce().toBuffer()};
+			} catch (err) {
 				throw new Error(util.format('Decoding SignatureHeader failed: %s', err));
 			}
 
@@ -142,7 +142,7 @@ class ChaincodeStub {
 				creator = _idProto.SerializedIdentity.decode(signatureHeader.creator);
 				decodedSP.proposal.header.signature_header.creator = creator;
 				this.creator = creator;
-			} catch(err) {
+			} catch (err) {
 				throw new Error(util.format('Decoding SerializedIdentity failed: %s', err));
 			}
 
@@ -151,7 +151,7 @@ class ChaincodeStub {
 				channelHeader = _commonProto.ChannelHeader.decode(header.channel_header);
 				decodedSP.proposal.header.channel_header = channelHeader;
 				this.txTimestamp = channelHeader.timestamp;
-			} catch(err) {
+			} catch (err) {
 				throw new Error(util.format('Decoding ChannelHeader failed: %s', err));
 			}
 
@@ -159,7 +159,7 @@ class ChaincodeStub {
 			try {
 				ccpp = _proposalProto.ChaincodeProposalPayload.decode(this.proposal.payload);
 				decodedSP.proposal.payload = ccpp;
-			} catch(err) {
+			} catch (err) {
 				throw new Error(util.format('Decoding ChaincodeProposalPayload failed: %s', err));
 			}
 
@@ -290,19 +290,19 @@ class ChaincodeStub {
 	 * @property {number} type Any of the following:
 	 * <ul>
 	 * <li>MESSAGE = 0;                   // Used for messages which are signed but opaque
-     * <li>CONFIG = 1;                    // Used for messages which express the channel config
-     * <li>CONFIG_UPDATE = 2;             // Used for transactions which update the channel config
-     * <li>ENDORSER_TRANSACTION = 3;      // Used by the SDK to submit endorser based transactions
-     * <li>ORDERER_TRANSACTION = 4;       // Used internally by the orderer for management
-     * <li>DELIVER_SEEK_INFO = 5;         // Used as the type for Envelope messages submitted to instruct the Deliver API to seek
-     * <li>CHAINCODE_PACKAGE = 6;         // Used for packaging chaincode artifacts for install
-     * </ul>
-     * @property {number} version
-     * @property {google.protobuf.Timestamp} timestamp The local time when the message was created by the submitter
-     * @property {string} channel_id Identifier of the channel that this message bound for
-     * @property {string} tx_id Unique identifier used to track the transaction throughout the proposal endorsement, ordering,
-     * validation and committing to the ledger
-     * @property {number} epoch
+	 * <li>CONFIG = 1;                    // Used for messages which express the channel config
+	 * <li>CONFIG_UPDATE = 2;             // Used for transactions which update the channel config
+	 * <li>ENDORSER_TRANSACTION = 3;      // Used by the SDK to submit endorser based transactions
+	 * <li>ORDERER_TRANSACTION = 4;       // Used internally by the orderer for management
+	 * <li>DELIVER_SEEK_INFO = 5;         // Used as the type for Envelope messages submitted to instruct the Deliver API to seek
+	 * <li>CHAINCODE_PACKAGE = 6;         // Used for packaging chaincode artifacts for install
+	 * </ul>
+	 * @property {number} version
+	 * @property {google.protobuf.Timestamp} timestamp The local time when the message was created by the submitter
+	 * @property {string} channel_id Identifier of the channel that this message bound for
+	 * @property {string} tx_id Unique identifier used to track the transaction throughout the proposal endorsement, ordering,
+	 * validation and committing to the ledger
+	 * @property {number} epoch
 	 */
 
 	/**
@@ -373,7 +373,7 @@ class ChaincodeStub {
 	 * Retrieves the current value of the state variable <code>key</code>
 	 * @async
 	 * @param {string} key State variable key to retrieve from the state store
-	 * @returns {Promise} Promise for the current value of the state variable
+	 * @returns {Promise<byte[]>} Promise for the current value of the state variable
 	 */
 	async getState(key) {
 		logger.debug('getState called with key:%s', key);
@@ -388,13 +388,16 @@ class ChaincodeStub {
 	 * overwritten.
 	 * @async
 	 * @param {string} key State variable key to set the value for
-	 * @param {byte[]} value State variable value
+	 * @param {byte[]|string} value State variable value
 	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state update request
 	 * or rejected if any errors
 	 */
 	async putState(key, value) {
 		// Access public data by setting the collection to empty string
 		const collection = '';
+		if (typeof value === 'string') {
+			value = Buffer.from(value);
+		}
 		return await this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
 	}
 
@@ -427,7 +430,7 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
 	async getStateByRange(startKey, endKey) {
-		if (!startKey || startKey.length === 0) {
+		if (!startKey) {
 			startKey = EMPTY_KEY_SUBSTITUTE;
 		}
 		// Access public data by setting the collection to empty string
@@ -625,14 +628,15 @@ class ChaincodeStub {
 	 *
 	 * @param {string} collection The collection name
 	 * @param {string} key Private data variable key to retrieve from the state store
+	 * @returns {Promise<byte[]>} Promise for the private value from the state store
 	 */
 	async getPrivateData(collection, key) {
 		logger.debug('getPrivateData called with collection:%s, key:%s', collection, key);
-		if (arguments.length !== 2) {
-			throw new Error('getPrivateData requires two arguments, collection and key');
-		}
-		if (!collection) {
+		if (!collection || typeof collection !== 'string') {
 			throw new Error('collection must be a valid string');
+		}
+		if (!key || typeof key !== 'string') {
+			throw new Error('key must be a valid string');
 		}
 
 		return await this.handler.handleGetState(collection, key, this.channel_id, this.txId);
@@ -640,9 +644,9 @@ class ChaincodeStub {
 
 	/**
 	 * putPrivateData puts the specified `key` and `value` into the transaction's
-	 * private writeset. Note that only hash of the private writeset goes into the
+	 * private writeSet. Note that only hash of the private writeSet goes into the
 	 * transaction proposal response (which is sent to the client who issued the
-	 * transaction) and the actual private writeset gets temporarily stored in a
+	 * transaction) and the actual private writeSet gets temporarily stored in a
 	 * transient store. PutPrivateData doesn't effect the `collection` until the
 	 * transaction is validated and successfully committed. Simple keys must not be
 	 * an empty string and must not start with null character (0x00), in order to
@@ -651,18 +655,21 @@ class ChaincodeStub {
 	 *
 	 * @param {string} collection The collection name
 	 * @param {string} key Private data variable key to set the value for
-	 * @param {string} value Private data variable value
+	 * @param {string|byte[]} value Private data variable value
 	 */
 	async putPrivateData(collection, key, value) {
 		logger.debug('putPrivateData called with collection:%s, key:%s', collection, key);
-		if (arguments.length !== 3) {
-			throw new Error('putPrivateData requires three arguments, collection, key and value');
-		}
-		if (!collection) {
+		if (!collection || typeof collection !== 'string') {
 			throw new Error('collection must be a valid string');
 		}
-		if (!key) {
+		if (!key || typeof key !== 'string') {
 			throw new Error('key must be a valid string');
+		}
+		if (!value) {
+			throw new Error('value must be valid');
+		}
+		if (typeof value === 'string') {
+			value = Buffer.from(value);
 		}
 
 		return this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
@@ -681,13 +688,12 @@ class ChaincodeStub {
 	 */
 	async deletePrivateData(collection, key) {
 		logger.debug('deletePrivateData called with collection:%s, key:%s', collection, key);
-		if (arguments.length !== 2) {
-			throw new Error('deletePrivateData requires two arguments, collection and key');
-		}
-		if (!collection) {
+		if (!collection || typeof collection !== 'string') {
 			throw new Error('collection must be a valid string');
 		}
-
+		if (!key || typeof key !== 'string') {
+			throw new Error('key must be a valid string');
+		}
 		return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
 	}
 
@@ -711,10 +717,10 @@ class ChaincodeStub {
 		if (arguments.length !== 3) {
 			throw new Error('getPrivateDataByRange requires three arguments, collection, startKey and endKey');
 		}
-		if (!collection) {
+		if (!collection || typeof collection !== 'string') {
 			throw new Error('collection must be a valid string');
 		}
-		if (!startKey || startKey.length === 0) {
+		if (!startKey) {
 			startKey = EMPTY_KEY_SUBSTITUTE;
 		}
 
@@ -742,7 +748,7 @@ class ChaincodeStub {
 		if (arguments.length !== 3) {
 			throw new Error('getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
 		}
-		if (!collection) {
+		if (!collection || typeof collection !== 'string') {
 			throw new Error('collection must be a valid string');
 		}
 		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
@@ -772,7 +778,7 @@ class ChaincodeStub {
 		if (arguments.length !== 2) {
 			throw new Error('getPrivateDataQueryResult requires two arguments, collection and query');
 		}
-		if (!collection) {
+		if (!collection || typeof collection !== 'string') {
 			throw new Error('collection must be a valid string');
 		}
 
