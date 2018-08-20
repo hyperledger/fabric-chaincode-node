@@ -18,3 +18,5 @@ test/.DS_Store
 .idea
 yarn.lock
 .nyc_output
+test/typescript/chaincode.js
+test/typescript/chaincode.js.map

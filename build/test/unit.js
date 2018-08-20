@@ -6,6 +6,7 @@
 
 const gulp = require('gulp');
 const mocha = require('gulp-mocha');
+const shell = require('gulp-shell');
 const istanbul = require('gulp-istanbul');
 const Instrumenter = require('istanbul-api');
 
@@ -21,7 +22,14 @@ gulp.task('instrument', function() {
 		.pipe(istanbul.hookRequire());
 });
 
-gulp.task('test-headless', ['clean-up', 'lint', 'instrument', 'protos'], function() {
+gulp.task('compile', shell.task([
+	'npm run compile',
+], {
+	verbose: true, // so we can see the docker command output
+	ignoreErrors: false // once compile failed, throw error
+}));
+
+gulp.task('test-headless', ['clean-up', 'lint', 'compile', 'instrument', 'protos'], function() {
 	// this is needed to avoid a problem in tape-promise with adding
 	// too many listeners to the "unhandledRejection" event
 	process.setMaxListeners(0);

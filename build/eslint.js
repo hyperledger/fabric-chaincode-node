@@ -12,6 +12,7 @@ gulp.task('lint', function () {
 		'**/*.js',
 		'!src/node_modules/**',
 		'!test/node_modules/**',
+		'!test/typescript/*.js',
 		'!coverage/**',
 		'!docs/**'
 	], {

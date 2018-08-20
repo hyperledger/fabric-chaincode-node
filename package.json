@@ -9,9 +9,11 @@
   "engineStrict": true,
   "license": "Apache-2.0",
   "scripts": {
-    "test": "gulp test-headless"
+    "test": "gulp test-headless",
+    "compile": "tsc --project test/typescript"
   },
   "dependencies": {
+    "@types/node": "^8.9.4",
     "fabric-shim": "file:./src",
     "fabric-shim-crypto": "file:./fabric-shim-crypto",
     "jsrsasign": "^8.0.4"
@@ -29,14 +31,15 @@
     "gulp-mocha": "^3.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.6.1",
-    "gulp-shell": "^0.6.3",
+    "gulp-shell": "^0.6.5",
     "gulp-wait": "0.0.2",
     "gulp-watch": "^4.3.11",
     "istanbul-api": "^1.1.13",
     "mocha": "3.4.2",
     "require-dir": "^0.3.2",
-    "rewire": "^3.0.0",
+    "rewire": "^3.0.2",
     "sinon": "3.2.1",
-    "sinon-test": "^2.2.0"
+    "sinon-test": "^2.2.0",
+    "typescript": "3.0.1"
   }
 }
