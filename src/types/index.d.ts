@@ -44,6 +44,18 @@ declare module 'fabric-shim' {
         getIdBytes(): Buffer;
     }
 
+    enum RESPONSE_CODE {
+        OK = 200,
+        ERRORTHRESHOLD = 400,
+        ERROR = 500
+    }
+
+    class ResponseCode {
+        OK: number;
+        ERRORTHRESHOLD: number;
+        ERROR: number;
+    }
+
     export class ChaincodeStub {
         getArgs(): string[];
         getStringArgs(): string[];
@@ -79,6 +91,8 @@ declare module 'fabric-shim' {
         getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator>;
         getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator>;
         getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator>;
+
+        static RESPONSE_CODE: ResponseCode;
     }
 
     interface SplitCompositekey {

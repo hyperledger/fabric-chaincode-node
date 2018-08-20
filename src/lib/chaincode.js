@@ -17,7 +17,7 @@ const Logger = require('./logger');
 const logger = Logger.getLogger('lib/chaincode.js');
 const Handler = require('./handler.js');
 const Iterators = require('./iterators.js');
-const Stub = require('./stub.js');
+const ChaincodeStub = require('./stub.js');
 const fs = require('fs');
 
 const argsDef = [
@@ -148,7 +148,7 @@ class Shim {
 	 */
 	static success(payload) {
 		let ret = new _responseProto.Response();
-		ret.status = Stub.RESPONSE_CODE.OK;
+		ret.status = ChaincodeStub.RESPONSE_CODE.OK;
 		ret.payload = payload ? payload : Buffer.from('');
 
 		return ret;
@@ -168,7 +168,7 @@ class Shim {
 	 */
 	static error(msg) {
 		let ret = new _responseProto.Response();
-		ret.status = Stub.RESPONSE_CODE.ERROR;
+		ret.status = ChaincodeStub.RESPONSE_CODE.ERROR;
 		ret.message = msg;
 
 		return ret;
@@ -392,7 +392,9 @@ module.exports.Shim = Shim;
 module.exports.ClientIdentity = ClientIdentity;
 
 // expose the Stub and Iterators to allow ability to write unit tests for users of fabric chaincode node
-module.exports.Stub = Stub;
+// Stub is a legacy alias for ChaincodeStub (the actual name of the class in stub.js)
+module.exports.Stub = ChaincodeStub;
+module.exports.ChaincodeStub = ChaincodeStub;
 module.exports.Iterators = Iterators;
 module.exports.HistoryQueryIterator = Iterators.HistoryQueryIterator;
 module.exports.StateQueryIterator = Iterators.StateQueryIterator;

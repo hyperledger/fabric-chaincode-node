@@ -251,10 +251,10 @@ describe('Chaincode', () => {
 		});
 	});
 
-	describe('reponse', () => {
+	describe('response', () => {
 		let Chaincode;
 		let respProto;
-		let Stub;
+		let ChaincodeStub;
 		let mockResponse;
 		let saveClass;
 
@@ -262,7 +262,7 @@ describe('Chaincode', () => {
 			Chaincode = rewire(chaincodePath);
 
 			respProto = Chaincode.__get__('_responseProto');
-			Stub = Chaincode.__get__('Stub');
+			ChaincodeStub = Chaincode.__get__('ChaincodeStub');
 			mockResponse = sinon.createStubInstance(respProto.Response);
 			saveClass = respProto.Response;
 
@@ -283,21 +283,21 @@ describe('Chaincode', () => {
 			let result = Chaincode.error('error msg');
 
 			expect(result.message).to.deep.equal('error msg');
-			expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.ERROR);
+			expect(result.status).to.deep.equal(ChaincodeStub.RESPONSE_CODE.ERROR);
 		});
 
 		it ('should handle an empty success', () => {
 			let result = Chaincode.success();
 
 			expect(result.payload).to.deep.equal(Buffer.from(''));
-			expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.OK);
+			expect(result.status).to.deep.equal(ChaincodeStub.RESPONSE_CODE.OK);
 		});
 
 		it ('should handle a success with message', () => {
 			let result = Chaincode.success('msg');
 
 			expect(result.payload).to.deep.equal('msg');
-			expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.OK);
+			expect(result.status).to.deep.equal(ChaincodeStub.RESPONSE_CODE.OK);
 		});
 	});
 

@@ -53,6 +53,18 @@ class TestTS implements ChaincodeInterface {
         if (fcn === 'nopayload') {
             return shim.success();
         }
+
+        if (fcn === 'myReturnCode') {
+            let rc: number;
+            rc = ChaincodeStub.RESPONSE_CODE.OK;
+            rc = shim.RESPONSE_CODE.OK;
+            rc = ChaincodeStub.RESPONSE_CODE.ERRORTHRESHOLD;
+            rc = shim.RESPONSE_CODE.ERRORTHRESHOLD;
+            rc = ChaincodeStub.RESPONSE_CODE.ERROR;
+            rc = shim.RESPONSE_CODE.ERROR;
+            rc++;
+        }
+
         return shim.success(Buffer.from('all good'));
     }
 
