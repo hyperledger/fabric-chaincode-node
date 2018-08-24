@@ -30,6 +30,7 @@ const packageJson = '{' +
 '  "dependencies": {' +
 '    "fabric-shim": "file:./fabric-shim",' +
 '    "fabric-shim-crypto": "file:./fabric-shim-crypto",' +
+'    "fabric-contract-api": "file:./fabric-contract-api",' +
 '    "chai": "^4.1.1",' +
 '    "chai-as-promised": "^7.1.1"' +
 '  }' +
@@ -48,14 +49,23 @@ function getTLSArgs() {
 }
 gulp.task('copy-shim', ['protos'], () => {
 	// first ensure the chaincode folder has the latest shim code
-	let srcPath = path.join(__dirname, '../../src/**');
+	let srcPath = path.join(__dirname, '../../fabric-shim/**');
 	let destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim');
 	fs.ensureDirSync(destPath);
 	return gulp.src(srcPath)
 		.pipe(gulp.dest(destPath));
 });
 
-gulp.task('copy-shim-crypto', ['copy-shim'], () => {
+gulp.task('copy-api', ['copy-shim'], () => {
+	// first ensure the chaincode folder has the latest shim code
+	let srcPath = path.join(__dirname, '../../fabric-contract-api/**');
+	let destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-contract-api');
+	fs.ensureDirSync(destPath);
+	return gulp.src(srcPath)
+		.pipe(gulp.dest(destPath));
+});
+
+gulp.task('copy-shim-crypto', ['copy-api'], () => {
 	// first ensure the chaincode folder has the latest shim code
 	let srcPath = path.join(__dirname, '../../fabric-shim-crypto/**');
 	let destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim-crypto');
@@ -323,4 +333,17 @@ gulp.task('test-e2e-invoke-v0-test15', ['test-e2e-invoke-v0-test14'], () => {
 		]));
 });
 
-gulp.task('test-e2e', ['test-e2e-invoke-v0-test15']);
+gulp.task('test-e2e-invoke-v0-test16', ['test-e2e-invoke-v0-test15'], () => {
+	return gulp.src('*.js', {read: false})
+		.pipe(wait(3000))
+		.pipe(shell([
+			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
+				getTLSArgs(),
+				CHANNEL_NAME,
+				CC_NAME,
+				'\'{"Args":["test16"]}\'')
+		]));
+});
+
+
+gulp.task('test-e2e-shim', ['test-e2e-invoke-v0-test16']);

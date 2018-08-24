@@ -1,5 +1,11 @@
 {
 	"getting-started": {
 		"title": "Getting Started"
+	},
+	"using-contractinterface":{
+		"title": "Using the Contract Interface"
+	},
+	"using-chaincodeinterface":{
+		"title": "Using the Chaincode Interface"
 	}
 }

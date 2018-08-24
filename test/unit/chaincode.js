@@ -13,12 +13,12 @@ const rewire = require('rewire');
 const grpc = require('grpc');
 const path = require('path');
 
-const Logger = require('../../src/lib/logger');
+const Logger = require('../../fabric-shim/lib/logger');
 
-const chaincodePath = '../../src/lib/chaincode.js';
+const chaincodePath = '../../fabric-shim/lib/chaincode.js';
 
 const _serviceProto = grpc.load({
-	root: path.join(__dirname, '../../src/lib/protos'),
+	root: path.join(__dirname, '../../fabric-shim/lib/protos'),
 	file: 'peer/chaincode_shim.proto'
 }).protos;
 

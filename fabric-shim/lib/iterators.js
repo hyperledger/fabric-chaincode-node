@@ -11,6 +11,9 @@ const _queryresultProto = grpc.load({
 /**
  * CommonIterator allows a chaincode to check whether any more result(s)
  * need to be fetched from an iterator and close it when done.
+ *
+ * @class
+ * @memberof fabric-shim
  */
 class CommonIterator extends EventEmitter {
 
@@ -117,6 +120,9 @@ class CommonIterator extends EventEmitter {
 /**
  * A State Query iterator allows a chaincode to iterate over a
  * set of key/value pairs returned by range and execute queries
+ *
+ * @extends CommonIterator
+ * @memberof fabric-shim
  */
 class StateQueryIterator extends CommonIterator {
 	constructor(handler, channel_id, txID, response) {
@@ -127,6 +133,9 @@ class StateQueryIterator extends CommonIterator {
 /**
  * A History Query iterator allows a chaincode to iterate over a
  * set of key/value pairs returned by a history query
+ *
+ * @extends CommonIterator
+ * @memberof fabric-shim
  */
 class HistoryQueryIterator extends CommonIterator {
 	constructor(handler, channel_id, txID, response) {

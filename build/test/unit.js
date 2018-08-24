@@ -16,7 +16,7 @@ const instrumenter = function(opts) {
 
 gulp.task('instrument', function() {
 	return gulp.src([
-		'src/lib/**/*.js',
+		'fabric-shim/lib/**/*.js',
 		'fabric-shim-crypto/lib/*.js'])
 		.pipe(istanbul({instrumenter: instrumenter}))
 		.pipe(istanbul.hookRequire());

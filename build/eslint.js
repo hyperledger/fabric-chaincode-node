@@ -10,7 +10,7 @@ const path = require('path');
 gulp.task('lint', function () {
 	return gulp.src([
 		'**/*.js',
-		'!src/node_modules/**',
+		'!fabric-shim/node_modules/**',
 		'!test/node_modules/**',
 		'!test/typescript/*.js',
 		'!coverage/**',

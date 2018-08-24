@@ -5,6 +5,8 @@
 #
 # This docker-compose is based out of fabric-samples/basic-network with TLS
 # enabled, Also used the artifacts from the same repo
+
+# NOTE for the volume mounts, this is running with the CWD = /tmp/fabric-shim/basic-network
 version: '2'
 
 networks:

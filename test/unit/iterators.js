@@ -10,10 +10,10 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const rewire = require('rewire');
-const Iterator = rewire('../../src/lib/iterators.js');
+const Iterator = rewire('../../fabric-shim/lib/iterators.js');
 const StateQueryIterator = Iterator.StateQueryIterator;
 const HistoryQueryIterator = Iterator.HistoryQueryIterator;
-const handler = require('../../src/lib/handler.js');
+const handler = require('../../fabric-shim/lib/handler.js');
 
 const channel_id = 'theChannelId';
 const txID = 'aTx';

@@ -1,0 +1,23 @@
+{
+  "name": "fabric-contract-api",
+  "version": "1.3.0-snapshot",
+  "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperledger/fabric-chaincode-node"
+  },
+  "keywords": [
+    "fabric-shim",
+    "Hyperledger Fabric",
+    "Fabric Shim"
+  ],
+  "engines": {
+    "node": "^8.9.0",
+    "npm": "^5.5.1"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+
+  }
+}

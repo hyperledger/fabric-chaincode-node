@@ -84,9 +84,13 @@ function computeProposalBinding(decodedSP) {
  * The ChaincodeStub is implemented by the <code>fabric-shim</code>
  * library and passed to the {@link ChaincodeInterface} calls by the Hyperledger Fabric platform.
  * The stub encapsulates the APIs between the chaincode implementation and the Fabric peer
+ * @class
+ * @memberof fabric-shim
+ * @hideconstructor
  */
 class ChaincodeStub {
 	/**
+	 * @hideconstructor
 	 * @param {Handler} client an instance of the Handler class
 	 * @param {string} channel_id channel id
 	 * @param {string} txId transaction id
@@ -193,6 +197,8 @@ class ChaincodeStub {
 	 * @property {string} fcn The function name, which by chaincode programming convention
 	 * is the first argument in the array of arguments
 	 * @property {string[]} params The rest of the arguments, as array of strings
+	 * @class
+	 * @memberof fabric-shim
 	 */
 
 	/**
@@ -239,6 +245,8 @@ class ChaincodeStub {
 	 * @typedef {Object} ProposalCreator
 	 * @property {string} mspid The unique ID of the Membership Service Provider instance that is associated
 	 * to the identity's organization and is able to perform digital signing and signature verification
+	 * @class
+	 * @memberof fabric-shim
 	 */
 
 	/**
@@ -266,6 +274,8 @@ class ChaincodeStub {
 	 * the {@link ProposalCreator} returned by <code>getCreator()</code>. The signature will have already been
 	 * verified by the peer before the invocation request reaches the chaincode.
 	 * @property {Proposal} proposal The object containing the chaincode invocation request and metadata about the request
+	 * @memberof fabric-shim
+	 * @class
 	 */
 
 	/**
@@ -274,6 +284,8 @@ class ChaincodeStub {
 	 * @property {Header} header The header object contains metadata describing key aspects of the invocation
 	 * request such as target channel, transaction ID, and submitter identity etc.
 	 * @property {ChaincodeProposalPayload} payload The payload object contains actual content of the invocation request
+	 * @memberof fabric-shim
+	 * @class
 	 */
 
 	/**
@@ -281,6 +293,8 @@ class ChaincodeStub {
 	 * @property {ChannelHeader} channel_header Channel header identifies the destination channel of the invocation
 	 * request and the type of request etc.
 	 * @property {SignatureHeader} signature_header Signature header has replay prevention and message authentication features
+	 * @memberof fabric-shim
+	 * @class
 	 */
 
 	/**
@@ -303,12 +317,16 @@ class ChaincodeStub {
 	 * @property {string} tx_id Unique identifier used to track the transaction throughout the proposal endorsement, ordering,
 	 * validation and committing to the ledger
 	 * @property {number} epoch
+	 * @memberof fabric-shim
+	 * @class
 	 */
 
 	/**
 	 * @typedef {Object} SignatureHeader
 	 * @property {ProposalCreator} creator The submitter of the chaincode invocation request
 	 * @property {Buffer} nonce Arbitrary number that may only be used once. Can be used to detect replay attacks.
+	 * @memberof fabric-shim
+	 * @class
 	 */
 
 	/**
@@ -318,6 +336,8 @@ class ChaincodeStub {
 	 * @property {Map<string:Buffer>} transientMap TransientMap contains data (e.g. cryptographic material) that might be used
 	 * to implement some form of application-level confidentiality. The contents of this field are supposed to always
 	 * be omitted from the transaction and excluded from the ledger.
+	 * @memberof fabric-shim
+	 * @class
 	 */
 
 	/**
@@ -487,6 +507,8 @@ class ChaincodeStub {
 	 * @property {number} status A status code that follows the HTTP status codes
 	 * @property {string} message A message associated with the response code
 	 * @property {byte[]} payload A payload that can be used to include metadata with this response
+	 * @class
+	 * @memberof fabric-shim
 	 */
 
 	/**

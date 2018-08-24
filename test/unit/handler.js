@@ -11,13 +11,13 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const rewire = require('rewire');
-let Handler = rewire('../../src/lib/handler.js');
+let Handler = rewire('../../fabric-shim/lib/handler.js');
 
-const Stub = require('../../src/lib/stub.js');
+const Stub = require('../../fabric-shim/lib/stub.js');
 const MsgQueueHandler = Handler.__get__('MsgQueueHandler');
 const QMsg = Handler.__get__('QMsg');
-const StateQueryIterator = require('../../src/lib/iterators.js').StateQueryIterator;
-const HistoryQueryIterator = require('../../src/lib/iterators.js').HistoryQueryIterator;
+const StateQueryIterator = require('../../fabric-shim/lib/iterators.js').StateQueryIterator;
+const HistoryQueryIterator = require('../../fabric-shim/lib/iterators.js').HistoryQueryIterator;
 
 const grpc = require('grpc');
 
@@ -487,7 +487,7 @@ describe('Handler', () => {
 
 		describe('chat', () => {
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 			});
 
 			it ('should create instance of MsgQueueHandler, register the client, setup listeners and write', () => {
@@ -817,7 +817,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -870,7 +870,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -921,7 +921,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -973,7 +973,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1021,7 +1021,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1069,7 +1069,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1119,7 +1119,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1167,7 +1167,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1227,7 +1227,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../src/lib/handler.js');
+				Handler = rewire('../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 

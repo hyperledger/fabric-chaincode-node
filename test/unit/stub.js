@@ -1,3 +1,10 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
+/*global describe it beforeEach afterEach before after  */
+
 const ByteBuffer = require('bytebuffer');
 const sinon = require('sinon');
 const chai = require('chai');
@@ -5,7 +12,7 @@ chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const rewire = require('rewire');
 
-const Stub = rewire('../../src/lib/stub.js');
+const Stub = rewire('../../fabric-shim/lib/stub.js');
 
 describe('Stub', () => {
 	describe('validateCompositeKeyAttribute', () => {

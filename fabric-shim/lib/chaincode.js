@@ -52,6 +52,7 @@ const _responseProto = grpc.load({
  * discover information on the request (invoking identity, target channel, arguments, etc.) as well as
  * talking with the peer to retrieve or update application state.
  * @class
+ * @memberof fabric-shim
  */
 class ChaincodeInterface {
 	/**
@@ -80,6 +81,7 @@ class ChaincodeInterface {
  * listen for incoming requests from the peer to dispatch to the chaincode in order to process
  * transaction proposals or execute queries.
  * @class
+ * @memberof fabric-shim
  */
 class Shim {
 	/**
@@ -138,6 +140,8 @@ class Shim {
 	 * @typedef {Object} SuccessResponse
 	 * @property {number} status Value is always set to 200 to indicate success
 	 * @property {Buffer} payload Optional custom content returned by the chaincode
+	 * @class
+	 * @memberof fabric-shim
 	 */
 
 	/**
@@ -158,6 +162,8 @@ class Shim {
 	 * @typedef {Object} ErrorResponse
 	 * @property {number} status Value is always set to 500 to indicate error
 	 * @property {string} message Optional error message returned by the chaincode
+	 * @class
+	 * @memberof fabric-shim
 	 */
 
 	/**
@@ -208,6 +214,7 @@ const FABRIC_CERT_ATTR_OID = '1.2.3.4.5.6.7.8.1';
  * }
  *
  * @class
+ * @memberof fabric-shim
  */
 class ClientIdentity {
 	/**
@@ -322,6 +329,8 @@ class ClientIdentity {
      *   }
      * }
 	 * @typedef {object} X509Certificate
+	 * @class
+	 * @memberof fabric-shim
 	 */
 
 	/**

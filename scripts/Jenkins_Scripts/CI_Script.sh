@@ -168,6 +168,7 @@ sdk_E2e_Tests() {
 
         echo "npm version ------> $(npm -v)"
         echo "node version ------> $(node -v)"
+        echo "npm install ------> starting"
 
         npm install || err_Check "ERROR!!! npm install failed"
         npm config set prefix ~/npm && npm install -g gulp
@@ -192,6 +193,12 @@ sdk_E2e_Tests() {
            # Copy Debug log to $WORKSPACE
            cp /tmp/fabric-shim/logs/*.log $WORKSPACE
         fi
+
+        echo "#######################"
+        echo "Run Scenario Tests"
+        echo "#######################"
+
+        gulp test-scenario
 }
 # Publish unstable npm modules after successful merge on amd64
 publish_Unstable() {

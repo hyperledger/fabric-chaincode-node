@@ -10,7 +10,7 @@ const chai = require('chai');
 const expect = chai.expect;
 
 const rewire = require('rewire');
-const Logger = rewire('../../src/lib/logger.js');
+const Logger = rewire('../../fabric-shim/lib/logger.js');
 
 describe('Logger', () => {
 	describe('getLogger', () => {
