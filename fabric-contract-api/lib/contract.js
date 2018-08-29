@@ -115,16 +115,6 @@ class Contract {
 	}
 
 	/**
-     * Get summary information about the identitiy that is being used to submit
-     * this transactions
-     *
-     * @return {ClientIdentity} clientIdentity objects
-     */
-	getCurrentIdentity(){
-		return new ClientIdentity(this.stub);
-	}
-
-	/**
 	 * Gets meta data about this instance
 	 *
 	 * @return {Object} object with key/value map of metadata

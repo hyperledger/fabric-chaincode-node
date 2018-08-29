@@ -19,5 +19,6 @@
   "license": "Apache-2.0",
   "dependencies": {
 
-  }
+  },
+  "types": "./types/index.d.ts"
 }
