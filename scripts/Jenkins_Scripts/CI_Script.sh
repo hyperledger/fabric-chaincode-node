@@ -174,14 +174,14 @@ sdk_E2e_Tests() {
         npm config set prefix ~/npm && npm install -g gulp
 
         echo "###################"
-        echo "Run Headless Tests"
+        echo "------> Run Headless Tests"
         echo "###################"
 
         gulp test-headless
         DEVMODE=false gulp channel-init
 
         echo "#######################"
-        echo "Run Integration Tests"
+        echo "------> Run Integration and Scenario Tests"
         echo "#######################"
 
         gulp test-e2e
@@ -194,11 +194,9 @@ sdk_E2e_Tests() {
            cp /tmp/fabric-shim/logs/*.log $WORKSPACE
         fi
 
-        echo "#######################"
-        echo "Run Scenario Tests"
-        echo "#######################"
-
-        gulp test-scenario
+        echo "#######################" 
+        echo "------> Tests Complete"
+        echo "#######################" 
 }
 # Publish unstable npm modules after successful merge on amd64
 publish_Unstable() {

@@ -61,10 +61,14 @@ versions() {
 cd $WORKSPACE/gopath/src/github.com/hyperledger/fabric-chaincode-node
 npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
 
-cd src
+cd fabric-shim
 versions
 npmPublish fabric-shim
 
 cd ../fabric-shim-crypto
 versions
 npmPublish fabric-shim-crypto
+
+cd ../fabric-contract-api
+versions
+npmPublish fabric-contract-api
