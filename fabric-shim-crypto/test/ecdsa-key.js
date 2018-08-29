@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-const ecdsaKey = require('../../fabric-shim-crypto/lib/ecdsa-key.js');
+const ecdsaKey = require('../lib/ecdsa-key.js');
 
 const jsrsa = require('jsrsasign');
 const KEYUTIL = jsrsa.KEYUTIL;

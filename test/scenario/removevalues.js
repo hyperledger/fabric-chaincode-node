@@ -1,16 +1,15 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
+
 'use strict';
-
-// SDK Library to asset with writing the logic
-
-// imaginee the next line to be
 
 const {Contract} = require('fabric-contract-api');
 
-// Business logic (well just util but still it's general purpose logic)
-// const util = require('util');
-
 /**
- * Support the Updating of values within the Contract
+ * Set of functions to support modifing the values
  */
 class RemoveValues extends Contract {
 
@@ -19,7 +18,6 @@ class RemoveValues extends Contract {
      */
 	constructor() {
 		super('org.mynamespace.removes');
-
 		// going to leave the default 'not known function' handling alone
 	}
 

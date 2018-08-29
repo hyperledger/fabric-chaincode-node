@@ -6,6 +6,9 @@
   "bin" : {
     "startChaincode":"./bin/chaincodeStart.js"
   },
+  "scripts": {
+	"compile": "tsc --project test/typescript"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/hyperledger/fabric-chaincode-node"

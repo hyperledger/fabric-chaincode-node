@@ -12,7 +12,7 @@ chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const rewire = require('rewire');
 
-const Stub = rewire('../../fabric-shim/lib/stub.js');
+const Stub = rewire('../../../fabric-shim/lib/stub.js');
 
 describe('Stub', () => {
 	describe('validateCompositeKeyAttribute', () => {
@@ -490,6 +490,21 @@ describe('Stub', () => {
 				expect(handlePutStateStub.calledOnce).to.be.ok;
 				expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', Buffer.from('a value'), 'dummyChannelId', 'dummyTxid']);
 			});
+			it ('should return handler.handlePutState', async () => {
+				const handlePutStateStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handlePutState: handlePutStateStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.putState('a key', {a:'value'});
+
+				expect(result).to.deep.equal('some state');
+				expect(handlePutStateStub.calledOnce).to.be.ok;
+				expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', {a:'value'}, 'dummyChannelId', 'dummyTxid']);
+			});
 		});
 
 		describe('deleteState', () => {
@@ -832,12 +847,19 @@ describe('Stub', () => {
 				await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
 			});
 
-			it ('should return handler.handlePutState', async () => {
+			it ('should return handler.handlePutState with string', async () => {
 				const result = await stub.putPrivateData('some collection', 'some key', 'some value');
-
 				expect(result).to.deep.equal('some state');
 				expect(handlePutStateStub.calledOnce).to.be.ok;
 				expect(handlePutStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', Buffer.from('some value'), 'dummyChannelId', 'dummyTxid']);
+			});
+
+			it ('should return handler.handlePutState with object', async () => {
+				const result = await stub.putPrivateData('some collection', 'some key', {some :'value'});
+
+				expect(result).to.deep.equal('some state');
+				expect(handlePutStateStub.calledOnce).to.be.ok;
+				expect(handlePutStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', {some :'value'}, 'dummyChannelId', 'dummyTxid']);
 			});
 		});
 

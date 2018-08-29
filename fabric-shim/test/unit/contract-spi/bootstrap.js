@@ -24,7 +24,7 @@ const mockery = require('mockery');
 
 const path = require('path');
 // class under test
-const pathToRoot = '../../..';
+const pathToRoot = '../../../..';
 const bootstrap = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap'));
 const Contract = require(path.join(pathToRoot, 'fabric-contract-api/lib/contract'));
 const ChaincodeFromContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/chaincodefromcontract'));

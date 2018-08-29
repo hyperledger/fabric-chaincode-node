@@ -8,7 +8,7 @@
 const chai = require('chai');
 const expect = chai.expect;
 
-const theModule = require('../../fabric-shim');
+const theModule = require('../../../fabric-shim');
 
 describe('Exports', () => {
 	it ('should export the start function', () => {

@@ -10,7 +10,7 @@ const chai = require('chai');
 const expect = chai.expect;
 
 const rewire = require('rewire');
-const Logger = rewire('../../fabric-shim/lib/logger.js');
+const Logger = rewire('../../../fabric-shim/lib/logger.js');
 
 describe('Logger', () => {
 	describe('getLogger', () => {
@@ -72,27 +72,24 @@ describe('Logger', () => {
 			expect(log.level).to.deep.equal('debug');
 		});
 	});
+
+	describe('formatter',()=>{
+		it('',()=>{
+			process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
+
+			let log = Logger.getLogger();
+			log.debug();
+			log.debug('hello');
+			log.debug('hello',{'one':'two'});
+			// sinon.assert.calledWith(logSpy,'wibble');
+		});
+
+		it('',()=>{
+			process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
+
+			let log = Logger.getLogger('fred');
+			log.debug('hello','fred');
+			// sinon.assert.calledWith(logSpy,'wibble');
+		});
+	});
 });
-
-// test('chaincode logger setup tests', (t) => {
-// 	process.env.CORE_CHAINCODE_LOGGING_SHIM = 'critical';
-// 	let log = Logger.getLogger();
-// 	t.equal(log.level, 'fatal', 'Test log level is correctly set for critical');
-
-// 	process.env.CORE_CHAINCODE_LOGGING_SHIM = 'WARNING';
-// 	log = Logger.getLogger();
-// 	t.equal(log.level, 'warn', 'Test log level is correctly set for warning');
-// 	process.env.CORE_CHAINCODE_LOGGING_SHIM = 'Debug';
-// 	log = Logger.getLogger();
-// 	t.equal(log.level, 'debug', 'Test log level is correctly set for debug');
-// 	process.env.CORE_CHAINCODE_LOGGING_SHIM = 'ERRor';
-// 	log = Logger.getLogger();
-// 	t.equal(log.level, 'error', 'Test log level is correctly set for error');
-
-// 	delete process.env.CORE_CHAINCODE_LOGGING_SHIM;
-
-// 	log = Logger.getLogger();
-// 	t.equal(log.level, 'info', 'Test log level is correctly set for error');
-
-// 	t.end();
-// });

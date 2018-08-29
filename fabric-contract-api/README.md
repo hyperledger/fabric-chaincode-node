@@ -18,7 +18,7 @@ Detailed explanation on the concept and programming model can be found here: [ht
 ```sh
 npm install --save fabric-contract-api
 ```
-
+       
 ### Usage
 
 Implement a class that ends the `contract` class, a contsturctor is needed. 

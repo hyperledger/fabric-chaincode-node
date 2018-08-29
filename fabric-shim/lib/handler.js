@@ -688,14 +688,11 @@ module.exports = ChaincodeSupportClient;
 class Endpoint {
 	constructor(url /*string*/, opts ) {
 		let purl = new URL(url);
-		let protocol;
-		if (purl.protocol) {
-			protocol = purl.protocol.toLowerCase().slice(0, -1);
-		}
-		if (protocol === 'grpc') {
+
+		if (purl.protocol === 'grpc:') {
 			this.addr = purl.host;
 			this.creds = grpc.credentials.createInsecure();
-		} else if (protocol === 'grpcs') {
+		} else if (purl.protocol === 'grpcs:') {
 			if(!opts || !opts.pem || !(typeof opts.pem === 'string')) {
 				throw new Error('PEM encoded certificate is required.');
 			}
@@ -710,7 +707,7 @@ class Endpoint {
 		} else {
 			let error = new Error();
 			error.name = 'InvalidProtocol';
-			error.message = 'Invalid protocol: ' + protocol + '.  URLs must begin with grpc:// or grpcs://';
+			error.message = 'Invalid protocol: ' + purl.protocol + '  URLs must begin with grpc:// or grpcs://';
 			throw error;
 		}
 	}

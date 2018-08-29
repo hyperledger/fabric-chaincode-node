@@ -152,14 +152,14 @@ function importKey(raw) {
 		throw new Error('Failed to parse key from PEM: ' + err);
 	}
 
-	if (key) {
-		if (key.type && key.type === 'EC') {
-			return new ECDSAKey(key);
-		}
-		else {
-			throw new Error('Does not understand PEM contents other than ECDSA private keys and certificates');
-		}
+
+	if (key.type && key.type === 'EC') {
+		return new ECDSAKey(key);
 	}
+	else {
+		throw new Error('Does not understand PEM contents other than ECDSA private keys and certificates');
+	}
+
 }
 
 // Utilitly method to make sure the start and end markers are correct

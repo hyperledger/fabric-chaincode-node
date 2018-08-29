@@ -127,21 +127,6 @@ class ChaincodeFromContract {
 		}
 	}
 
-	/**
-     * Add all of the methods of the source class to the engine class.
-     * @private
-     * @param {Object} sourceClass The source class to copy methods from.
-     */
-	mixin(source,destination) {
-		let destProto = Object.getPrototypeOf(destination);
-		let srcProto = Object.getPrototypeOf(source);
-		Object.getOwnPropertyNames(srcProto).forEach((method) => {
-			if (method !== 'constructor') {
-				destProto[method] = srcProto[method];
-			}
-		});
-	}
-
 	createCtx(stub){
 		let ctx = {
 			stub,

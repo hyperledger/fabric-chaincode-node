@@ -9,8 +9,7 @@
   "engineStrict": true,
   "license": "Apache-2.0",
   "scripts": {
-    "test": "gulp test-headless",
-    "compile": "tsc --project test/typescript"
+    "test": "gulp test-headless"
   },
   "dependencies": {
     "@types/node": "^8.9.4",

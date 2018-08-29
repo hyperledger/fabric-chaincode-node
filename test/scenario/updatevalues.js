@@ -1,6 +1,5 @@
 'use strict';
 
-// SDK Library to asset with writing the logic
 const {Contract} = require('fabric-contract-api');
 
 // Business logic (well just util but still it's general purpose logic)

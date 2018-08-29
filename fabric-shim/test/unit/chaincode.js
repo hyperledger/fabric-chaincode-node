@@ -13,16 +13,38 @@ const rewire = require('rewire');
 const grpc = require('grpc');
 const path = require('path');
 
-const Logger = require('../../fabric-shim/lib/logger');
+const Logger = require('../../../fabric-shim/lib/logger');
 
-const chaincodePath = '../../fabric-shim/lib/chaincode.js';
+const chaincodePath = '../../../fabric-shim/lib/chaincode.js';
 
 const _serviceProto = grpc.load({
-	root: path.join(__dirname, '../../fabric-shim/lib/protos'),
+	root: path.join(__dirname, '../../../fabric-shim/lib/protos'),
 	file: 'peer/chaincode_shim.proto'
 }).protos;
 
 describe('Chaincode', () => {
+
+	describe('Chaincode \'spi\' interface',()=>{
+		it ('should be able to call the init method',()=>{
+			let Chaincode = new (require(chaincodePath).ChaincodeInterface)();
+			Chaincode.Init();
+		});
+
+		it ('should be able to call the init method',()=>{
+			let Chaincode = new (require(chaincodePath).ChaincodeInterface)();
+			Chaincode.Invoke();
+		});
+		it('should only have the Init and Invoke',()=>{
+			let Chaincode = new (require(chaincodePath).ChaincodeInterface)();
+			const propNames = Object.getOwnPropertyNames(Object.getPrototypeOf(Chaincode));
+
+			propNames.length.should.equal(3);
+			propNames.should.have.members(['constructor','Init','Invoke']);
+
+
+		});
+	});
+
 	describe('Command line arguments', () => {
 		it ('should return undefined for zero argument', () => {
 			let Chaincode = rewire(chaincodePath);
@@ -118,7 +140,7 @@ describe('Chaincode', () => {
 		describe('TLS handling', () => {
 			let Chaincode = rewire(chaincodePath);
 
-			let testfile = path.join(__dirname, '../../package.json');
+			let testfile = path.join(__dirname, '../../../package.json');
 
 			Chaincode.__set__('opts', {'peer.address': 'localhost:7051'});
 

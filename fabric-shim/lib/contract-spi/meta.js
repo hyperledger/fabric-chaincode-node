@@ -23,7 +23,7 @@ class Meta extends Contract {
      * Gets meta data associated with this Chaincode deployment
      */
 	getContractMetaData(){
-		return Buffer.from(JSON.stringify(this.getMetaData()));
+		return Buffer.from(JSON.stringify(this.getMetadata()));
 	}
 
 }

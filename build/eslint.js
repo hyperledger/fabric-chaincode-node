@@ -12,7 +12,7 @@ gulp.task('lint', function () {
 		'**/*.js',
 		'!fabric-shim/node_modules/**',
 		'!test/node_modules/**',
-		'!test/typescript/*.js',
+		'!**/typescript/*.js',
 		'!coverage/**',
 		'!docs/**'
 	], {

@@ -11,13 +11,13 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const rewire = require('rewire');
-let Handler = rewire('../../fabric-shim/lib/handler.js');
+let Handler = rewire('../../../fabric-shim/lib/handler.js');
 
-const Stub = require('../../fabric-shim/lib/stub.js');
+const Stub = require('../../../fabric-shim/lib/stub.js');
 const MsgQueueHandler = Handler.__get__('MsgQueueHandler');
 const QMsg = Handler.__get__('QMsg');
-const StateQueryIterator = require('../../fabric-shim/lib/iterators.js').StateQueryIterator;
-const HistoryQueryIterator = require('../../fabric-shim/lib/iterators.js').HistoryQueryIterator;
+const StateQueryIterator = require('../../../fabric-shim/lib/iterators.js').StateQueryIterator;
+const HistoryQueryIterator = require('../../../fabric-shim/lib/iterators.js').HistoryQueryIterator;
 
 const grpc = require('grpc');
 
@@ -487,7 +487,7 @@ describe('Handler', () => {
 
 		describe('chat', () => {
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 			});
 
 			it ('should create instance of MsgQueueHandler, register the client, setup listeners and write', () => {
@@ -759,6 +759,23 @@ describe('Handler', () => {
 					expect(mockStream.write.calledOnce).to.be.ok;
 					expect(mockStream.end.calledOnce).to.be.ok;
 				});
+				it ('should end the  with error', () => {
+					let eventReg = {};
+					let mockEventEmitter = (event, cb) => {
+						eventReg[event] = cb;
+					};
+
+					let mockStream = {write: sinon.stub(), on: mockEventEmitter, end: sinon.stub()};
+
+					let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+					handler._client.register = sinon.stub().returns(mockStream);
+					handler.chat('some starter message');
+					let error = new Error();
+					eventReg['error'](error);
+
+					expect(mockStream.write.calledOnce).to.be.ok;
+					expect(mockStream.end.calledOnce).to.be.ok;
+				});
 			});
 		});
 
@@ -817,7 +834,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -870,7 +887,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -921,7 +938,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -973,7 +990,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1021,7 +1038,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1069,7 +1086,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1119,7 +1136,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1167,7 +1184,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
@@ -1227,7 +1244,7 @@ describe('Handler', () => {
 			});
 
 			afterEach(() => {
-				Handler = rewire('../../fabric-shim/lib/handler.js');
+				Handler = rewire('../../../fabric-shim/lib/handler.js');
 				sandbox.restore();
 			});
 
