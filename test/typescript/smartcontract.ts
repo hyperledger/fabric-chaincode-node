@@ -5,37 +5,41 @@
 
 */
 
-import {Contract, Context} from 'fabric-contract-api';
+import { Contract, Context, IntermediaryFn } from 'fabric-contract-api';
+import { ChaincodeStub, ClientIdentity } from 'fabric-shim';
 
-interface cpContext extends Context {
-    cpList: string;
-}
-
-export default class TestContract extends Contract {
+export default class TestContractOne extends Contract {
 
     constructor() {
-        super('org.papernet.commercialpaper');
+        super('org.papernet.commercialpaper', {key: 'value'});
 
-        this.setBeforeFn ( function (ctx){
+        const intermediaryFn: IntermediaryFn  = (ctx: Context) => {
             return ctx;
-        }) ;
-        this.setAfterFn ( function (ctx){
-            return ctx;
-        });
-        this.setUnkownFn ( function (ctx){
-            return ctx;
-        });
+        }
+
+        this.setBeforeFn(intermediaryFn);
+        this.setAfterFn(intermediaryFn);
+        this.setUnknownFn(intermediaryFn);
     }
 
     async Transaction(ctx: Context)  {
-        ctx.stub.createCompositeKey('key',[])
-        ctx.clientIdentity.getID();
+        const stubApi: ChaincodeStub = ctx.stub;
+        const clientIdentity: ClientIdentity = ctx.clientIdentity;
 
-        this.getAfterFn();
-        this.getBeforeFn();
-        this.getMetadata();
-        this.getUnkownFn();
-        this.getNamespace();
+        const afterFn: IntermediaryFn  = this.getAfterFn();
+        const testCtxAfter: Context = afterFn(ctx);
+        const beforeFn: IntermediaryFn = this.getBeforeFn();
+        const testCtxBefore: Context = beforeFn(ctx);
+        const unknownFn: IntermediaryFn = this.getUnknownFn();
+        const testCtxUnkown: Context = beforeFn(ctx);
+        const testCtx: Context = afterFn(ctx);
+        const data: object = this.getMetadata();
+        const ns: string = this.getNamespace();
     }
 }
 
+export class TestContractTwo extends Contract {
+    constructor() {
+        super('org.papernet.commercialpaper');
+    }
+}

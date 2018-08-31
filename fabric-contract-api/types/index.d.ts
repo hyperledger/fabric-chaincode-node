@@ -17,8 +17,8 @@ declare module 'fabric-contract-api' {
     export class Contract {
         constructor(namespace: string, metadata?:object);
 
-        setUnkownFn(fn : IntermediaryFn): void;
-        getUnkownFn(): IntermediaryFn;
+        setUnknownFn(fn : IntermediaryFn): void;
+        getUnknownFn(): IntermediaryFn;
 
         setBeforeFn(fn : IntermediaryFn): void;
         getBeforeFn(): IntermediaryFn;
