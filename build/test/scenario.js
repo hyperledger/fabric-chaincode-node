@@ -79,7 +79,7 @@ gulp.task('invoke_functions',async (done)=>{
 
 	const options={};
 	const script = 'docker';
-	const args = util.format('exec cli peer chaincode invoke %s -C %s -n %s -c %s',
+	const args = util.format('exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
 		getTLSArgs(),
 		CHANNEL_NAME,
 		'mysmartcontract',
