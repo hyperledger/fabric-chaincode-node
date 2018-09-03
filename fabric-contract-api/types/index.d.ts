@@ -15,7 +15,7 @@ declare module 'fabric-contract-api' {
     export type IntermediaryFn = (ctx: Context) => Context;
 
     export class Contract {
-        constructor(namespace: string, metadata?:object);
+        constructor(namespace?: string, metadata?:object);
 
         setUnknownFn(fn : IntermediaryFn): void;
         getUnknownFn(): IntermediaryFn;

@@ -43,3 +43,9 @@ export class TestContractTwo extends Contract {
         super('org.papernet.commercialpaper');
     }
 }
+
+export class TestContractThree extends Contract {
+    constructor() {
+        super();
+    }
+}
