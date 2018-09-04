@@ -6,7 +6,7 @@ This outlines the theory of the how the new node module works; with the fabric s
 
 ### 1: Chaincode is created as an npm module.
 
-An initial `package.json` is as follows - the only runtime dependencay as far as anything blockchain is concerned is the `fabric-chaincode-api`.  This provides the API definition that can be used for development, and also unit test.
+An initial `package.json` is as follows - the only runtime dependency as far as anything blockchain is concerned is the `fabric-chaincode-api`.  This provides the API definition that can be used for development, and also unit test.
 
 For development an implementation of the `fabric-shim` and specifically the CLI that accompanies it is required
 
@@ -35,13 +35,13 @@ For development an implementation of the `fabric-shim` and specifically the CLI 
 }
 
 ```
-Remember to add in any additionla business logic, and testing libraries needed. 
+Remember to add in any additional business logic, and testing libraries needed. 
 
 For 1.3 Fabric, please also add in `fabric-shim` as a dependency, and `node startChaincode` as the script to run for `npm start`. Therefore this would include
 
 ```
   "scripts": {
-    "start": "startChaincode",
+    "start": "fabric-chaincode-node start",
     "test": "nyc mocha test",
     ....
   },
@@ -127,15 +127,15 @@ Note that ALL the functions defined in these modules will be called by the clien
 
 - There are 3 functions `setup` `setNewAssetValue` and `doubleAssetValue` that can be called by issuing the appropriate invoke client side
 - The `ctx` in the function is a transaction context; each time a invoke is called this will be a new instance that can be used by the function implementation to access apis such as the world state of information on invoking identity.
-- The arguements are split out from the array passed on the invoke. 
-- The constructor contains a 'namespace' to help indentifiy the sets of functions
+- The arguments are split out from the array passed on the invoke. 
+- The constructor contains a 'namespace' to help identify the sets of functions
 
 
-### 5: Alteratnive ways of specifing the contracts
+### 5: Alternative ways of specifying the contracts
 
 *package.json*
 
-Insted of providing the Smart Contracts as exports, you can add details to the package.json. Using the above functions add this to the package.json
+Instead of providing the Smart Contracts as exports, you can add details to the package.json. Using the above functions add this to the package.json
 
 ```
   "contracts":{
@@ -145,13 +145,7 @@ Insted of providing the Smart Contracts as exports, you can add details to the p
 
 If present this takes precedence over the exports.
 
-
-*Programatically*
-Note that programatic approach is now being considered as not a useful approach
-
-
-
-## Running chaincode in dev mode
+## Running chaincode in development mode
 
 This is quite easy - as you need to run the startChaincode command.
 
@@ -163,26 +157,26 @@ $ npx startChaincode --peer.address localhost:7052
 
 ## Using this chaincode
 
-Each of the functions can be invoked with arbitary arguements. The name of the function is of the format
+Each of the functions can be invoked with arbitrary arguments. The name of the function is of the format
 
 ```
-[namespace_]functionname
+[namespace.]functionname
 ```
 
 If a namespace is given in the constructor then it will be prefixed separated by a _ (underscore)
 
-> _assuming that you have a fabric up and running with the approriate environment variables set_
+> _assuming that you have a fabric up and running with the appropriate environment variables set_
 
 ```
 $ peer chaincode install --lang node --name mycontract --version v0 --path ~/chaincode-examples
-$ peer chaincode instantiate --orderer localhost:7050 --channelID mychannel --lang node --name mycontract --version v0 -c '{"Args":["org.mynamespace.updates_setup"]}'
+$ peer chaincode instantiate --orderer localhost:7050 --channelID mychannel --lang node --name mycontract --version v0 -c '{"Args":["org.mynamespace.updates.setup"]}'
 ```
 
 Will get things working...
 Then you can invoke the chaincode via this command.
 
 ```
-$ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Args":["org.mynamespace.removes_getAssetValue"]}' -n mycontract4  
+$ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Args":["org.mynamespace.removes.getAssetValue"]}' -n mycontract4  
 ```
 
 
@@ -201,7 +195,6 @@ For example
 	 */
 	constructor() {
 		super('org.mynamespace.updates');
-		this.$setUnkownFn(this.unkownFn);
 	}
 
 	/** The function to invoke if something unkown comes in.
@@ -212,8 +205,58 @@ For example
         throw new Error('Big Friendly letters ->>> DON\'T PANIC')
 	}
 
+	async beforeTransaction(ctx){
+		console.info(`Transaction ID: ${ctx.stub.getTxID()}`);
+	}
+
+	async afterTransaction(ctx,result){
+		// log result to preferred log implementation
+		// emit events etc...
+	}
+
 ```
 
+### Structure of the Transaction Context
+
+In Fabric 1.2, there is a *stub* api that provides chaincode with functionality. 
+No functionality has been removed, but a new approach to providing abstractions on this to facilitate programming.
+
+*user additions*:  additional properties can be added to the object to support for example common handling of the data serialization.
+
+The context object contains 
+
+- `ctx.stub`  the same stub instance as in earlier versions for compatibility
+- `ctx.identity` and instance of the Client Identity object 
+
+You are at liberty to create a subclass of the Context to provide additional functions, or per-transaction context storage. For example
+
+```
+	/**
+	 * Custom context for use within this contract
+	 */
+	createContext(){
+		return new ScenarioContext();
+	}
+```
+
+and the Context class itself is 
+
+```
+const { Context } = require('fabric-contract-api');
+
+class ScenarioContext extends Context{
+
+	constructor(){
+		super();
+	}
+
+	generateKey(){
+		return this.stub.createCompositeKey('type',['keyvalue']);
+	}
+
+}
+
+```
 
 ## Node.js Chaincode API rules
 
@@ -222,24 +265,24 @@ Definitions as per https://www.ietf.org/rfc/rfc2119.txt
 - All the functions that are present in the prototype of a class that extends *Contract* will be invokable
 - The exports from the node module *MUST* include *contracts* that is an array of constructors (1 or more)
 - Each class *MAY* call in it's constructor pass a namespace. This is prefixed to each of the function names by an _  (underscore)
-- Each class *MAY* define functions that are executed before and functions that are executred after the invoked function.
+- Each class *MAY* define functions that are executed before and functions that are executed after the invoked function.
   - These are part of the same fabric transaction
   - They are scoped per namespace
 - Each class *MAY* define a function that would be executed if a matching function name does not exist; otherwise a 'no function exists' error will be thrown
 - If too many parameters are passed, they will be discarded
-- If too few parameters are passed, then the remainder will be set to undefiend
+- If too few parameters are passed, then the remainder will be set to undefined
 	- as per node.js language standard
 - Duplicate function names in a single class is an error
-- Any function that is dynamically added will not be registered as an invokeable function
-- There are no specific function that is invoked per Fabric's *init* chaincode spi. The inistantiate flow can pass function name and parameters; therefore consider 
+- Any function that is dynamically added will not be registered as an invokable function
+- There are no specific function that is invoked per Fabric's *init* chaincode spi. The instantiate flow can pass function name and parameters; therefore consider 
 a dedicated function that will be called for new chaincode deployments, and for upgrade deployments.
 
 ## Restrictions on programming in side a Contract function
 
-Hyperledger Fabric's consenusys algorithm permits the ability to use general purpose languages; rather than a more restricive language. But the following restrictions apply
+Hyperledger Fabric's consensus algorithm permits the ability to use general purpose languages; rather than a more restrictive language. But the following restrictions apply
 
-- Functions should not create random variables, or use any function whos return values are functions of the current time or location of execution
-  - i.e. the function will be excuted in another context (i.e. peer process).  This could potentially be in a different timezone in a different locale. 
+- Functions should not create random variables, or use any function whose return values are functions of the current time or location of execution
+  - i.e. the function will be executed in another context (i.e. peer process).  This could potentially be in a different time zone in a different locale. 
 - Functions should be away that they may read state, and write state. But they are producing a set of changes that will be applied to the state. The implication is that updates to the state
 may not be read back.  
 
@@ -252,33 +295,13 @@ let v2 = getState("key")
 v2=="world" // is false,  v2 is "hello"
 ```
 
-In any subsequent innvocation, the value would be seen to be updated. 
+In any subsequent invocation, the value would be seen to be updated. 
 
-Note that if you have use any Flux archiecture implications such as Redux, the above restrictions will be familar. 
+Note that if you have use any Flux architecture implications such as Redux, the above restrictions will be familiar. 
 
 
-### Structure of the Tranaction Context
 
-In Fabric 1.2, there is a *stub* api that provides chaincode with functionality. 
-No functionality has been removed, but a new approach to providing abstractions on this to faciliate programming.
 
-*user additions*:  additional properties can be added to the object to support for example common handling of the data serialization.
-
-The context object contains 
-
-- `ctx.stub`  the same stub instance as in earlier versions for compatibility
-- `ctx.identity` and instance of the Client Identity object 
-
-### Extending the transaction context
-
-If for example, we have a set of utilities functions that help with marhsalling data to and from the world state, we can 'inject' that into the context as 
-follows
-
-```
-        this.setBeforeFn = (ctx)=>{
-            ctx.datautil = new DataModel(ctx);
-        };
-```
 
 
 

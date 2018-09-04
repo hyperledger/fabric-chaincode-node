@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*global describe it beforeEach afterEach before after  */
+/*global describe it beforeEach afterEach  */
 'use strict';
 
 const chai = require('chai');
@@ -31,6 +31,11 @@ const ChaincodeFromContract = require(path.join(pathToRoot, 'fabric-shim/lib/con
 
 const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
 
+function log(...e){
+	// eslint-disable-next-line no-console
+	console.log(...e);
+}
+
 describe('contract.js', () => {
 
 	/**
@@ -45,7 +50,7 @@ describe('contract.js', () => {
          * @param {object} api api
          */
 		alpha(api) {
-
+			log(api);
 		}
 	}
 

@@ -5,47 +5,69 @@
 
 */
 
-import { Contract, Context, IntermediaryFn } from 'fabric-contract-api';
+import { Contract, Context } from 'fabric-contract-api';
 import { ChaincodeStub, ClientIdentity } from 'fabric-shim';
+
+export class ScenarioContext extends Context{
+
+	customFunction():void {
+
+	}
+}
 
 export default class TestContractOne extends Contract {
 
     constructor() {
-        super('org.papernet.commercialpaper', {key: 'value'});
-
-        const intermediaryFn: IntermediaryFn  = (ctx: Context) => {
-            return ctx;
-        }
-
-        this.setBeforeFn(intermediaryFn);
-        this.setAfterFn(intermediaryFn);
-        this.setUnknownFn(intermediaryFn);
+        super('org.papernet.commercialpaper');
     }
 
-    async Transaction(ctx: Context)  {
+	beforeTransaction(ctx: ScenarioContext){
+
+		// test that the context super class properties are available
+        const stubApi: ChaincodeStub = ctx.stub;
+		const clientIdentity: ClientIdentity = ctx.clientIdentity;
+
+		// tests that the functions in the subclasses context be called
+		ctx.customFunction();
+
+		// This proves that typescript is enforcing the
+		// return type of Promise<void>
+		return Promise.resolve();
+	}
+
+	afterTransaction(ctx: ScenarioContext,result: any){
+		// This proves that typescript is enforcing the
+		// return type of Promise<void>
+		return Promise.resolve();
+	}
+
+	unknownTransaction(ctx: ScenarioContext){
+		// This proves that typescript is enforcing the
+		// return type of Promise<void>
+		return Promise.resolve();
+	}
+
+	createContext(){
+		return new ScenarioContext();
+	}
+
+    async Transaction(ctx: ScenarioContext)  {
+		// test that the context super class properties are available
         const stubApi: ChaincodeStub = ctx.stub;
         const clientIdentity: ClientIdentity = ctx.clientIdentity;
 
-        const afterFn: IntermediaryFn  = this.getAfterFn();
-        const testCtxAfter: Context = afterFn(ctx);
-        const beforeFn: IntermediaryFn = this.getBeforeFn();
-        const testCtxBefore: Context = beforeFn(ctx);
-        const unknownFn: IntermediaryFn = this.getUnknownFn();
-        const testCtxUnkown: Context = beforeFn(ctx);
-        const testCtx: Context = afterFn(ctx);
-        const data: object = this.getMetadata();
+		// test that the namespace returns a string
         const ns: string = this.getNamespace();
     }
 }
 
 export class TestContractTwo extends Contract {
     constructor() {
-        super('org.papernet.commercialpaper');
-    }
-}
-
-export class TestContractThree extends Contract {
-    constructor() {
         super();
+	}
+
+	async Transaction(ctx: Context)  {
+        const stubApi: ChaincodeStub = ctx.stub;
+        const clientIdentity: ClientIdentity = ctx.clientIdentity;
     }
 }

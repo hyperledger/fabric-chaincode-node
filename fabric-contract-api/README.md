@@ -74,7 +74,7 @@ module.exports.contracts = ['UpdateValues'];
 
 ```json
   "scripts": {
-	"start": "startChaincode"
+	"start": "fabric-chaincode-node start"
   }
 ```
 

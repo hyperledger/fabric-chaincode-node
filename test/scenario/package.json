@@ -6,7 +6,7 @@
     "npm": ">=5.3.0"
   },
   "scripts": {
-    "start": "startChaincode"
+    "start": "fabric-chaincode-node start"
   },
   "main": "index.js",
   "engine-strict": true,

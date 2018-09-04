@@ -26,12 +26,12 @@ class RemoveValues extends Contract {
      * @param {*} api
      */
 	async quarterAssetValue({stub}) {
-		console.info('Transaction ID: ' + stub.getTxID());
+		console.info('Transaction ID: ' + stub.getTxID());   //eslint-disable-line
 
 		let value = await stub.getState('dummyKey');
-		if (isNan(value)) {
+		if (Number.isNan(value)) {
 			let str = `'Need to have numerc value set to quarter it, ${value}`;
-			console.error(str);
+			console.error(str); //eslint-disable-line
 			throw new Error(str);
 		} else {
 			let v = value/4;
@@ -42,7 +42,7 @@ class RemoveValues extends Contract {
 
 
 	async getAssetValue({stub}){
-		console.info('Transaction ID: ' + stub.getTxID());
+		console.info('Transaction ID: ' + stub.getTxID()); //eslint-disable-line
 
 		let value = await stub.getState('dummyKey');
 

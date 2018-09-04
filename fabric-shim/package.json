@@ -4,7 +4,7 @@
   "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
   "main": "index.js",
   "bin" : {
-    "startChaincode":"./bin/chaincodeStart.js"
+    "fabric-chaincode-node":"./bin/chaincodeStart.js"
   },
   "scripts": {
 	"compile": "tsc --project test/typescript"

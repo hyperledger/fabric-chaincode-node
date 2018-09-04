@@ -14,7 +14,7 @@ The "build" folder contains the "build" steps. This being javascript there's no 
 * linting: to make sure we enforce a somewhat consistent coding style
 * dependency sharing: the proto files needed by the fabric-shim are a subset of what the fabric defines in the "protos" folder. They need to get copied to the proper locations for things to work, including the "src/lib/protos" folder so the code can load them
 
-The "test" folder contains the unit and integration tests, as well as artifacts used by the tests
+The "test" folder contains the unit and integration tests, as well as artefacts used by the tests
 
 *Note:* npm 5 resolves the dependency "fabric-shim": "file:./src" by simply linking the folder "node_modules/fabric-shim" to the src folder, which makes it unnecessary to use a watcher.
 
@@ -102,7 +102,7 @@ You can now proceed to the section "Test Node.js Chaincode".
 
 Alternatively you can use the `peer` and `orderer` binaries to manually start the target network and initialize the channel.
 
-Run these commands to build the executabiles needed for the test environment:
+Run these commands to build the executables needed for the test environment:
 ```
 make peer
 make orderer
@@ -156,14 +156,14 @@ Once the chaincode instantiation has completely successfully, you can send trans
 CORE_LOGGING_PEER=debug ./build/bin/peer chaincode invoke -o localhost:7050 -C test -c '{"Args":["test1"]}' -n mycc
 ```
 
-In the output of the command, you should see the following indiciating successful completion of the transaction:
+In the output of the command, you should see the following indicating successful completion of the transaction:
 ```
 2017-08-14 16:24:04.225 EDT [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 00a Chaincode invoke successful. result: status:200
 ```
 
 ### Run the unit and integration tests
 
-The project is equipped with both unit tests (runs standalone) and integration tests (requires a target fabric network).
+The project is equipped with both unit tests (runs stand-alone) and integration tests (requires a target fabric network).
 * to run the unit tests:
 ```
 gulp test-headless

@@ -1,4 +1,4 @@
-`fabric-shim` provides the APIs for application developers to implement "Smart Contracts" for the Hyperledger Fabric backend, also known as "Chaincodes". Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
+`fabric-shim` provides the APIs for application developers to implement "Smart Contracts" for the Hyperledger Fabric back-end, also known as "Chaincodes". Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
 
 ### Overview
 

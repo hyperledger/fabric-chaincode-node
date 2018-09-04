@@ -10,6 +10,6 @@
  * @see {@link fabric-contract-api.Contract}
  */
 module.exports.Contract = require('./lib/contract.js');
-
+module.exports.Context = require('./lib/context.js');
 
 

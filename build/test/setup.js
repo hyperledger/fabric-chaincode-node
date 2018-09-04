@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 'use strict';
-
+/* eslint-disable no-console*/
 const gulp = require('gulp');
 const util = require('util');
 const fs = require('fs-extra');

@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+/* eslint-disable */
 'use strict';
 const shim = require('fabric-shim');
 const ChaincodeCrypto = require('fabric-shim-crypto');

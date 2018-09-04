@@ -3,7 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-
+/*global describe it beforeEach afterEach before after */
+/* eslint-disable no-useless-escape */
 'use strict';
 
 const sinon = require('sinon');

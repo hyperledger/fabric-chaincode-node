@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+/*global describe it */
 
 const ecdsaKey = require('../lib/ecdsa-key.js');
 
@@ -66,7 +67,6 @@ describe('ECDSA Key', () => {
 
 		it ('should return false when _key prvKeyHex is null', () => {
 			let myEcdsaKey = new ecdsaKey({type: 'EC', prvKeyHex: null, pubKeyHex: 'some random value'});
-
 			expect(myEcdsaKey.isPrivate()).to.deep.equal(false);
 		});
 	});
@@ -74,7 +74,6 @@ describe('ECDSA Key', () => {
 	describe('getPublicKey', () => {
 		it ('should return the instance for public key', () => {
 			let myEcdsaKey = new ecdsaKey(KEYUTIL.generateKeypair('EC', 'secp256r1').pubKeyObj);
-
 			expect(myEcdsaKey.getPublicKey()).to.deep.equal(myEcdsaKey);
 		});
 
@@ -95,14 +94,13 @@ describe('ECDSA Key', () => {
 	describe('toBytes', () => {
 		it ('should return private key', () => {
 			let myEcdsaKey = new ecdsaKey(KEYUTIL.generateKeypair('EC', 'secp256r1').prvKeyObj);
-
-			expect(myEcdsaKey.toBytes()).to.match(/(\-\-\-\-\-\s*BEGIN PRIVATE KEY?[^-]+?\-\-\-\-\-)([\s\S]*)(\-\-\-\-\-\s*END PRIVATE KEY?[^-]+?\-\-\-\-\-)/);
+			expect(myEcdsaKey.toBytes()).to.match(/(-----\s*BEGIN PRIVATE KEY?[^-]+?-----)([\s\S]*)(-----\s*END PRIVATE KEY?[^-]+?-----)/);
 		});
 
 		it ('should return public key', () => {
-			let myEcdsaKey = new ecdsaKey(KEYUTIL.generateKeypair('EC', 'secp256r1').pubKeyObj);
 
-			expect(myEcdsaKey.toBytes()).to.match(/(\-\-\-\-\-\s*BEGIN PUBLIC KEY?[^-]+?\-\-\-\-\-)([\s\S]*)(\-\-\-\-\-\s*END PUBLIC KEY?[^-]+?\-\-\-\-\-)/);
+			let myEcdsaKey = new ecdsaKey(KEYUTIL.generateKeypair('EC', 'secp256r1').pubKeyObj);
+			expect(myEcdsaKey.toBytes()).to.match(/(-----\s*BEGIN PUBLIC KEY?[^-]+?-----)([\s\S]*)(-----\s*END PUBLIC KEY?[^-]+?-----)/);
 		});
 	});
 });

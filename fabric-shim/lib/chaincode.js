@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-
+/* eslint-disable no-useless-escape */
 'use strict';
 
 const CLIArgs = require('command-line-args');
@@ -55,6 +55,7 @@ const _responseProto = grpc.load({
  * @memberof fabric-shim
  */
 class ChaincodeInterface {
+
 	/**
 	 * Called during chaincode instantiate and upgrade. This method can be used
 	 * to initialize asset states
@@ -63,7 +64,7 @@ class ChaincodeInterface {
 	 * library and passed to the ChaincodeInterface calls by the Hyperledger Fabric platform. The stub
 	 * encapsulates the APIs between the chaincode implementation and the Fabric peer
 	 */
-	async Init(stub) {}
+	async Init(stub) {}   // eslint-disable-line no-unused-vars
 
 	/**
 	 * called throughout the life time of the chaincode to carry out business
@@ -73,7 +74,7 @@ class ChaincodeInterface {
 	 * library and passed to the ChaincodeInterface calls by the Hyperledger Fabric platform. The stub
 	 * encapsulates the APIs between the chaincode implementation and the Fabric peer
 	 */
-	async Invoke(stub) {}
+	async Invoke(stub) {}   // eslint-disable-line no-unused-vars
 }
 
 /**
@@ -118,6 +119,8 @@ class Shim {
 			opts.cert = fs.readFileSync(certPath).toString();
 		}
 
+		// remove any of the unknown options
+		delete opts._unknown;
 		logger.debug(opts);
 		let client = new Handler(chaincode, url, opts);
 		let chaincodeName = process.env.CORE_CHAINCODE_ID_NAME;

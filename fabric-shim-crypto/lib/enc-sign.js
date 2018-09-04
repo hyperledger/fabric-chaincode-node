@@ -144,8 +144,8 @@ function importKey(raw) {
 	let pemString = raw.toString();
 	pemString = makeRealPem(pemString);
 	let key = null;
-	let theKey = null;
-	let error = null;
+	// let theKey = null;
+	// let error = null;
 	try {
 		key = KEYUTIL.getKey(pemString);
 	} catch(err) {

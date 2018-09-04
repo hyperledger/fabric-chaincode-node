@@ -7,12 +7,8 @@
 
 const gulp = require('gulp');
 const shell = require('gulp-shell');
-const rename = require('gulp-rename');
 const using = require('gulp-using');
 const filter = require('gulp-filter');
-const wait = require('gulp-wait');
-const map   = require('map-stream');
-
 const jsonTransform = require('gulp-json-transform');
 
 const util = require('util');
@@ -25,7 +21,6 @@ const test = require('../../test/constants.js');
 
 const execFile = util.promisify(require('child_process').execFile);
 const CHANNEL_NAME = 'mychannel';
-const CC_NAME = 'mysmartcontract';
 const tls = process.env.TLS ? process.env.TLS : 'false';
 const delay = require('delay');
 
@@ -55,7 +50,7 @@ gulp.task('invokeAllFns',(done)=>{
 
 	];
 
-	console.log('=== Starting Scenario Tests');
+	console.log('=== Starting Scenario Tests'); // eslint-disable-line
 	runSequence(...tasks,done);
 
 });
@@ -83,17 +78,21 @@ gulp.task('invoke_functions',async (done)=>{
 		getTLSArgs(),
 		CHANNEL_NAME,
 		'mysmartcontract',
-		'{"Args":["org.mynamespace.updates_setNewAssetValue","42"]}').split(' ');
+		'{"Args":["org.mynamespace.updates.setNewAssetValue","42"]}').split(' ');
 
 	const {error, stdout, stderr} = await execFile(script,args, options);
-
 	if (error){
 		done(error);
 	}else {
 		// validate the stdout/stderr
-		console.log(stdout);
-		console.log(stderr);
+		console.log(stdout); // eslint-disable-line
+		console.log(stderr); // eslint-disable-line
+
+		// if the output needs to be parsed use this format
+		// let data = JSON.parse(regexp.exec(stderr)[1].replace(/\\/g,''));
+
 	}
+
 });
 
 gulp.task('st-copy-shim', ['protos'], () => {
@@ -107,7 +106,7 @@ gulp.task('st-copy-shim', ['protos'], () => {
 	return gulp.src(srcPath)
 		.pipe(f)
 		.pipe(using())
-		.pipe(jsonTransform((data, file) => {
+		.pipe(jsonTransform((data, file) => { // eslint-disable-line
 			data.version = data.version+'-test';
 			return data;
 		}))
@@ -126,7 +125,7 @@ gulp.task('st-copy-api', ['st-copy-shim'], () => {
 	return gulp.src(srcPath)
 		.pipe(f)
 		.pipe(using())
-		.pipe(jsonTransform((data, file) => {
+		.pipe(jsonTransform((data, file) => { // eslint-disable-line
 			data.version = data.version+'-test';
 			return data;
 		}))
@@ -145,7 +144,7 @@ gulp.task('st-copy-shim-crypto', ['st-copy-api'], () => {
 	return gulp.src(srcPath)
 		.pipe(f)
 		.pipe(using())
-		.pipe(jsonTransform((data, file) => {
+		.pipe(jsonTransform((data, file) => {  // eslint-disable-line
 			data.version = data.version+'-test';
 			return data;
 		}))
@@ -192,7 +191,7 @@ gulp.task('st-instantiate_chaincode', () => {
 				getTLSArgs(),
 				CHANNEL_NAME,
 				'mysmartcontract',
-				'\'{"Args":["org.mynamespace.updates_setup"]}\'',
+				'\'{"Args":["org.mynamespace.updates.setup"]}\'',
 				'\'OR ("Org1MSP.member")\'')
 		]));
 });

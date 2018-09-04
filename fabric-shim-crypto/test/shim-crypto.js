@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
+/*global describe it beforeEach afterEach after */
 
 const chai = require('chai');
 const expect = chai.expect;
@@ -140,7 +141,7 @@ describe('enc-sign', () => {
 				let updateStub = sinon.stub().returns('0000000000');
 				let finalStub = sinon.stub().returns('1111111111');
 
-				let mockCreateCipher = sandbox.stub(crypto, 'createCipheriv').returns({
+				sandbox.stub(crypto, 'createCipheriv').returns({
 					update: updateStub,
 					final: finalStub
 				});
@@ -166,8 +167,9 @@ describe('enc-sign', () => {
 			it ('should return a buffer of decrypted ciphertext', () => {
 				const updateStub = sinon.stub().returns('some ');
 				const finalStub = sinon.stub().returns('message');
-
-				const mockCreateDeipher = sandbox.stub(crypto, 'createDecipheriv').returns({
+				// eslint-disable-next-line no-unused-vars
+				// const mockCreateDeipher =
+				sandbox.stub(crypto, 'createDecipheriv').returns({
 					update: updateStub,
 					final: finalStub
 				});
@@ -201,7 +203,7 @@ describe('enc-sign', () => {
 
 				expect(() => {
 					sc.sign();
-				}).to.throw(/The transient map in the chaincode invocation request must contain a \"sign-key\" entry in order to perform signing/);
+				}).to.throw(/The transient map in the chaincode invocation request must contain a "sign-key" entry in order to perform signing/);
 			});
 
 			it ('should throw an error if signKey is null', () => {
@@ -210,7 +212,7 @@ describe('enc-sign', () => {
 
 				expect(() => {
 					sc.sign();
-				}).to.throw(/The transient map in the chaincode invocation request must contain a \"sign-key\" entry in order to perform signing/);
+				}).to.throw(/The transient map in the chaincode invocation request must contain a "sign-key" entry in order to perform signing/);
 			});
 
 			it ('should throw an error if the message is not passed', () => {
@@ -293,7 +295,7 @@ describe('enc-sign', () => {
 
 				expect(() => {
 					sc.verify();
-				}).to.throw(/The transient map in the chaincode invocation request must contain a \"sign-key\" entry in order to perform signature verification/);
+				}).to.throw(/The transient map in the chaincode invocation request must contain a "sign-key" entry in order to perform signature verification/);
 			});
 
 			it ('should throw an error if signKey is null', () => {
@@ -302,7 +304,7 @@ describe('enc-sign', () => {
 
 				expect(() => {
 					sc.verify();
-				}).to.throw(/The transient map in the chaincode invocation request must contain a \"sign-key\" entry in order to perform signature verification/);
+				}).to.throw(/The transient map in the chaincode invocation request must contain a "sign-key" entry in order to perform signature verification/);
 			});
 
 			it ('should throw an error if the signature is not passed', () => {
@@ -511,7 +513,7 @@ describe('enc-sign', () => {
 				type: 'EC'
 			};
 
-			let getKeyStub = sinon.stub(KEYUTIL, 'getKey').returns(mockKey);
+			sinon.stub(KEYUTIL, 'getKey').returns(mockKey);
 
 			expect(importKey('some raw content') instanceof ECDSAKey).to.be.ok;
 			expect(mockECDSAKey.calledWithNew).to.be.ok;
@@ -573,7 +575,7 @@ i6dOfok=
 				_preventMalleability('some sig', {
 					name: 'some name'
 				});
-			}).to.throw(/Can not find the half order needed to calculate \"s\" value for immalleable signatures. Unsupported curve name: some name/);
+			}).to.throw(/Can not find the half order needed to calculate "s" value for immalleable signatures. Unsupported curve name: some name/);
 		});
 
 		it ('should return sig for a low s', () => {
@@ -639,7 +641,7 @@ i6dOfok=
 				_checkMalleability('some sig', {
 					name: 'some name'
 				});
-			}).to.throw(/Can not find the half order needed to calculate \"s\" value for immalleable signatures. Unsupported curve name: some name/);
+			}).to.throw(/Can not find the half order needed to calculate "s" value for immalleable signatures. Unsupported curve name: some name/);
 		});
 
 		it ('should throw an error if signature object fails to load correctly (no r)', () => {

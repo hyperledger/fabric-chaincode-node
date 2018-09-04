@@ -7,26 +7,21 @@
 declare module 'fabric-contract-api' {
 
     import { ChaincodeStub, ClientIdentity } from 'fabric-shim';
-    export interface Context {
+    export class Context {
         stub: ChaincodeStub;
         clientIdentity: ClientIdentity;
     }
 
-    export type IntermediaryFn = (ctx: Context) => Context;
-
     export class Contract {
-        constructor(namespace?: string, metadata?:object);
+        constructor(namespace?: string);
 
-        setUnknownFn(fn : IntermediaryFn): void;
-        getUnknownFn(): IntermediaryFn;
+        beforeTransaction(ctx : Context): Promise<void>;
+        afterTransaction(ctx : Context,result: any): Promise<void>;
 
-        setBeforeFn(fn : IntermediaryFn): void;
-        getBeforeFn(): IntermediaryFn;
+        unknownTransaction(ctx : Context): Promise<void>;
 
-        setAfterFn(fn : IntermediaryFn): void;
-        getAfterFn(): IntermediaryFn;
-
+        createContext(): Context;
         getNamespace(): string;
-        getMetadata(): object;
+
     }
 }

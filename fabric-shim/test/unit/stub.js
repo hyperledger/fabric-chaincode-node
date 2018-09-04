@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-/*global describe it beforeEach afterEach before after  */
+/*global describe it beforeEach afterEach after  */
 
 const ByteBuffer = require('bytebuffer');
 const sinon = require('sinon');
@@ -658,7 +658,7 @@ describe('Stub', () => {
 				function CustomEvent () {
 					this.setEventName = setEventNameSpy;
 					this.setPayload = setPayloadSpy;
-				};
+				}
 
 				let eventProtoStub = {
 					ChaincodeEvent: CustomEvent

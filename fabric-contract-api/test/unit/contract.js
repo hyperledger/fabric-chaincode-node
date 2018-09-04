@@ -25,10 +25,45 @@ const path = require('path');
 // class under test
 const pathToRoot = '../../..';
 const Contract = require(path.join(pathToRoot,'fabric-contract-api/lib/contract'));
+const Context = require(path.join(pathToRoot,'fabric-contract-api/lib/context'));
+
+
+let beforeStub;
+let afterStub;
+let unknownStub;
+let createContextStub;
+
+/*
+* A fake  contract class;
+*/
+class SCAlpha extends Contract {
+
+	/** */
+	constructor() {
+		super('alpha.beta.delta');
+
+	}
+
+	async unknownTransaction(ctx){
+		unknownStub(ctx);
+	}
+
+	async beforeTransaction(ctx){
+		beforeStub(ctx);
+	}
+
+	async afterTransaction(ctx,result){
+		afterStub(ctx,result);
+	}
+
+	createContext(){
+		createContextStub();
+	}
+}
+
 
 
 describe('contract.js',()=>{
-
 
 	let sandbox;
 
@@ -42,23 +77,29 @@ describe('contract.js',()=>{
 
 	describe('#constructor',()=>{
 
-		it('should create with default namespace  ',()=>{
-			let sc = new Contract();
-			expect(sc.namespace).to.equal('contract');
-
-			( ()=>{
-				sc.unknownFn();
-			}).should.throw(/does not exist/);
-
+		it('should create with default namespace',()=>{
+			let sc0 = new Contract();
+			expect(sc0.getNamespace()).to.equal('');
 
 			// should also create default when the supplied name is empty space
 			let sc1 = new Contract('');
-			expect(sc1.namespace).to.equal('contract');
-			expect(sc1.getNamespace()).to.equal('contract');
+			expect(sc1.getNamespace()).to.equal('');
 
 			let sc2 = new Contract('  ');
-			expect(sc2.namespace).to.equal('contract');
-			expect(sc2.getNamespace()).to.equal('contract');
+			expect(sc2.getNamespace()).to.equal('');
+		});
+
+		it('should have default unknownTx fn',()=>{
+			let sc0 = new Contract();
+			const ctx = {
+				stub : {
+					getFunctionAndParameters: 'fn'
+				}
+			};
+
+			ctx.stub.getFunctionAndParameters = sandbox.stub().returns({fcn:'wibble'});
+
+			return sc0.unknownTransaction(ctx).should.eventually.be.rejectedWith(/^You've asked to invoke a function that does not exist: wibble$/);
 		});
 
 		it('should create with the name specified',()=>{
@@ -70,95 +111,59 @@ describe('contract.js',()=>{
 			expect(sc2.namespace).to.equal('somewhat.padded.out');
 			expect(sc2.getNamespace()).to.equal('somewhat.padded.out');
 		});
-	});
 
-	describe('#_isFunction',()=>{
-		let sc;
-		beforeEach('create temporary  contract',()=>{
-			sc = new Contract();
+		it('should call the default before/after functions',()=>{
+			let sc0 = new Contract();
+
+
+			return Promise.all([
+				sc0.beforeTransaction().should.be.fulfilled,
+				sc0.afterTransaction().should.be.fulfilled]);
 		});
 
-		it('should return true for functions',()=>{
-			sc._isFunction((()=>{})).should.be.true;
-		});
-
-		it('should return false for not-functions',()=>{
-			sc._isFunction().should.be.false;
-			sc._isFunction('Hello').should.be.false;
-			sc._isFunction(25).should.be.false;
-			sc._isFunction(sc);
+		it('should call the default createContext functions',()=>{
+			let sc0 = new Contract();
+			sc0.createContext().should.be.an.instanceOf(Context);
 		});
 	});
 
-	describe('#set/get UnkownFn',()=>{
-		let sc;
-		beforeEach('create temporary  contract',()=>{
-			sc = new Contract();
+	describe('subclass specific functioning',()=>{
+
+		beforeEach('setup the stubs',()=>{
+			beforeStub = sandbox.stub().resolves();
+			afterStub = sandbox.stub().resolves();
+			unknownStub = sandbox.stub().resolves();
+			createContextStub = sandbox.stub().returns();
 		});
 
-		it('should return function passed in',()=>{
-			let fn = ()=>{return 42;};
-			sc.setUnknownFn(fn);
-			expect(sc.unknownFn()).to.equal(42);
-			expect(sc.getUnknownFn()()).to.equal(42);
-
+		it('should set the correct namespace',()=>{
+			let sc = new SCAlpha();
+			sc.getNamespace().should.equal('alpha.beta.delta');
 		});
-		it('should throw error with wrong tyupes  ',()=>{
-			( ()=>{
-				sc.setUnknownFn('wibble');
-			}  ).should.throw(/Argument is not a function/);
+
+		it('should call the correct subclassed fns',()=>{
+			let sc = new SCAlpha();
+			let ctx = 'a really simple context';
+			sc.beforeTransaction(ctx);
+			sinon.assert.calledOnce(beforeStub);
+			sinon.assert.calledWith(beforeStub,ctx);
+
+			sc.afterTransaction(ctx,'result');
+			sinon.assert.calledOnce(afterStub);
+			sinon.assert.calledWith(afterStub,ctx,'result');
+
+			sc.unknownTransaction(ctx);
+			sinon.assert.calledOnce(unknownStub);
+			sinon.assert.calledWith(unknownStub,ctx);
+
+			sc.createContext();
+			sinon.assert.calledOnce(createContextStub);
+
 		});
 	});
 
-	describe('#set/get BeforeFn',()=>{
-		let sc;
-		beforeEach('create temporary  contract',()=>{
-			sc = new Contract();
-		});
 
-		it('should return function passed in',()=>{
-			let fn = ()=>{return 42;};
-			sc.setBeforeFn(fn);
-			expect(sc.beforeFn()).to.equal(42);
-			expect(sc.getBeforeFn()()).to.equal(42);
 
-		});
-		it('should throw error with wrong tyupes  ',()=>{
-			( ()=>{
-				sc.setBeforeFn('wibble');
-			}  ).should.throw(/Argument is not a function/);
-		});
-	});
 
-	describe('#set/get AfterFn',()=>{
-		let sc;
-		beforeEach('create temporary  contract',()=>{
-			sc = new Contract();
-		});
 
-		it('should return function passed in',()=>{
-			let fn = ()=>{return 42;};
-			sc.setAfterFn(fn);
-			expect(sc.afterFn()).to.equal(42);
-			expect(sc.getAfterFn()()).to.equal(42);
-
-		});
-		it('should throw error with wrong tyupes  ',()=>{
-			( ()=>{
-				sc.setAfterFn('wibble');
-			}  ).should.throw(/Argument is not a function/);
-		});
-	});
-
-	describe('#getMetadata',()=>{
-		let sc;
-		beforeEach('create temporary  contract',()=>{
-			sc = new Contract('anamespace',{a:'value',some:'othervalue'});
-		});
-
-		it('should return value passed in',()=>{
-			let md = sc.getMetadata();
-			expect(md).to.deep.equal({a:'value',some:'othervalue'});
-		});
-	});
 });

@@ -48,5 +48,5 @@ gulp.task('test-headless', ['clean-up', 'lint', 'typescript_check', 'instrument'
 			reporters: ['lcov', 'json', 'text',
 				'text-summary', 'cobertura','html']
 		}))
-		.pipe(istanbul.enforceThresholds({ thresholds: { global: 100 } }));;
+		.pipe(istanbul.enforceThresholds({ thresholds: { global: 100 } }));
 });

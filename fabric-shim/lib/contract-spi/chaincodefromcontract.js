@@ -7,12 +7,12 @@
 
 const shim = require('../chaincode');
 const Contract = require('fabric-contract-api').Contract;
-const stub = require('../stub');
+
 const Logger = require('../logger');
 const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
-const util = require('util');
-const ClientIdentity = require('../chaincode').ClientIdentity;
 
+const ClientIdentity = require('../chaincode').ClientIdentity;
+const SystemContract = require('./systemcontract');
 /**
  * The user will have written a class than extends the 'Contract' interface; this
  * is expressed in terms of domain specific functions - that need to be called in the
@@ -39,7 +39,7 @@ class ChaincodeFromContract {
 			throw new Error('Missing argument: array of contract classes');
 		}
 		// always add in the 'meta' class that has general abilities
-		contractClasses.push(require('./meta'));
+		contractClasses.push(SystemContract);
 		logger.debug(contractClasses);
 
 
@@ -48,6 +48,10 @@ class ChaincodeFromContract {
 			let contract = new(contractClass);
 			if (!(contract instanceof Contract)) {
 				throw new Error(`invalid contract instance ${contract}`);
+			}
+
+			if (contract instanceof SystemContract){
+				contract._setChaincode(this);
 			}
 
 			const propNames = Object.getOwnPropertyNames(Object.getPrototypeOf(contract));
@@ -59,12 +63,15 @@ class ChaincodeFromContract {
 					continue;
 				} else if (propName === 'constructor') {
 					continue;
+				} else if (propName.startsWith('_')){
+					continue;
 				}
 
 				functionNames.push(propName);
 			}
 			let namespace = contract.getNamespace();
 			logger.debug(functionNames,contractClass,namespace);
+
 			this.contracts[`${namespace}`] = { contractClass, functionNames, contract };
 		}
 
@@ -89,51 +96,53 @@ class ChaincodeFromContract {
 		try {
 			const { fcn, params } = stub.getFunctionAndParameters();
 
-			let splitFcn = fcn.split('_');
-
-			let ns = splitFcn[0];
-			let fn = splitFcn[1];
+			let splitFcn = fcn.split('.');
+			let fn = splitFcn.pop();
+			let ns = splitFcn.join('.');
 
 			if (!this.contracts[ns]){
 				throw new Error(`Namespace is not known :${ns}:`);
 			}
 
+			let contractInstance = this.contracts[ns].contract;
+			let ctx = contractInstance.createContext();
+			ctx.setChaincodeStub(stub);
+			ctx.setClientIdentity(new ClientIdentity(stub));
+
 			const functionExists = this.contracts[ns].functionNames.indexOf(fn) !== -1;
 			if (functionExists) {
 
-				let contractInstance = this.contracts[ns].contract;
-				let ctx = this.createCtx(stub);
-
-				let afterFn = contractInstance.getAfterFn();
-				let beforeFn = contractInstance.getBeforeFn();
-
-				if (beforeFn){
-					ctx = beforeFn(ctx);
-				}
+				// before tx fn
+				await contractInstance.beforeTransaction(ctx);
 
 				// use the spread operator to make this pass the arguments seperately not as an array
 				const result = await contractInstance[fn](ctx,...params);
 
-				if (afterFn){
-					afterFn(ctx,result);
-				}
+				// after tx fn
+				await contractInstance.afterTransaction(ctx,result);
+
 				return shim.success(result);
 			} else {
-				throw new Error(`No contract function ${fn}`);
+				await contractInstance.unknownTransaction(ctx);
 			}
 		} catch (error) {
-
 			return shim.error(error);
 		}
 	}
 
-	createCtx(stub){
-		let ctx = {
-			stub,
-			clientIdentity: new ClientIdentity(stub)
-		};
-		return ctx;
+	/**
+	 * get information on the contracts
+	 */
+	getContracts(){
+		let data = {};
+		// this.contracts[`${namespace}`] = { contractClass, functionNames, contract };
+		for (let c in this.contracts){
+			data[c] = {'functions':this.contracts[c].functionNames};
+		}
+
+		return  data;
 	}
+
 }
 
 module.exports = ChaincodeFromContract;

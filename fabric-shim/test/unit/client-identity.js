@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
+/*global describe it */
+
 const shim = require('../../../fabric-shim/lib/chaincode.js');
 
 const chai = require('chai');

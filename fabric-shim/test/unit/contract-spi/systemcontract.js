@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*global describe it beforeEach afterEach before after  */
+/*global describe it beforeEach afterEach  */
 'use strict';
 
 // test specific libraries
@@ -21,18 +21,15 @@ const expect = chai.expect;
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
-const mockery = require('mockery');
 
-
-// standard utility fns
 const path = require('path');
 
 // class under test
 const pathToRoot = '../../../..';
-const Meta = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/meta'));
-const Contract = require(path.join(pathToRoot, 'fabric-contract-api/lib/contract'));
+const SystemContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/systemcontract'));
 
-describe('meta',()=>{
+
+describe('SystemContract',()=>{
 
 	let sandbox;
 
@@ -47,7 +44,7 @@ describe('meta',()=>{
 	describe('#constructor',()=>{
 
 		it('should create correctly',()=>{
-			let meta = new Meta();
+			let meta = new SystemContract();
 			expect(meta.getNamespace()).to.equal('org.hyperledger.fabric');
 		});
 
@@ -56,10 +53,16 @@ describe('meta',()=>{
 	describe('#getdata',()=>{
 
 		it('should get the buffer',async ()=>{
-			let meta = new Meta();
-			let data = meta.getContractMetaData();
-			console.log(data.toString());
+			let meta = new SystemContract();
+
+			let chaincodeMock = {
+				getContracts : sandbox.stub().returns({})
+			};
+			meta._setChaincode(chaincodeMock);
+
+			let data = meta.getMetaData();
 			expect(data.toString()).to.equal('{}');
+			sinon.assert.calledOnce(chaincodeMock.getContracts);
 
 		});
 
