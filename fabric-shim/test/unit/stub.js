@@ -11,6 +11,13 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const rewire = require('rewire');
+const grpc = require('grpc');
+const path = require('path');
+
+const _serviceProto = grpc.load({
+	root: path.join(__dirname, '../../lib/protos'),
+	file: 'peer/chaincode_shim.proto'
+}).protos;
 
 const Stub = rewire('../../../fabric-shim/lib/stub.js');
 
@@ -527,7 +534,7 @@ describe('Stub', () => {
 
 		describe('getStateByRange', () => {
 			it ('should return handler.handleGetStateByRange', async () => {
-				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
+				const handleGetStateByRangeStub = sinon.stub().resolves({ iterator: 'some state' });
 
 				let stub = new Stub({
 					handleGetStateByRange: handleGetStateByRangeStub
@@ -543,7 +550,7 @@ describe('Stub', () => {
 			});
 
 			it ('should return handler.handleGetStateByRange using empty key substitute', async () => {
-				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
+				const handleGetStateByRangeStub = sinon.stub().resolves({ iterator: 'some state' });
 
 				let stub = new Stub({
 					handleGetStateByRange: handleGetStateByRangeStub
@@ -561,9 +568,69 @@ describe('Stub', () => {
 			});
 		});
 
+		describe('getStateByRangeWithPagination', () => {
+			it('should have default startKey eqls EMPTY_KEY_SUBSTITUTE', async () => {
+				let EMPTY_KEY_SUBSTITUTE = Stub.__get__('EMPTY_KEY_SUBSTITUTE');
+				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getStateByRangeWithPagination(null, 'end key', 3);
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				const metadata = new _serviceProto.QueryResponseMetadata();
+				metadata.setBookmark('');
+				metadata.setFetchedRecordsCount(3);
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', EMPTY_KEY_SUBSTITUTE, 'end key', 'dummyChannelId', 'dummyTxid', metadata.toBuffer()]);
+			});
+
+			it('should have default bookmark eqls an empty string', async () => {
+				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getStateByRangeWithPagination('start key', 'end key', 3);
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				const metadata = new _serviceProto.QueryResponseMetadata();
+				metadata.setFetchedRecordsCount(3);
+				metadata.setBookmark('');
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid', metadata.toBuffer()]);
+			});
+
+			it('should have default bookmark eqls an empty string', async () => {
+				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
+
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getStateByRangeWithPagination('start key', 'end key', 3, 'a bookmark');
+
+				expect(result).to.deep.equal('some state');
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				const metadata = new _serviceProto.QueryResponseMetadata();
+				metadata.setFetchedRecordsCount(3);
+				metadata.setBookmark('a bookmark');
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid', metadata.toBuffer()]);
+			});
+		});
+
 		describe('getQueryResult', () => {
 			it ('should return handler.handleGetQueryResult', async () => {
-				const handleGetQueryResultStub = sinon.stub().resolves('some query result');
+				const handleGetQueryResultStub = sinon.stub().resolves({ iterator: 'some query result' });
 
 				let stub = new Stub({
 					handleGetQueryResult: handleGetQueryResultStub
@@ -575,7 +642,47 @@ describe('Stub', () => {
 
 				expect(result).to.deep.equal('some query result');
 				expect(handleGetQueryResultStub.calledOnce).to.be.ok;
-				expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['', 'a query', 'dummyChannelId', 'dummyTxid']);
+				expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['', 'a query', null, 'dummyChannelId', 'dummyTxid']);
+			});
+		});
+
+		describe('getQueryResultWithPagination', () => {
+			it('should have default bookmark equals an empty string', async () => {
+				const handleGetQueryResultStub = sinon.stub().resolves('some query result');
+
+				let stub = new Stub({
+					handleGetQueryResult: handleGetQueryResultStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getQueryResultWithPagination('a query', 3);
+
+				expect(result).to.deep.equal('some query result');
+				expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+				const metadata = handleGetQueryResultStub.firstCall.args[2];
+				const decoded = _serviceProto.QueryMetadata.decode(metadata);
+				expect(decoded.pageSize).to.equal(3);
+				expect(decoded.bookmark).to.equal('');
+			});
+
+			it('should have default bookmark equals an empty string', async () => {
+				const handleGetQueryResultStub = sinon.stub().resolves('some query result');
+
+				let stub = new Stub({
+					handleGetQueryResult: handleGetQueryResultStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const result = await stub.getQueryResultWithPagination('a query', 3, 'a bookmark');
+
+				expect(result).to.deep.equal('some query result');
+				expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+				const metadata = handleGetQueryResultStub.firstCall.args[2];
+				const decoded = _serviceProto.QueryMetadata.decode(metadata);
+				expect(decoded.pageSize).to.equal(3);
+				expect(decoded.bookmark).to.equal('a bookmark');
 			});
 		});
 
@@ -769,6 +876,34 @@ describe('Stub', () => {
 				expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
 				expect(getStateByRangeStub.calledOnce).to.be.ok;
 				expect(getStateByRangeStub.firstCall.args).to.deep.equal(['some composite key', `some composite key${MAX_UNICODE_RUNE_VALUE}`]);
+			});
+		});
+
+		describe('getStateByPartialCompositeKeyWithPagination', () => {
+			it('the default bookmark should equal an empty string', async () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const getStateByRangeWithPagination = sinon.stub(stub, 'getStateByRangeWithPagination').resolves('some state by range');
+
+				const result = await stub.getStateByPartialCompositeKeyWithPagination('some type', ['attr1', 'attr2'], 3);
+				expect(result).to.deep.equal('some state by range');
+				expect(getStateByRangeWithPagination.calledOnce).to.be.ok;
+				expect(getStateByRangeWithPagination.firstCall.args[3]).to.equal('');
+			});
+
+			it('should return getStateByRangeWithPagination with bookmark and pageSize', async () => {
+				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const getStateByRangeWithPagination = sinon.stub(stub, 'getStateByRangeWithPagination').resolves('some state by range');
+
+				const result = await stub.getStateByPartialCompositeKeyWithPagination('some type', ['attr1', 'attr2'], 3, 'a bookmark');
+				expect(result).to.deep.equal('some state by range');
+				expect(getStateByRangeWithPagination.calledOnce).to.be.ok;
+				expect(getStateByRangeWithPagination.firstCall.args[3]).to.equal('a bookmark');
 			});
 		});
 
@@ -1030,7 +1165,7 @@ describe('Stub', () => {
 
 				expect(result).to.deep.equal('some query result');
 				expect(handleGetQueryResultStub.calledOnce).to.be.ok;
-				expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['some collection', 'some query', 'dummyChannelId', 'dummyTxid']);
+				expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['some collection', 'some query', null, 'dummyChannelId', 'dummyTxid']);
 			});
 		});
 	});

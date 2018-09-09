@@ -12,9 +12,9 @@ const chai = require('chai');
 chai.should();
 chai.use(require('chai-as-promised'));
 
-const a1 = {key: 'k1', value: 'value1'};
-const a2 = {key: 'k2', value: 'value1'};
-const a3 = {key: 'k3', value: 'value1'};
+const a1 = { key: 'k1', value: 'value1' };
+const a2 = { key: 'k2', value: 'value1' };
+const a3 = { key: 'k3', value: 'value1' };
 const assert = chai.assert;
 
 async function getAllResults(iterator, getKeys) {
@@ -46,6 +46,26 @@ async function getAllResults(iterator, getKeys) {
 	}
 }
 
+async function checkPagedResponse(response, expectedKeys, expectedPageSize, expectedBookmark, expectedResponse) {
+	const { iterator, metadata } = response;
+	console.log(metadata);
+	const results = await getAllResults(iterator, true /* get keys instead of values */);
+	console.log('Get Keys: %j', results);
+	results.length.should.equal(expectedKeys, 'Should return 2 composite key');
+	results.should.deep.eql(expectedResponse);
+	metadata.fetched_records_count.should.equal(expectedPageSize);
+	/**
+	 * FIXME: seems a peer side bug or just by the design?
+	 * https://jira.hyperledger.org/browse/FAB-11926
+	 * a bookmark
+	 * '\u0000color~name\u0000red\u0000name4\u0000'
+	 * would be serialized to
+	 * '\\u0000color~name\\u0000red\\u0000name4\\u0000'
+	 *
+	 */
+	// metadata.bookmark.should.equal(expectedBookmark);
+}
+
 let Chaincode = class {
 	async Init(stub) {
 		console.info('Transaction ID: ' + stub.getTxID());
@@ -57,14 +77,14 @@ let Chaincode = class {
 			try {
 				await stub.putState('dummyKey', Buffer.from('dummyValue1'));
 				return shim.success();
-			} catch(err) {
+			} catch (err) {
 				return shim.error(err);
 			}
 		} else {
 			try {
 				await stub.putState('whoami', Buffer.from('mycc2'));
 				return shim.success();
-			} catch(err) {
+			} catch (err) {
 				return shim.error(err);
 			}
 		}
@@ -83,9 +103,9 @@ let Chaincode = class {
 			return shim.success();
 		}
 		try {
-			let payload =  await method(stub, ret.params);
+			let payload = await method(stub, ret.params);
 			return shim.success(payload);
-		} catch(err) {
+		} catch (err) {
 			console.log(err);
 			return shim.error(err);
 		}
@@ -194,6 +214,7 @@ let Chaincode = class {
 		let key1 = stub.createCompositeKey('color~name', ['blue', 'name1']);
 		let key2 = stub.createCompositeKey('color~name', ['blue', 'name2']);
 		let key3 = stub.createCompositeKey('color~name', ['red', 'name3']);
+		let key4 = stub.createCompositeKey('color~name', ['red', 'name4']);
 
 		let p1 = stub.putState(key1, 'dummyValue3')
 			.then((res) => {
@@ -216,7 +237,14 @@ let Chaincode = class {
 				assert.fail('Failed to put a state using composite key ' + key3);
 			});
 
-		return Promise.all([p1, p2, p3])
+		let p4 = stub.putState(key4, 'dummyValue6')
+			.then((res) => {
+				assert.isOk(true, 'Successfully put a state using composite key ' + key4);
+			}, (err) => {
+				assert.fail('Failed to put a state using composite key ' + key4);
+			});
+
+		return Promise.all([p1, p2, p3, p4])
 			.then(() => {
 				return 'I completed ok';
 			});
@@ -234,11 +262,11 @@ let Chaincode = class {
 		key1.attributes[0].should.equal('blue', 'first attribute value of the returned composite key should be "blue"');
 		key1.attributes[1].should.equal('name1', '2nd attribute value of the returned composite key should be "name1"');
 
-		let key2 = stub.splitCompositeKey(results[0]);
+		let key2 = stub.splitCompositeKey(results[1]);
 		key2.objectType.should.equal('color~name', '"objectType" value of the returned composite key should be "color~name"');
 		key2.attributes.length.should.equal(2, '"attributes" value of the returned composite key should be array of size 2');
 		key2.attributes[0].should.equal('blue', 'first attribute value of the returned composite key should be "blue"');
-		key2.attributes[1].should.equal('name1', '2nd attribute value of the returned composite key should be "name2"');
+		key2.attributes[1].should.equal('name2', '2nd attribute value of the returned composite key should be "name2"');
 	}
 
 	// tests the encryption of state values
@@ -289,13 +317,13 @@ let Chaincode = class {
 		try {
 			let results = await stub.invokeChaincode('mycc2', ['getKey']);
 			results.should.be.false; // if we get here then we should fail
-		} catch(error_) {
+		} catch (error_) {
 			error = error_;
 		}
 		error.message.should.match(/Incorrect no. of parameters/);
 	}
 
-	async test16(stub,args){
+	async test16(stub, args) {
 		// test the ClientIdentiy class
 		let cid = new shim.ClientIdentity(stub);
 		cid.mspId.should.equal('Org1MSP', 'Test mspId value');
@@ -321,6 +349,68 @@ let Chaincode = class {
 		console.log('put ' + args[1] + ' into ' + args[0]);
 	}
 
+	async test17(stub, args) {
+		console.log('test getStateByRangeWithPagination()');
+		const key1 = stub.createCompositeKey('color~name', ['blue', 'name1']);
+		const key2 = stub.createCompositeKey('color~name', ['blue', 'name2']);
+		const key3 = stub.createCompositeKey('color~name', ['red', 'name3']);
+		const key4 = stub.createCompositeKey('color~name', ['red', 'name4']);
+
+		// with pageSize = 2, query from key1 to key4, and start from '' would only return 2 values, and bookmark will be key3
+		let response = await stub.getStateByRangeWithPagination(key1, key4, 2, key2);
+		let expectedResponse = [key2, key3];
+		await checkPagedResponse(response, 2, 2, key4, expectedResponse);
+
+		// query from this bookmark again, start from key2
+		response = await stub.getStateByRangeWithPagination(key1, key4, 3, '');
+		expectedResponse = [key1, key2, key3];
+		await checkPagedResponse(response, 3, 3, '', expectedResponse);
+
+	}
+
+	async test18(stub, args) {
+		console.log('test getQueryResultWithPagination()');
+
+
+		let query = {
+			selector: {
+				key: {
+					$regex: 'k[0-9]'
+				}
+			}
+		};
+
+		let response = await stub.getQueryResultWithPagination(JSON.stringify(query), 2);
+		const { iterator, metadata } = response;
+		console.log(metadata);
+		let results = await getAllResults(iterator, true /* get keys instead of values */);
+		console.log('Get Keys: %j', results);
+		results.length.should.equal(2, 'Should return 2 keys');
+		results.should.deep.eql(['key4', 'key5']);
+		metadata.fetched_records_count.should.equal(2);
+		metadata.bookmark.should.exist;
+
+		response = await stub.getQueryResultWithPagination(JSON.stringify(query), 2, metadata.bookmark);
+		console.log(response.metadata);
+		results = await getAllResults(response.iterator, true /* get keys instead of values */);
+		console.log(results);
+		results.length.should.eql(1);
+		results.should.deep.eql(['key6']);
+		response.metadata.fetched_records_count.should.equal(1);
+	}
+
+	// this tests the composite key features - step 3: query back the composite key with pagination
+	async test19(stub, args) {
+		console.log('test getStateByPartialCompositeKeyWithPagination()');
+		const key1 = stub.createCompositeKey('color~name', ['blue', 'name1']);
+		const key2 = stub.createCompositeKey('color~name', ['blue', 'name2']);
+		const key3 = stub.createCompositeKey('color~name', ['red', 'name3']);
+		const key4 = stub.createCompositeKey('color~name', ['red', 'name4']);
+
+		let response = await stub.getStateByPartialCompositeKeyWithPagination('color~name', [], 3, '');
+		let expectedResponse = [key1, key2, key3];
+		await checkPagedResponse(response, 3, 3, key4, expectedResponse);
+	}
 };
 
 shim.start(new Chaincode());

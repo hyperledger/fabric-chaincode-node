@@ -44,6 +44,16 @@ declare module 'fabric-shim' {
         getIdBytes(): Buffer;
     }
 
+    interface QueryResponseMetadata {
+        fetched_records_count: number;
+        bookmark: string;
+    }
+
+    interface StateQueryResponse<T> {
+        iterator: T;
+        metadata: QueryResponseMetadata;
+    }
+
     enum RESPONSE_CODE {
         OK = 200,
         ERRORTHRESHOLD = 400,
@@ -74,9 +84,12 @@ declare module 'fabric-shim' {
         putState(key: string, value: Buffer): Promise<void>;
         deleteState(key: string): Promise<void>;
         getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator>;
+        getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
         getStateByPartialCompositeKey(objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator>;
+        getStateByPartialCompositeKeyWithPagination(objectType: string, attributes: string[], pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
 
         getQueryResult(query: string): Promise<Iterators.StateQueryIterator>;
+        getQueryResultWithPagination(query: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
         getHistoryForKey(key: string): Promise<Iterators.HistoryQueryIterator>;
 
         invokeChaincode(chaincodeName: string, args: string[], channel: string): Promise<ChaincodeResponse>;

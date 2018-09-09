@@ -15,7 +15,9 @@ import { Shim,
     X509,
     SplitCompositekey,
     SerializedIdentity,
-    ChaincodeProposal
+    ChaincodeProposal,
+    QueryResponseMetadata,
+    StateQueryResponse
  } from 'fabric-shim';
 
 import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
@@ -76,6 +78,7 @@ class TestTS implements ChaincodeInterface {
         await this.testOtherStubCalls(stub);
         this.testClientIdentity(stub);
         this.testProposal(stub);
+        await this.testPagedQuery(stub);
     }
 
     testCompositeKey(stub: ChaincodeStub): void {
@@ -99,6 +102,35 @@ class TestTS implements ChaincodeInterface {
         this.testIterator(stateQIterator);
         this.testStateQueryIterator(stateQIterator);
 
+    }
+
+    async testPagedQuery(stub: ChaincodeStub): Promise<void> {
+        let response: StateQueryResponse<Iterators.StateQueryIterator> = await stub.getStateByRangeWithPagination('key2', 'key6', 3);
+        await this.testStateQueryIterator(response.iterator);
+        await this.testIterator(response.iterator);
+        this.testQueryResponseMetadata(response.metadata);
+        response = await stub.getStateByRangeWithPagination('key2', 'key6', 3, '');
+        await this.testStateQueryIterator(response.iterator);
+        await this.testIterator(response.iterator);
+        this.testQueryResponseMetadata(response.metadata);
+
+        response = await stub.getStateByPartialCompositeKeyWithPagination('obj', ['a', 'b'], 10);
+        await this.testStateQueryIterator(response.iterator);
+        await this.testIterator(response.iterator);
+        this.testQueryResponseMetadata(response.metadata);
+        response = await stub.getStateByPartialCompositeKeyWithPagination('obj', ['a', 'b'], 10, 'abookmark');
+        await this.testStateQueryIterator(response.iterator);
+        await this.testIterator(response.iterator);
+        this.testQueryResponseMetadata(response.metadata);
+
+        response = await stub.getQueryResultWithPagination('Query string', 10);
+        await this.testStateQueryIterator(response.iterator);
+        await this.testIterator(response.iterator);
+        this.testQueryResponseMetadata(response.metadata);
+        response = await stub.getQueryResultWithPagination('Query string', 10, 'abookmark');
+        await this.testStateQueryIterator(response.iterator);
+        await this.testIterator(response.iterator);
+        this.testQueryResponseMetadata(response.metadata);
     }
 
     async testOtherIteratorCalls(stub: ChaincodeStub): Promise<void> {
@@ -265,6 +297,11 @@ class TestTS implements ChaincodeInterface {
         input = payload.getInput();
         let map: Map<string, Buffer> = payload.transientMap;
         map = payload.getTransientMap();
+    }
+
+    testQueryResponseMetadata(metadata: QueryResponseMetadata) {
+        const cnt: number = metadata.fetched_records_count;
+        const bookmark: string = metadata.bookmark;
     }
 }
 Shim.start(new TestTS());

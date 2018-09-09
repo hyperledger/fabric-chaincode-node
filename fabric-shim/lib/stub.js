@@ -33,6 +33,11 @@ const _idProto = grpc.load({
 	file: 'msp/identities.proto'
 }).msp;
 
+const _serviceProto = grpc.load({
+	root: path.join(__dirname, './protos'),
+	file: 'peer/chaincode_shim.proto'
+}).protos;
+
 const logger = require('./logger').getLogger('lib/chaincode.js');
 
 const RESPONSE_CODE = {
@@ -78,6 +83,14 @@ function computeProposalBinding(decodedSP) {
 	const hash = crypto.createHash('sha256');
 	hash.update(total);
 	return hash.digest('hex');
+}
+
+// Construct the QueryMetadata with a page size and a bookmark needed for pagination
+function createQueryMetadata(pageSize, bookmark) {
+	const metadata = new _serviceProto.QueryMetadata();
+	metadata.setPageSize(pageSize);
+	metadata.setBookmark(bookmark);
+	return metadata.toBuffer();
 }
 
 /**
@@ -136,7 +149,7 @@ class ChaincodeStub {
 			let signatureHeader;
 			try {
 				signatureHeader = _commonProto.SignatureHeader.decode(header.signature_header);
-				decodedSP.proposal.header.signature_header = {nonce: signatureHeader.getNonce().toBuffer()};
+				decodedSP.proposal.header.signature_header = { nonce: signatureHeader.getNonce().toBuffer() };
 			} catch (err) {
 				throw new Error(util.format('Decoding SignatureHeader failed: %s', err));
 			}
@@ -438,6 +451,11 @@ class ChaincodeStub {
 	 * Returns a range iterator over a set of keys in the
 	 * ledger. The iterator can be used to iterate over all keys
 	 * between the startKey (inclusive) and endKey (exclusive).
+	 *
+	 * However, if the number of keys between startKey and endKey is greater than the
+	 * totalQueryLimit (defined in core.yaml, which is the peer's configuration file),
+	 * this iterator cannot be used to fetch all keys (results will be limited by the totalQueryLimit).
+	 *
 	 * The keys are returned by the iterator in lexical order. Note
 	 * that startKey and endKey can be empty string, which implies unbounded range
 	 * query on start or end.<br><br>
@@ -455,7 +473,43 @@ class ChaincodeStub {
 		}
 		// Access public data by setting the collection to empty string
 		const collection = '';
-		return await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+		const { iterator } = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+		return iterator;
+	}
+
+	/**
+	 * getStateByRangeWithPagination returns a range iterator over a set of keys in the
+	 * ledger. The iterator can be used to fetch keys between the startKey (inclusive)
+	 * and endKey (exclusive).
+	 * When an empty string is passed as a value to the bookmark argument, the returned
+	 * iterator can be used to fetch the first `pageSize` keys between the startKey
+	 * (inclusive) and endKey (exclusive).
+	 * When the bookmark is a non-emptry string, the iterator can be used to fetch
+	 * the first `pageSize` keys between the bookmark (inclusive) and endKey (exclusive).
+	 * Note that only the bookmark present in a prior page of query results (ResponseMetadata)
+	 * can be used as a value to the bookmark argument. Otherwise, an empty string must
+	 * be passed as bookmark.
+	 * The keys are returned by the iterator in lexical order. Note
+	 * that startKey and endKey can be empty string, which implies unbounded range
+	 * query on start or end.
+	 * Call Close() on the returned StateQueryIteratorInterface object when done.
+	 * This call is only supported in a read only transaction.
+	 *
+	 * @param {string} startKey
+	 * @param {string} endKey
+	 * @param {int} pageSize
+	 * @param {string} bookmark
+	 */
+	async getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark) {
+		if (!startKey) {
+			startKey = EMPTY_KEY_SUBSTITUTE;
+		}
+		if (!bookmark) {
+			bookmark = '';
+		}
+		const collection = '';
+		const metadata = createQueryMetadata(pageSize, bookmark);
+		return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
 	}
 
 	/**
@@ -463,7 +517,13 @@ class ChaincodeStub {
 	 * only supported for state databases that support rich query,
 	 * e.g. CouchDB. The query string is in the native syntax
 	 * of the underlying state database. An {@link StateQueryIterator} is returned
-	 * which can be used to iterate (next) over the query result set.<br><br>
+	 * which can be used to iterate over all keys in the query result set.<br><br>
+	 *
+	 * However, if the number of keys in the query result set is greater than the
+	 * totalQueryLimit (defined in core.yaml), this iterator cannot be used
+	 * to fetch all keys in the query result set (results will be limited by
+	 * the totalQueryLimit).
+	 *
 	 * The query is NOT re-executed during validation phase, phantom reads are
 	 * not detected. That is, other committed transactions may have added,
 	 * updated, or removed keys that impact the result set, and this would not
@@ -477,7 +537,36 @@ class ChaincodeStub {
 	async getQueryResult(query) {
 		// Access public data by setting the collection to empty string
 		const collection = '';
-		return await this.handler.handleGetQueryResult(collection, query, this.channel_id, this.txId);
+		const { iterator } =  await this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
+		return iterator;
+	}
+
+	/**
+	 * getQueryResultWithPagination performs a "rich" query against a state database.
+	 * It is only supported for state databases that support rich query,
+	 * e.g., CouchDB. The query string is in the native syntax
+	 * of the underlying state database. An iterator is returned
+	 * which can be used to iterate over keys in the query result set.
+	 * When an empty string is passed as a value to the bookmark argument, the returned
+	 * iterator can be used to fetch the first `pageSize` of query results.
+	 * When the bookmark is a non-emptry string, the iterator can be used to fetch
+	 * the first `pageSize` keys between the bookmark and the last key in the query result.
+	 * Note that only the bookmark present in a prior page of query results (ResponseMetadata)
+	 * can be used as a value to the bookmark argument. Otherwise, an empty string
+	 * must be passed as bookmark.
+	 * This call is only supported in a read only transaction.
+	 *
+	 * @param {string} query
+	 * @param {int} pageSize
+	 * @param {string} bookmark
+	 */
+	async getQueryResultWithPagination(query, pageSize, bookmark) {
+		if (!bookmark) {
+			bookmark = '';
+		}
+		const metadata = createQueryMetadata(pageSize, bookmark);
+		const collection = '';
+		return await this.handler.handleGetQueryResult(collection, query, metadata, this.channel_id, this.txId);
 	}
 
 	/**
@@ -603,7 +692,7 @@ class ChaincodeStub {
 	 * 'attributes' (string[])
 	 */
 	splitCompositeKey(compositeKey) {
-		let result = {objectType: null, attributes: []};
+		let result = { objectType: null, attributes: [] };
 		if (compositeKey && compositeKey.length > 1 && compositeKey.charAt(0) === COMPOSITEKEY_NS) {
 			let splitKey = compositeKey.substring(1).split(MIN_UNICODE_RUNE_VALUE);
 			result.objectType = splitKey[0];
@@ -619,6 +708,10 @@ class ChaincodeStub {
 	/**
 	 * Queries the state in the ledger based on a given partial composite key. This function returns an iterator
 	 * which can be used to iterate over all composite keys whose prefix matches the given partial composite key.
+	 *
+	 * However, if the number of matching composite keys is greater than the totalQueryLimit (defined in core.yaml),
+	 * this iterator cannot be used to fetch all matching keys (results will be limited by the totalQueryLimit).
+	 *
 	 * The `objectType` and attributes are expected to have only valid utf8 strings and should not contain
 	 * U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point).<br><br>
 	 *
@@ -636,7 +729,44 @@ class ChaincodeStub {
 	 */
 	async getStateByPartialCompositeKey(objectType, attributes) {
 		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
-		return await this.getStateByRange(partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+		const startKey = partialCompositeKey;
+		const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
+		return this.getStateByRange(startKey, endKey);
+	}
+
+	/**
+	 * GetStateByPartialCompositeKeyWithPagination queries the state in the ledger based on
+	 * a given partial composite key. This function returns an iterator
+	 * which can be used to iterate over the composite keys whose
+	 * prefix matches the given partial composite key.
+	 * When an empty string is passed as a value to the bookmark argument, the returned
+	 * iterator can be used to fetch the first `pageSize` composite keys whose prefix
+	 * matches the given partial composite key.
+	 * When the bookmark is a non-emptry string, the iterator can be used to fetch
+	 * the first `pageSize` keys between the bookmark (inclusive) and the last matching
+	 * composite key.
+	 * Note that only the bookmark present in a prior page of query result (ResponseMetadata)
+	 * can be used as a value to the bookmark argument. Otherwise, an empty string must
+	 * be passed as bookmark.
+	 * The `objectType` and attributes are expected to have only valid utf8 strings
+	 * and should not contain U+0000 (nil byte) and U+10FFFF (biggest and unallocated
+	 * code point). See related functions SplitCompositeKey and CreateCompositeKey.
+	 * Call Close() on the returned StateQueryIteratorInterface object when done.
+	 * This call is only supported in a read only transaction.
+	 *
+	 * @param {string} objectType
+	 * @param {string[]} attributes
+	 * @param {int} pageSize
+	 * @param {string} bookmark
+	 */
+	async getStateByPartialCompositeKeyWithPagination(objectType, attributes, pageSize, bookmark) {
+		if (!bookmark) {
+			bookmark = '';
+		}
+		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
+		const startKey = partialCompositeKey;
+		const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
+		return await this.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
 	}
 
 	/**
@@ -802,7 +932,7 @@ class ChaincodeStub {
 			throw new Error('collection must be a valid string');
 		}
 
-		return this.handler.handleGetQueryResult(collection, query, this.channel_id, this.txId);
+		return this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
 	}
 }
 

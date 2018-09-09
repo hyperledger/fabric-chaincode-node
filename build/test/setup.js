@@ -32,6 +32,11 @@ gulp.task('clean-up', function() {
 // docker-compose.yml's content to fit the needs of the test environment
 let samplesPath = constants.BasicNetworkSamplePath;
 let testDir = constants.BasicNetworkTestDir;
+console.log('\n####################################################');
+console.log('BasicNetworkSamplePath: %s', samplesPath);
+console.log('BasicNetworkTestDir: %s', testDir);
+console.log('####################################################\n');
+
 let devmode = process.env.DEVMODE ? process.env.DEVMODE : 'true';
 let tls = process.env.TLS ? process.env.TLS : 'false';
 gulp.task('docker-copy', ['clean-up'], function() {

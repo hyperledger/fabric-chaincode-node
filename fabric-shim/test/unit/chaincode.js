@@ -38,10 +38,8 @@ describe('Chaincode', () => {
 			let Chaincode = new (require(chaincodePath).ChaincodeInterface)();
 			const propNames = Object.getOwnPropertyNames(Object.getPrototypeOf(Chaincode));
 
-			propNames.length.should.equal(3);
-			propNames.should.have.members(['constructor','Init','Invoke']);
-
-
+			expect(propNames.length).to.eql(3);
+			expect(propNames).to.have.members(['constructor','Init','Invoke']);
 		});
 	});
 

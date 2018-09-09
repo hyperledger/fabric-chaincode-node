@@ -3,11 +3,11 @@
   "version": "1.3.0-snapshot",
   "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
   "main": "index.js",
-  "bin" : {
-    "fabric-chaincode-node":"./bin/chaincodeStart.js"
+  "bin": {
+    "fabric-chaincode-node": "./bin/chaincodeStart.js"
   },
   "scripts": {
-	"compile": "tsc --project test/typescript"
+    "compile": "tsc --project test/typescript"
   },
   "repository": {
     "type": "git",

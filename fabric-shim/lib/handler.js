@@ -405,11 +405,14 @@ class ChaincodeSupportClient {
 		return await this._askPeerAndListen(msg, 'DeleteState');
 	}
 
-	async handleGetStateByRange(collection, startKey, endKey, channel_id, txId) {
+	async handleGetStateByRange(collection, startKey, endKey, channel_id, txId, metadata) {
 		let payload = new _serviceProto.GetStateByRange();
 		payload.setStartKey(startKey);
 		payload.setEndKey(endKey);
 		payload.setCollection(collection);
+		if (metadata) {
+			payload.setMetadata(metadata);
+		}
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
@@ -447,10 +450,13 @@ class ChaincodeSupportClient {
 		return await this._askPeerAndListen(msg, 'QueryStateClose');
 	}
 
-	async handleGetQueryResult(collection, query, channel_id, txId) {
+	async handleGetQueryResult(collection, query, metadata, channel_id, txId) {
 		let payload = new _serviceProto.GetQueryResult();
 		payload.setQuery(query);
 		payload.setCollection(collection);
+		if (metadata) {
+			payload.setMetadata(metadata);
+		}
 
 		let msg = {
 			type: _serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
@@ -648,6 +654,22 @@ function shortTxid(txId) {
 	return txId.substring(0, 8);
 }
 
+function handleGetQueryResult(handler, res, method) {
+	const payload = _serviceProto.QueryResponse.decode(res.payload);
+	const iterator = new StateQueryIterator(handler, res.channel_id, res.txid, payload);
+
+	const result = { iterator };
+
+	if (payload.metadata) {
+		logger.debug(util.format('Received metadata for method: %s', method));
+		const metadata = _serviceProto.QueryResponseMetadata.decode(payload.metadata);
+		result.metadata = metadata;
+		logger.debug(util.format('metadata: %j', result.metadata));
+	}
+
+	return result;
+}
+
 function parseResponse(handler, res, method) {
 	if (res.type === MSG_TYPE.RESPONSE) {
 		logger.debug(util.format('[%s-%s]Received %s() successful response', res.channel_id, shortTxid(res.txid), method));
@@ -657,7 +679,7 @@ function parseResponse(handler, res, method) {
 		switch (method) {
 		case 'GetStateByRange':
 		case 'GetQueryResult':
-			return new StateQueryIterator(handler, res.channel_id, res.txid, _serviceProto.QueryResponse.decode(res.payload));
+			return handleGetQueryResult(handler, res, method);
 		case 'GetHistoryForKey':
 			return new HistoryQueryIterator(handler, res.channel_id, res.txid, _serviceProto.QueryResponse.decode(res.payload));
 		case 'QueryStateNext':
