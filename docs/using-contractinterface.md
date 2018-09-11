@@ -60,7 +60,7 @@ Chaincode is deployed by the peer in response to issuing a number of (usually CL
 A docker image is built for this chaincode, the package.json and code copied in. and `npm install` run.
 > It is important to make sure that you have a `package-lock.json` to ensure the correct packages are imported.
 
-After the install there is a 'bootstrap' process that starts the chaincode up (more details later). The constructors of the exported Contracts will be run at this point; these constructors are for setting the namespace and optionally  setup of the 'error/monitoring functions', (again more later). This instance of the contract will existing whilst this chaincode docker image is up.
+After the install there is a 'bootstrap' process that starts the chaincode up (more details later). The constructors of the exported Contracts will be run at this point; these constructors are for setting the namespace and optional setup of the 'error/monitoring functions', (again more later). This instance of the contract will existing whilst this chaincode docker image is up.
 
 When chaincode is instantiated or updated, the `init()` function is the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialization or migration that might be needed.  These two functions have been abstracted away to focus on specific function implementations.
 
@@ -200,9 +200,8 @@ For example
 	/** The function to invoke if something unkown comes in.
 	 * 
 	 */
-	async uknownFn(api){
-		console.log("Big Friendly letters ->>> DON\'T PANIC")
-        throw new Error('Big Friendly letters ->>> DON\'T PANIC')
+	async unknownTransaction(ctx){		
+        throw new Error('a custom error message')
 	}
 
 	async beforeTransaction(ctx){
