@@ -17,7 +17,6 @@ const HistoryQueryIterator = require('./iterators').HistoryQueryIterator;
 
 const logger = require('./logger').getLogger('lib/handler.js');
 const Stub = require('./stub.js');
-const shim = require('./chaincode.js');
 
 const _serviceProto = grpc.load({
 	root: path.join(__dirname, './protos'),
@@ -584,7 +583,10 @@ async function handleMessage(msg, client, action) {
 				let errMsg = util.format('[%s-%s]Calling chaincode %s() has not called success or error.',
 					msg.channel_id, shortTxid(msg.txid), method);
 				logger.error(errMsg);
-				resp = shim.error(errMsg);
+
+				resp =  new _responseProto.Response();
+				resp.status = Stub.RESPONSE_CODE.ERROR;
+				resp.message = errMsg;
 			}
 
 			logger.debug(util.format(

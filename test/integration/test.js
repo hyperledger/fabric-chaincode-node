@@ -103,9 +103,14 @@ let Chaincode = class {
 			return shim.success();
 		}
 		try {
-			let payload = await method(stub, ret.params);
-			return shim.success(payload);
-		} catch (err) {
+			let payload =  await method(stub, ret.params);
+			if (payload==='noreturn'){
+				return;
+			} else {
+				return shim.success(payload);
+			}
+
+		} catch(err) {
 			console.log(err);
 			return shim.error(err);
 		}
@@ -330,6 +335,11 @@ let Chaincode = class {
 		cid.getID().should.equal('x509::/C=US/ST=California/L=San Francisco/CN=Admin@org1.example.com::/C=US/ST=California/L=San Francisco/O=org1.example.com/CN=ca.org1.example.com', 'Test getID()');
 	}
 
+
+	async test17(stub,args){
+		return 'noreturn'
+	}
+
 	// useful helper transactions
 	async getKey(stub, args) {
 		if (args.length !== 1) {
@@ -410,6 +420,11 @@ let Chaincode = class {
 		let response = await stub.getStateByPartialCompositeKeyWithPagination('color~name', [], 3, '');
 		let expectedResponse = [key1, key2, key3];
 		await checkPagedResponse(response, 3, 3, key4, expectedResponse);
+	}
+
+	// return 'noreturn' to stop calling the shim error call..
+	async test20(stub, args) {
+		return 'noreturn'
 	}
 };
 

@@ -1415,8 +1415,6 @@ describe('Handler', () => {
 		let mockStub = sinon.createStubInstance(Stub);
 		mockStub.chaincodeEvent = 'some event';
 
-		let shimErrorStub;
-
 		let saveCreateStub;
 		let saveShortTxid;
 
@@ -1440,7 +1438,6 @@ describe('Handler', () => {
 			let shortTxidStub = sandbox.stub().returns('a short txId');
 			Handler.__set__('shortTxid', shortTxidStub);
 
-			shimErrorStub = sandbox.stub(Handler.__get__('shim'), 'error').returns({status: Stub.RESPONSE_CODE.ERROR, message: 'shim message'});
 		});
 
 		afterEach(() => {
@@ -1495,9 +1492,11 @@ describe('Handler', () => {
 				expect(decodeStub.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
-				expect(shimErrorStub.calledOnce).to.be.ok;
-				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Init\(\) has not called success or error./);
+
+				let text = '[theChannelID-a short txId]Calling chaincode Init() has not called success or error.';
+				expectedResponse.payload = Buffer.from(text);
 				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+				expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
 				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
 			});
 
@@ -1509,9 +1508,11 @@ describe('Handler', () => {
 				expect(decodeStub.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
-				expect(shimErrorStub.calledOnce).to.be.ok;
-				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Invoke\(\) has not called success or error./);
+				let text = '[theChannelID-a short txId]Calling chaincode Invoke() has not called success or error.';
+				expectedResponse.payload = Buffer.from(text);
 				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+
+				expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
 				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
 			});
 
@@ -1523,9 +1524,12 @@ describe('Handler', () => {
 				expect(decodeStub.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
-				expect(shimErrorStub.calledOnce).to.be.ok;
-				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Init\(\) has not called success or error./);
+				let text = '[theChannelID-a short txId]Calling chaincode Init() has not called success or error.';
+				expectedResponse.payload = Buffer.from(text);
+
 				expect(mockHandler._stream.write.calledOnce).to.be.ok;
+
+				expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
 				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
 			});
 
@@ -1537,10 +1541,12 @@ describe('Handler', () => {
 				expect(decodeStub.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
-				expect(shimErrorStub.calledOnce).to.be.ok;
-				expect(shimErrorStub.firstCall.args[0]).to.match(/\[theChannelID-a short txId\]Calling chaincode Invoke\(\) has not called success or error./);
+				let text = '[theChannelID-a short txId]Calling chaincode Invoke() has not called success or error.';
+				expectedResponse.payload = Buffer.from(text);
+
 				expect(mockHandler._stream.write.calledOnce).to.be.ok;
 				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
+				expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
 			});
 		});
 
@@ -1567,7 +1573,6 @@ describe('Handler', () => {
 				expect(decodeStub.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
-				expect(shimErrorStub.notCalled).to.be.ok;
 				expect(mockHandler._stream.write.calledOnce).to.be.ok;
 				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
 			});
@@ -1582,7 +1587,6 @@ describe('Handler', () => {
 				expect(decodeStub.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
 				expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
-				expect(shimErrorStub.notCalled).to.be.ok;
 				expect(mockHandler._stream.write.calledOnce).to.be.ok;
 				expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
 			});
