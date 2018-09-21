@@ -64,6 +64,18 @@ function validateCompositeKeyAttribute(attr) {
 	utf8.decode(attr);
 }
 
+// To ensure that simple keys do not go into composite key namespace,
+// we validate simplekey to check whether the key starts with 0x00 (which
+// is the namespace for compositeKey). This helps in avoding simple/composite
+// key collisions.
+function validateSimpleKeys(...keys) {
+	keys.forEach((key) => {
+		if (key && typeof key === 'string' && key.charAt(0) === COMPOSITEKEY_NS) {
+			throw new Error(`first character of the key [${key}] contains a null character which is not allowed`);
+		}
+	});
+}
+
 function computeProposalBinding(decodedSP) {
 	let nonce = decodedSP.proposal.header.signature_header.nonce;
 	let creator = decodedSP.proposal.header.signature_header.creator.toBuffer();
@@ -471,6 +483,7 @@ class ChaincodeStub {
 		if (!startKey) {
 			startKey = EMPTY_KEY_SUBSTITUTE;
 		}
+		validateSimpleKeys(startKey, endKey);
 		// Access public data by setting the collection to empty string
 		const collection = '';
 		const { iterator } = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
@@ -507,6 +520,7 @@ class ChaincodeStub {
 		if (!bookmark) {
 			bookmark = '';
 		}
+		validateSimpleKeys(startKey, endKey);
 		const collection = '';
 		const metadata = createQueryMetadata(pageSize, bookmark);
 		return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
@@ -731,7 +745,9 @@ class ChaincodeStub {
 		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
 		const startKey = partialCompositeKey;
 		const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
-		return this.getStateByRange(startKey, endKey);
+		const collection = '';
+		const { iterator } = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+		return iterator;
 	}
 
 	/**
@@ -766,7 +782,9 @@ class ChaincodeStub {
 		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
 		const startKey = partialCompositeKey;
 		const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
-		return await this.getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark);
+		const collection = '';
+		const metadata = createQueryMetadata(pageSize, bookmark);
+		return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
 	}
 
 	/**

@@ -566,9 +566,43 @@ describe('Stub', () => {
 				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
 				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', EMPTY_KEY_SUBSTITUTE, 'end key', 'dummyChannelId', 'dummyTxid']);
 			});
+
+			it('should throw error if using compositekey', async () => {
+				const handleGetStateByRangeStub = sinon.stub().resolves({ iterator: 'some state' });
+
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const compositeStartKey = stub.createCompositeKey('obj', ['attr1']);
+				expect(stub.getStateByRange(compositeStartKey, 'end key'))
+					.eventually
+					.be
+					// eslint-disable-next-line no-control-regex
+					.rejectedWith(/first character of the key \[\u0000obj\u0000attr1\u0000] contains a null character which is not allowed/);
+			});
 		});
 
 		describe('getStateByRangeWithPagination', () => {
+			it('should throw error if using compositekey', async () => {
+				const handleGetStateByRangeStub = sinon.stub().resolves({ iterator: 'some state' });
+
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
+					args: []
+				});
+
+				const compositeStartKey = stub.createCompositeKey('obj', ['attr1']);
+				expect(stub.getStateByRangeWithPagination(compositeStartKey, 'end key', 3, ''))
+					.eventually
+					.be
+					// eslint-disable-next-line no-control-regex
+					.rejectedWith(/first character of the key \[\u0000obj\u0000attr1\u0000] contains a null character which is not allowed/);
+			});
+
 			it('should have default startKey eqls EMPTY_KEY_SUBSTITUTE', async () => {
 				let EMPTY_KEY_SUBSTITUTE = Stub.__get__('EMPTY_KEY_SUBSTITUTE');
 				const handleGetStateByRangeStub = sinon.stub().resolves('some state');
@@ -861,49 +895,72 @@ describe('Stub', () => {
 
 		describe('getStateByPartialCompositeKey', () => {
 			const MAX_UNICODE_RUNE_VALUE = Stub.__get__('MAX_UNICODE_RUNE_VALUE');
+			it ('should return handler.handleGetStateByRange using composite key', async () => {
+				const handleGetStateByRangeStub = sinon.stub().resolves({ iterator: 'some state' });
 
-			it ('should return getStateByRange using composite key', async () => {
-				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
 					args: []
 				});
 
 				const createCompositeKeyStub = sinon.stub(stub, 'createCompositeKey').returns('some composite key');
-				const getStateByRangeStub = sinon.stub(stub, 'getStateByRange').resolves('some state by range');
-
 				const result = await stub.getStateByPartialCompositeKey('some type', ['attr1', 'attr2']);
-				expect(result).to.deep.equal('some state by range');
+
+				expect(result).to.deep.equal('some state');
 				expect(createCompositeKeyStub.calledOnce).to.be.ok;
 				expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
-				expect(getStateByRangeStub.calledOnce).to.be.ok;
-				expect(getStateByRangeStub.firstCall.args).to.deep.equal(['some composite key', `some composite key${MAX_UNICODE_RUNE_VALUE}`]);
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'some composite key', `some composite key${MAX_UNICODE_RUNE_VALUE}`, 'dummyChannelId', 'dummyTxid']);
 			});
 		});
 
 		describe('getStateByPartialCompositeKeyWithPagination', () => {
+			let response;
+			let handleGetStateByRangeStub;
+
+			beforeEach(() => {
+				response = { iterator: 'some state', bookmark: 'some bookmark' };
+				handleGetStateByRangeStub = sinon.stub().resolves(response);
+			});
+
 			it('the default bookmark should equal an empty string', async () => {
-				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
 					args: []
 				});
 
-				const getStateByRangeWithPagination = sinon.stub(stub, 'getStateByRangeWithPagination').resolves('some state by range');
-
+				const createCompositeKeyStub = sinon.stub(stub, 'createCompositeKey').returns('some composite key');
 				const result = await stub.getStateByPartialCompositeKeyWithPagination('some type', ['attr1', 'attr2'], 3);
-				expect(result).to.deep.equal('some state by range');
-				expect(getStateByRangeWithPagination.calledOnce).to.be.ok;
-				expect(getStateByRangeWithPagination.firstCall.args[3]).to.equal('');
+
+				expect(result).to.deep.equal(response);
+				expect(createCompositeKeyStub.calledOnce).to.be.ok;
+				expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				const metadata = handleGetStateByRangeStub.firstCall.args[5];
+				const decoded = _serviceProto.QueryMetadata.decode(metadata);
+				expect(decoded.pageSize).to.equal(3);
+				expect(decoded.bookmark).to.equal('');
 			});
 
 			it('should return getStateByRangeWithPagination with bookmark and pageSize', async () => {
-				let stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+				let stub = new Stub({
+					handleGetStateByRange: handleGetStateByRangeStub
+				}, 'dummyChannelId', 'dummyTxid', {
 					args: []
 				});
 
-				const getStateByRangeWithPagination = sinon.stub(stub, 'getStateByRangeWithPagination').resolves('some state by range');
-
-				const result = await stub.getStateByPartialCompositeKeyWithPagination('some type', ['attr1', 'attr2'], 3, 'a bookmark');
-				expect(result).to.deep.equal('some state by range');
-				expect(getStateByRangeWithPagination.calledOnce).to.be.ok;
-				expect(getStateByRangeWithPagination.firstCall.args[3]).to.equal('a bookmark');
+				const createCompositeKeyStub = sinon.stub(stub, 'createCompositeKey').returns('some composite key');
+				const result = await stub.getStateByPartialCompositeKeyWithPagination('some type', ['attr1', 'attr2'], 23, 'a bookmark');
+				expect(result).to.deep.equal(response);
+				expect(createCompositeKeyStub.calledOnce).to.be.ok;
+				expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
+				expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+				const metadata = handleGetStateByRangeStub.firstCall.args[5];
+				const decoded = _serviceProto.QueryMetadata.decode(metadata);
+				expect(decoded.pageSize).to.equal(23);
+				expect(decoded.bookmark).to.equal('a bookmark');
 			});
 		});
 

@@ -46,7 +46,7 @@ async function getAllResults(iterator, getKeys) {
 	}
 }
 
-async function checkPagedResponse(response, expectedKeys, expectedPageSize, expectedBookmark, expectedResponse) {
+async function checkPagedResponse(response, expectedKeys, expectedPageSize, expectedResponse) {
 	const { iterator, metadata } = response;
 	console.log(metadata);
 	const results = await getAllResults(iterator, true /* get keys instead of values */);
@@ -54,16 +54,6 @@ async function checkPagedResponse(response, expectedKeys, expectedPageSize, expe
 	results.length.should.equal(expectedKeys, 'Should return 2 composite key');
 	results.should.deep.eql(expectedResponse);
 	metadata.fetched_records_count.should.equal(expectedPageSize);
-	/**
-	 * FIXME: seems a peer side bug or just by the design?
-	 * https://jira.hyperledger.org/browse/FAB-11926
-	 * a bookmark
-	 * '\u0000color~name\u0000red\u0000name4\u0000'
-	 * would be serialized to
-	 * '\\u0000color~name\\u0000red\\u0000name4\\u0000'
-	 *
-	 */
-	// metadata.bookmark.should.equal(expectedBookmark);
 }
 
 let Chaincode = class {
@@ -335,11 +325,6 @@ let Chaincode = class {
 		cid.getID().should.equal('x509::/C=US/ST=California/L=San Francisco/CN=Admin@org1.example.com::/C=US/ST=California/L=San Francisco/O=org1.example.com/CN=ca.org1.example.com', 'Test getID()');
 	}
 
-
-	async test17(stub,args){
-		return 'noreturn'
-	}
-
 	// useful helper transactions
 	async getKey(stub, args) {
 		if (args.length !== 1) {
@@ -361,21 +346,20 @@ let Chaincode = class {
 
 	async test17(stub, args) {
 		console.log('test getStateByRangeWithPagination()');
-		const key1 = stub.createCompositeKey('color~name', ['blue', 'name1']);
-		const key2 = stub.createCompositeKey('color~name', ['blue', 'name2']);
-		const key3 = stub.createCompositeKey('color~name', ['red', 'name3']);
-		const key4 = stub.createCompositeKey('color~name', ['red', 'name4']);
+		const key1 = 'key1';
+		const key2 = 'key2';
+		const key3 = 'key3';
+		const key4 = 'key4';
 
 		// with pageSize = 2, query from key1 to key4, and start from '' would only return 2 values, and bookmark will be key3
 		let response = await stub.getStateByRangeWithPagination(key1, key4, 2, key2);
 		let expectedResponse = [key2, key3];
-		await checkPagedResponse(response, 2, 2, key4, expectedResponse);
+		await checkPagedResponse(response, 2, 2, expectedResponse);
 
 		// query from this bookmark again, start from key2
 		response = await stub.getStateByRangeWithPagination(key1, key4, 3, '');
 		expectedResponse = [key1, key2, key3];
-		await checkPagedResponse(response, 3, 3, '', expectedResponse);
-
+		await checkPagedResponse(response, 3, 3, expectedResponse);
 	}
 
 	async test18(stub, args) {
@@ -419,7 +403,7 @@ let Chaincode = class {
 
 		let response = await stub.getStateByPartialCompositeKeyWithPagination('color~name', [], 3, '');
 		let expectedResponse = [key1, key2, key3];
-		await checkPagedResponse(response, 3, 3, key4, expectedResponse);
+		await checkPagedResponse(response, 3, 3, expectedResponse);
 	}
 
 	// return 'noreturn' to stop calling the shim error call..
