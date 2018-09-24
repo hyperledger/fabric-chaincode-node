@@ -29,7 +29,14 @@ test('Chaincode command line arguments tests', (t) => {
 	delete require.cache[require.resolve('fabric-shim/lib/chaincode.js')];
 	Chaincode = rewire('fabric-shim/lib/chaincode.js');
 	opts = Chaincode.__get__('opts');
-	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing only --peer.address argument');
+	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing only --peer.address argument is correctly picked up');
+	t.equal(opts['grpc.max_send_message_length'], -1, 'Test grpc.max_send_message_length defaults to -1');
+	t.equal(opts['grpc.max_receive_message_length'], -1, 'Test grpc.max_receive_message_length defaults to -1');
+	t.equal(opts['grpc.keepalive_time_ms'], 60000, 'Test grpc.keepalive_time_ms defaults to 60000');
+	t.equal(opts['grpc.http2.min_time_between_pings_ms'], 60000, 'Test grpc.http2.min_time_between_pings_ms defaults to 60000');
+	t.equal(opts['grpc.keepalive_timeout_ms'], 20000, 'Test grpc.keepalive_timeout_ms defaults to 20000');
+	t.equal(opts['grpc.http2.max_pings_without_data'], 0, 'Test grpc.http2.max_pings_without_data defaults to 0');
+	t.equal(opts['grpc.keepalive_permit_without_calls'], 1, 'Test grpc.keepalive_permit_without_calls defaults to 1');
 
 	process.argv.push('--test.another');
 	process.argv.push('dummyValue9');
@@ -37,8 +44,45 @@ test('Chaincode command line arguments tests', (t) => {
 	Chaincode = rewire('fabric-shim/lib/chaincode.js');
 	opts = Chaincode.__get__('opts');
 	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing two arguments and one is in the parsing definition');
-	t.deepEqual(opts['test.again'], undefined, 'Test passing two arguments and one is NOT in the parsing definition');
+	t.deepEqual(opts['test.another'], undefined, 'Test passing two arguments and one is NOT in the parsing definition');
 
+	process.argv.pop();  // remove dummyValu9
+	process.argv.pop();  // remove test.another
+
+	process.argv.push('--grpc.max_send_message_length');
+	process.argv.push('101');
+	process.argv.push('--grpc.max_receive_message_length');
+	process.argv.push('177');
+	process.argv.push('--grpc.keepalive_time_ms');
+	process.argv.push('1234');
+	process.argv.push('--grpc.keepalive_timeout_ms');
+	process.argv.push('5678');
+	process.argv.push('--grpc.http2.min_time_between_pings_ms');
+	process.argv.push('7654');
+	process.argv.push('--grpc.http2.max_pings_without_data');
+	process.argv.push('99');
+	process.argv.push('--grpc.keepalive_permit_without_calls');
+	process.argv.push('2');
+	delete require.cache[require.resolve('fabric-shim/lib/chaincode.js')];
+	Chaincode = rewire('fabric-shim/lib/chaincode.js');
+	opts = Chaincode.__get__('opts');
+	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing only --peer.address argument is correctly picked up');
+	t.equal(opts['grpc.max_send_message_length'],101, 'Test grpc.max_send_message_length can be set');
+	t.equal(opts['grpc.max_receive_message_length'], 177, 'Test grpc.max_receive_message_length can be set');
+	t.equal(opts['grpc.keepalive_time_ms'], 1234, 'Test grpc.keepalive_time_ms can be set');
+	t.equal(opts['grpc.http2.min_time_between_pings_ms'], 7654, 'Test grpc.http2.min_time_between_pings_ms can be set');
+	t.equal(opts['grpc.keepalive_timeout_ms'], 5678, 'Test grpc.keepalive_timeout_ms can be set');
+	t.equal(opts['grpc.http2.max_pings_without_data'], 99, 'Test grpc.http2.max_pings_without_data can be set');
+	t.equal(opts['grpc.keepalive_permit_without_calls'], 2, 'Test grpc.keepalive_permit_without_calls can be set');
+
+	// remove the 7 parameters passed
+	for (let index = 0; index < 7; index++) {
+		process.argv.pop();
+		process.argv.pop();
+	}
+
+	process.argv.pop();  // remove localhost:7051
+	process.argv.pop();  // remove peer.address
 	t.end();
 });
 
