@@ -1,3 +1,8 @@
+## v1.1.3
+Thu Sep 27 10:16:35 EDT 2018
+
+* [2e7d873](https://github.com/hyperledger/fabric/commit/2e7d873) [FAB-12131](https://jira.hyperledger.org/browse/FAB-12131) ensure keepalive pings from chaincode
+
 ## v1.1.2
 Fri May  4 15:27:00 EDT 2018
 
