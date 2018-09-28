@@ -120,8 +120,8 @@ gulp.task('test-e2e-invoke-v0-test1-test2', ['test-e2e-instantiate-v0'], () => {
 	return gulp.src('*.js', {read: false})
 		// because the peer CLI for the instantiate call returns
 		// before the transaction gets committed to the ledger, we
-		// introduce a wait for 3 sec before running the invoke
-		.pipe(wait(3000))
+		// introduce a wait for 5 sec before running the invoke
+		.pipe(wait(5000))
 		.pipe(shell([
 			// test1 and test2 of the chaincode are independent of each other,
 			// can be called in parallel
@@ -140,7 +140,7 @@ gulp.task('test-e2e-invoke-v0-test1-test2', ['test-e2e-instantiate-v0'], () => {
 
 gulp.task('test-e2e-invoke-v0-test3', ['test-e2e-invoke-v0-test1-test2'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -152,7 +152,7 @@ gulp.task('test-e2e-invoke-v0-test3', ['test-e2e-invoke-v0-test1-test2'], () => 
 
 gulp.task('test-e2e-invoke-v0-test4', ['test-e2e-invoke-v0-test3'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -164,7 +164,7 @@ gulp.task('test-e2e-invoke-v0-test4', ['test-e2e-invoke-v0-test3'], () => {
 
 gulp.task('test-e2e-invoke-v0-test5', ['test-e2e-invoke-v0-test4'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -177,7 +177,7 @@ gulp.task('test-e2e-invoke-v0-test5', ['test-e2e-invoke-v0-test4'], () => {
 
 gulp.task('test-e2e-invoke-v0-test6', ['test-e2e-invoke-v0-test5'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -189,7 +189,7 @@ gulp.task('test-e2e-invoke-v0-test6', ['test-e2e-invoke-v0-test5'], () => {
 
 gulp.task('test-e2e-invoke-v0-test7', ['test-e2e-invoke-v0-test6'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -201,7 +201,7 @@ gulp.task('test-e2e-invoke-v0-test7', ['test-e2e-invoke-v0-test6'], () => {
 
 gulp.task('test-e2e-invoke-v0-test8', ['test-e2e-invoke-v0-test7'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -213,7 +213,7 @@ gulp.task('test-e2e-invoke-v0-test8', ['test-e2e-invoke-v0-test7'], () => {
 
 gulp.task('test-e2e-invoke-v0-test9', ['test-e2e-invoke-v0-test8'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -225,7 +225,7 @@ gulp.task('test-e2e-invoke-v0-test9', ['test-e2e-invoke-v0-test8'], () => {
 
 gulp.task('test-e2e-invoke-v0-test10', ['test-e2e-invoke-v0-test9'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),
@@ -241,7 +241,7 @@ gulp.task('test-e2e-invoke-v0-test11', ['test-e2e-invoke-v0-test10'], () => {
 				'\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
 
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			// values of "encrypt-key" and "iv" below are base64 encoded 32-byte and 16-byte strings respectively
 			util.format(cmd,
@@ -258,7 +258,7 @@ gulp.task('test-e2e-invoke-v0-test12', ['test-e2e-invoke-v0-test11'], () => {
 				'\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
 
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			// values of "encrypt-key" and "iv" below must be the same as those used to encrypt
 			util.format(cmd,
@@ -279,7 +279,7 @@ gulp.task('test-e2e-invoke-v0-test13', ['test-e2e-invoke-v0-test12'], () => {
 				'EUgS0VZLS0tLS0="}\'';
 
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			// value of "sign-key" below is a base64 encoded private key PEM
 			util.format(cmd,
@@ -300,7 +300,7 @@ gulp.task('test-e2e-invoke-v0-test14', ['test-e2e-invoke-v0-test13'], () => {
 				'EUgS0VZLS0tLS0="}\'';
 
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			// value of "sign-key" below must be the same as those used to sign above
 			util.format(cmd,
@@ -314,7 +314,7 @@ gulp.task('test-e2e-invoke-v0-test14', ['test-e2e-invoke-v0-test13'], () => {
 // Test invoke where chaincode responds with an error
 gulp.task('test-e2e-invoke-v0-test15', ['test-e2e-invoke-v0-test14'], () => {
 	return gulp.src('*.js', {read: false})
-		.pipe(wait(3000))
+		.pipe(wait(5000))
 		.pipe(shell([
 			util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s',
 				getTLSArgs(),

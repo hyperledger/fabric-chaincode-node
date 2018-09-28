@@ -138,13 +138,27 @@ test('handler.js constructor tests', (t) => {
 			'request-timeout': 12345,
 			'another-property': 'dummyValue7',
 			'key':'dummyKeyString',
-			'cert':'dummyCertString'
+			'cert':'dummyCertString',
+			'grpc.max_send_message_length': 1,
+			'grpc.max_receive_message_length': 2,
+			'grpc.keepalive_time_ms': 3,
+			'grpc.http2.min_time_between_pings_ms': 5,
+			'grpc.keepalive_timeout_ms': 8,
+			'grpc.http2.max_pings_without_data': 13,
+			'grpc.keepalive_permit_without_calls': 21
 		});
 
 	t.equal(handler._options['grpc.ssl_target_name_override'], 'dummyHost', 'Test converting opts.ssl-target-name-override to grpc.ssl_target_name_override');
 	t.equal(handler._options['grpc.default_authority'], 'dummyHost', 'Test converting opts.ssl-target-name-override to grpc.default_authority');
 	t.equal(handler._options['request-timeout'], 12345, 'Test processing request-time option');
 	t.equal(handler._options['another-property'], 'dummyValue7', 'Test processing another-property option');
+	t.equal(handler._options['grpc.max_send_message_length'], 1, 'Test grpc.max_send_message_length set to 1');
+	t.equal(handler._options['grpc.max_receive_message_length'], 2, 'Test grpc.max_receive_message_length set to 2');
+	t.equal(handler._options['grpc.keepalive_time_ms'], 3, 'Test grpc.keepalive_time_ms set to 3');
+	t.equal(handler._options['grpc.http2.min_time_between_pings_ms'], 5, 'Test grpc.http2.min_time_between_pings_ms set to 5');
+	t.equal(handler._options['grpc.keepalive_timeout_ms'], 8, 'Test grpc.keepalive_timeout_ms set to 8');
+	t.equal(handler._options['grpc.http2.max_pings_without_data'], 13, 'Test grpc.http2.max_pings_without_data set to 13');
+	t.equal(handler._options['grpc.keepalive_permit_without_calls'], 21, 'Test grpc.keepalive_permit_without_calls set to 21');
 
 	// The DNS can be case sensitive in some cases (eg Docker DNS)
 	handler = new Handler(chaincodeObj, 'grpc://Peer.Example.com:7051');
