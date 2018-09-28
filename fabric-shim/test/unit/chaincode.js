@@ -51,7 +51,7 @@ describe('Chaincode', () => {
 			expect(opts['peer.address']).to.be.an('undefined');
 		});
 
-		it ('shout set value when peer.address argument set', () => {
+		it ('should set value when peer.address argument set, and default others', () => {
 			process.argv.push('--peer.address');
 			process.argv.push('localhost:7051');
 			delete require.cache[require.resolve(chaincodePath)];
@@ -59,6 +59,16 @@ describe('Chaincode', () => {
 			let opts = Chaincode.__get__('opts');
 
 			expect(opts['peer.address']).to.deep.equal('localhost:7051');
+			expect(opts['grpc.max_send_message_length']).to.equal(-1);
+			expect(opts['grpc.max_receive_message_length']).to.equal(-1);
+			expect(opts['grpc.keepalive_time_ms']).to.equal(60000);
+			expect(opts['grpc.http2.min_time_between_pings_ms']).to.equal(60000);
+			expect(opts['grpc.keepalive_timeout_ms']).to.equal(20000);
+			expect(opts['grpc.keepalive_permit_without_calls']).to.equal(1);
+			expect(opts['grpc.http2.max_pings_without_data']).to.equal(0);
+
+			process.argv.pop();
+			process.argv.pop();
 		});
 
 		it ('should ignore non expected arguments arguments', () => {
@@ -73,6 +83,46 @@ describe('Chaincode', () => {
 
 			expect(opts['peer.address']).to.deep.equal('localhost:7051');
 			expect(opts['test.again']).to.be.an('undefined');
+
+			for (let index = 0; index < 4; index++) {
+				process.argv.pop();
+			}
+		});
+
+		it ('should be possible to change the default CLI values', () => {
+			process.argv.push('--peer.address');
+			process.argv.push('localhost:7051');
+			process.argv.push('--grpc.max_send_message_length');
+			process.argv.push('101');
+			process.argv.push('--grpc.max_receive_message_length');
+			process.argv.push('177');
+			process.argv.push('--grpc.keepalive_time_ms');
+			process.argv.push('1234');
+			process.argv.push('--grpc.keepalive_timeout_ms');
+			process.argv.push('5678');
+			process.argv.push('--grpc.http2.min_time_between_pings_ms');
+			process.argv.push('7654');
+			process.argv.push('--grpc.http2.max_pings_without_data');
+			process.argv.push('99');
+			process.argv.push('--grpc.keepalive_permit_without_calls');
+			process.argv.push('2');
+
+			delete require.cache[require.resolve(chaincodePath)];
+			let Chaincode = rewire(chaincodePath);
+			let opts = Chaincode.__get__('opts');
+
+			expect(opts['peer.address']).to.deep.equal('localhost:7051');
+			expect(opts['grpc.max_send_message_length']).to.equal(101);
+			expect(opts['grpc.max_receive_message_length']).to.equal(177);
+			expect(opts['grpc.keepalive_time_ms']).to.equal(1234);
+			expect(opts['grpc.http2.min_time_between_pings_ms']).to.equal(7654);
+			expect(opts['grpc.keepalive_timeout_ms']).to.equal(5678);
+			expect(opts['grpc.keepalive_permit_without_calls']).to.equal(2);
+			expect(opts['grpc.http2.max_pings_without_data']).to.equal(99);
+
+			for (let index = 0; index < 16; index++) {
+				process.argv.pop();
+			}
 		});
 	});
 

@@ -29,12 +29,6 @@ async function getAllResults(iterator, getKeys) {
 		} else if (!res.value) {
 			throw new Error('no value and not done (internal error?)');
 		}
-		if (res.value.namespace) console.log(res.value.namespace);
-		if (res.value.key) console.log(res.value.key);
-		if (res.value.tx_id) console.log(res.value.tx_id);
-		if (res.value.channel_id) console.log(res.value.channel_id);
-		if (res.value.timestamp) console.log(res.value.timestamp);
-		if (res.value.is_delete) console.log(res.value.is_delete);
 		let theVal = (getKeys) ? res.value.key : res.value.value.toString('utf8');
 		allResults.push(theVal);
 		console.log(theVal);
