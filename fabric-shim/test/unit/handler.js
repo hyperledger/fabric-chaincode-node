@@ -414,12 +414,25 @@ describe('Handler', () => {
 			expect(handler['_request_timeout']).to.deep.equal(123456);
 		});
 
-		it ('should store additional options', () => {
+		it ('should store additional grpc options', () => {
 			let handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure, {
-				'another-value': 'another string'
+				'grpc.max_send_message_length': 1,
+				'grpc.max_receive_message_length': 2,
+				'grpc.keepalive_time_ms': 3,
+				'grpc.http2.min_time_between_pings_ms': 5,
+				'grpc.keepalive_timeout_ms': 8,
+				'grpc.http2.max_pings_without_data': 13,
+				'grpc.keepalive_permit_without_calls': 21
 			});
 
-			expect(handler['_options']['another-value']).to.deep.equal('another string');
+			expect(handler._options['grpc.max_send_message_length']).to.equal(1);
+			expect(handler._options['grpc.max_receive_message_length']).to.equal(2);
+			expect(handler._options['grpc.keepalive_time_ms']).to.equal(3);
+			expect(handler._options['grpc.http2.min_time_between_pings_ms']).to.equal(5);
+			expect(handler._options['grpc.keepalive_timeout_ms']).to.equal(8);
+			expect(handler._options['grpc.http2.max_pings_without_data']).to.equal(13);
+			expect(handler._options['grpc.keepalive_permit_without_calls']).to.equal(21);
+
 		});
 
 		it ('should preserve casing in handler addr', () => {
