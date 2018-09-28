@@ -96,9 +96,7 @@ class ChaincodeFromContract {
 		try {
 			const { fcn, params } = stub.getFunctionAndParameters();
 
-			let splitFcn = fcn.split('.');
-			let fn = splitFcn.pop();
-			let ns = splitFcn.join('.');
+			let {namespace:ns,function:fn} = this._splitFunctionName(fcn);
 
 			if (!this.contracts[ns]){
 				throw new Error(`Namespace is not known :${ns}:`);
@@ -111,7 +109,6 @@ class ChaincodeFromContract {
 
 			const functionExists = this.contracts[ns].functionNames.indexOf(fn) !== -1;
 			if (functionExists) {
-
 				// before tx fn
 				await contractInstance.beforeTransaction(ctx);
 
@@ -128,6 +125,31 @@ class ChaincodeFromContract {
 		} catch (error) {
 			return shim.error(error);
 		}
+	}
+
+	/**
+	 * Parse the fcn name to be namespace and function.  These are separated by a :
+	 * Anything after the : is treated as the function name
+	 * No : implies that the whole string is a function name
+	 *
+	 * @param {String} fcn the combined function and name string
+	 * @return {Object} split into namespace and string
+	 */
+	_splitFunctionName(fcn){
+		// Did consider using a split(':') call to do this; however I chose regular expression for
+		// the reason that it provides definitive description.
+		// Split will just split - you would then need to write the code to handle edge cases
+		// for no input, for multiple :, for multiple : without intervening characters
+		// https://regex101.com/ is very useful for understanding
+
+		const regex = /([^:]*)(?::|^)(.*)/g;
+		let result = {namespace:'',function:''};
+
+		let m = regex.exec(fcn);
+		result.namespace = m[1];
+		result.function = m[2];
+
+		return result;
 	}
 
 	/**

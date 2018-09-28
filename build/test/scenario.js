@@ -78,7 +78,7 @@ gulp.task('invoke_functions',async (done)=>{
 		getTLSArgs(),
 		CHANNEL_NAME,
 		'mysmartcontract',
-		'{"Args":["org.mynamespace.updates.setNewAssetValue","42"]}').split(' ');
+		'{"Args":["org.mynamespace.updates:setNewAssetValue","42"]}').split(' ');
 
 	const {error, stdout, stderr} = await execFile(script,args, options);
 	if (error){
@@ -191,7 +191,7 @@ gulp.task('st-instantiate_chaincode', () => {
 				getTLSArgs(),
 				CHANNEL_NAME,
 				'mysmartcontract',
-				'\'{"Args":["org.mynamespace.updates.setup"]}\'',
+				'\'{"Args":["org.mynamespace.updates:setup"]}\'',
 				'\'OR ("Org1MSP.member")\'')
 		]));
 });
