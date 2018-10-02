@@ -7,9 +7,23 @@
 var gulp = require('gulp');
 var jsdoc = require('gulp-jsdoc3');
 var fs = require('fs-extra');
+const path=require('path');
+let currentBranch=process.env.GERRIT_BRANCH;
+
+if (!currentBranch){
+	console.error('GERRIT_BRANCH needs to be set');
+	process.exit(1);
+}
+
+let docsRoot;
+if (process.env.DOCS_ROOT){
+	docsRoot = process.env.DOCS_ROOT;
+} else {
+	docsRoot = './docs/gen';
+}
 
 gulp.task('clean', function(){
-	return fs.removeSync('./docs/gen/**');
+	return fs.removeSync(path.join(docsRoot,currentBranch));
 });
 
 gulp.task('docs', ['clean'], function () {
@@ -20,7 +34,7 @@ gulp.task('docs', ['clean'], function () {
 		jsdoc({
 			opts: {
 				tutorials: './docs/tutorials',
-				destination: './docs/gen'
+				destination: path.join(docsRoot,currentBranch)
 			},
 			templates: {
 				systemName: 'Hyperledger Fabric Shim for node.js chaincode',
