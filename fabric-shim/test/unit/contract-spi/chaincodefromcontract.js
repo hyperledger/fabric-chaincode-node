@@ -200,7 +200,7 @@ describe('chaincodefromcontract',()=>{
 
 			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
 			stubInterface.getFunctionAndParameters.returns({
-				fcn:'alpha.alpha',
+				fcn:'alpha:alpha',
 				params: [   'arg1','arg2'   ]
 			}  );
 			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
@@ -258,7 +258,7 @@ describe('chaincodefromcontract',()=>{
 			// cc.createCtx = sandbox.stub().returns({});
 			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
 			stubInterface.getFunctionAndParameters.returns({
-				fcn:'beta.beta',
+				fcn:'beta:beta',
 				params: [   'arg1','arg2'   ]
 			}  );
 			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
@@ -314,7 +314,7 @@ describe('chaincodefromcontract',()=>{
 			// cc.createCtx = sandbox.stub().returns({});
 			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
 			stubInterface.getFunctionAndParameters.returns({
-				fcn:'beta.beta',
+				fcn:'beta:beta',
 				params: [   'arg1','arg2'   ]
 			}  );
 			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
@@ -370,7 +370,7 @@ describe('chaincodefromcontract',()=>{
 			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
 			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
 			stubInterface.getFunctionAndParameters.returns({
-				fcn:'wibble.alpha',
+				fcn:'wibble:alpha',
 				params: [   'arg1','arg2'   ]
 			}  );
 
@@ -393,7 +393,7 @@ describe('chaincodefromcontract',()=>{
 			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
 			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
 			stubInterface.getFunctionAndParameters.returns({
-				fcn:'alpha.wibble',
+				fcn:'alpha:wibble',
 				params: [   'arg1','arg2'   ]
 			}  );
 			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
@@ -456,7 +456,7 @@ describe('chaincodefromcontract',()=>{
 
 			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
 			stubInterface.getFunctionAndParameters.returns({
-				fcn:'org.hyperledger.fabric.getMetaData',
+				fcn:'org.hyperledger.fabric:getMetaData',
 				params: [   'arg1','arg2'   ]
 			}  );
 			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
@@ -492,6 +492,39 @@ describe('chaincodefromcontract',()=>{
 			sinon.assert.calledOnce(getContractsSpy);
 			sinon.assert.calledOnce(getMetaDataSpy);
 			sinon.assert.calledWith(fakesuccess,expectedResponse);
+		});
+	});
+
+	describe('#_splitFunctionName',()=>{
+		let cc;
+		beforeEach(()=>{
+			// actual contract instance is not important for this test
+			cc = new ChaincodeFromContract([SCBeta]);
+		});
+
+		it('should handle the usual case of ns:fn',()=>{
+			let result= cc._splitFunctionName('namespace:function');
+			result.should.deep.equal({namespace:'namespace',function:'function'});
+		});
+
+		it('should handle the case of no namespace explicit',()=>{
+			let result = cc._splitFunctionName(':function');
+			result.should.deep.equal({namespace:'',function:'function'});
+		});
+
+		it('should handle the case of no namespace implict',()=>{
+			let result = cc._splitFunctionName('function');
+			result.should.deep.equal({namespace:'',function:'function'});
+		});
+
+		it('should handle the case of no input',()=>{
+			let result = cc._splitFunctionName('');
+			result.should.deep.equal({namespace:'',function:''});
+		});
+
+		it('should handle the case of multiple :',()=>{
+			let result = cc._splitFunctionName('namespace:function:with:colons:');
+			result.should.deep.equal({namespace:'namespace',function:'function:with:colons:'});
 		});
 	});
 
