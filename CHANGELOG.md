@@ -1,3 +1,8 @@
+## v1.2.2
+Mon  8 Oct 2018 08:56:20 EDT
+
+* [1f58df7](https://github.com/hyperledger/fabric/commit/1f58df7) [FABCI-138](https://jira.hyperledger.org/browse/FABCI-138) ChaincodeNode update npm tag
+
 ## v1.2.1
 Thu  4 Oct 2018 15:51:20 BST
 

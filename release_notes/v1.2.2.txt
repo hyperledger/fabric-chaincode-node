@@ -1,0 +1,22 @@
+v1.2.2 Oct, 2018
+-----------------------------
+
+Release Notes
+-------------
+Changes for the release publishing process
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.2/CHANGELOG.md#v122
