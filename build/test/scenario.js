@@ -18,6 +18,7 @@ const runSequence = require('run-sequence');
 const log = require('fancy-log');
 const test = require('../../test/constants.js');
 
+const os = require('os');
 
 const execFile = util.promisify(require('child_process').execFile);
 const CHANNEL_NAME = 'mychannel';
@@ -165,7 +166,7 @@ gulp.task('st-copy-chaincode',['localpublish'] ,() => {
 
 gulp.task('localpublish',()=>{
 	return gulp.src('*.js', {read: false})
-		.pipe(shell([util.format('%s/local-npm.sh',__dirname)]));
+		.pipe(shell([util.format('%s/local-npm.sh %s',__dirname, os.tmpdir())]));
 });
 
 

@@ -432,7 +432,6 @@ describe('Handler', () => {
 			expect(handler._options['grpc.keepalive_timeout_ms']).to.equal(8);
 			expect(handler._options['grpc.http2.max_pings_without_data']).to.equal(13);
 			expect(handler._options['grpc.keepalive_permit_without_calls']).to.equal(21);
-
 		});
 
 		it ('should preserve casing in handler addr', () => {

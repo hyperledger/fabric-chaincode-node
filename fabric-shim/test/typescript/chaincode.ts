@@ -4,6 +4,9 @@
  SPDX-License-Identifier: Apache-2.0
 
 */
+
+
+/// <reference path="../../types/index.d.ts" />
 import * as shim from 'fabric-shim';
 
 import { Shim,

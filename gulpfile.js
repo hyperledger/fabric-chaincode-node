@@ -22,3 +22,10 @@ gulp.task('test-e2e',(done)=>{
 	];
 	runSequence(...tasks,done);
 });
+
+gulp.task('test-devmode-cli',(done)=>{
+	const tasks = [
+		'test-devmode'
+	];
+	runSequence(...tasks,done);
+});

@@ -30,7 +30,6 @@ function register(contracts){
  * @ignore
  */
 function bootstrap(){
-
 	let jsonPath = path.resolve(__dirname,'..','..','..','..','package.json');
 	// let's find the package.json file
 	let json = require(jsonPath);
@@ -64,7 +63,6 @@ function bootstrap(){
 	} else  {
 		throw new Error('Can not detect any of the indications of how this is a contract instance');
 	}
-
 }
 
 module.exports.bootstrap = bootstrap;

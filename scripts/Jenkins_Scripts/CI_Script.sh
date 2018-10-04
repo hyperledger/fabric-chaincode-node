@@ -194,6 +194,18 @@ sdk_E2e_Tests() {
            cp /tmp/fabric-shim/logs/*.log $WORKSPACE
         fi
 
+        DEVMODE=true gulp channel-init
+
+        gulp test-devmode-cli
+        if [ $? != 0 ]; then
+           # Copy Debug log to $WORKSPACE
+           cp /tmp/fabric-shim/logs/*.log $WORKSPACE
+           exit 1
+        else
+           # Copy Debug log to $WORKSPACE
+           cp /tmp/fabric-shim/logs/*.log $WORKSPACE
+        fi
+
         echo "#######################" 
         echo "------> Tests Complete"
         echo "#######################" 
