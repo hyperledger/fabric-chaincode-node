@@ -1,3 +1,23 @@
+## v1.3.0
+Wed 10 Oct 17:04:37 BST 2018
+
+* [8743012c4](https://github.com/hyperledger/fabric/commit/8743012c4) [FAB-11926](https://jira.hyperledger.org/browse/FAB-11926) check for simple keys for getStateByRange
+* [38651fa54](https://github.com/hyperledger/fabric/commit/38651fa54) [FAB-12131](https://jira.hyperledger.org/browse/FAB-12131) ensure keepalive pings from chaincode
+* [c1981a653](https://github.com/hyperledger/fabric/commit/c1981a653) FIX [FAB-12037](https://jira.hyperledger.org/browse/FAB-12037) Cyclic Require
+* [eead4fee4](https://github.com/hyperledger/fabric/commit/eead4fee4) [FAB-11270](https://jira.hyperledger.org/browse/FAB-11270) JSDoc Redirection & correct publising
+* [fbd6b11df](https://github.com/hyperledger/fabric/commit/fbd6b11df) [FAB-11784](https://jira.hyperledger.org/browse/FAB-11784) node-shim support for paged query
+* [7f7f6663e](https://github.com/hyperledger/fabric/commit/7f7f6663e) [FAB-11768](https://jira.hyperledger.org/browse/FAB-11768) Test Improvements
+* [24ce92e23](https://github.com/hyperledger/fabric/commit/24ce92e23) [FAB-11246](https://jira.hyperledger.org/browse/FAB-11246) fix unreliable fabric-chaincode-node e2e
+* [bc2362e84](https://github.com/hyperledger/fabric/commit/bc2362e84) [FAB-11824](https://jira.hyperledger.org/browse/FAB-11824) Correct typescript definitions and tests
+* [22cd61b3c](https://github.com/hyperledger/fabric/commit/22cd61b3c) [FAB-11782](https://jira.hyperledger.org/browse/FAB-11782) Update build scripts in-repo as well
+* [e9e58d790](https://github.com/hyperledger/fabric/commit/e9e58d790) [FAB-10865](https://jira.hyperledger.org/browse/FAB-10865) ChaincodeStub does not work w/ TypeScript
+* [8a25a6a86](https://github.com/hyperledger/fabric/commit/8a25a6a86) [FAB-10865](https://jira.hyperledger.org/browse/FAB-10865) Add typescript definitions for shim
+* [230083adf](https://github.com/hyperledger/fabric/commit/230083adf) FABCI-57 CI pipeline configuration
+* [21b44fc2d](https://github.com/hyperledger/fabric/commit/21b44fc2d) [FAB-11408](https://jira.hyperledger.org/browse/FAB-11408) add typeof check for privateData APIs
+* [f8211b842](https://github.com/hyperledger/fabric/commit/f8211b842) [FAB-11284](https://jira.hyperledger.org/browse/FAB-11284) jsDoc Update
+* [c79b4886e](https://github.com/hyperledger/fabric/commit/c79b4886e) moving eslint config to file
+* [39d88f441](https://github.com/hyperledger/fabric/commit/39d88f441) [FAB-11188](https://jira.hyperledger.org/browse/FAB-11188) set version master to 1.3.0-snapshot
+
 ## v1.2.0
 Fri Jul  6 08:14:22 EDT 2018
 

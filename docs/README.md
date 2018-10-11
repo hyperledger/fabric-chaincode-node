@@ -1,16 +1,25 @@
 [![NPM](https://nodei.co/npm/fabric-contract-api.svg?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/fabric-contract-api/)
+[![Version](https://badge.fury.io/js/fabric-contract-api.svg)](http://badge.fury.io/js/fabric-contract-api) [![Build Status](https://jenkins.hyperledger.org/buildStatus/icon?job=fabric-chaincode-node-merge-x86_64)](https://jenkins.hyperledger.org/view/fabric-chaincode-node/job/fabric-chaincode-node-merge-x86_64)
+
+
+
 [![NPM](https://nodei.co/npm/fabric-shim.svg?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/fabric-shim/)
-
-
 [![Version](https://badge.fury.io/js/fabric-shim.svg)](http://badge.fury.io/js/fabric-shim) [![Build Status](https://jenkins.hyperledger.org/buildStatus/icon?job=fabric-chaincode-node-merge-x86_64)](https://jenkins.hyperledger.org/view/fabric-chaincode-node/job/fabric-chaincode-node-merge-x86_64)
 
-The `fabric-contract-api` provides the *contract interface*. a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#smart-contract). Within Hyperledger Fabric, Smart Contracts are also known as [Chaincode](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#chaincode). Working with this API provides a high level entry point to writing business logic.
-(this contract interface is experimental, and feedback is actively requested; whilst there are no plans to change this api it might be latered as a result of feedback).
+## Introduction
 
-The `fabric-shim` provides the *chaincode interface*, a lower level API for implementing "Smart Contracts". It also _currently_ provides the implementation to support communication with Hyperledger Fabric peers for Smart Contracts written using the `fabric-contract-api`.  To confirm that this is the same as the `fabric-shim` in previous versions of Hyperledger Fabric.
+The `fabric-contract-api` provides the *contract interface*. a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#smart-contract). Within Hyperledger Fabric, Smart Contracts are also known as [Chaincode](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#chaincode). Working with this API provides a high level entry point to writing business logic.
+
+The `fabric-shim` provides the *chaincode interface*, a lower level API for implementing "Smart Contracts". It also provides the implementation to support communication with Hyperledger Fabric peers for Smart Contracts written using the `fabric-contract-api` together with the `fabric-chaincode-node` cli to launch Chaincode or Smart Contracts.
+
+To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
 Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
 
+
+## API documentation versions
+
+[Release 1.3](../release-1.3) | [Release 1.2](../release-1.2) | [Release 1.1](../release-1.1) | [Master branch](../master)
 
 ## Contract Interface
 
@@ -22,7 +31,7 @@ npm install --save fabric-contract-api
 
 ### Usage
 
-Implement a class that ends the `contract` class, a contsturctor is needed. 
+Implement a class that ends the `contract` class, a constructor is needed. 
 The other functions will be invokable functions of your Smart Contract
 
 ```javascript
@@ -71,11 +80,11 @@ const UpdateValues = require('./updatevalues')
 module.exports.contracts = ['UpdateValues'];
 ```
 
-**Note:** In order to make this contract runnable in version 1.3, also install the `fabric-shim` module as below, and ensure that the 'start' script in `package.json` refers to `startChaincode`
+**Note:** In order to make this contract runnable in version 1.4, also install the `fabric-shim` module as below, and ensure that the 'start' script in `package.json` refers to `fabric-chaincode-node`
 
 ```json
   "scripts": {
-	"start": "startChaincode"
+	"start": "fabric-chaincode-node start"
   }
 ```
 

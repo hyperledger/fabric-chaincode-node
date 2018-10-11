@@ -10,7 +10,7 @@ An initial `package.json` is as follows - the only runtime dependency as far as 
 
 For development an implementation of the `fabric-shim` and specifically the CLI that accompanies it is required
 
-**NOTE: for Fabric 1.3, this will need to be made a development dependency of the node model, and the `npm start` will need to call a defined app to start**
+**NOTE: for Fabric 1.4, this will need to be made a development dependency of the node module, and the `npm start` will need to call a defined app to start**
 
 ```
 {
@@ -37,7 +37,7 @@ For development an implementation of the `fabric-shim` and specifically the CLI 
 ```
 Remember to add in any additional business logic, and testing libraries needed. 
 
-For 1.3 Fabric, please also add in `fabric-shim` as a dependency, and `node startChaincode` as the script to run for `npm start`. Therefore this would include
+Please also add in `fabric-shim` as a dependency, and `fabric-chaincode-node` as the script to run for `npm start`. Therefore this would include
 
 ```
   "scripts": {
@@ -46,8 +46,8 @@ For 1.3 Fabric, please also add in `fabric-shim` as a dependency, and `node star
     ....
   },
   "dependencies": {
-    "fabric-contract-api": "^1.3.0",
-    "fabric-shim": "^1.3.0",
+    "fabric-contract-api": "^1.4.0-snapshot.1",
+    "fabric-shim": "^1.4.0-snapshot.1",
     ....
   },
 ```
@@ -106,7 +106,7 @@ class UpdateValues extends Contract
 		super('org.mynamespace.updates');
 	}
 
-	async setup(ctx){
+	async instantiate(ctx){
 	  //  .....
 	}
 
@@ -150,7 +150,7 @@ If present this takes precedence over the exports.
 This is quite easy - as you need to run the startChaincode command.
 
 ```
-$ npx startChaincode --peer.address localhost:7052
+$ $(npm bin)/fabric-chaincode-node --peer.address localhost:7052
 ```
 
 (this is actually what the peer does; this does mean that any chaincode that is written using the existing chaincode interface will continue to work as is.)
@@ -160,10 +160,10 @@ $ npx startChaincode --peer.address localhost:7052
 Each of the functions can be invoked with arbitrary arguments. The name of the function is of the format
 
 ```
-[namespace.]functionname
+[namespace:]functionname
 ```
 
-If a namespace is given in the constructor then it will be prefixed separated by a _ (underscore)
+If a namespace is given in the constructor then it will be prefixed separated by a : (colon)
 
 > _assuming that you have a fabric up and running with the appropriate environment variables set_
 

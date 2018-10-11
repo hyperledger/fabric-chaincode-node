@@ -28,10 +28,11 @@ gulp.task('clean', function(){
 });
 
 let docSrc = [
-	'fabric-shim/README.md',
+	'docs/README.md',
 	'fabric-shim/lib/chaincode.js',
 	'fabric-shim/lib/stub.js',
-	'fabric-shim/lib/iterators.js'
+	'fabric-shim/lib/iterators.js',
+	'fabric-contract-api/lib/**/*.js'
 ];
 
 
@@ -43,9 +44,10 @@ gulp.task('jsdocs', ['clean'], function (cb) {
 				destination: path.join(docsRoot,currentBranch)
 			},
 			templates: {
-				systemName: 'Hyperledger Fabric node.js Shim',
+				systemName: 'Hyperledger Fabric Node.js Contract and Shim',
 				theme: 'cosmo'
-			}
+			},
+
 		},cb)
 	);
 });
