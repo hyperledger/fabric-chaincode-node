@@ -47,8 +47,10 @@ gulp.task('invokeAllFns',(done)=>{
 		'st-instantiate_chaincode',
 		'delay',
 		// invoke all functions
-		'invoke_functions'
+		'invoke_functions',
 
+		// query the functions
+		'query_functions'
 	];
 
 	console.log('=== Starting Scenario Tests'); // eslint-disable-line
@@ -91,9 +93,35 @@ gulp.task('invoke_functions',async (done)=>{
 
 		// if the output needs to be parsed use this format
 		// let data = JSON.parse(regexp.exec(stderr)[1].replace(/\\/g,''));
-
 	}
+});
 
+gulp.task('query_functions',async (done)=>{
+
+	const options={};
+	const script = 'docker';
+	const args = util.format('exec cli peer chaincode query %s -C %s -n %s -c %s',
+		getTLSArgs(),
+		CHANNEL_NAME,
+		'mysmartcontract',
+		'{"Args":["org.hyperledger.fabric:getMetaData"]}').split(' ');
+
+	const {error, stdout, stderr} = await execFile(script,args, options);
+	if (error){
+		done(error);
+	}else {
+		// validate the stdout/stderr
+		console.log(stdout); // eslint-disable-line
+		console.log(stderr); // eslint-disable-line
+
+		let metadata = JSON.stringify(JSON.parse(stdout));
+
+		let expectedMetadata = '{"org.mynamespace.updates":{"functions":["unknownTransaction","beforeTransaction","createContext","setup","setNewAssetValue","doubleAssetValue"]},"org.mynamespace.removes":{"functions":["quarterAssetValue","getAssetValue"]},"org.hyperledger.fabric":{"functions":["getMetaData"]}}';
+
+		if (metadata !== expectedMetadata) {
+			throw new Error(`Expected query response to equal ${expectedMetadata} \ninstead recieved: \n${metadata}`);
+		}
+	}
 });
 
 gulp.task('st-copy-shim', ['protos'], () => {

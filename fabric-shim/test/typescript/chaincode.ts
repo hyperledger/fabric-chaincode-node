@@ -5,8 +5,6 @@
 
 */
 
-
-/// <reference path="../../types/index.d.ts" />
 import * as shim from 'fabric-shim';
 
 import { Shim,

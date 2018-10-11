@@ -35,7 +35,7 @@ const Context = require(path.join(pathToRoot, 'fabric-contract-api/lib/context')
 const ChaincodeFromContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/chaincodefromcontract'));
 const SystemContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/systemcontract'));
 const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
-const FarbicStubInterface = require(path.join(pathToRoot,'fabric-shim/lib/stub'));
+const FabricStubInterface = require(path.join(pathToRoot,'fabric-shim/lib/stub'));
 let alphaStub;
 let betaStub;
 
@@ -177,321 +177,315 @@ describe('chaincodefromcontract',()=>{
 
 	describe('#invoke',()=>{
 
-		it('should invoke the alpha function',async ()=>{
-			let fakeerror = sinon.fake((e)=>{
-				sinon.assert.fail(e);
+		let fakeSuccess;
+		let fakeError;
 
-			});
-			sandbox.replace(shim,'error',fakeerror);
-			let fakesuccess = sinon.fake((e)=>{
-				log(e);
-			});
-			sandbox.replace(shim,'success',fakesuccess);
+		let defaultBeforeSpy;
+		let defaultAfterSpy;
+		let defaultCreateContext;
 
-			alphaStub.resolves('Hello');
-			beforeFnStubA.resolves();
-			afterFnStubA.resolves();
+		const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
+		'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
+		'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+		'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
+		'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
+		'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
+		'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
+		'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
+		'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
+		'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
+		'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
+		'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
+		'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
+		'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
+		'-----END CERTIFICATE-----';
 
-			let defaultBeforeSpy = sandbox.spy(Contract.prototype,'beforeTransaction');
-			let defaultAfterSpy = sandbox.spy(Contract.prototype,'afterTransaction');
-			let defaultCreateContext = sandbox.spy(Contract.prototype,'createContext');
+		let idBytes = {
+			toBuffer: ()=>{return new Buffer(certWithoutAttrs);}
+		};
 
-			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
+		let cc;
 
-			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
-			stubInterface.getFunctionAndParameters.returns({
-				fcn:'alpha:alpha',
-				params: [   'arg1','arg2'   ]
-			}  );
-			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-			'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-			'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-			'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-			'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-			'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-			'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-			'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-			'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-			'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-			'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-			'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-			'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-			'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-			'-----END CERTIFICATE-----';
-			let idBytes = {
-				toBuffer: ()=>{return new Buffer(certWithoutAttrs);}
-			};
+		beforeEach(() => {
+			cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
 
-			let mockSigningId = {
-				getMspid: sinon.stub(),
-				getIdBytes: sinon.stub().returns(idBytes)
-			};
-			stubInterface.getCreator.returns(
-				mockSigningId
-			);
-
-
-			await cc.Invoke(stubInterface);
-			sinon.assert.calledOnce(alphaStub);
-			sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
-			sinon.assert.calledOnce(defaultBeforeSpy);
-			sinon.assert.calledOnce(defaultAfterSpy);
-			sinon.assert.calledOnce(defaultCreateContext);
-			sinon.assert.callOrder(defaultCreateContext,defaultBeforeSpy,alphaStub,defaultAfterSpy);
-			sinon.assert.calledWith(fakesuccess,'Hello');
+			defaultBeforeSpy = sandbox.spy(Contract.prototype,'beforeTransaction');
+			defaultAfterSpy = sandbox.spy(Contract.prototype,'afterTransaction');
+			defaultCreateContext = sandbox.spy(Contract.prototype,'createContext');
 		});
 
-		it('should invoke the correct before/after fns function',async ()=>{
-			let fakeerror = sinon.fake((e)=>{
-				sinon.assert.fail(e);
+		describe('expected successful', () => {
+			beforeEach(() => {
+				fakeSuccess = sinon.fake((e)=>{
+					log(e);
+				});
+
+				fakeError = sinon.fake((e)=>{
+					sinon.assert.fail(e);
+				});
+
+				sandbox.replace(shim,'success',fakeSuccess);
+				sandbox.replace(shim,'error',fakeError);
 			});
-			sandbox.replace(shim,'error',fakeerror);
-			let fakesuccess = sinon.fake((e)=>{
-				log(e);
+
+			it('should invoke the alpha function',async ()=>{
+				alphaStub.resolves('Hello');
+				beforeFnStubA.resolves();
+				afterFnStubA.resolves();
+
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'alpha:alpha',
+					params: [   'arg1','arg2'   ]
+				}  );
+
+				let mockSigningId = {
+					getMspid: sinon.stub(),
+					getIdBytes: sinon.stub().returns(idBytes)
+				};
+				stubInterface.getCreator.returns(
+					mockSigningId
+				);
+
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(alphaStub);
+				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
+				sinon.assert.calledOnce(defaultBeforeSpy);
+				sinon.assert.calledOnce(defaultAfterSpy);
+				sinon.assert.calledOnce(defaultCreateContext);
+				sinon.assert.callOrder(defaultCreateContext,defaultBeforeSpy,alphaStub,defaultAfterSpy);
+				expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
+				expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('Hello');
 			});
-			sandbox.replace(shim,'success',fakesuccess);
-			beforeFnStubA.resolves();
-			afterFnStubA.resolves();
-			ctxStub = sandbox.createStubInstance(Context);
 
-			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
-			// cc.createCtx = sandbox.stub().returns({});
-			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
-			stubInterface.getFunctionAndParameters.returns({
-				fcn:'beta:beta',
-				params: [   'arg1','arg2'   ]
-			}  );
-			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-			'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-			'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-			'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-			'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-			'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-			'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-			'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-			'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-			'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-			'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-			'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-			'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-			'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-			'-----END CERTIFICATE-----';
-			let idBytes = {
-				toBuffer: ()=>{return new Buffer(certWithoutAttrs);}
-			};
+			it('should invoke the alpha function handling non-string response',async ()=>{
+				alphaStub.resolves(123);
+				beforeFnStubA.resolves();
+				afterFnStubA.resolves();
 
-			let mockSigningId = {
-				getMspid: sinon.stub(),
-				getIdBytes: sinon.stub().returns(idBytes)
-			};
-			stubInterface.getCreator.returns(
-				mockSigningId
-			);
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'alpha:alpha',
+					params: [   'arg1','arg2'   ]
+				}  );
+
+				let mockSigningId = {
+					getMspid: sinon.stub(),
+					getIdBytes: sinon.stub().returns(idBytes)
+				};
+				stubInterface.getCreator.returns(
+					mockSigningId
+				);
+
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(alphaStub);
+				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
+				sinon.assert.calledOnce(defaultBeforeSpy);
+				sinon.assert.calledOnce(defaultAfterSpy);
+				sinon.assert.calledOnce(defaultCreateContext);
+				sinon.assert.callOrder(defaultCreateContext,defaultBeforeSpy,alphaStub,defaultAfterSpy);
+				expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
+				expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('123');
+			});
+
+			it ('should invoke alpha and handle when function response is a buffer', async () => {
+				alphaStub.resolves(Buffer.from('hello'));
+				beforeFnStubA.resolves();
+				afterFnStubA.resolves();
+
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'alpha:alpha',
+					params: [   'arg1','arg2'   ]
+				}  );
+
+				let mockSigningId = {
+					getMspid: sinon.stub(),
+					getIdBytes: sinon.stub().returns(idBytes)
+				};
+				stubInterface.getCreator.returns(
+					mockSigningId
+				);
+
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(alphaStub);
+				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
+				sinon.assert.calledOnce(defaultBeforeSpy);
+				sinon.assert.calledOnce(defaultAfterSpy);
+				sinon.assert.calledOnce(defaultCreateContext);
+				sinon.assert.callOrder(defaultCreateContext,defaultBeforeSpy,alphaStub,defaultAfterSpy);
+				expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
+				expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('[104,101,108,108,111]');
+			});
+
+			it ('should invoke alpha and handle when function response is an array', async () => {
+				alphaStub.resolves([1, 2, 3, 4]);
+				beforeFnStubA.resolves();
+				afterFnStubA.resolves();
+
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'alpha:alpha',
+					params: [   'arg1','arg2'   ]
+				}  );
+
+				let mockSigningId = {
+					getMspid: sinon.stub(),
+					getIdBytes: sinon.stub().returns(idBytes)
+				};
+				stubInterface.getCreator.returns(
+					mockSigningId
+				);
 
 
-			await cc.Invoke(stubInterface);
-			sinon.assert.calledOnce(betaStub);
-			sinon.assert.calledOnce(afterFnStubA);
-			sinon.assert.calledOnce(beforeFnStubA);
-			sinon.assert.callOrder(beforeFnStubA,afterFnStubA);
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(alphaStub);
+				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
+				sinon.assert.calledOnce(defaultBeforeSpy);
+				sinon.assert.calledOnce(defaultAfterSpy);
+				sinon.assert.calledOnce(defaultCreateContext);
+				sinon.assert.callOrder(defaultCreateContext,defaultBeforeSpy,alphaStub,defaultAfterSpy);
+				expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
+				expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('[1,2,3,4]');
+			});
+
+			it('should invoke the correct before/after fns function', async ()=>{
+				beforeFnStubA.resolves();
+				afterFnStubA.resolves();
+				ctxStub = sandbox.createStubInstance(Context);
+
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'beta:beta',
+					params: [   'arg1','arg2'   ]
+				}  );
+
+				let mockSigningId = {
+					getMspid: sinon.stub(),
+					getIdBytes: sinon.stub().returns(idBytes)
+				};
+				stubInterface.getCreator.returns(
+					mockSigningId
+				);
+
+
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(betaStub);
+				sinon.assert.calledOnce(afterFnStubA);
+				sinon.assert.calledOnce(beforeFnStubA);
+				sinon.assert.callOrder(beforeFnStubA,afterFnStubA);
+			});
+
+			describe('getMetadata' ,() => {
+				it('should invoke getMetaData',async ()=>{
+					alphaStub.resolves('Hello');
+					beforeFnStubA.resolves();
+					afterFnStubA.resolves();
+
+					let getMetaDataSpy = sandbox.spy(SystemContract.prototype,'getMetaData');
+					let getContractsSpy = sandbox.spy(ChaincodeFromContract.prototype,'getContracts');
+
+					let stubInterface = sinon.createStubInstance(FabricStubInterface);
+					stubInterface.getFunctionAndParameters.returns({
+						fcn:'org.hyperledger.fabric:getMetaData',
+						params: [   'arg1','arg2'   ]
+					});
+
+					let mockSigningId = {
+						getMspid: sinon.stub(),
+						getIdBytes: sinon.stub().returns(idBytes)
+					};
+					stubInterface.getCreator.returns(
+						mockSigningId
+					);
+
+					let expectedResponse =JSON.stringify({'alpha':{'functions':['alpha']},'beta':{'functions':['beta','afterTransaction','beforeTransaction','unknownTransaction','createContext']},'org.hyperledger.fabric':{'functions':['getMetaData']}});
+
+					await cc.Invoke(stubInterface);
+					sinon.assert.calledOnce(getContractsSpy);
+					sinon.assert.calledOnce(getMetaDataSpy);
+					expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
+					expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal(expectedResponse);
+				});
+			});
 		});
 
-		it('should correctly handle case of failing before hook',async ()=>{
-			let fakeerror = sinon.fake((e)=>{
-				log(e);
+		describe('expecting error', () => {
+			beforeEach(() => {
+				fakeSuccess = sinon.fake((e)=>{
+					sinon.assert.fail(e);
+				});
 
+				fakeError = sinon.fake((e)=>{
+					log(e);
+				});
+
+				sandbox.replace(shim,'success',fakeSuccess);
+				sandbox.replace(shim,'error',fakeError);
 			});
-			sandbox.replace(shim,'error',fakeerror);
-			let fakesuccess = sinon.fake((e)=>{
-				log(e);
+
+			it('should correctly handle case of failing before hook',async ()=>{
+				beforeFnStubA.rejects(new Error('failure failure'));
+				afterFnStubA.resolves();
+				ctxStub = sandbox.createStubInstance(Context);
+
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'beta:beta',
+					params: [   'arg1','arg2'   ]
+				});
+
+				let mockSigningId = {
+					getMspid: sinon.stub(),
+					getIdBytes: sinon.stub().returns(idBytes)
+				};
+				stubInterface.getCreator.returns(
+					mockSigningId
+				);
+
+
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(shim.error);
+				expect(fakeError.args[0][0]).to.be.instanceOf(Error);
+				expect(fakeError.args[0][0].toString()).to.match(/failure failure/);
+				sinon.assert.notCalled(betaStub);
+				sinon.assert.notCalled(afterFnStubA);
+
+				sinon.assert.calledOnce(beforeFnStubA);
 			});
-			sandbox.replace(shim,'success',fakesuccess);
-			beforeFnStubA.rejects(new Error('failure failure'));
-			afterFnStubA.resolves();
 
+			it('should throw correct error with missing namespace',async ()=>{
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'wibble:alpha',
+					params: [   'arg1','arg2'   ]
+				}  );
 
-			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
-			// cc.createCtx = sandbox.stub().returns({});
-			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
-			stubInterface.getFunctionAndParameters.returns({
-				fcn:'beta:beta',
-				params: [   'arg1','arg2'   ]
-			}  );
-			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-			'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-			'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-			'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-			'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-			'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-			'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-			'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-			'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-			'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-			'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-			'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-			'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-			'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-			'-----END CERTIFICATE-----';
-			let idBytes = {
-				toBuffer: ()=>{return new Buffer(certWithoutAttrs);}
-			};
-
-			let mockSigningId = {
-				getMspid: sinon.stub(),
-				getIdBytes: sinon.stub().returns(idBytes)
-			};
-			stubInterface.getCreator.returns(
-				mockSigningId
-			);
-
-
-			await cc.Invoke(stubInterface);
-
-			sinon.assert.calledOnce(shim.error);
-			expect(fakeerror.args[0][0]).to.be.instanceOf(Error);
-			expect(fakeerror.args[0][0].toString()).to.match(/failure failure/);
-			sinon.assert.notCalled(betaStub);
-			sinon.assert.notCalled(afterFnStubA);
-
-			sinon.assert.calledOnce(beforeFnStubA);
-
-		});
-
-		it('should throw correct error with missing namespace',async ()=>{
-			let fakeerror = sinon.fake((e)=>{
-				log(e);
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(shim.error);
+				expect(fakeError.args[0][0]).to.be.instanceOf(Error);
+				expect(fakeError.args[0][0].toString()).to.match(/Error: Namespace is not known :wibble:/);
 			});
-			sandbox.replace(shim,'error',fakeerror);
-			let fakesuccess = sinon.fake((e)=>{
-				log(e);
+
+			it('should throw correct error with wrong function name',async ()=>{
+				let stubInterface = sinon.createStubInstance(FabricStubInterface);
+				stubInterface.getFunctionAndParameters.returns({
+					fcn:'alpha:wibble',
+					params: [   'arg1','arg2'   ]
+				}  );
+
+				let mockSigningId = {
+					getMspid: sinon.stub(),
+					getIdBytes: sinon.stub().returns(idBytes)
+				};
+				stubInterface.getCreator.returns(
+					mockSigningId
+				);
+				await cc.Invoke(stubInterface);
+				sinon.assert.calledOnce(shim.error);
+				expect(fakeError.args[0][0]).to.be.instanceOf(Error);
+				expect(fakeError.args[0][0].toString()).to.match(/Error: You've asked to invoke a function that does not exist/);
 			});
-			sandbox.replace(shim,'success',fakesuccess);
-
-			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
-			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
-			stubInterface.getFunctionAndParameters.returns({
-				fcn:'wibble:alpha',
-				params: [   'arg1','arg2'   ]
-			}  );
-
-			await cc.Invoke(stubInterface);
-			sinon.assert.calledOnce(shim.error);
-			expect(fakeerror.args[0][0]).to.be.instanceOf(Error);
-			expect(fakeerror.args[0][0].toString()).to.match(/Error: Namespace is not known :wibble:/);
-		});
-
-		it('should throw correct error with wrong function name',async ()=>{
-			let fakeerror = sinon.fake((e)=>{
-				log(e);
-			});
-			sandbox.replace(shim,'error',fakeerror);
-			let fakesuccess = sinon.fake((e)=>{
-				log(e);
-			});
-			sandbox.replace(shim,'success',fakesuccess);
-
-			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
-			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
-			stubInterface.getFunctionAndParameters.returns({
-				fcn:'alpha:wibble',
-				params: [   'arg1','arg2'   ]
-			}  );
-			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-			'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-			'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-			'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-			'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-			'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-			'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-			'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-			'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-			'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-			'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-			'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-			'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-			'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-			'-----END CERTIFICATE-----';
-			let idBytes = {
-				toBuffer: ()=>{return new Buffer(certWithoutAttrs);}
-			};
-
-			let mockSigningId = {
-				getMspid: sinon.stub(),
-				getIdBytes: sinon.stub().returns(idBytes)
-			};
-			stubInterface.getCreator.returns(
-				mockSigningId
-			);
-			await cc.Invoke(stubInterface);
-			sinon.assert.calledOnce(shim.error);
-			expect(fakeerror.args[0][0]).to.be.instanceOf(Error);
-			expect(fakeerror.args[0][0].toString()).to.match(/Error: You've asked to invoke a function that does not exist/);
-		});
-
-	});
-
-
-	describe('#invoke getMetaData',()=>{
-
-		it('should invoke getMetaData',async ()=>{
-			let fakeerror = sinon.fake((e)=>{
-				sinon.assert.fail(e);
-
-			});
-			sandbox.replace(shim,'error',fakeerror);
-			let fakesuccess = sinon.fake((e)=>{
-				log(e);
-			});
-			sandbox.replace(shim,'success',fakesuccess);
-
-			alphaStub.resolves('Hello');
-			beforeFnStubA.resolves();
-			afterFnStubA.resolves();
-
-			let getMetaDataSpy = sandbox.spy(SystemContract.prototype,'getMetaData');
-			let getContractsSpy = sandbox.spy(ChaincodeFromContract.prototype,'getContracts');
-
-
-			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
-
-			let stubInterface = sinon.createStubInstance(FarbicStubInterface);
-			stubInterface.getFunctionAndParameters.returns({
-				fcn:'org.hyperledger.fabric:getMetaData',
-				params: [   'arg1','arg2'   ]
-			}  );
-			const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-			'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-			'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-			'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-			'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-			'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-			'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-			'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-			'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-			'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-			'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-			'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-			'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-			'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-			'-----END CERTIFICATE-----';
-			let idBytes = {
-				toBuffer: ()=>{return new Buffer(certWithoutAttrs);}
-			};
-
-			let mockSigningId = {
-				getMspid: sinon.stub(),
-				getIdBytes: sinon.stub().returns(idBytes)
-			};
-			stubInterface.getCreator.returns(
-				mockSigningId
-			);
-
-			let expectedResponse =JSON.stringify({'alpha':{'functions':['alpha']},'beta':{'functions':['beta','afterTransaction','beforeTransaction','unknownTransaction','createContext']},'org.hyperledger.fabric':{'functions':['getMetaData']}});
-
-			await cc.Invoke(stubInterface);
-			sinon.assert.calledOnce(getContractsSpy);
-			sinon.assert.calledOnce(getMetaDataSpy);
-			sinon.assert.calledWith(fakesuccess,expectedResponse);
 		});
 	});
 
