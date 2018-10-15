@@ -6,9 +6,11 @@
 'use strict';
 
 const path = require('path');
+const yargs = require('yargs');
 const shim = require('../chaincode');
 const ChaincodeFromContract = require('./chaincodefromcontract');
 const Logger = require('../logger');
+const StartCommand = require('../cmds/startCommand.js');
 
 const logger = Logger.getLogger('contracts-spi/bootstrap.js');
 /**
@@ -30,10 +32,14 @@ function register(contracts){
  * @ignore
  */
 function bootstrap(){
-	let jsonPath = path.resolve(__dirname,'..','..','..','..','package.json');
+	let opts = StartCommand.getArgs(yargs);
+
+	let modPath = path.resolve(process.cwd(), opts['module-path']);
+
+	let jsonPath = path.resolve(modPath, 'package.json');
 	// let's find the package.json file
 	let json = require(jsonPath);
-	logger.debug('starting up and reading package.json at %s',jsonPath);
+	logger.debug('starting up and reading package.json at %s', jsonPath);
 	logger.debug(json);
 	if (json.contracts){
 		logger.debug('Using contracts spec in the package.json');
@@ -41,7 +47,7 @@ function bootstrap(){
 		if (json.contracts.classes){
 			let classesToRegister = json.contracts.classes.map((value)=>{
 				// p is the path to the file contain the defined contract
-				let p =(path.resolve(__dirname,'..','..','..',value));
+				let p =(path.resolve(modPath, value));
 				let r = require(p);
 				return r;
 			});
@@ -51,8 +57,7 @@ function bootstrap(){
 		}
 	} else if (json.main){
 		logger.debug('Using the main entry %s',json.main);
-
-		let p = (path.resolve(__dirname,'..','..','..','..',json.main));
+		let p = (path.resolve(modPath, json.main));
 		let r = require(p);
 
 		if (r.contracts){

@@ -23,8 +23,6 @@ const StartCommand = require('./cmds/startCommand.js');
 
 let yargs = require('yargs');
 
-let YargsParser = require('yargs-parser');
-
 const _chaincodeProto = grpc.load({
 	root: path.join(__dirname, './protos'),
 	file: 'peer/chaincode.proto'
@@ -90,40 +88,7 @@ class Shim {
 	 * @param {ChaincodeInterface} chaincode User-provided object that must implement the <code>ChaincodeInterface</code>
 	 */
 	static start(chaincode) {
-		let opts = yargs.argv;
-
-		if (opts.$0 !== 'fabric-chaincode-node') {
-			let defaults = {};
-
-			let required = [];
-
-			for (let key in StartCommand.validOptions) {
-				logger.error(StartCommand);
-				if (StartCommand.validOptions[key].hasOwnProperty('default')) {
-					defaults[key] = StartCommand.validOptions[key].default;
-				}
-
-				if (StartCommand.validOptions[key].hasOwnProperty('required') && StartCommand.validOptions[key].required) {
-					required.push(key);
-				}
-			}
-
-			opts = YargsParser(process.argv.slice(2), {
-				default: defaults,
-				configuration: {
-					'dot-notation': false
-				},
-				envPrefix: 'CORE'
-			});
-
-			opts['chaincode-id-name'] = opts.chaincodeIdName;
-
-			required.forEach((argName) => {
-				if (!opts.hasOwnProperty(argName)) {
-					throw new Error('Missing required argument ' + argName);
-				}
-			});
-		}
+		let opts = StartCommand.getArgs(yargs);
 
 		if (typeof chaincode !== 'object' || chaincode === null)
 			throw new Error('Missing required argument: chaincode');
@@ -145,6 +110,7 @@ class Shim {
 			}
 		}
 		delete optsCpy['chaincode-id-name'];
+		delete optsCpy['module-path'];
 
 		let url = parsePeerUrl(opts['peer.address']);
 		if (isTLS()){
