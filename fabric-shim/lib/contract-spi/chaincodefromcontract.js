@@ -113,11 +113,20 @@ class ChaincodeFromContract {
 				await contractInstance.beforeTransaction(ctx);
 
 				// use the spread operator to make this pass the arguments seperately not as an array
-				const result = await contractInstance[fn](ctx,...params);
+				let result = await contractInstance[fn](ctx,...params);
 
 				// after tx fn
 				await contractInstance.afterTransaction(ctx,result);
 
+				if (Buffer.isBuffer(result)) {
+					result = JSON.stringify([...result]);
+				} else if (Array.isArray(result)) {
+					result = JSON.stringify(result);
+				} else {
+					result = String(result);
+				}
+
+				result = Buffer.from(result);
 				return shim.success(result);
 			} else {
 				await contractInstance.unknownTransaction(ctx);
