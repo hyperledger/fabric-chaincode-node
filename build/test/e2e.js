@@ -30,7 +30,7 @@ const packageJson = '{' +
 	'  "dependencies": {' +
 	'    "fabric-shim": "file:./fabric-shim",' +
 	'    "fabric-shim-crypto": "file:./fabric-shim-crypto",' +
-	'    "fabric-contract-api": "file:./fabric-contract-api",' +
+//	'    "fabric-contract-api": "file:./fabric-contract-api",' +
 	'    "chai": "^4.1.1",' +
 	'    "chai-as-promised": "^7.1.1"' +
 	'  }' +

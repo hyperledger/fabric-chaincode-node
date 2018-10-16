@@ -6,13 +6,12 @@
 'use strict';
 
 const shim = require('../chaincode');
-const Contract = require('fabric-contract-api').Contract;
 
 const Logger = require('../logger');
 const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
 
 const ClientIdentity = require('../chaincode').ClientIdentity;
-const SystemContract = require('./systemcontract');
+
 /**
  * The user will have written a class than extends the 'Contract' interface; this
  * is expressed in terms of domain specific functions - that need to be called in the
@@ -30,6 +29,9 @@ class ChaincodeFromContract {
      * @param {Contract[]} contractClasses array of  contracts to register
      */
 	constructor(contractClasses) {
+
+		const Contract = require('fabric-contract-api').Contract;
+		const SystemContract = require('./systemcontract');
 
 		// the structure that stores the 'function-pointers', contents of the form
 		// {  namespace : { ContractClass,  Contract,  functionNames[] }}
