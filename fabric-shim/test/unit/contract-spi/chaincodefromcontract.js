@@ -161,21 +161,70 @@ describe('chaincodefromcontract',()=>{
 
 	describe('#init',()=>{
 
-		it('should call the Invoke method',async ()=>{
-			let stubFake = {};
+		it('should call the invokeFunctionality method',async ()=>{
+			let stubInterface = sinon.createStubInstance(FabricStubInterface);
+			stubInterface.getFunctionAndParameters.returns({
+				fcn:'alpha:alpha',
+				params: [   'arg1','arg2'   ]
+			}  );
+			let fakesuccess = sinon.fake((e)=>{
+				log(e);
+			});
+			sandbox.replace(shim,'success',fakesuccess);
 
 			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
-			sandbox.stub(cc,'Invoke');
-			await cc.Init(stubFake);
+			sandbox.stub(cc,'invokeFunctionality');
 
-			sinon.assert.calledOnce(cc.Invoke);
-			sinon.assert.calledWith(cc.Invoke,stubFake);
+			await cc.Init(stubInterface);
+			sinon.assert.calledOnce(cc.invokeFunctionality);
+			sinon.assert.calledWith(cc.invokeFunctionality, stubInterface);
+			sinon.assert.notCalled(fakesuccess);
+
+		});
+
+		it('should return a shim.success when no args are passed through the init function',async ()=>{
+			let stubInterface = sinon.createStubInstance(FabricStubInterface);
+			stubInterface.getFunctionAndParameters.returns({
+				fcn: '',
+				params: []
+			}  );
+			let fakesuccess = sinon.fake((e)=>{
+				log(e);
+			});
+			sandbox.replace(shim,'success',fakesuccess);
+
+			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
+			sandbox.stub(cc,'invokeFunctionality');
+
+			await cc.Init(stubInterface);
+			sinon.assert.calledOnce(fakesuccess);
+			sinon.assert.notCalled(cc.invokeFunctionality);
 
 		});
 
 	});
 
-	describe('#invoke',()=>{
+	describe('#invoke', ()=>{
+
+		it('should call the invokeFunctionality method',async ()=>{
+			let stubInterface = sinon.createStubInstance(FabricStubInterface);
+			stubInterface.getFunctionAndParameters.returns({
+				fcn:'alpha:alpha',
+				params: [   'arg1','arg2'   ]
+			});
+
+			let cc = new ChaincodeFromContract([SCAlpha,SCBeta]);
+			sandbox.stub(cc,'invokeFunctionality');
+			await cc.Invoke(stubInterface);
+
+			sinon.assert.calledOnce(cc.invokeFunctionality);
+			sinon.assert.calledWith(cc.invokeFunctionality, stubInterface);
+
+		});
+
+	});
+
+	describe('#invokeFunctionality',()=>{
 
 		let fakeSuccess;
 		let fakeError;
@@ -247,7 +296,7 @@ describe('chaincodefromcontract',()=>{
 					mockSigningId
 				);
 
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 				sinon.assert.calledOnce(alphaStub);
 				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
 				sinon.assert.calledOnce(defaultBeforeSpy);
@@ -277,7 +326,7 @@ describe('chaincodefromcontract',()=>{
 					mockSigningId
 				);
 
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 				sinon.assert.calledOnce(alphaStub);
 				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
 				sinon.assert.calledOnce(defaultBeforeSpy);
@@ -307,7 +356,7 @@ describe('chaincodefromcontract',()=>{
 					mockSigningId
 				);
 
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters() );
 				sinon.assert.calledOnce(alphaStub);
 				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
 				sinon.assert.calledOnce(defaultBeforeSpy);
@@ -338,7 +387,7 @@ describe('chaincodefromcontract',()=>{
 				);
 
 
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 				sinon.assert.calledOnce(alphaStub);
 				sinon.assert.calledWith(alphaStub,sinon.match.any,'arg1','arg2');
 				sinon.assert.calledOnce(defaultBeforeSpy);
@@ -369,15 +418,15 @@ describe('chaincodefromcontract',()=>{
 				);
 
 
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 				sinon.assert.calledOnce(betaStub);
 				sinon.assert.calledOnce(afterFnStubA);
 				sinon.assert.calledOnce(beforeFnStubA);
 				sinon.assert.callOrder(beforeFnStubA,afterFnStubA);
 			});
 
-			describe('getMetadata' ,() => {
-				it('should invoke getMetaData',async ()=>{
+			describe('getContracts' ,() => {
+				it('should invoke getContracts',async ()=>{
 					alphaStub.resolves('Hello');
 					beforeFnStubA.resolves();
 					afterFnStubA.resolves();
@@ -401,7 +450,7 @@ describe('chaincodefromcontract',()=>{
 
 					let expectedResponse =JSON.stringify({'alpha':{'functions':['alpha']},'beta':{'functions':['beta','afterTransaction','beforeTransaction','unknownTransaction','createContext']},'org.hyperledger.fabric':{'functions':['getMetaData']}});
 
-					await cc.Invoke(stubInterface);
+					await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 					sinon.assert.calledOnce(getContractsSpy);
 					sinon.assert.calledOnce(getMetaDataSpy);
 					expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
@@ -444,7 +493,7 @@ describe('chaincodefromcontract',()=>{
 				);
 
 
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 				sinon.assert.calledOnce(shim.error);
 				expect(fakeError.args[0][0]).to.be.instanceOf(Error);
 				expect(fakeError.args[0][0].toString()).to.match(/failure failure/);
@@ -461,7 +510,7 @@ describe('chaincodefromcontract',()=>{
 					params: [   'arg1','arg2'   ]
 				}  );
 
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 				sinon.assert.calledOnce(shim.error);
 				expect(fakeError.args[0][0]).to.be.instanceOf(Error);
 				expect(fakeError.args[0][0].toString()).to.match(/Error: Namespace is not known :wibble:/);
@@ -481,7 +530,7 @@ describe('chaincodefromcontract',()=>{
 				stubInterface.getCreator.returns(
 					mockSigningId
 				);
-				await cc.Invoke(stubInterface);
+				await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
 				sinon.assert.calledOnce(shim.error);
 				expect(fakeError.args[0][0]).to.be.instanceOf(Error);
 				expect(fakeError.args[0][0].toString()).to.match(/Error: You've asked to invoke a function that does not exist/);

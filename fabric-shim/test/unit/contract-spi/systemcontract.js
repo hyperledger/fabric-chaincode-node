@@ -50,7 +50,7 @@ describe('SystemContract',()=>{
 
 	});
 
-	describe('#getdata',()=>{
+	describe('#getMetaData',()=>{
 
 		it('should get the buffer',async ()=>{
 			let meta = new SystemContract();

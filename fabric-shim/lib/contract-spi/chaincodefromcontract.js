@@ -84,19 +84,35 @@ class ChaincodeFromContract {
      * @param {ChaincodeStub} stub Stub class giving the full api
      */
 	async Init(stub) {
-		return this.Invoke(stub);
+		const fAndP = stub.getFunctionAndParameters();
+		if (fAndP.fcn === '') {
+			const message = 'Default initiator successful.';
+			return shim.success(Buffer.from(message));
+		} else{
+			return this.invokeFunctionality(stub, fAndP);
+		}
 	}
 
 	/**
-     * The invoke fn is called for all the invoke operations; init is also redirected to here
+     * The invoke fn is called for all the invoke operations
      *
      * @param {ChaincodeStub} stub Stub class giving the full api
      */
 	async Invoke(stub) {
-		try {
-			const { fcn, params } = stub.getFunctionAndParameters();
+		const fAndP = stub.getFunctionAndParameters();
+		return this.invokeFunctionality(stub, fAndP);
+	}
 
-			let {namespace:ns,function:fn} = this._splitFunctionName(fcn);
+	/**
+     * The invokeFunctionality function is called for all the invoke operations; init is also redirected to here
+     *
+     * @param {ChaincodeStub} stub Stub class giving the full api
+	 * @param {Object} fAndP Function and Paramters obtained from the smart contract argument
+     */
+
+	async invokeFunctionality(stub, fAndP) {
+		try {
+			let {namespace:ns,function:fn} = this._splitFunctionName(fAndP.fcn);
 
 			if (!this.contracts[ns]){
 				throw new Error(`Namespace is not known :${ns}:`);
@@ -113,7 +129,7 @@ class ChaincodeFromContract {
 				await contractInstance.beforeTransaction(ctx);
 
 				// use the spread operator to make this pass the arguments seperately not as an array
-				let result = await contractInstance[fn](ctx,...params);
+				let result = await contractInstance[fn](ctx,...fAndP.params);
 
 				// after tx fn
 				await contractInstance.afterTransaction(ctx,result);
@@ -171,7 +187,7 @@ class ChaincodeFromContract {
 			data[c] = {'functions':this.contracts[c].functionNames};
 		}
 
-		return  data;
+		return data;
 	}
 
 }
