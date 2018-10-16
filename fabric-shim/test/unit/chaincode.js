@@ -16,6 +16,7 @@ const path = require('path');
 const Logger = require('../../../fabric-shim/lib/logger');
 
 const chaincodePath = '../../../fabric-shim/lib/chaincode.js';
+const StartCommand = require('../../lib/cmds/startCommand.js');
 
 const _serviceProto = grpc.load({
 	root: path.join(__dirname, '../../../fabric-shim/lib/protos'),
@@ -49,24 +50,6 @@ describe('Chaincode', () => {
 		beforeEach(() => {
 			Chaincode = rewire(chaincodePath);
 			Chaincode.__set__('yargs', {'argv': {'$0': 'fabric-chaincode-node'}});
-		});
-
-		it ('should throw an error if not calling via CLI and missing required field', () => {
-			let startChaincode = Chaincode.__get__('StartCommand');
-
-			Chaincode.__set__('StartCommand', {
-				validOptions: {
-					'some-arg': {required: true}
-				}
-			});
-
-			Chaincode.__set__('yargs', {'argv': {'$0': 'index.js'}});
-
-			expect(() => {
-				Chaincode.start();
-			}).to.throw(/Missing required argument some-arg/);
-
-			Chaincode.__set__('StartCommand', startChaincode);
 		});
 
 		it ('should throw an error if no arguments passed', () => {
@@ -105,9 +88,18 @@ describe('Chaincode', () => {
 			let handlerClass = Chaincode.__get__('Handler');
 			let chat = sinon.stub(handlerClass.prototype, 'chat');
 
-			Chaincode.__set__('yargs', {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc'}});
+			const myYargs = {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc'}};
+			Chaincode.__set__('yargs', myYargs);
+
+			let getArgsStub = sinon.stub(StartCommand, 'getArgs').returns({
+				'peer.address': 'localhost:7051',
+				'chaincode-id-name': 'mycc'
+			});
 
 			Chaincode.start({Init: function() {}, Invoke: function() {}});
+
+			sinon.assert.calledOnce(getArgsStub);
+			sinon.assert.calledWith(getArgsStub, myYargs);
 
 			expect(chat.calledOnce).to.be.ok;
 
@@ -117,6 +109,7 @@ describe('Chaincode', () => {
 			expect(args[0].type).to.deep.equal(_serviceProto.ChaincodeMessage.Type.REGISTER);
 
 			chat.restore();
+			getArgsStub.restore();
 		});
 
 		it ('should delete unnecessary arguments passed to the CLI before passing on', () => {
@@ -132,84 +125,64 @@ describe('Chaincode', () => {
 				}
 			}
 
-			Chaincode.__set__('yargs', {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc', 'some-other-arg': 'another-arg', 'yet-another-bad-arg': 'arg'}});
+			let myYargs = {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc', 'some-other-arg': 'another-arg', 'yet-another-bad-arg': 'arg'}};
+			Chaincode.__set__('yargs', myYargs);
 
 			let handlerClass = Chaincode.__get__('Handler');
 			Chaincode.__set__('Handler', MockHandler);
 
+			let getArgsStub = sinon.stub(StartCommand, 'getArgs').returns({
+				'peer.address': 'localhost:7051',
+				'chaincode-id-name': 'mycc',
+				'some-other-arg': 'some other val',
+				'yet-another-arg': 'yet another val',
+				'module-path': 'some/path'
+			});
+
 			Chaincode.start({Init: function() {}, Invoke: function() {}});
+
+			sinon.assert.calledOnce(getArgsStub);
+			sinon.assert.calledWith(getArgsStub, myYargs);
 
 			expect(testOpts.hasOwnProperty('some-other-arg')).to.be.false;
 			expect(testOpts.hasOwnProperty('yet-another-arg')).to.be.false;
 			expect(testOpts.hasOwnProperty('chaincode-id-name')).to.be.false;
+			expect(testOpts.hasOwnProperty('module-path')).to.be.false;
 			expect(testOpts.hasOwnProperty('peer.address')).to.be.true;
 
 			Chaincode.__set__('Handler', handlerClass);
+
+			getArgsStub.restore();
 		});
 
-		it ('should handle when entry to function is not via yargs command', () => {
-			let testOpts = null;
-
-			class MockHandler {
-				constructor(chaincode, url, opts) {
-					testOpts = opts;
-				}
-
-				chat() {
-					// do nothing
-				}
-			}
-
-
-			Chaincode.__set__('yargs', {'argv': {}});
-
-			process.argv = ['node', 'test.js', '--peer.address', 'localhost:7051', '--chaincode-id-name', 'mycc'];
-
-			let handlerClass = Chaincode.__get__('Handler');
-			Chaincode.__set__('Handler', MockHandler);
-			let chat = sinon.stub(MockHandler.prototype, 'chat');
-
-			Chaincode.start({Init: function() {}, Invoke: function() {}});
-
-			expect(testOpts['peer.address']).to.deep.equal('localhost:7051');
-			expect(testOpts['grpc.max_send_message_length']).to.deep.equal(-1);
-			expect(testOpts['grpc.max_receive_message_length']).to.deep.equal(-1);
-			expect(testOpts['grpc.keepalive_time_ms']).to.deep.equal(60000);
-			expect(testOpts['grpc.http2.min_time_between_pings_ms']).to.deep.equal(60000);
-			expect(testOpts['grpc.keepalive_timeout_ms']).to.deep.equal(20000);
-			expect(testOpts['grpc.http2.max_pings_without_data']).to.deep.equal(0);
-			expect(testOpts['grpc.keepalive_permit_without_calls']).to.deep.equal(1);
-
-			expect(chat.calledOnce).to.be.ok;
-
-			let args = chat.firstCall.args;
-			expect(args.length).to.deep.equal(1);
-			expect(typeof args[0]).to.deep.equal('object');
-			expect(args[0].type).to.deep.equal(_serviceProto.ChaincodeMessage.Type.REGISTER);
-
-			chat.restore();
-			Chaincode.__set__('Handler', handlerClass);
-		});
-
-		it ('should handle when entry to function is not via yargs command and uses env vars', () => {
-
-		});
-
-		describe('TLS handling', () => {
-			let Chaincode = rewire(chaincodePath);
-
+		describe ('TLS handling', () => {
+			let Chaincode;
 			let testfile = path.join(__dirname, '../../../package.json');
 
-			Chaincode.__set__('yargs', {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc'}});
+			let myYargs = {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc'}};
+
+			let getArgsStub;
 
 			before(() => {
+				Chaincode = rewire(chaincodePath);
 				process.env.CORE_PEER_TLS_ENABLED = true;
 				process.env.CORE_PEER_TLS_ROOTCERT_FILE = testfile;
+
+				Chaincode.__set__('yargs', myYargs);
+			});
+
+			beforeEach(() => {
+				getArgsStub = sinon.stub(StartCommand, 'getArgs').returns({
+					'peer.address': 'localhost:7051',
+					'chaincode-id-name': 'mycc'
+				});
 			});
 
 			afterEach(() => {
 				delete process.env.CORE_TLS_CLIENT_KEY_PATH;
 				delete process.env.CORE_TLS_CLIENT_CERT_PATH;
+
+				getArgsStub.restore();
 			});
 
 			after(() => {
@@ -239,6 +212,9 @@ describe('Chaincode', () => {
 				process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
 
 				Chaincode.start({Init: function() {}, Invoke: function() {}});
+
+				sinon.assert.calledOnce(getArgsStub);
+				sinon.assert.calledWith(getArgsStub, myYargs);
 
 				expect(chat.calledOnce).to.be.ok;
 
@@ -270,6 +246,9 @@ describe('Chaincode', () => {
 				process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
 
 				Chaincode.start({Init: function() {}, Invoke: function() {}});
+
+				sinon.assert.calledOnce(getArgsStub);
+				sinon.assert.calledWith(getArgsStub, myYargs);
 
 				let attributes = ['pem', 'cert', 'key'];
 

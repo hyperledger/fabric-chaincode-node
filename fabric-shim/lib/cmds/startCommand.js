@@ -14,6 +14,9 @@
 
 'use strict';
 
+
+let YargsParser = require('yargs-parser');
+
 const Bootstrap = require('../contract-spi/bootstrap');
 
 const validOptions = {
@@ -26,7 +29,8 @@ const validOptions = {
 	'grpc.http2.max_pings_without_data': {type: 'number', default: 0},
 	'grpc.keepalive_permit_without_calls': {type: 'number', default: 1},
 	'ssl-target-name-override': {type: 'string'},
-	'chaincode-id-name': {type: 'string', required: true}
+	'chaincode-id-name': {type: 'string', required: true},
+	'module-path': {type: 'string', default: process.cwd()}
 };
 
 module.exports.validOptions = validOptions;
@@ -42,4 +46,44 @@ exports.builder = (yargs) => {
 };
 exports.handler = function () {
 	Bootstrap.bootstrap();
+};
+
+exports.getArgs = function (yargs) {
+	let argv = yargs.argv;
+
+	if (argv.$0 !== 'fabric-chaincode-node') {
+
+		let defaults = {};
+
+		let required = [];
+
+		for (let key in validOptions) {
+			if (validOptions[key].hasOwnProperty('default')) {
+				defaults[key] = validOptions[key].default;
+			}
+
+			if (validOptions[key].hasOwnProperty('required') && validOptions[key].required) {
+				required.push(key);
+			}
+		}
+
+		argv = YargsParser(process.argv.slice(2), {
+			default: defaults,
+			configuration: {
+				'dot-notation': false
+			},
+			envPrefix: 'CORE'
+		});
+
+		argv['chaincode-id-name'] = argv.chaincodeIdName;
+		argv['module-path'] = argv.modulePath;
+
+		required.forEach((argName) => {
+			if (!argv.hasOwnProperty(argName)) {
+				throw new Error('Missing required argument ' + argName);
+			}
+		});
+	}
+
+	return argv;
 };
