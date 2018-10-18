@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-/*global describe it */
+/* global describe it */
 
 const shim = require('../../../fabric-shim/lib/chaincode.js');
 
@@ -58,91 +58,95 @@ const certWithLongDNs = '-----BEGIN CERTIFICATE-----' +
 
 describe('Client-Identity', () => {
 
-	it ('should throw an error when using a bad cert', () => {
-		let stub = mockStub('I AM NOT A CERT');
-		expect(() => {
-			new shim.ClientIdentity(stub);
-		}).to.throw(/Failed to find start line or end line of the certificate./);
-	});
+    it ('should throw an error when using a bad cert', () => {
+        const stub = mockStub('I AM NOT A CERT');
+        expect(() => {
+            new shim.ClientIdentity(stub);
+        }).to.throw(/Failed to find start line or end line of the certificate./);
+    });
 
-	describe('Certificate with values' ,() => {
-		let stub = mockStub(certWithAttrs);
-		let cid = new shim.ClientIdentity(stub);
+    describe('Certificate with values', () => {
+        const stub = mockStub(certWithAttrs);
+        const cid = new shim.ClientIdentity(stub);
 
-		it ('should have correct mspId', () => {
-			expect(cid.getMSPID()).to.deep.equal('dummyId');
-		});
+        it ('should have correct mspId', () => {
+            expect(cid.getMSPID()).to.deep.equal('dummyId');
+        });
 
-		it ('should return correct value on getID()', () => {
-			expect(cid.getID()).to.deep.equal('x509::/CN=MyTestUserWithAttrs::/CN=fabric-ca-server');
-		});
+        it ('should return correct value on getID()', () => {
+            expect(cid.getID()).to.deep.equal('x509::/CN=MyTestUserWithAttrs::/CN=fabric-ca-server');
+        });
 
-		it ('should have correct attrs', () => {
-			expect(cid.attrs['attr1']).to.deep.equal('val1');
-		});
+        it ('should have correct attrs', () => {
+            expect(cid.attrs.attr1).to.deep.equal('val1');
+        });
 
-		it ('should return correct value on getX509Certificate()', () => {
-			let x509 = cid.getX509Certificate();
+        it ('should return correct value on getX509Certificate()', () => {
+            const x509 = cid.getX509Certificate();
 
-			expect(x509.subject.commonName).to.deep.equal('MyTestUserWithAttrs');
-			expect(x509.serial).to.deep.equal('1E4998E9F44FD00353BF3681C0A0A431964F5275');
-		});
+            expect(x509.subject.commonName).to.deep.equal('MyTestUserWithAttrs');
+            expect(x509.serial).to.deep.equal('1E4998E9F44FD00353BF3681C0A0A431964F5275');
+        });
 
-		it('should return the value when getAttributeValue() called with known attribute', () => {
-			expect(cid.getAttributeValue('attr1')).to.deep.equal('val1');
-		});
+        it ('should return the value when getAttributeValue() called with known attribute', () => {
+            expect(cid.getAttributeValue('attr1')).to.deep.equal('val1');
+        });
 
-		it('should return null when getAttributeValue() called with unknown attribute', () => {
-			expect(cid.getAttributeValue('unknown')).to.be.null;
-		});
+        it ('should return null when getAttributeValue() called with unknown attribute', () => {
+            expect(cid.getAttributeValue('unknown')).to.be.null;
+        });
 
-		it('should return true when value provided matches known attribute in assertAttributeValue()', () => {
-			expect(cid.assertAttributeValue('attr1', 'val1')).to.deep.equal(true);
-		});
+        it ('should return true when value provided matches known attribute in assertAttributeValue()', () => {
+            expect(cid.assertAttributeValue('attr1', 'val1')).to.deep.equal(true);
+        });
 
-		it('should return false when value provided does not match known attribute in assertAttributeValue()', () => {
-			expect(cid.assertAttributeValue('attr1', 'val2')).to.deep.equal(false);
-		});
+        it ('should return false when value provided does not match known attribute in assertAttributeValue()', () => {
+            expect(cid.assertAttributeValue('attr1', 'val2')).to.deep.equal(false);
+        });
 
-		it('should return false when unknown attribute in assertAttributeValue()', () => {
-			expect(cid.assertAttributeValue('unknown', 'val1')).to.deep.equal(false);
-		});
-	});
+        it ('should return false when unknown attribute in assertAttributeValue()', () => {
+            expect(cid.assertAttributeValue('unknown', 'val1')).to.deep.equal(false);
+        });
+    });
 
-	describe('Certificate without values', () => {
-		let stub = mockStub(certWithoutAttrs);
-		let cid = new shim.ClientIdentity(stub);
+    describe('Certificate without values', () => {
+        const stub = mockStub(certWithoutAttrs);
+        const cid = new shim.ClientIdentity(stub);
 
-		it ('should have correct mspId', () => {
-			expect(cid.getMSPID()).to.deep.equal('dummyId');
-		});
+        it ('should have correct mspId', () => {
+            expect(cid.getMSPID()).to.deep.equal('dummyId');
+        });
 
-		it ('should have not attributes', () => {
-			expect(cid['attrs']).to.deep.equal({});
-		});
-	});
+        it ('should have not attributes', () => {
+            expect(cid.attrs).to.deep.equal({});
+        });
+    });
 
-	describe('Certificate with long DNs', () => {
-		let stub = mockStub(certWithLongDNs);
-		let cid = new shim.ClientIdentity(stub);
+    describe('Certificate with long DNs', () => {
+        const stub = mockStub(certWithLongDNs);
+        const cid = new shim.ClientIdentity(stub);
 
-		it ('should return correct value on getID()', () => {
-			expect(cid.getID()).to.deep.equal('x509::/C=US/ST=California/L=San Francisco/CN=User1@org2.example.com::/C=US/ST=California/L=San Francisco/O=org2.example.com/CN=ca.org2.example.com');
-		});
-	});
+        it ('should return correct value on getID()', () => {
+            expect(cid.getID()).to.deep.equal('x509::/C=US/ST=California/L=San Francisco/CN=User1@org2.example.com::/C=US/ST=California/L=San Francisco/O=org2.example.com/CN=ca.org2.example.com');
+        });
+    });
 });
 
 function mockStub(cert) {
-	return {
-		getCreator: function() {
-			return {
-				getMspid: function() { return 'dummyId'; },
-				getIdBytes: function() {
-					let buf = Buffer.from(cert);
-					buf.toBuffer = function() { return this; };
-					return buf;
-				}
-			};
-		}
-	};
+    return {
+        getCreator: function() {
+            return {
+                getMspid: function() {
+                    return 'dummyId';
+                },
+                getIdBytes: function() {
+                    const buf = Buffer.from(cert);
+                    buf.toBuffer = function() {
+                        return this;
+                    };
+                    return buf;
+                }
+            };
+        }
+    };
 }

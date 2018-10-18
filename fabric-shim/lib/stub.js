@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-//TODO: Need to add parameter validation to all calls.
+// TODO: Need to add parameter validation to all calls.
 'use strict';
 
 const grpc = require('grpc');
@@ -14,42 +14,42 @@ const utf8 = require('utf8');
 const crypto = require('crypto');
 
 const _commonProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'common/common.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'common/common.proto'
 }).common;
 
 const _proposalProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'peer/proposal.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'peer/proposal.proto'
 }).protos;
 
 const _eventProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'peer/chaincode_event.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'peer/chaincode_event.proto'
 }).protos;
 
 const _idProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'msp/identities.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'msp/identities.proto'
 }).msp;
 
 const _serviceProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'peer/chaincode_shim.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'peer/chaincode_shim.proto'
 }).protos;
 
 const logger = require('./logger').getLogger('lib/chaincode.js');
 
 const RESPONSE_CODE = {
-	// OK constant - status code less than 400, endorser will endorse it.
-	// OK means init or invoke successfully.
-	OK: 200,
+    // OK constant - status code less than 400, endorser will endorse it.
+    // OK means init or invoke successfully.
+    OK: 200,
 
-	// ERRORTHRESHOLD constant - status code greater than or equal to 400 will be considered an error and rejected by endorser.
-	ERRORTHRESHOLD: 400,
+    // ERRORTHRESHOLD constant - status code greater than or equal to 400 will be considered an error and rejected by endorser.
+    ERRORTHRESHOLD: 400,
 
-	// ERROR constant - default error value
-	ERROR: 500
+    // ERROR constant - default error value
+    ERROR: 500
 };
 
 const MIN_UNICODE_RUNE_VALUE = '\u0000';
@@ -58,10 +58,10 @@ const COMPOSITEKEY_NS = '\x00';
 const EMPTY_KEY_SUBSTITUTE = '\x01';
 
 function validateCompositeKeyAttribute(attr) {
-	if (!attr || typeof attr !== 'string' || attr.length === 0) {
-		throw new Error('object type or attribute not a non-zero length string');
-	}
-	utf8.decode(attr);
+    if (!attr || typeof attr !== 'string' || attr.length === 0) {
+        throw new Error('object type or attribute not a non-zero length string');
+    }
+    utf8.decode(attr);
 }
 
 // To ensure that simple keys do not go into composite key namespace,
@@ -69,40 +69,40 @@ function validateCompositeKeyAttribute(attr) {
 // is the namespace for compositeKey). This helps in avoding simple/composite
 // key collisions.
 function validateSimpleKeys(...keys) {
-	keys.forEach((key) => {
-		if (key && typeof key === 'string' && key.charAt(0) === COMPOSITEKEY_NS) {
-			throw new Error(`first character of the key [${key}] contains a null character which is not allowed`);
-		}
-	});
+    keys.forEach((key) => {
+        if (key && typeof key === 'string' && key.charAt(0) === COMPOSITEKEY_NS) {
+            throw new Error(`first character of the key [${key}] contains a null character which is not allowed`);
+        }
+    });
 }
 
 function computeProposalBinding(decodedSP) {
-	let nonce = decodedSP.proposal.header.signature_header.nonce;
-	let creator = decodedSP.proposal.header.signature_header.creator.toBuffer();
-	let epoch = decodedSP.proposal.header.channel_header.epoch;
+    const nonce = decodedSP.proposal.header.signature_header.nonce;
+    const creator = decodedSP.proposal.header.signature_header.creator.toBuffer();
+    const epoch = decodedSP.proposal.header.channel_header.epoch;
 
-	// see github.com/hyperledger/fabric/protos/utils/proputils.go, computeProposalBindingInternal()
+    // see github.com/hyperledger/fabric/protos/utils/proputils.go, computeProposalBindingInternal()
 
-	// the epoch will be encoded as little endian bytes of 8
-	// it's a Long number with high and low values (since JavaScript only supports
-	// 32bit unsigned integers)
-	let buf = Buffer.allocUnsafe(8);
-	buf.writeUInt32LE(epoch.low, 0);
-	buf.writeUInt32LE(epoch.high, 4);
+    // the epoch will be encoded as little endian bytes of 8
+    // it's a Long number with high and low values (since JavaScript only supports
+    // 32bit unsigned integers)
+    const buf = Buffer.allocUnsafe(8);
+    buf.writeUInt32LE(epoch.low, 0);
+    buf.writeUInt32LE(epoch.high, 4);
 
-	let total = Buffer.concat([nonce, creator, buf], nonce.length + creator.length + 8);
+    const total = Buffer.concat([nonce, creator, buf], nonce.length + creator.length + 8);
 
-	const hash = crypto.createHash('sha256');
-	hash.update(total);
-	return hash.digest('hex');
+    const hash = crypto.createHash('sha256');
+    hash.update(total);
+    return hash.digest('hex');
 }
 
 // Construct the QueryMetadata with a page size and a bookmark needed for pagination
 function createQueryMetadata(pageSize, bookmark) {
-	const metadata = new _serviceProto.QueryMetadata();
-	metadata.setPageSize(pageSize);
-	metadata.setBookmark(bookmark);
-	return metadata.toBuffer();
+    const metadata = new _serviceProto.QueryMetadata();
+    metadata.setPageSize(pageSize);
+    metadata.setBookmark(bookmark);
+    return metadata.toBuffer();
 }
 
 /**
@@ -114,7 +114,7 @@ function createQueryMetadata(pageSize, bookmark) {
  * @hideconstructor
  */
 class ChaincodeStub {
-	/**
+    /**
 	 * @hideconstructor
 	 * @param {Handler} client an instance of the Handler class
 	 * @param {string} channel_id channel id
@@ -122,102 +122,104 @@ class ChaincodeStub {
 	 * @param {any} chaincodeInput decoded message from peer
 	 * @param {any} signedProposal the proposal
 	 */
-	constructor(client, channel_id, txId, chaincodeInput, signedProposal) {
-		this.channel_id = channel_id;
-		this.txId = txId;
-		this.args = chaincodeInput.args.map((entry) => {
-			return entry.toBuffer().toString();
-		});
-		this.handler = client;
+    constructor(client, channel_id, txId, chaincodeInput, signedProposal) {
+        this.channel_id = channel_id;
+        this.txId = txId;
+        this.args = chaincodeInput.args.map((entry) => {
+            return entry.toBuffer().toString();
+        });
+        this.handler = client;
 
-		if (signedProposal) {
-			let decodedSP = {
-				signature: signedProposal.signature
-			};
+        if (signedProposal) {
+            const decodedSP = {
+                signature: signedProposal.signature
+            };
 
-			let proposal;
-			try {
-				proposal = _proposalProto.Proposal.decode(signedProposal.proposal_bytes);
-				decodedSP.proposal = {};
-				this.proposal = proposal;
-			} catch (err) {
-				throw new Error(util.format('Failed extracting proposal from signedProposal. [%s]', err));
-			}
+            let proposal;
+            try {
+                proposal = _proposalProto.Proposal.decode(signedProposal.proposal_bytes);
+                decodedSP.proposal = {};
+                this.proposal = proposal;
+            } catch (err) {
+                throw new Error(util.format('Failed extracting proposal from signedProposal. [%s]', err));
+            }
 
-			if (!this.proposal.header || this.proposal.header.toBuffer().length === 0)
-				throw new Error('Proposal header is empty');
+            if (!this.proposal.header || this.proposal.header.toBuffer().length === 0) {
+                throw new Error('Proposal header is empty');
+            }
 
-			if (!this.proposal.payload || this.proposal.payload.toBuffer().length === 0)
-				throw new Error('Proposal payload is empty');
+            if (!this.proposal.payload || this.proposal.payload.toBuffer().length === 0) {
+                throw new Error('Proposal payload is empty');
+            }
 
-			let header;
-			try {
-				header = _commonProto.Header.decode(this.proposal.header);
-				decodedSP.proposal.header = {};
-			} catch (err) {
-				throw new Error(util.format('Could not extract the header from the proposal: %s', err));
-			}
+            let header;
+            try {
+                header = _commonProto.Header.decode(this.proposal.header);
+                decodedSP.proposal.header = {};
+            } catch (err) {
+                throw new Error(util.format('Could not extract the header from the proposal: %s', err));
+            }
 
-			let signatureHeader;
-			try {
-				signatureHeader = _commonProto.SignatureHeader.decode(header.signature_header);
-				decodedSP.proposal.header.signature_header = { nonce: signatureHeader.getNonce().toBuffer() };
-			} catch (err) {
-				throw new Error(util.format('Decoding SignatureHeader failed: %s', err));
-			}
+            let signatureHeader;
+            try {
+                signatureHeader = _commonProto.SignatureHeader.decode(header.signature_header);
+                decodedSP.proposal.header.signature_header = {nonce: signatureHeader.getNonce().toBuffer()};
+            } catch (err) {
+                throw new Error(util.format('Decoding SignatureHeader failed: %s', err));
+            }
 
-			let creator;
-			try {
-				creator = _idProto.SerializedIdentity.decode(signatureHeader.creator);
-				decodedSP.proposal.header.signature_header.creator = creator;
-				this.creator = creator;
-			} catch (err) {
-				throw new Error(util.format('Decoding SerializedIdentity failed: %s', err));
-			}
+            let creator;
+            try {
+                creator = _idProto.SerializedIdentity.decode(signatureHeader.creator);
+                decodedSP.proposal.header.signature_header.creator = creator;
+                this.creator = creator;
+            } catch (err) {
+                throw new Error(util.format('Decoding SerializedIdentity failed: %s', err));
+            }
 
-			let channelHeader;
-			try {
-				channelHeader = _commonProto.ChannelHeader.decode(header.channel_header);
-				decodedSP.proposal.header.channel_header = channelHeader;
-				this.txTimestamp = channelHeader.timestamp;
-			} catch (err) {
-				throw new Error(util.format('Decoding ChannelHeader failed: %s', err));
-			}
+            let channelHeader;
+            try {
+                channelHeader = _commonProto.ChannelHeader.decode(header.channel_header);
+                decodedSP.proposal.header.channel_header = channelHeader;
+                this.txTimestamp = channelHeader.timestamp;
+            } catch (err) {
+                throw new Error(util.format('Decoding ChannelHeader failed: %s', err));
+            }
 
-			let ccpp;
-			try {
-				ccpp = _proposalProto.ChaincodeProposalPayload.decode(this.proposal.payload);
-				decodedSP.proposal.payload = ccpp;
-			} catch (err) {
-				throw new Error(util.format('Decoding ChaincodeProposalPayload failed: %s', err));
-			}
+            let ccpp;
+            try {
+                ccpp = _proposalProto.ChaincodeProposalPayload.decode(this.proposal.payload);
+                decodedSP.proposal.payload = ccpp;
+            } catch (err) {
+                throw new Error(util.format('Decoding ChaincodeProposalPayload failed: %s', err));
+            }
 
-			this.transientMap = ccpp.getTransientMap();
+            this.transientMap = ccpp.getTransientMap();
 
-			this.signedProposal = decodedSP;
+            this.signedProposal = decodedSP;
 
-			this.binding = computeProposalBinding(decodedSP);
-		}
-	}
+            this.binding = computeProposalBinding(decodedSP);
+        }
+    }
 
-	/**
+    /**
 	 * Returns the arguments as array of strings from the chaincode invocation request.
 	 * Equivalent to [getStringArgs()]{@link ChaincodeStub#getStringArgs}
 	 * @returns {string[]}
 	 */
-	getArgs() {
-		return this.args;
-	}
+    getArgs() {
+        return this.args;
+    }
 
-	/**
+    /**
 	 * Returns the arguments as array of strings from the chaincode invocation request
 	 * @returns {string[]}
 	 */
-	getStringArgs() {
-		return this.args;
-	}
+    getStringArgs() {
+        return this.args;
+    }
 
-	/**
+    /**
 	 * @typedef FunctionAndParameters
 	 * @property {string} fcn The function name, which by chaincode programming convention
 	 * is the first argument in the array of arguments
@@ -226,45 +228,45 @@ class ChaincodeStub {
 	 * @memberof fabric-shim
 	 */
 
-	/**
+    /**
 	 * Returns an object containing the chaincode function name to invoke, and the array
 	 * of arguments to pass to the target function
 	 * @returns {FunctionAndParameters}
 	 */
-	getFunctionAndParameters() {
-		let values = this.getStringArgs();
-		if (values.length >= 1) {
-			return {
-				fcn: values[0],
-				params: values.slice(1)
-			};
-		} else {
-			return {
-				fcn: '',
-				params: []
-			};
-		}
-	}
+    getFunctionAndParameters() {
+        const values = this.getStringArgs();
+        if (values.length >= 1) {
+            return {
+                fcn: values[0],
+                params: values.slice(1)
+            };
+        } else {
+            return {
+                fcn: '',
+                params: []
+            };
+        }
+    }
 
-	/**
+    /**
 	 * Returns the transaction ID for the current chaincode invocation request. The transaction
 	 * ID uniquely identifies the transaction within the scope of the channel.
 	 */
-	getTxID() {
-		return this.txId;
-	}
+    getTxID() {
+        return this.txId;
+    }
 
-	/**
+    /**
 	 * Returns the channel ID for the proposal for chaincode to process.
 	 * This would be the 'channel_id' of the transaction proposal (see ChannelHeader
 	 * in protos/common/common.proto) except where the chaincode is calling another on
 	 * a different channel.
 	 */
-	getChannelID() {
-		return this.channel_id;
-	}
+    getChannelID() {
+        return this.channel_id;
+    }
 
-	/**
+    /**
 	 * This object contains the essential identity information of the chaincode invocation's submitter,
 	 * including its organizational affiliation (mspid) and certificate (id_bytes)
 	 * @typedef {Object} ProposalCreator
@@ -274,24 +276,24 @@ class ChaincodeStub {
 	 * @memberof fabric-shim
 	 */
 
-	/**
+    /**
 	 * Returns the identity object of the chaincode invocation's submitter
 	 * @returns {ProposalCreator}
 	 */
-	getCreator() {
-		return this.creator;
-	}
+    getCreator() {
+        return this.creator;
+    }
 
-	/**
+    /**
 	 * Returns the transient map that can be used by the chaincode but not
 	 * saved in the ledger, such as cryptographic information for encryption and decryption
 	 * @returns {Map<string:Buffer>}
 	 */
-	getTransient() {
-		return this.transientMap;
-	}
+    getTransient() {
+        return this.transientMap;
+    }
 
-	/**
+    /**
 	 * The SignedProposal object represents the request object sent by the client application
 	 * to the chaincode.
 	 * @typedef {Object} SignedProposal
@@ -303,7 +305,7 @@ class ChaincodeStub {
 	 * @class
 	 */
 
-	/**
+    /**
 	 * The essential content of the chaincode invocation request
 	 * @typedef {Object} Proposal
 	 * @property {Header} header The header object contains metadata describing key aspects of the invocation
@@ -313,7 +315,7 @@ class ChaincodeStub {
 	 * @class
 	 */
 
-	/**
+    /**
 	 * @typedef {Object} Header
 	 * @property {ChannelHeader} channel_header Channel header identifies the destination channel of the invocation
 	 * request and the type of request etc.
@@ -322,7 +324,7 @@ class ChaincodeStub {
 	 * @class
 	 */
 
-	/**
+    /**
 	 * Channel header identifies the destination channel of the invocation
 	 * request and the type of request etc.
 	 * @typedef {Object} ChannelHeader
@@ -346,7 +348,7 @@ class ChaincodeStub {
 	 * @class
 	 */
 
-	/**
+    /**
 	 * @typedef {Object} SignatureHeader
 	 * @property {ProposalCreator} creator The submitter of the chaincode invocation request
 	 * @property {Buffer} nonce Arbitrary number that may only be used once. Can be used to detect replay attacks.
@@ -354,7 +356,7 @@ class ChaincodeStub {
 	 * @class
 	 */
 
-	/**
+    /**
 	 * @typedef {Object} ChaincodeProposalPayload
 	 * @property {Buffer} input Input contains the arguments for this invocation. If this invocation
 	 * deploys a new chaincode, ESCC/VSCC are part of this field. This is usually a marshaled ChaincodeInvocationSpec
@@ -365,24 +367,24 @@ class ChaincodeStub {
 	 * @class
 	 */
 
-	/**
+    /**
 	 * Returns a fully decoded object of the signed transaction proposal
 	 * @returns {SignedProposal}
 	 */
-	getSignedProposal() {
-		return this.signedProposal;
-	}
+    getSignedProposal() {
+        return this.signedProposal;
+    }
 
-	/**
+    /**
 	 * Returns the timestamp when the transaction was created. This
 	 * is taken from the transaction {@link ChannelHeader}, therefore it will indicate the
 	 * client's timestamp, and will have the same value across all endorsers.
 	 */
-	getTxTimestamp() {
-		return this.txTimestamp;
-	}
+    getTxTimestamp() {
+        return this.txTimestamp;
+    }
 
-	/**
+    /**
 	 * Returns a HEX-encoded string of SHA256 hash of the transaction's nonce, creator and epoch concatenated, as a
 	 * unique representation of the specific transaction. This value can be used to prevent replay attacks in chaincodes
 	 * that need to authenticate an identity independent of the transaction's submitter. In a chaincode proposal, the
@@ -410,24 +412,24 @@ class ChaincodeStub {
 	 *
 	 * @returns {string} A HEX-encoded string of SHA256 hash of the transaction's nonce, creator and epoch concatenated
 	 */
-	getBinding() {
-		return this.binding;
-	}
+    getBinding() {
+        return this.binding;
+    }
 
-	/**
+    /**
 	 * Retrieves the current value of the state variable <code>key</code>
 	 * @async
 	 * @param {string} key State variable key to retrieve from the state store
 	 * @returns {Promise<byte[]>} Promise for the current value of the state variable
 	 */
-	async getState(key) {
-		logger.debug('getState called with key:%s', key);
-		// Access public data by setting the collection to empty string
-		const collection = '';
-		return await this.handler.handleGetState(collection, key, this.channel_id, this.txId);
-	}
+    async getState(key) {
+        logger.debug('getState called with key:%s', key);
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        return await this.handler.handleGetState(collection, key, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * Writes the state variable <code>key</code> of value <code>value</code>
 	 * to the state store. If the variable already exists, the value will be
 	 * overwritten.
@@ -437,29 +439,29 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state update request
 	 * or rejected if any errors
 	 */
-	async putState(key, value) {
-		// Access public data by setting the collection to empty string
-		const collection = '';
-		if (typeof value === 'string') {
-			value = Buffer.from(value);
-		}
-		return await this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
-	}
+    async putState(key, value) {
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        if (typeof value === 'string') {
+            value = Buffer.from(value);
+        }
+        return await this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * Deletes the state variable <code>key</code> from the state store.
 	 * @async
 	 * @param {string} key State variable key to delete from the state store
 	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state delete request
 	 * or rejected if any errors
 	 */
-	async deleteState(key) {
-		// Access public data by setting the collection to empty string
-		const collection = '';
-		return await this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
-	}
+    async deleteState(key) {
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        return await this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * Returns a range iterator over a set of keys in the
 	 * ledger. The iterator can be used to iterate over all keys
 	 * between the startKey (inclusive) and endKey (exclusive).
@@ -479,18 +481,18 @@ class ChaincodeStub {
 	 * @param {string} endKey State variable key as the end of the key range (exclusive)
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
-	async getStateByRange(startKey, endKey) {
-		if (!startKey) {
-			startKey = EMPTY_KEY_SUBSTITUTE;
-		}
-		validateSimpleKeys(startKey, endKey);
-		// Access public data by setting the collection to empty string
-		const collection = '';
-		const { iterator } = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
-		return iterator;
-	}
+    async getStateByRange(startKey, endKey) {
+        if (!startKey) {
+            startKey = EMPTY_KEY_SUBSTITUTE;
+        }
+        validateSimpleKeys(startKey, endKey);
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        const {iterator} = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+        return iterator;
+    }
 
-	/**
+    /**
 	 * getStateByRangeWithPagination returns a range iterator over a set of keys in the
 	 * ledger. The iterator can be used to fetch keys between the startKey (inclusive)
 	 * and endKey (exclusive).
@@ -513,20 +515,20 @@ class ChaincodeStub {
 	 * @param {int} pageSize
 	 * @param {string} bookmark
 	 */
-	async getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark) {
-		if (!startKey) {
-			startKey = EMPTY_KEY_SUBSTITUTE;
-		}
-		if (!bookmark) {
-			bookmark = '';
-		}
-		validateSimpleKeys(startKey, endKey);
-		const collection = '';
-		const metadata = createQueryMetadata(pageSize, bookmark);
-		return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
-	}
+    async getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark) {
+        if (!startKey) {
+            startKey = EMPTY_KEY_SUBSTITUTE;
+        }
+        if (!bookmark) {
+            bookmark = '';
+        }
+        validateSimpleKeys(startKey, endKey);
+        const collection = '';
+        const metadata = createQueryMetadata(pageSize, bookmark);
+        return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
+    }
 
-	/**
+    /**
 	 * Performs a "rich" query against a state database. It is
 	 * only supported for state databases that support rich query,
 	 * e.g. CouchDB. The query string is in the native syntax
@@ -548,14 +550,14 @@ class ChaincodeStub {
 	 * @param {string} query Query string native to the underlying state database
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
-	async getQueryResult(query) {
-		// Access public data by setting the collection to empty string
-		const collection = '';
-		const { iterator } =  await this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
-		return iterator;
-	}
+    async getQueryResult(query) {
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        const {iterator} =  await this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
+        return iterator;
+    }
 
-	/**
+    /**
 	 * getQueryResultWithPagination performs a "rich" query against a state database.
 	 * It is only supported for state databases that support rich query,
 	 * e.g., CouchDB. The query string is in the native syntax
@@ -574,16 +576,16 @@ class ChaincodeStub {
 	 * @param {int} pageSize
 	 * @param {string} bookmark
 	 */
-	async getQueryResultWithPagination(query, pageSize, bookmark) {
-		if (!bookmark) {
-			bookmark = '';
-		}
-		const metadata = createQueryMetadata(pageSize, bookmark);
-		const collection = '';
-		return await this.handler.handleGetQueryResult(collection, query, metadata, this.channel_id, this.txId);
-	}
+    async getQueryResultWithPagination(query, pageSize, bookmark) {
+        if (!bookmark) {
+            bookmark = '';
+        }
+        const metadata = createQueryMetadata(pageSize, bookmark);
+        const collection = '';
+        return await this.handler.handleGetQueryResult(collection, query, metadata, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * Returns a history of key values across time.
 	 * For each historic key update, the historic value and associated
 	 * transaction id and timestamp are returned. The timestamp is the
@@ -600,11 +602,11 @@ class ChaincodeStub {
 	 * @param {string} key The state variable key
 	 * @returns {Promise} Promise for a {@link HistoryQueryIterator} object
 	 */
-	async getHistoryForKey(key) {
-		return await this.handler.handleGetHistoryForKey(key, this.channel_id, this.txId);
-	}
+    async getHistoryForKey(key) {
+        return await this.handler.handleGetHistoryForKey(key, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * A Response object is returned from a chaincode invocation
 	 * @typedef {Object} Response
 	 * @property {number} status A status code that follows the HTTP status codes
@@ -614,7 +616,7 @@ class ChaincodeStub {
 	 * @memberof fabric-shim
 	 */
 
-	/**
+    /**
 	 * Locally calls the specified chaincode <code>invoke()</code> using the
 	 * same transaction context; that is, chaincode calling chaincode doesn't
 	 * create a new transaction message.<br><br>
@@ -635,14 +637,14 @@ class ChaincodeStub {
 	 * @param {string} channel Name of the channel where the target chaincode is active
 	 * @returns {Promise} Promise for a {@link Response} object returned by the called chaincode
 	 */
-	async invokeChaincode(chaincodeName, args, channel) {
-		if (channel && channel.length > 0) {
-			chaincodeName = chaincodeName + '/' + channel;
-		}
-		return await this.handler.handleInvokeChaincode(chaincodeName, args, this.channel_id, this.txId);
-	}
+    async invokeChaincode(chaincodeName, args, channel) {
+        if (channel && channel.length > 0) {
+            chaincodeName = chaincodeName + '/' + channel;
+        }
+        return await this.handler.handleInvokeChaincode(chaincodeName, args, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * Allows the chaincode to propose an event on the transaction proposal. When the transaction
 	 * is included in a block and the block is successfully committed to the ledger, the block event
 	 * will be delivered to the current event listeners that have been registered with the peer's
@@ -653,17 +655,18 @@ class ChaincodeStub {
 	 * @param {string} name Name of the event
 	 * @param {byte[]} payload A payload can be used to include data about the event
 	 */
-	setEvent(name, payload) {
-		if (typeof name !== 'string' || name === '')
-			throw new Error('Event name must be a non-empty string');
+    setEvent(name, payload) {
+        if (typeof name !== 'string' || name === '') {
+            throw new Error('Event name must be a non-empty string');
+        }
 
-		let event = new _eventProto.ChaincodeEvent();
-		event.setEventName(name);
-		event.setPayload(payload);
-		this.chaincodeEvent = event;
-	}
+        const event = new _eventProto.ChaincodeEvent();
+        event.setEventName(name);
+        event.setPayload(payload);
+        this.chaincodeEvent = event;
+    }
 
-	/**
+    /**
 	 * Creates a composite key by combining the objectType string and the given `attributes` to form a composite
 	 * key. The objectType and attributes are expected to have only valid utf8 strings and should not contain
 	 * U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point). The resulting composite key can be
@@ -682,21 +685,21 @@ class ChaincodeStub {
 	 * @return {string} A composite key with the <code>objectType</code> and the array of <code>attributes</code>
 	 * joined together with special delimiters that will not be confused with values of the attributes
 	 */
-	createCompositeKey(objectType, attributes) {
-		validateCompositeKeyAttribute(objectType);
-		if (!Array.isArray(attributes)) {
-			throw new Error('attributes must be an array');
-		}
+    createCompositeKey(objectType, attributes) {
+        validateCompositeKeyAttribute(objectType);
+        if (!Array.isArray(attributes)) {
+            throw new Error('attributes must be an array');
+        }
 
-		let compositeKey = COMPOSITEKEY_NS + objectType + MIN_UNICODE_RUNE_VALUE;
-		attributes.forEach((attribute) => {
-			validateCompositeKeyAttribute(attribute);
-			compositeKey = compositeKey + attribute + MIN_UNICODE_RUNE_VALUE;
-		});
-		return compositeKey;
-	}
+        let compositeKey = COMPOSITEKEY_NS + objectType + MIN_UNICODE_RUNE_VALUE;
+        attributes.forEach((attribute) => {
+            validateCompositeKeyAttribute(attribute);
+            compositeKey = compositeKey + attribute + MIN_UNICODE_RUNE_VALUE;
+        });
+        return compositeKey;
+    }
 
-	/**
+    /**
 	 * Splits the specified key into attributes on which the composite key was formed.
 	 * Composite keys found during range queries or partial composite key queries can
 	 * therefore be split into their original composite parts, essentially recovering
@@ -705,21 +708,21 @@ class ChaincodeStub {
 	 * @return {Object} An object which has properties of 'objectType' (string) and
 	 * 'attributes' (string[])
 	 */
-	splitCompositeKey(compositeKey) {
-		let result = { objectType: null, attributes: [] };
-		if (compositeKey && compositeKey.length > 1 && compositeKey.charAt(0) === COMPOSITEKEY_NS) {
-			let splitKey = compositeKey.substring(1).split(MIN_UNICODE_RUNE_VALUE);
-			result.objectType = splitKey[0];
-			splitKey.pop();
-			if (splitKey.length > 1) {
-				splitKey.shift();
-				result.attributes = splitKey;
-			}
-		}
-		return result;
-	}
+    splitCompositeKey(compositeKey) {
+        const result = {objectType: null, attributes: []};
+        if (compositeKey && compositeKey.length > 1 && compositeKey.charAt(0) === COMPOSITEKEY_NS) {
+            const splitKey = compositeKey.substring(1).split(MIN_UNICODE_RUNE_VALUE);
+            result.objectType = splitKey[0];
+            splitKey.pop();
+            if (splitKey.length > 1) {
+                splitKey.shift();
+                result.attributes = splitKey;
+            }
+        }
+        return result;
+    }
 
-	/**
+    /**
 	 * Queries the state in the ledger based on a given partial composite key. This function returns an iterator
 	 * which can be used to iterate over all composite keys whose prefix matches the given partial composite key.
 	 *
@@ -741,16 +744,16 @@ class ChaincodeStub {
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
 	 * @return {Promise} A promise that resolves with a {@link StateQueryIterator}, rejects if an error occurs
 	 */
-	async getStateByPartialCompositeKey(objectType, attributes) {
-		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
-		const startKey = partialCompositeKey;
-		const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
-		const collection = '';
-		const { iterator } = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
-		return iterator;
-	}
+    async getStateByPartialCompositeKey(objectType, attributes) {
+        const partialCompositeKey = this.createCompositeKey(objectType, attributes);
+        const startKey = partialCompositeKey;
+        const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
+        const collection = '';
+        const {iterator} = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+        return iterator;
+    }
 
-	/**
+    /**
 	 * GetStateByPartialCompositeKeyWithPagination queries the state in the ledger based on
 	 * a given partial composite key. This function returns an iterator
 	 * which can be used to iterate over the composite keys whose
@@ -775,19 +778,19 @@ class ChaincodeStub {
 	 * @param {int} pageSize
 	 * @param {string} bookmark
 	 */
-	async getStateByPartialCompositeKeyWithPagination(objectType, attributes, pageSize, bookmark) {
-		if (!bookmark) {
-			bookmark = '';
-		}
-		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
-		const startKey = partialCompositeKey;
-		const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
-		const collection = '';
-		const metadata = createQueryMetadata(pageSize, bookmark);
-		return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
-	}
+    async getStateByPartialCompositeKeyWithPagination(objectType, attributes, pageSize, bookmark) {
+        if (!bookmark) {
+            bookmark = '';
+        }
+        const partialCompositeKey = this.createCompositeKey(objectType, attributes);
+        const startKey = partialCompositeKey;
+        const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
+        const collection = '';
+        const metadata = createQueryMetadata(pageSize, bookmark);
+        return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
+    }
 
-	/**
+    /**
 	 * getPrivateData returns the value of the specified `key` from the specified
 	 * `collection`. Note that GetPrivateData doesn't read data from the
 	 * private writeset, which has not been committed to the `collection`. In
@@ -798,19 +801,19 @@ class ChaincodeStub {
 	 * @param {string} key Private data variable key to retrieve from the state store
 	 * @returns {Promise<byte[]>} Promise for the private value from the state store
 	 */
-	async getPrivateData(collection, key) {
-		logger.debug('getPrivateData called with collection:%s, key:%s', collection, key);
-		if (!collection || typeof collection !== 'string') {
-			throw new Error('collection must be a valid string');
-		}
-		if (!key || typeof key !== 'string') {
-			throw new Error('key must be a valid string');
-		}
+    async getPrivateData(collection, key) {
+        logger.debug('getPrivateData called with collection:%s, key:%s', collection, key);
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!key || typeof key !== 'string') {
+            throw new Error('key must be a valid string');
+        }
 
-		return await this.handler.handleGetState(collection, key, this.channel_id, this.txId);
-	}
+        return await this.handler.handleGetState(collection, key, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * putPrivateData puts the specified `key` and `value` into the transaction's
 	 * private writeSet. Note that only hash of the private writeSet goes into the
 	 * transaction proposal response (which is sent to the client who issued the
@@ -825,25 +828,25 @@ class ChaincodeStub {
 	 * @param {string} key Private data variable key to set the value for
 	 * @param {string|byte[]} value Private data variable value
 	 */
-	async putPrivateData(collection, key, value) {
-		logger.debug('putPrivateData called with collection:%s, key:%s', collection, key);
-		if (!collection || typeof collection !== 'string') {
-			throw new Error('collection must be a valid string');
-		}
-		if (!key || typeof key !== 'string') {
-			throw new Error('key must be a valid string');
-		}
-		if (!value) {
-			throw new Error('value must be valid');
-		}
-		if (typeof value === 'string') {
-			value = Buffer.from(value);
-		}
+    async putPrivateData(collection, key, value) {
+        logger.debug('putPrivateData called with collection:%s, key:%s', collection, key);
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!key || typeof key !== 'string') {
+            throw new Error('key must be a valid string');
+        }
+        if (!value) {
+            throw new Error('value must be valid');
+        }
+        if (typeof value === 'string') {
+            value = Buffer.from(value);
+        }
 
-		return this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
-	}
+        return this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * deletePrivateData records the specified `key` to be deleted in the private writeset of
 	 * the transaction. Note that only hash of the private writeset goes into the
 	 * transaction proposal response (which is sent to the client who issued the
@@ -854,18 +857,18 @@ class ChaincodeStub {
 	 * @param {string} collection The collection name
 	 * @param {string} key Private data variable key to delete from the state store
 	 */
-	async deletePrivateData(collection, key) {
-		logger.debug('deletePrivateData called with collection:%s, key:%s', collection, key);
-		if (!collection || typeof collection !== 'string') {
-			throw new Error('collection must be a valid string');
-		}
-		if (!key || typeof key !== 'string') {
-			throw new Error('key must be a valid string');
-		}
-		return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
-	}
+    async deletePrivateData(collection, key) {
+        logger.debug('deletePrivateData called with collection:%s, key:%s', collection, key);
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!key || typeof key !== 'string') {
+            throw new Error('key must be a valid string');
+        }
+        return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * getPrivateDataByRange returns a range iterator over a set of keys in a
 	 * given private collection. The iterator can be used to iterate over all keys
 	 * between the startKey (inclusive) and endKey (exclusive).
@@ -880,22 +883,22 @@ class ChaincodeStub {
 	 * @param {string} startKey Private data variable key as the start of the key range (inclusive)
 	 * @param {string} endKey Private data variable key as the end of the key range (exclusive)
 	 */
-	async getPrivateDataByRange(collection, startKey, endKey) {
-		logger.debug('getPrivateDataByRange called with collection:%s, startKey:%s, endKey:%s', collection, startKey, endKey);
-		if (arguments.length !== 3) {
-			throw new Error('getPrivateDataByRange requires three arguments, collection, startKey and endKey');
-		}
-		if (!collection || typeof collection !== 'string') {
-			throw new Error('collection must be a valid string');
-		}
-		if (!startKey) {
-			startKey = EMPTY_KEY_SUBSTITUTE;
-		}
+    async getPrivateDataByRange(collection, startKey, endKey) {
+        logger.debug('getPrivateDataByRange called with collection:%s, startKey:%s, endKey:%s', collection, startKey, endKey);
+        if (arguments.length !== 3) {
+            throw new Error('getPrivateDataByRange requires three arguments, collection, startKey and endKey');
+        }
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!startKey) {
+            startKey = EMPTY_KEY_SUBSTITUTE;
+        }
 
-		return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
-	}
+        return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+    }
 
-	/**
+    /**
 	 * getPrivateDataByPartialCompositeKey queries the state in a given private
 	 * collection based on a given partial composite key. This function returns
 	 * an iterator which can be used to iterate over all composite keys whose prefix
@@ -911,20 +914,20 @@ class ChaincodeStub {
 	 * @param {string} objectType A string used as the prefix of the resulting key
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
 	 */
-	async getPrivateDataByPartialCompositeKey(collection, objectType, attributes) {
-		logger.debug('getPrivateDataByRange called with collection:%s, objectType:%s, attributes:%j', collection, objectType, attributes);
-		if (arguments.length !== 3) {
-			throw new Error('getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
-		}
-		if (!collection || typeof collection !== 'string') {
-			throw new Error('collection must be a valid string');
-		}
-		const partialCompositeKey = this.createCompositeKey(objectType, attributes);
+    async getPrivateDataByPartialCompositeKey(collection, objectType, attributes) {
+        logger.debug('getPrivateDataByRange called with collection:%s, objectType:%s, attributes:%j', collection, objectType, attributes);
+        if (arguments.length !== 3) {
+            throw new Error('getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
+        }
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        const partialCompositeKey = this.createCompositeKey(objectType, attributes);
 
-		return this.getPrivateDataByRange(collection, partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
-	}
+        return this.getPrivateDataByRange(collection, partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+    }
 
-	/**
+    /**
 	 * getPrivateDataQueryResult performs a "rich" query against a given private
 	 * collection. It is only supported for state databases that support rich query,
 	 * e.g.CouchDB. The query string is in the native syntax
@@ -941,17 +944,17 @@ class ChaincodeStub {
 	 * @param {string} query The query to be performed
 	 * @returns {Promise} Promise for a {@link PrivateQueryIterator} object
 	 */
-	async getPrivateDataQueryResult(collection, query) {
-		logger.debug('getPrivateDataQueryResult called with collection:%s, query:%j', collection, query);
-		if (arguments.length !== 2) {
-			throw new Error('getPrivateDataQueryResult requires two arguments, collection and query');
-		}
-		if (!collection || typeof collection !== 'string') {
-			throw new Error('collection must be a valid string');
-		}
+    async getPrivateDataQueryResult(collection, query) {
+        logger.debug('getPrivateDataQueryResult called with collection:%s, query:%j', collection, query);
+        if (arguments.length !== 2) {
+            throw new Error('getPrivateDataQueryResult requires two arguments, collection and query');
+        }
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
 
-		return this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
-	}
+        return this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
+    }
 }
 
 module.exports = ChaincodeStub;

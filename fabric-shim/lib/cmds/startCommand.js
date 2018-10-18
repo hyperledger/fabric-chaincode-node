@@ -15,22 +15,22 @@
 'use strict';
 
 
-let YargsParser = require('yargs-parser');
+const YargsParser = require('yargs-parser');
 
 const Bootstrap = require('../contract-spi/bootstrap');
 
 const validOptions = {
-	'peer.address': {type: 'string', required: true},
-	'grpc.max_send_message_length': {type: 'number', default: -1},
-	'grpc.max_receive_message_length': {type: 'number', default: -1},
-	'grpc.keepalive_time_ms': {type: 'number', default: 60000},
-	'grpc.http2.min_time_between_pings_ms': {type: 'number', default: 60000},
-	'grpc.keepalive_timeout_ms': {type: 'number', default: 20000},
-	'grpc.http2.max_pings_without_data': {type: 'number', default: 0},
-	'grpc.keepalive_permit_without_calls': {type: 'number', default: 1},
-	'ssl-target-name-override': {type: 'string'},
-	'chaincode-id-name': {type: 'string', required: true},
-	'module-path': {type: 'string', default: process.cwd()}
+    'peer.address': {type: 'string', required: true},
+    'grpc.max_send_message_length': {type: 'number', default: -1},
+    'grpc.max_receive_message_length': {type: 'number', default: -1},
+    'grpc.keepalive_time_ms': {type: 'number', default: 60000},
+    'grpc.http2.min_time_between_pings_ms': {type: 'number', default: 60000},
+    'grpc.keepalive_timeout_ms': {type: 'number', default: 20000},
+    'grpc.http2.max_pings_without_data': {type: 'number', default: 0},
+    'grpc.keepalive_permit_without_calls': {type: 'number', default: 1},
+    'ssl-target-name-override': {type: 'string'},
+    'chaincode-id-name': {type: 'string', required: true},
+    'module-path': {type: 'string', default: process.cwd()}
 };
 
 module.exports.validOptions = validOptions;
@@ -38,52 +38,52 @@ module.exports.validOptions = validOptions;
 exports.command = 'start [options]';
 exports.desc = 'Start an empty chaincode';
 exports.builder = (yargs) => {
-	yargs.options(validOptions);
+    yargs.options(validOptions);
 
-	yargs.usage('fabric-chaincode-node start --peer.address localhost:7051 --chaincode-id-name mycc');
+    yargs.usage('fabric-chaincode-node start --peer.address localhost:7051 --chaincode-id-name mycc');
 
-	return yargs;
+    return yargs;
 };
 exports.handler = function () {
-	Bootstrap.bootstrap();
+    Bootstrap.bootstrap();
 };
 
 exports.getArgs = function (yargs) {
-	let argv = yargs.argv;
+    let argv = yargs.argv;
 
-	if (argv.$0 !== 'fabric-chaincode-node') {
+    if (argv.$0 !== 'fabric-chaincode-node') {
 
-		let defaults = {};
+        const defaults = {};
 
-		let required = [];
+        const required = [];
 
-		for (let key in validOptions) {
-			if (validOptions[key].hasOwnProperty('default')) {
-				defaults[key] = validOptions[key].default;
-			}
+        for (const key in validOptions) {
+            if (validOptions[key].hasOwnProperty('default')) {
+                defaults[key] = validOptions[key].default;
+            }
 
-			if (validOptions[key].hasOwnProperty('required') && validOptions[key].required) {
-				required.push(key);
-			}
-		}
+            if (validOptions[key].hasOwnProperty('required') && validOptions[key].required) {
+                required.push(key);
+            }
+        }
 
-		argv = YargsParser(process.argv.slice(2), {
-			default: defaults,
-			configuration: {
-				'dot-notation': false
-			},
-			envPrefix: 'CORE'
-		});
+        argv = YargsParser(process.argv.slice(2), {
+            default: defaults,
+            configuration: {
+                'dot-notation': false
+            },
+            envPrefix: 'CORE'
+        });
 
-		argv['chaincode-id-name'] = argv.chaincodeIdName;
-		argv['module-path'] = argv.modulePath;
+        argv['chaincode-id-name'] = argv.chaincodeIdName;
+        argv['module-path'] = argv.modulePath;
 
-		required.forEach((argName) => {
-			if (!argv.hasOwnProperty(argName)) {
-				throw new Error('Missing required argument ' + argName);
-			}
-		});
-	}
+        required.forEach((argName) => {
+            if (!argv.hasOwnProperty(argName)) {
+                throw new Error('Missing required argument ' + argName);
+            }
+        });
+    }
 
-	return argv;
+    return argv;
 };

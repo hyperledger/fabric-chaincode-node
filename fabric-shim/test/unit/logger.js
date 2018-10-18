@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-/*global describe it */
+/* global describe it */
 'use strict';
 
 const winston = require('winston');
@@ -14,83 +14,83 @@ const rewire = require('rewire');
 const Logger = rewire('../../../fabric-shim/lib/logger.js');
 
 describe('Logger', () => {
-	describe('getLogger', () => {
-		it ('should create a new logger name unknown', () => {
-			let log = Logger.getLogger('unknown name');
+    describe('getLogger', () => {
+        it ('should create a new logger name unknown', () => {
+            const log = Logger.getLogger('unknown name');
 
-			expect(log instanceof winston.Logger).to.be.ok;
-			expect(log.level).to.deep.equal('info');
-		});
+            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log.level).to.deep.equal('info');
+        });
 
-		it ('should return existing logger if known name used', () => {
-			let myLogger = {
-				hello: 'world'
-			};
+        it ('should return existing logger if known name used', () => {
+            const myLogger = {
+                hello: 'world'
+            };
 
-			Logger.__set__('loggers', {
-				'myLogger': myLogger
-			});
+            Logger.__set__('loggers', {
+                'myLogger': myLogger
+            });
 
-			let log = Logger.getLogger('myLogger');
-			expect(log).to.deep.equal(Object.assign(myLogger, {log: 'info'}));
+            const log = Logger.getLogger('myLogger');
+            expect(log).to.deep.equal(Object.assign(myLogger, {log: 'info'}));
 
-			Logger.__set__('loggers', {});
-		});
+            Logger.__set__('loggers', {});
+        });
 
-		it ('should set the log level to fatal when env var set to CRITICAL', () => {
-			process.env['CORE_CHAINCODE_LOGGING_SHIM'] = 'CRITICAL';
+        it ('should set the log level to fatal when env var set to CRITICAL', () => {
+            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'CRITICAL';
 
-			let log = Logger.getLogger();
+            const log = Logger.getLogger();
 
-			expect(log instanceof winston.Logger).to.be.ok;
-			expect(log.level).to.deep.equal('fatal');
-		});
+            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log.level).to.deep.equal('fatal');
+        });
 
-		it ('should set the log level to error when env var set to ERROR', () => {
-			process.env['CORE_CHAINCODE_LOGGING_SHIM'] = 'ERROR';
+        it ('should set the log level to error when env var set to ERROR', () => {
+            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'ERROR';
 
-			let log = Logger.getLogger();
+            const log = Logger.getLogger();
 
-			expect(log instanceof winston.Logger).to.be.ok;
-			expect(log.level).to.deep.equal('error');
-		});
+            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log.level).to.deep.equal('error');
+        });
 
-		it ('should set the log level to warn when env var set to WARNING', () => {
-			process.env['CORE_CHAINCODE_LOGGING_SHIM'] = 'WARNING';
+        it ('should set the log level to warn when env var set to WARNING', () => {
+            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'WARNING';
 
-			let log = Logger.getLogger();
+            const log = Logger.getLogger();
 
-			expect(log instanceof winston.Logger).to.be.ok;
-			expect(log.level).to.deep.equal('warn');
-		});
+            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log.level).to.deep.equal('warn');
+        });
 
-		it ('should set the log level to debug when env var set to DEBUG', () => {
-			process.env['CORE_CHAINCODE_LOGGING_SHIM'] = 'DEBUG';
+        it ('should set the log level to debug when env var set to DEBUG', () => {
+            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
 
-			let log = Logger.getLogger();
+            const log = Logger.getLogger();
 
-			expect(log instanceof winston.Logger).to.be.ok;
-			expect(log.level).to.deep.equal('debug');
-		});
-	});
+            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log.level).to.deep.equal('debug');
+        });
+    });
 
-	describe('formatter',()=>{
-		it('',()=>{
-			process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
+    describe('formatter', () => {
+        it ('', () => {
+            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
 
-			let log = Logger.getLogger();
-			log.debug();
-			log.debug('hello');
-			log.debug('hello',{'one':'two'});
-			// sinon.assert.calledWith(logSpy,'wibble');
-		});
+            const log = Logger.getLogger();
+            log.debug();
+            log.debug('hello');
+            log.debug('hello', {'one':'two'});
+            // sinon.assert.calledWith(logSpy,'wibble');
+        });
 
-		it('',()=>{
-			process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
+        it ('', () => {
+            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
 
-			let log = Logger.getLogger('fred');
-			log.debug('hello','fred');
-			// sinon.assert.calledWith(logSpy,'wibble');
-		});
-	});
+            const log = Logger.getLogger('fred');
+            log.debug('hello', 'fred');
+            // sinon.assert.calledWith(logSpy,'wibble');
+        });
+    });
 });

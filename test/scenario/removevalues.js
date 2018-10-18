@@ -3,9 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-
 'use strict';
-
+/* eslint-disable no-console */
 const {Contract} = require('fabric-contract-api');
 
 /**
@@ -13,41 +12,37 @@ const {Contract} = require('fabric-contract-api');
  */
 class RemoveValues extends Contract {
 
-	/**
-     *
-     */
-	constructor() {
-		super('org.mynamespace.removes');
-		// going to leave the default 'not known function' handling alone
-	}
+    constructor() {
+        super('org.mynamespace.removes');
+        // going to leave the default 'not known function' handling alone
+    }
 
-	/**
+    /**
      *
      * @param {*} api
      */
-	async quarterAssetValue({stub}) {
-		console.info('Transaction ID: ' + stub.getTxID());   //eslint-disable-line
+    async quarterAssetValue({stub}) {
+        console.info('Transaction ID: ' + stub.getTxID());
 
-		let value = await stub.getState('dummyKey');
-		if (Number.isNan(value)) {
-			let str = `'Need to have numerc value set to quarter it, ${value}`;
-			console.error(str); //eslint-disable-line
-			throw new Error(str);
-		} else {
-			let v = value/4;
-			await stub.putState('dummyKey', v);
-			return v;
-		}
-	}
+        const value = await stub.getState('dummyKey');
+        if (Number.isNan(value)) {
+            const str = `'Need to have numerc value set to quarter it, ${value}`;
+            console.error(str);
+            throw new Error(str);
+        } else {
+            const v = value / 4;
+            await stub.putState('dummyKey', v);
+            return v;
+        }
+    }
 
 
-	async getAssetValue({stub}){
-		console.info('Transaction ID: ' + stub.getTxID()); //eslint-disable-line
+    async getAssetValue({stub}) {
+        console.info('Transaction ID: ' + stub.getTxID());
 
-		let value = await stub.getState('dummyKey');
-
-		return value;
-	}
+        const value = await stub.getState('dummyKey');
+        return value;
+    }
 
 }
 

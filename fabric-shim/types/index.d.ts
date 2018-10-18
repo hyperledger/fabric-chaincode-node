@@ -162,8 +162,8 @@ declare module 'fabric-shim' {
         }
     }
 
-    //This def is correct, but possibly not complete
-    //for example it doesn't include extensions
+    // This def is correct, but possibly not complete
+    // for example it doesn't include extensions
     export namespace X509 {
         interface Certificate {
             subject: Subject;

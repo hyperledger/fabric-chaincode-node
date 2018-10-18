@@ -8,9 +8,9 @@
 const os = require('os');
 const path = require('path');
 
-let tempdir = path.join(os.tmpdir(), 'fabric-shim');
-let bnSamplesPath = path.join(__dirname, '../../fabric-samples/basic-network');
-let bnTestDir = path.join(tempdir, 'basic-network');
+const tempdir = path.join(os.tmpdir(), 'fabric-shim');
+const bnSamplesPath = path.join(__dirname, '../../fabric-samples/basic-network');
+const bnTestDir = path.join(tempdir, 'basic-network');
 
 module.exports.tempdir = tempdir;
 module.exports.BasicNetworkSamplePath = bnSamplesPath;

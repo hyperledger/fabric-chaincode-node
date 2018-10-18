@@ -15,23 +15,23 @@ const Contract = require('fabric-contract-api').Contract;
  */
 class SystemContract extends Contract {
 
-	constructor(){
-		super('org.hyperledger.fabric');
-	}
+    constructor() {
+        super('org.hyperledger.fabric');
+    }
 
-	/**
+    /**
 	 *
 	 * @param {Object} chaincode
 	 */
-	_setChaincode(chaincode){
-		this.chaincode = chaincode;
-	}
-	/**
+    _setChaincode(chaincode) {
+        this.chaincode = chaincode;
+    }
+    /**
      * Gets meta data associated with this Chaincode deployment
      */
-	getMetaData(){
-		return JSON.stringify(this.chaincode.getContracts());
-	}
+    getMetaData() {
+        return JSON.stringify(this.chaincode.getContracts());
+    }
 
 }
 

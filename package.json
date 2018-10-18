@@ -46,7 +46,7 @@
     "mocha": "3.4.2",
     "mockery": "^2.1.0",
     "require-dir": "^0.3.2",
-    "rewire": "^3.0.2",
+    "rewire": "^4.0.1",
     "run-sequence": "^2.2.1",
     "sinon": "^6.1.5",
     "sinon-test": "^2.2.0",

@@ -18,20 +18,20 @@ const Context = require('./context');
  */
 class Contract {
 
-	/**
+    /**
      * Constructor - supplying a namespace is recommended but is not mandatory.
 	 *
      * @param {String} namespace namespace for the logic within this contract
      */
-	constructor(namespace){
-		if (namespace && namespace.trim() !== '' ){
-			this.namespace = namespace.trim();
-		} else {
-			this.namespace = '';
-		}
-	}
+    constructor(namespace) {
+        if (namespace && namespace.trim() !== '') {
+            this.namespace = namespace.trim();
+        } else {
+            this.namespace = '';
+        }
+    }
 
-	/**
+    /**
 	 * 'beforeTransaction' will be called before any of the transaction functions within your contract
 	 * Override this method to implement your own processing. Examples of what you may wish to code
 	 *  are Logging, Event Publishing or Permissions checks
@@ -40,11 +40,11 @@ class Contract {
 	 *
 	 * @param {Context} ctx the transactional context
 	 */
-	async beforeTransaction(ctx){										// eslint-disable-line
-		// default implementation is do nothing
-	}
+    async beforeTransaction(ctx) {
+    // default implementation is do nothing
+    }
 
-	/**
+    /**
 	 * 'afterTransaction' will be called before any of the transaction functions within your contract
 	 * Override this method to implement your own processing. Examples of what you may wish to code
 	 *  are Logging, Event Publishing
@@ -54,24 +54,23 @@ class Contract {
 	 * @param {Context} ctx the transactional context
 	 * @param {Object} result value that is returned from the transaction function
 	 */
-	async afterTransaction(ctx,result){								// eslint-disable-line no-unused-vars
-		// default implementation is do nothing
-	}
+    async afterTransaction(ctx, result) {
+        // default implementation is do nothing
+    }
 
-	/**
+    /**
 	 * 'unknownTransaction' will be called if the required transaction function requested does not exist
 	 * Override this method to implement your own processing.
-	 * 	 *
 	 * If an error is thrown, the whole transaction will be rejected
 	 *
 	 * @param {Context} ctx the transactional context
 	 */
-	async unknownTransaction(ctx) {
-		const { fcn } = ctx.stub.getFunctionAndParameters();
-		throw new Error(`You've asked to invoke a function that does not exist: ${fcn}`);
-	}
+    async unknownTransaction(ctx) {
+        const {fcn} = ctx.stub.getFunctionAndParameters();
+        throw new Error(`You've asked to invoke a function that does not exist: ${fcn}`);
+    }
 
-	/**
+    /**
 	 * 'createContext' is called before any after, before, unknown or user defined transaction function. This permits contracts
 	 * to use their own subclass of context to add additinal processing.
 	 *
@@ -81,16 +80,16 @@ class Contract {
 	 *
 	 * @return {Context} a context implementation that must subclass context
 	 */
-	createContext(){
-		return new Context();
-	}
+    createContext() {
+        return new Context();
+    }
 
-	/**
+    /**
      * @return {String} returns the namepsace
      */
-	getNamespace(){
-		return this.namespace;
-	}
+    getNamespace() {
+        return this.namespace;
+    }
 
 }
 

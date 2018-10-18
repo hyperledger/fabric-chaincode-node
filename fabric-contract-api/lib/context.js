@@ -35,28 +35,28 @@
  */
 class Context {
 
-	constructor(){
-	}
+    constructor() {
+    }
 
-	/**
+    /**
 	 * This sets the chaincode stub object with api to use for worldstate access.
 	 * MUST NOT BE CALLED FROM SMART CONTRACT CODE
 	 *
 	 * @param {ChaincodeStub} stub chaincode stub instance
 	 */
-	setChaincodeStub(stub){
-		this.stub = stub;
-	}
+    setChaincodeStub(stub) {
+        this.stub = stub;
+    }
 
-	/**
+    /**
 	 * This sets the ClientIdentity object to use for information on the transaction invoking identity
 	 * MUST NOT BE CALLED FROM SMART CONTRACT CODE
 	 *
 	 * @param {ClientIdentity} clientIdentity chaincode stub instance
 	 */
-	setClientIdentity(clientIdentity){
-		this.clientIdentity = clientIdentity;
-	}
+    setClientIdentity(clientIdentity) {
+        this.clientIdentity = clientIdentity;
+    }
 }
 
 module.exports = Context;

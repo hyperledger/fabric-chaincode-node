@@ -1,17 +1,17 @@
 'use strict';
 
-const { Context } = require('fabric-contract-api');
+const {Context} = require('fabric-contract-api');
 
-class ScenarioContext extends Context{
+class ScenarioContext extends Context {
 
-	constructor(){
-		super();
-	}
+    constructor() {
+        super();
+    }
 
 
-	generateKey(){
-		return this.stub.createCompositeKey('type',['keyvalue']);
-	}
+    generateKey() {
+        return this.stub.createCompositeKey('type', ['keyvalue']);
+    }
 
 }
 

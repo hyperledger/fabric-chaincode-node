@@ -21,21 +21,21 @@ const fs = require('fs');
 
 const StartCommand = require('./cmds/startCommand.js');
 
-let yargs = require('yargs');
+const yargs = require('yargs');
 
 const _chaincodeProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'peer/chaincode.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'peer/chaincode.proto'
 }).protos;
 
 const _serviceProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'peer/chaincode_shim.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'peer/chaincode_shim.proto'
 }).protos;
 
 const _responseProto = grpc.load({
-	root: path.join(__dirname, './protos'),
-	file: 'peer/proposal_response.proto'
+    root: path.join(__dirname, './protos'),
+    file: 'peer/proposal_response.proto'
 }).protos;
 
 /**
@@ -50,7 +50,7 @@ const _responseProto = grpc.load({
  */
 class ChaincodeInterface {
 
-	/**
+    /**
 	 * Called during chaincode instantiate and upgrade. This method can be used
 	 * to initialize asset states
 	 * @async
@@ -58,9 +58,9 @@ class ChaincodeInterface {
 	 * library and passed to the ChaincodeInterface calls by the Hyperledger Fabric platform. The stub
 	 * encapsulates the APIs between the chaincode implementation and the Fabric peer
 	 */
-	async Init(stub) {}   // eslint-disable-line no-unused-vars
+    async Init(stub) {}
 
-	/**
+    /**
 	 * called throughout the life time of the chaincode to carry out business
 	 * transaction logic and effect the asset states
 	 * @async
@@ -68,7 +68,7 @@ class ChaincodeInterface {
 	 * library and passed to the ChaincodeInterface calls by the Hyperledger Fabric platform. The stub
 	 * encapsulates the APIs between the chaincode implementation and the Fabric peer
 	 */
-	async Invoke(stub) {}   // eslint-disable-line no-unused-vars
+    async Invoke(stub) {}
 }
 
 /**
@@ -79,7 +79,7 @@ class ChaincodeInterface {
  * @memberof fabric-shim
  */
 class Shim {
-	/**
+    /**
 	 * Call this method to start the chaincode process. After constructing a chaincode object,
 	 * pass the object to this function which will initiate a request to register the chaincode
 	 * with the target peer. The address of the target peer must be provided via a program
@@ -87,65 +87,68 @@ class Shim {
 	 * @static
 	 * @param {ChaincodeInterface} chaincode User-provided object that must implement the <code>ChaincodeInterface</code>
 	 */
-	static start(chaincode) {
-		let opts = StartCommand.getArgs(yargs);
+    static start(chaincode) {
+        const opts = StartCommand.getArgs(yargs);
 
-		if (typeof chaincode !== 'object' || chaincode === null)
-			throw new Error('Missing required argument: chaincode');
+        if (typeof chaincode !== 'object' || chaincode === null) {
+            throw new Error('Missing required argument: chaincode');
+        }
 
-		if (typeof chaincode.Init !== 'function')
-			throw new Error('The "chaincode" argument must implement the "Init()" method');
+        if (typeof chaincode.Init !== 'function') {
+            throw new Error('The "chaincode" argument must implement the "Init()" method');
+        }
 
-		if (typeof chaincode.Invoke !== 'function')
-			throw new Error('The "chaincode" argument must implement the "Invoke()" method');
+        if (typeof chaincode.Invoke !== 'function') {
+            throw new Error('The "chaincode" argument must implement the "Invoke()" method');
+        }
 
-		logger.debug(opts);
+        logger.debug(opts);
 
-		let optsCpy  = Object.assign({}, opts);
-		let expectedOpts = StartCommand.validOptions;
+        const optsCpy  = Object.assign({}, opts);
+        const expectedOpts = StartCommand.validOptions;
 
-		for (let key in optsCpy) {
-			if (!expectedOpts.hasOwnProperty(key)) {
-				delete optsCpy[key];
-			}
-		}
-		delete optsCpy['chaincode-id-name'];
-		delete optsCpy['module-path'];
+        for (const key in optsCpy) {
+            if (!expectedOpts.hasOwnProperty(key)) {
+                delete optsCpy[key];
+            }
+        }
+        delete optsCpy['chaincode-id-name'];
+        delete optsCpy['module-path'];
 
-		let url = parsePeerUrl(opts['peer.address']);
-		if (isTLS()){
-			optsCpy.pem = fs.readFileSync(process.env.CORE_PEER_TLS_ROOTCERT_FILE).toString();
+        const url = parsePeerUrl(opts['peer.address']);
+        if (isTLS()) {
+            optsCpy.pem = fs.readFileSync(process.env.CORE_PEER_TLS_ROOTCERT_FILE).toString();
 
-			// the peer enforces mutual TLS, so we must have the client key and cert to proceed
-			let keyPath = process.env.CORE_TLS_CLIENT_KEY_PATH;
-			let certPath = process.env.CORE_TLS_CLIENT_CERT_PATH;
-			if (typeof keyPath !== 'string' || typeof certPath !== 'string') {
-				throw new Error('The client key and cert are needed when TLS is enabled, but environment ' +
+            // the peer enforces mutual TLS, so we must have the client key and cert to proceed
+            const keyPath = process.env.CORE_TLS_CLIENT_KEY_PATH;
+            const certPath = process.env.CORE_TLS_CLIENT_CERT_PATH;
+            if (typeof keyPath !== 'string' || typeof certPath !== 'string') {
+                throw new Error('The client key and cert are needed when TLS is enabled, but environment ' +
 					'variables specifying the paths to these files are missing');
-			}
+            }
 
-			optsCpy.key = fs.readFileSync(keyPath).toString();
-			optsCpy.cert = fs.readFileSync(certPath).toString();
-		}
+            optsCpy.key = fs.readFileSync(keyPath).toString();
+            optsCpy.cert = fs.readFileSync(certPath).toString();
+        }
 
-		let chaincodeName = opts['chaincode-id-name'];
-		let client = new Handler(chaincode, url, optsCpy);
-		let chaincodeID = new _chaincodeProto.ChaincodeID();
-		chaincodeID.setName(chaincodeName);
+        const chaincodeName = opts['chaincode-id-name'];
+        const client = new Handler(chaincode, url, optsCpy);
+        const chaincodeID = new _chaincodeProto.ChaincodeID();
+        chaincodeID.setName(chaincodeName);
 
-		logger.info(util.format('Registering with peer %s as chaincode "%s"', opts['peer.address'], chaincodeName));
+        logger.info(util.format('Registering with peer %s as chaincode "%s"', opts['peer.address'], chaincodeName));
 
-		client.chat({
-			type: _serviceProto.ChaincodeMessage.Type.REGISTER,
-			payload: chaincodeID.toBuffer()
-		});
+        client.chat({
+            type: _serviceProto.ChaincodeMessage.Type.REGISTER,
+            payload: chaincodeID.toBuffer()
+        });
 
-		// return the client object to give the calling code
-		// a handle to terminate pro-actively by calling client.close()
-		return client;
-	}
+        // return the client object to give the calling code
+        // a handle to terminate pro-actively by calling client.close()
+        return client;
+    }
 
-	/**
+    /**
 	 * @typedef {Object} SuccessResponse
 	 * @property {number} status Value is always set to 200 to indicate success
 	 * @property {Buffer} payload Optional custom content returned by the chaincode
@@ -153,21 +156,21 @@ class Shim {
 	 * @memberof fabric-shim
 	 */
 
-	/**
+    /**
 	 * Returns a standard response object with status code 200 and an optional payload
 	 * @static
 	 * @param {Buffer} payload Can be any content the chaincode wish to return to the client
 	 * @returns {SuccessResponse}
 	 */
-	static success(payload) {
-		let ret = new _responseProto.Response();
-		ret.status = ChaincodeStub.RESPONSE_CODE.OK;
-		ret.payload = payload ? payload : Buffer.from('');
+    static success(payload) {
+        const ret = new _responseProto.Response();
+        ret.status = ChaincodeStub.RESPONSE_CODE.OK;
+        ret.payload = payload ? payload : Buffer.from('');
 
-		return ret;
-	}
+        return ret;
+    }
 
-	/**
+    /**
 	 * @typedef {Object} ErrorResponse
 	 * @property {number} status Value is always set to 500 to indicate error
 	 * @property {string} message Optional error message returned by the chaincode
@@ -175,33 +178,33 @@ class Shim {
 	 * @memberof fabric-shim
 	 */
 
-	/**
+    /**
 	 * Returns a standard response object with status code 200 and an optional payload
 	 * @static
 	 * @param {string} msg A message describing the error
 	 * @returns {ErrorResponse}
 	 */
-	static error(msg) {
-		let ret = new _responseProto.Response();
-		ret.status = ChaincodeStub.RESPONSE_CODE.ERROR;
-		ret.message = msg;
+    static error(msg) {
+        const ret = new _responseProto.Response();
+        ret.status = ChaincodeStub.RESPONSE_CODE.ERROR;
+        ret.message = msg;
 
-		return ret;
-	}
+        return ret;
+    }
 
-	/**
+    /**
 	 * Returns a log4js logger named after <code>name</code>
 	 * @static
 	 * @param {string} name Logger name used to label log messages produced by the returned logger
 	 * @returns {Object} log4js based logger. See log4js documentation for usage details
 	 */
-	static newLogger(name) {
-		if (!name) {
-			name = 'shim';
-		}
+    static newLogger(name) {
+        if (!name) {
+            name = 'shim';
+        }
 
-		return Logger.getLogger(name);
-	}
+        return Logger.getLogger(name);
+    }
 }
 
 // special OID used by Fabric to save attributes in x.509 certificates
@@ -226,53 +229,53 @@ const FABRIC_CERT_ATTR_OID = '1.2.3.4.5.6.7.8.1';
  * @memberof fabric-shim
  */
 class ClientIdentity {
-	/**
+    /**
 	 * Returns a new instance of ClientIdentity
 	 * @param {ChaincodeStub} This is the stub object passed to Init() and Invoke() methods
 	 */
-	constructor(stub) {
-		this.stub = stub;
-		let signingId = stub.getCreator();
+    constructor(stub) {
+        this.stub = stub;
+        const signingId = stub.getCreator();
 
-		this.mspId = signingId.getMspid();
+        this.mspId = signingId.getMspid();
 
-		let idBytes = signingId.getIdBytes().toBuffer();
-		let normalizedCert = normalizeX509(idBytes.toString());
-		let cert = X509.parseCert(normalizedCert);
-		this.cert = cert;
+        const idBytes = signingId.getIdBytes().toBuffer();
+        const normalizedCert = normalizeX509(idBytes.toString());
+        const cert = X509.parseCert(normalizedCert);
+        this.cert = cert;
 
-		this.attrs = {};
-		if(cert && cert.extensions && cert.extensions[FABRIC_CERT_ATTR_OID]) {
-			let attr_string = cert.extensions[FABRIC_CERT_ATTR_OID];
-			let attr_object = JSON.parse(attr_string);
-			let attrs = attr_object.attrs;
-			this.attrs = attrs;
-		}
+        this.attrs = {};
+        if (cert && cert.extensions && cert.extensions[FABRIC_CERT_ATTR_OID]) {
+            const attr_string = cert.extensions[FABRIC_CERT_ATTR_OID];
+            const attr_object = JSON.parse(attr_string);
+            const attrs = attr_object.attrs;
+            this.attrs = attrs;
+        }
 
-		// assemble the unique ID based on certificate
-		let x = new jsrsasign.X509();
-		x.readCertPEM(normalizedCert);
-		this.id = `x509::${x.getSubjectString()}::${x.getIssuerString()}`;
-	}
+        // assemble the unique ID based on certificate
+        const x = new jsrsasign.X509();
+        x.readCertPEM(normalizedCert);
+        this.id = `x509::${x.getSubjectString()}::${x.getIssuerString()}`;
+    }
 
-	/**
+    /**
 	 * getID returns the ID associated with the invoking identity.  This ID
 	 * is guaranteed to be unique within the MSP.
 	 * @returns {string} A string in the format: "x509::{subject DN}::{issuer DN}"
 	 */
-	getID() {
-		return this.id;
-	}
+    getID() {
+        return this.id;
+    }
 
-	/**
+    /**
 	 * Returns the MSP ID of the invoking identity.
 	 * @returns {string}
 	 */
-	getMSPID() {
-		return this.mspId;
-	}
+    getMSPID() {
+        return this.mspId;
+    }
 
-	/**
+    /**
 	 * getAttributeValue returns the value of the client's attribute named `attrName`.
 	 * If the invoking identity possesses the attribute, returns the value of the attribute.
 	 * If the invoking identity does not possess the attribute, returns null.
@@ -281,13 +284,16 @@ class ClientIdentity {
 	 * @returns {string | null} Value of the attribute or null if the invoking identity
 	 *     does not possess the attribute.
 	 */
-	getAttributeValue(attrName) {
-		let attr = this.attrs[attrName];
-		if (attr) return attr;
-		else return null;
-	}
+    getAttributeValue(attrName) {
+        const attr = this.attrs[attrName];
+        if (attr) {
+            return attr;
+        } else {
+            return null;
+        }
+    }
 
-	/**
+    /**
 	 * assertAttributeValue verifies that the invoking identity has the attribute named `attrName`
 	 * with a value of `attrValue`.
 	 * @param {string} attrName Name of the attribute to retrieve the value from the
@@ -296,17 +302,18 @@ class ClientIdentity {
 	 * @returns {boolean} True if the invoking identity possesses the attribute and the attribute
 	 *     value matches the expected value. Otherwise, returns false.
 	 */
-	assertAttributeValue(attrName, attrValue) {
-		let attr = this.getAttributeValue(attrName);
-		if (attr === null)
-			return false;
-		else if (attrValue === attr)
-			return true;
-		else
-			return false;
-	}
+    assertAttributeValue(attrName, attrValue) {
+        const attr = this.getAttributeValue(attrName);
+        if (attr === null) {
+            return false;
+        } else if (attrValue === attr) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	/**
+    /**
 	 * An object representing an x.509 certificate with the following structure:
 	 * <br><pre>
 	 * { subject: {
@@ -342,41 +349,42 @@ class ClientIdentity {
 	 * @memberof fabric-shim
 	 */
 
-	/**
+    /**
 	 * getX509Certificate returns the X509 certificate associated with the invoking identity,
 	 * or null if it was not identified by an X509 certificate, for instance if the MSP is
 	 * implemented with an alternative to PKI such as [Identity Mixer]{@link https://jira.hyperledger.org/browse/FAB-5673}.
 	 * @returns {X509Certificate | null}
 	 */
-	getX509Certificate() {
-		return this.cert;
-	}
+    getX509Certificate() {
+        return this.cert;
+    }
 }
 
 function parsePeerUrl(url) {
-	if (typeof url === 'undefined' || url === '') {
-		throw new Error('The "peer.address" program argument must be set to a legitimate value of <host>:<port>');
-	} else {
-		if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
-			throw new Error('The "peer.address" program argument can not be set to an "http(s)" url, ' +
+    if (typeof url === 'undefined' || url === '') {
+        throw new Error('The "peer.address" program argument must be set to a legitimate value of <host>:<port>');
+    } else {
+        if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+            throw new Error('The "peer.address" program argument can not be set to an "http(s)" url, ' +
 				'use grpc(s) or omit the protocol');
-		} else {
-			// if the url has grpc(s) prefix, use it, otherwise decide based on the TLS enablement
-			if (url.indexOf('grpc://') !== 0 && url.indexOf('grpcs://') !== 0) {
-				if (isTLS())
-					url = 'grpcs://' + url;
-				else
-					url = 'grpc://' + url;
-			}
-		}
-	}
+        } else {
+            // if the url has grpc(s) prefix, use it, otherwise decide based on the TLS enablement
+            if (url.indexOf('grpc://') !== 0 && url.indexOf('grpcs://') !== 0) {
+                if (isTLS()) {
+                    url = 'grpcs://' + url;
+                } else {
+                    url = 'grpc://' + url;
+                }
+            }
+        }
+    }
 
-	return url;
+    return url;
 }
 
-function isTLS(){
-	let tls = process.env.CORE_PEER_TLS_ENABLED;
-	return typeof tls === 'string' && tls.toLowerCase() === 'true';
+function isTLS() {
+    const tls = process.env.CORE_PEER_TLS_ENABLED;
+    return typeof tls === 'string' && tls.toLowerCase() === 'true';
 }
 
 /*
@@ -385,23 +393,23 @@ function isTLS(){
  * with x509 parsers
  */
 function normalizeX509(raw) {
-	logger.debug(`[normalizeX509]raw cert: ${raw}`);
-	var regex = /(\-\-\-\-\-\s*BEGIN ?[^-]+?\-\-\-\-\-)([\s\S]*)(\-\-\-\-\-\s*END ?[^-]+?\-\-\-\-\-)/;
-	var matches = raw.match(regex);
-	if (!matches || matches.length !== 4) {
-		throw new Error('Failed to find start line or end line of the certificate.');
-	}
+    logger.debug(`[normalizeX509]raw cert: ${raw}`);
+    const regex = /(\-\-\-\-\-\s*BEGIN ?[^-]+?\-\-\-\-\-)([\s\S]*)(\-\-\-\-\-\s*END ?[^-]+?\-\-\-\-\-)/;
+    let matches = raw.match(regex);
+    if (!matches || matches.length !== 4) {
+        throw new Error('Failed to find start line or end line of the certificate.');
+    }
 
-	// remove the first element that is the whole match
-	matches.shift();
-	// remove LF or CR
-	matches = matches.map((element) => {
-		return element.trim();
-	});
+    // remove the first element that is the whole match
+    matches.shift();
+    // remove LF or CR
+    matches = matches.map((element) => {
+        return element.trim();
+    });
 
-	// make sure '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----' are in their own lines
-	// and that it ends in a new line
-	return matches.join('\n') + '\n';
+    // make sure '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----' are in their own lines
+    // and that it ends in a new line
+    return matches.join('\n') + '\n';
 }
 
 module.exports = Shim;

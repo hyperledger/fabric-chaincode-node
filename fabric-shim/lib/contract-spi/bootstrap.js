@@ -23,51 +23,51 @@ const logger = Logger.getLogger('contracts-spi/bootstrap.js');
  * @ignore
  * @param {Contract} contracts contract to register to use
  */
-function register(contracts){
-	shim.start(new ChaincodeFromContract(contracts));
+function register(contracts) {
+    shim.start(new ChaincodeFromContract(contracts));
 }
 
 /**
  * This is the main entry point for starting the user's chaincode
  * @ignore
  */
-function bootstrap(){
-	let opts = StartCommand.getArgs(yargs);
+function bootstrap() {
+    const opts = StartCommand.getArgs(yargs);
 
-	let modPath = path.resolve(process.cwd(), opts['module-path']);
+    const modPath = path.resolve(process.cwd(), opts['module-path']);
 
-	let jsonPath = path.resolve(modPath, 'package.json');
-	// let's find the package.json file
-	let json = require(jsonPath);
-	logger.debug('starting up and reading package.json at %s', jsonPath);
-	logger.debug(json);
-	if (json.contracts){
-		logger.debug('Using contracts spec in the package.json');
-		// this is the declaratitive way of specifing the classes that should be used.
-		if (json.contracts.classes){
-			let classesToRegister = json.contracts.classes.map((value)=>{
-				// p is the path to the file contain the defined contract
-				let p =(path.resolve(modPath, value));
-				let r = require(p);
-				return r;
-			});
-			register(classesToRegister);
-		} else {
-			throw new Error('Contracts element specified in package.json, but the contents are not usable');
-		}
-	} else if (json.main){
-		logger.debug('Using the main entry %s',json.main);
-		let p = (path.resolve(modPath, json.main));
-		let r = require(p);
+    const jsonPath = path.resolve(modPath, 'package.json');
+    // let's find the package.json file
+    const json = require(jsonPath);
+    logger.debug('starting up and reading package.json at %s', jsonPath);
+    logger.debug(json);
+    if (json.contracts) {
+        logger.debug('Using contracts spec in the package.json');
+        // this is the declaratitive way of specifing the classes that should be used.
+        if (json.contracts.classes) {
+            const classesToRegister = json.contracts.classes.map((value) => {
+                // p is the path to the file contain the defined contract
+                const p = (path.resolve(modPath, value));
+                const r = require(p);
+                return r;
+            });
+            register(classesToRegister);
+        } else {
+            throw new Error('Contracts element specified in package.json, but the contents are not usable');
+        }
+    } else if (json.main) {
+        logger.debug('Using the main entry %s', json.main);
+        const p = (path.resolve(modPath, json.main));
+        const r = require(p);
 
-		if (r.contracts){
-			register(r.contracts);
-		}else {
-			register([r]);
-		}
-	} else  {
-		throw new Error('Can not detect any of the indications of how this is a contract instance');
-	}
+        if (r.contracts) {
+            register(r.contracts);
+        } else {
+            register([r]);
+        }
+    } else  {
+        throw new Error('Can not detect any of the indications of how this is a contract instance');
+    }
 }
 
 module.exports.bootstrap = bootstrap;

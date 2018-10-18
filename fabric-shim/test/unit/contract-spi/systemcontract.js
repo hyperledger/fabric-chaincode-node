@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*global describe it beforeEach afterEach  */
+/* global describe it beforeEach afterEach  */
 'use strict';
 
 // test specific libraries
@@ -29,43 +29,43 @@ const pathToRoot = '../../../..';
 const SystemContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/systemcontract'));
 
 
-describe('SystemContract',()=>{
+describe('SystemContract', () => {
 
-	let sandbox;
+    let sandbox;
 
-	beforeEach('Sandbox creation', () => {
-		sandbox = sinon.createSandbox();
-	});
+    beforeEach('Sandbox creation', () => {
+        sandbox = sinon.createSandbox();
+    });
 
-	afterEach('Sandbox restoration', () => {
-		sandbox.restore();
-	});
+    afterEach('Sandbox restoration', () => {
+        sandbox.restore();
+    });
 
-	describe('#constructor',()=>{
+    describe('#constructor', () => {
 
-		it('should create correctly',()=>{
-			let meta = new SystemContract();
-			expect(meta.getNamespace()).to.equal('org.hyperledger.fabric');
-		});
+        it ('should create correctly', () => {
+            const meta = new SystemContract();
+            expect(meta.getNamespace()).to.equal('org.hyperledger.fabric');
+        });
 
-	});
+    });
 
-	describe('#getMetaData',()=>{
+    describe('#getMetaData', () => {
 
-		it('should get the buffer',async ()=>{
-			let meta = new SystemContract();
+        it ('should get the buffer', async () => {
+            const meta = new SystemContract();
 
-			let chaincodeMock = {
-				getContracts : sandbox.stub().returns({})
-			};
-			meta._setChaincode(chaincodeMock);
+            const chaincodeMock = {
+                getContracts : sandbox.stub().returns({})
+            };
+            meta._setChaincode(chaincodeMock);
 
-			let data = meta.getMetaData();
-			expect(data.toString()).to.equal('{}');
-			sinon.assert.calledOnce(chaincodeMock.getContracts);
+            const data = meta.getMetaData();
+            expect(data.toString()).to.equal('{}');
+            sinon.assert.calledOnce(chaincodeMock.getContracts);
 
-		});
+        });
 
-	});
+    });
 
 });

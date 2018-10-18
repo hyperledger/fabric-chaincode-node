@@ -8,14 +8,14 @@ const eslint = require('gulp-eslint');
 const path = require('path');
 
 gulp.task('lint', function () {
-	return gulp.src([
-		'**/*.js',
-		'!fabric-shim/node_modules/**',
-		'!test/node_modules/**',
-		'!**/typescript/*.js',
-		'!coverage/**',
-		'!docs/**'
-	], {
-		base: path.join(__dirname, '..')
-	}).pipe(eslint()).pipe(eslint.format()).pipe(eslint.failAfterError());
+    return gulp.src([
+        '**/*.js',
+        '!fabric-shim/node_modules/**',
+        '!test/node_modules/**',
+        '!**/typescript/*.js',
+        '!coverage/**',
+        '!docs/**'
+    ], {
+        base: path.join(__dirname, '..')
+    }).pipe(eslint()).pipe(eslint.format()).pipe(eslint.failAfterError());
 });
