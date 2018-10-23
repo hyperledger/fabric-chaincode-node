@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js",
     "compile": "tsc --project test/typescript",
-    "test": "nyc mocha --recursive test/unit/**/*.js"
+    "test": "nyc mocha --recursive 'test/unit/**/*.js'"
   },
   "repository": {
     "type": "git",

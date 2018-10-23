@@ -6,6 +6,7 @@
 /* eslint-disable  */
 'use strict';
 const shim = require('fabric-shim');
+const { KeyEndorsementPolicy } = require('fabric-shim/lib/utils/statebased');
 const ChaincodeCrypto = require('fabric-shim-crypto');
 const util = require('util');
 const chai = require('chai');
@@ -359,14 +360,13 @@ const Chaincode = class {
     async test18(stub, args) {
         console.log('test getQueryResultWithPagination()');
 
-
-        const query = {
-            selector: {
-                key: {
-                    $regex: 'k[0-9]'
-                }
-            }
-        };
+		let query = {
+			selector: {
+				key: {
+					$regex: 'k[0-9]'
+				}
+			}
+		};
 
         let response = await stub.getQueryResultWithPagination(JSON.stringify(query), 2);
         const { iterator, metadata } = response;
@@ -401,9 +401,31 @@ const Chaincode = class {
     }
 
 	// return 'noreturn' to stop calling the shim error call..
-    async test20(stub, args) {
-        return 'noreturn';
-    }
+	async test20(stub, args) {
+		return 'noreturn'
+	}
+
+	async test21(stub, args) {
+		console.log('test 21, set state validation parameter');
+		const ep = new KeyEndorsementPolicy();
+		ep.addOrgs('MEMBER', 'Org1MSP');
+		await stub.setStateValidationParameter('key1', ep.getPolicy());
+	}
+
+	async test22(stub, args) {
+		console.log('test 22, get state validation parameter');
+
+		// should exists validation parameter ['Org1MSP'] for key1
+		const epBuffer = await stub.getStateValidationParameter('key1');
+		const ep = new KeyEndorsementPolicy(epBuffer);
+		console.log('state validation parameter --> ', ep.listOrgs());
+		ep.listOrgs().should.deep.eql(['Org1MSP']);
+
+		// should not exists validation parameter for key2
+		const epBuffer2 = await stub.getStateValidationParameter('key2');
+		console.log(epBuffer2);
+		assert.isUndefined(epBuffer2, 'key2 should not have validation parameter');
+	}
 };
 
 shim.start(new Chaincode());

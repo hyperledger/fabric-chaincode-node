@@ -22,19 +22,19 @@ const path = require('path');
 const constants = require('../../test/constants.js');
 
 const packageJson = '{' +
-	'  "name": "fabric-shim-test",' +
-	'  "version": "1.0.0-snapshot",' +
-	'  "description": "Test suite for fabric-shim",' +
-	'  "license": "Apache-2.0",' +
-	'  "scripts": { "start" : "node test.js" },' +
-	'  "dependencies": {' +
-	'    "fabric-shim": "file:./fabric-shim",' +
-	'    "fabric-shim-crypto": "file:./fabric-shim-crypto",' +
-//	'    "fabric-contract-api": "file:./fabric-contract-api",' +
-	'    "chai": "^4.1.1",' +
-	'    "chai-as-promised": "^7.1.1"' +
-	'  }' +
-	'}';
+    '  "name": "fabric-shim-test",' +
+    '  "version": "1.0.0-snapshot",' +
+    '  "description": "Test suite for fabric-shim",' +
+    '  "license": "Apache-2.0",' +
+    '  "scripts": { "start" : "node test.js" },' +
+    '  "dependencies": {' +
+    '    "fabric-shim": "file:./fabric-shim",' +
+    '    "fabric-shim-crypto": "file:./fabric-shim-crypto",' +
+    //	'    "fabric-contract-api": "file:./fabric-contract-api",' +
+    '    "chai": "^4.1.1",' +
+    '    "chai-as-promised": "^7.1.1"' +
+    '  }' +
+    '}';
 const tls = process.env.TLS ? process.env.TLS : 'false';
 const CC_NAME = 'mycc';
 const CC2_NAME = 'mycc2';
@@ -129,9 +129,9 @@ gulp.task('test-e2e-instantiate-v0', ['test-e2e-install-v0'], () => {
 
 gulp.task('test-e2e-invoke-v0-test1-test2', ['test-e2e-instantiate-v0'], () => {
     return gulp.src('*.js', {read: false})
-    // because the peer CLI for the instantiate call returns
-    // before the transaction gets committed to the ledger, we
-    // introduce a wait for 3 sec before running the invoke
+        // because the peer CLI for the instantiate call returns
+        // before the transaction gets committed to the ledger, we
+        // introduce a wait for 3 sec before running the invoke
         .pipe(wait(3000))
         .pipe(shell([
             // test1 and test2 of the chaincode are independent of each other,
@@ -249,7 +249,7 @@ gulp.task('test-e2e-invoke-v0-test10', ['test-e2e-invoke-v0-test9'], () => {
 // Test encryption support in fabric-shim-crypto
 gulp.task('test-e2e-invoke-v0-test11', ['test-e2e-invoke-v0-test10'], () => {
     const cmd = 'docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent --transient ' +
-		'\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
+        '\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
 
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
@@ -266,7 +266,7 @@ gulp.task('test-e2e-invoke-v0-test11', ['test-e2e-invoke-v0-test10'], () => {
 // Test decryption support in fabric-shim-crypto
 gulp.task('test-e2e-invoke-v0-test12', ['test-e2e-invoke-v0-test11'], () => {
     const cmd = 'docker exec cli peer chaincode query %s -C %s -n %s -c %s --transient ' +
-		'\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
+        '\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
 
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
@@ -283,11 +283,11 @@ gulp.task('test-e2e-invoke-v0-test12', ['test-e2e-invoke-v0-test11'], () => {
 // Test decryption support in fabric-shim-crypto
 gulp.task('test-e2e-invoke-v0-test13', ['test-e2e-invoke-v0-test12'], () => {
     const cmd = 'docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent --transient ' +
-		'\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
-		'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
-		'yWVNTY3FDdkFraWhSQU5DQUFTNkJoRmdXL3EwUHpya3dUNVJsV1R0NDFWZ1hMZ3VQdjZRS3ZHc1c3U3' +
-		'FLNlRrY0NmeHNXb1NqeTYvcjFTenpUTW5pM0o4aVFSb0ozcm9QbW94UExLNC0tLS0tRU5EIFBSSVZBV' +
-		'EUgS0VZLS0tLS0="}\'';
+        '\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
+        'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
+        'yWVNTY3FDdkFraWhSQU5DQUFTNkJoRmdXL3EwUHpya3dUNVJsV1R0NDFWZ1hMZ3VQdjZRS3ZHc1c3U3' +
+        'FLNlRrY0NmeHNXb1NqeTYvcjFTenpUTW5pM0o4aVFSb0ozcm9QbW94UExLNC0tLS0tRU5EIFBSSVZBV' +
+        'EUgS0VZLS0tLS0="}\'';
 
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
@@ -304,11 +304,11 @@ gulp.task('test-e2e-invoke-v0-test13', ['test-e2e-invoke-v0-test12'], () => {
 // Test decryption support in fabric-shim-crypto
 gulp.task('test-e2e-invoke-v0-test14', ['test-e2e-invoke-v0-test13'], () => {
     const cmd = 'docker exec cli peer chaincode query %s -C %s -n %s -c %s --transient ' +
-		'\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
-		'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
-		'yWVNTY3FDdkFraWhSQU5DQUFTNkJoRmdXL3EwUHpya3dUNVJsV1R0NDFWZ1hMZ3VQdjZRS3ZHc1c3U3' +
-		'FLNlRrY0NmeHNXb1NqeTYvcjFTenpUTW5pM0o4aVFSb0ozcm9QbW94UExLNC0tLS0tRU5EIFBSSVZBV' +
-		'EUgS0VZLS0tLS0="}\'';
+        '\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
+        'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
+        'yWVNTY3FDdkFraWhSQU5DQUFTNkJoRmdXL3EwUHpya3dUNVJsV1R0NDFWZ1hMZ3VQdjZRS3ZHc1c3U3' +
+        'FLNlRrY0NmeHNXb1NqeTYvcjFTenpUTW5pM0o4aVFSb0ozcm9QbW94UExLNC0tLS0tRU5EIFBSSVZBV' +
+        'EUgS0VZLS0tLS0="}\'';
 
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
@@ -398,5 +398,32 @@ gulp.task('test-e2e-invoke-v0-test20', ['test-e2e-invoke-v0-test19'], () => {
         ]));
 });
 
+// set key-level validation params
+gulp.task('test-e2e-invoke-v0-test21', ['test-e2e-invoke-v0-test20'], () => {
+    return gulp.src('*.js', {read: false})
+        .pipe(wait(3000))
+        .pipe(shell([
+            util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
+                getTLSArgs(),
+                CHANNEL_NAME,
+                CC_NAME,
+                '\'{"Args":["test21"]}\'',
+                ';exit $((!($?!=0)))')
+        ]));
+});
 
-gulp.task('test-e2e-shim', ['test-e2e-invoke-v0-test20']);
+// get key-level validation params
+gulp.task('test-e2e-invoke-v0-test22', ['test-e2e-invoke-v0-test21'], () => {
+    return gulp.src('*.js', {read: false})
+        .pipe(wait(3000))
+        .pipe(shell([
+            util.format('docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
+                getTLSArgs(),
+                CHANNEL_NAME,
+                CC_NAME,
+                '\'{"Args":["test22"]}\'',
+                ';exit $((!($?!=0)))')
+        ]));
+});
+
+gulp.task('test-e2e-shim', ['test-e2e-invoke-v0-test22']);
