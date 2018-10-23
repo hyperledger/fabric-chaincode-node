@@ -243,7 +243,7 @@ Finally, create a file package.json at the same location, and put in the followi
 	"engineStrict": true,
 	"license": "Apache-2.0",
 	"dependencies": {
-		"fabric-shim": "unastable"
+		"fabric-shim": "unstable"
 	}
 }
 ```
