@@ -32,8 +32,8 @@ test('Chaincode command line arguments tests', (t) => {
 	t.deepEqual(opts['peer.address'], 'localhost:7051', 'Test passing only --peer.address argument is correctly picked up');
 	t.equal(opts['grpc.max_send_message_length'], -1, 'Test grpc.max_send_message_length defaults to -1');
 	t.equal(opts['grpc.max_receive_message_length'], -1, 'Test grpc.max_receive_message_length defaults to -1');
-	t.equal(opts['grpc.keepalive_time_ms'], 60000, 'Test grpc.keepalive_time_ms defaults to 60000');
-	t.equal(opts['grpc.http2.min_time_between_pings_ms'], 60000, 'Test grpc.http2.min_time_between_pings_ms defaults to 60000');
+	t.equal(opts['grpc.keepalive_time_ms'], 110000, 'Test grpc.keepalive_time_ms defaults to 110000');
+	t.equal(opts['grpc.http2.min_time_between_pings_ms'], 110000, 'Test grpc.http2.min_time_between_pings_ms defaults to 110000');
 	t.equal(opts['grpc.keepalive_timeout_ms'], 20000, 'Test grpc.keepalive_timeout_ms defaults to 20000');
 	t.equal(opts['grpc.http2.max_pings_without_data'], 0, 'Test grpc.http2.max_pings_without_data defaults to 0');
 	t.equal(opts['grpc.keepalive_permit_without_calls'], 1, 'Test grpc.keepalive_permit_without_calls defaults to 1');
