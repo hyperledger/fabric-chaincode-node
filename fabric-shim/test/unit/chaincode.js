@@ -61,8 +61,8 @@ describe('Chaincode', () => {
 			expect(opts['peer.address']).to.deep.equal('localhost:7051');
 			expect(opts['grpc.max_send_message_length']).to.equal(-1);
 			expect(opts['grpc.max_receive_message_length']).to.equal(-1);
-			expect(opts['grpc.keepalive_time_ms']).to.equal(60000);
-			expect(opts['grpc.http2.min_time_between_pings_ms']).to.equal(60000);
+			expect(opts['grpc.keepalive_time_ms']).to.equal(110000);
+			expect(opts['grpc.http2.min_time_between_pings_ms']).to.equal(110000);
 			expect(opts['grpc.keepalive_timeout_ms']).to.equal(20000);
 			expect(opts['grpc.keepalive_permit_without_calls']).to.equal(1);
 			expect(opts['grpc.http2.max_pings_without_data']).to.equal(0);
