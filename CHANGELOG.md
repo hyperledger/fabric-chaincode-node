@@ -1,3 +1,8 @@
+## v1.3.1
+Fri 26 Oct 2018 08:12:55 BST
+
+* [69cc06b](https://github.com/hyperledger/fabric/commit/69cc06b) [FAB-12580](https://jira.hyperledger.org/browse/FAB-12580) Peer can’t tolerate ping frequency
+
 ## v1.3.0
 Wed 10 Oct 17:04:37 BST 2018
 
