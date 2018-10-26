@@ -40,6 +40,8 @@ const _serviceProto = grpc.load({
 
 const logger = require('./logger').getLogger('lib/chaincode.js');
 
+const VALIDATION_PARAMETER = 'VALIDATION_PARAMETER';
+
 const RESPONSE_CODE = {
     // OK constant - status code less than 400, endorser will endorse it.
     // OK means init or invoke successfully.
@@ -129,6 +131,7 @@ class ChaincodeStub {
             return entry.toBuffer().toString();
         });
         this.handler = client;
+        this.validationParameterMetakey = VALIDATION_PARAMETER;
 
         if (signedProposal) {
             const decodedSP = {
@@ -459,6 +462,35 @@ class ChaincodeStub {
         // Access public data by setting the collection to empty string
         const collection = '';
         return await this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
+    }
+
+    /**
+	 * Sets the key-level endorsement policy for `key`
+	 *
+	 * @async
+	 * @param {string} key State variable key to set endorsement policy
+	 * @param {Buffer} ep endorsement policy
+	 */
+    async setStateValidationParameter(key, ep) {
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
+    }
+
+    /**
+	 * getStateValidationParameter retrieves the key-level endorsement policy
+	 * for `key`. Note that this will introduce a read dependency on `key` in
+	 * the transaction's readset.
+	 *
+	 * @async
+	 * @param {string} key State variable key to set endorsement policy
+	 * @returns {Buffer} returns the endorsement policy for this key
+	 */
+    async getStateValidationParameter(key) {
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        const res = await this.handler.handleGetStateMetadata(collection, key, this.channel_id, this.txId);
+        return res[this.validationParameterMetakey];
     }
 
     /**
@@ -866,6 +898,34 @@ class ChaincodeStub {
             throw new Error('key must be a valid string');
         }
         return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
+    }
+
+    /**
+	 * SetPrivateDataValidationParameter sets the key-level endorsement policy
+	 * for the private data specified by `key`.
+	 *
+	 * @async
+	 * @param {string} collection The collection name for this private data
+	 * @param {string} key Private data variable key to set endorsement policy
+	 * @param {Buffer} ep endorsement policy
+	 */
+    async setPrivateDataValidationParameter(collection, key, ep) {
+        return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
+    }
+
+    /**
+	 * GetPrivateDataValidationParameter retrieves the key-level endorsement
+	 * policy for the private data specified by `key`. Note that this introduces
+	 * a read dependency on `key` in the transaction's readset.
+	 *
+	 * @async
+	 * @param {string} collection The collection name for this private data
+	 * @param {string} key Private data variable key by which to retrieve endorsement policy
+	 * @returns {Buffer} endorsement policy for this key
+	 */
+    async getPrivateDataValidationParameter(collection, key) {
+        const res = await this.handler.handleGetStateMetadata(collection, key, this.channel_id, this.txId);
+        return res[this.validationParameterMetakey];
     }
 
     /**

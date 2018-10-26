@@ -403,6 +403,43 @@ class ChaincodeSupportClient {
         return await this._askPeerAndListen(msg, 'DeleteState');
     }
 
+    async handlePutStateMetadata(collection, key, metakey, ep, channel_id, txId) {
+        // construct payload for PutStateMetadata
+        const stateMetadata = new _serviceProto.StateMetadata();
+        stateMetadata.setMetakey(metakey);
+        stateMetadata.setValue(ep);
+
+        const payload = new _serviceProto.PutStateMetadata();
+        payload.setKey(key);
+        payload.setCollection(collection);
+        payload.setMetadata(stateMetadata);
+
+        const msg = {
+            type: _serviceProto.ChaincodeMessage.Type.PUT_STATE_METADATA,
+            payload: payload.toBuffer(),
+            txid: txId,
+            channel_id: channel_id
+        };
+
+        return this._askPeerAndListen(msg, 'PutStateMetadata');
+    }
+
+    async handleGetStateMetadata(collection, key, channel_id, txId) {
+        // construct payload for GetStateMetadata
+        const payload = new _serviceProto.GetStateMetadata();
+        payload.setKey(key);
+        payload.setCollection(collection);
+
+        const msg = {
+            type: _serviceProto.ChaincodeMessage.Type.GET_STATE_METADATA,
+            payload: payload.toBuffer(),
+            txid: txId,
+            channel_id: channel_id
+        };
+
+        return this._askPeerAndListen(msg, 'GetStateMetadata');
+    }
+
     async handleGetStateByRange(collection, startKey, endKey, channel_id, txId, metadata) {
         const payload = new _serviceProto.GetStateByRange();
         payload.setStartKey(startKey);
@@ -671,6 +708,22 @@ function handleGetQueryResult(handler, res, method) {
     return result;
 }
 
+function handleGetStateMetadata(payload) {
+    const method = 'handleGetStateMetadata';
+    logger.debug('%s - get response from peer.', method);
+    const decoded = _serviceProto.StateMetadataResult.decode(payload);
+    logger.debug('%s - decoded response:%j', method, decoded);
+    const entries = decoded.getEntries();
+    const metadata = {};
+
+    entries.forEach(entry => {
+        metadata[entry.getMetakey()] = entry.getValue();
+    });
+
+    logger.debug('%s - metadata: %j', method, metadata);
+    return metadata;
+}
+
 function parseResponse(handler, res, method) {
     if (res.type === MSG_TYPE.RESPONSE) {
         logger.debug(util.format('[%s-%s]Received %s() successful response', res.channel_id, shortTxid(res.txid), method));
@@ -688,6 +741,8 @@ function parseResponse(handler, res, method) {
                 return _serviceProto.QueryResponse.decode(res.payload);
             case 'InvokeChaincode':
                 return _serviceProto.ChaincodeMessage.decode(res.payload);
+            case 'GetStateMetadata':
+                return handleGetStateMetadata(res.payload);
         }
 
         return res.payload;
