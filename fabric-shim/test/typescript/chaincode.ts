@@ -18,7 +18,9 @@ import { Shim,
     SerializedIdentity,
     ChaincodeProposal,
     QueryResponseMetadata,
-    StateQueryResponse
+    StateQueryResponse,
+    KeyEndorsementPolicy,
+    ENDORSER_ROLES,
  } from 'fabric-shim';
 
 import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
@@ -80,6 +82,7 @@ class TestTS implements ChaincodeInterface {
         this.testClientIdentity(stub);
         this.testProposal(stub);
         await this.testPagedQuery(stub);
+        await this.testStateBasedEP(stub);
     }
 
     testCompositeKey(stub: ChaincodeStub): void {
@@ -303,6 +306,22 @@ class TestTS implements ChaincodeInterface {
     testQueryResponseMetadata(metadata: QueryResponseMetadata) {
         const cnt: number = metadata.fetched_records_count;
         const bookmark: string = metadata.bookmark;
+    }
+
+    async testStateBasedEP(stub: ChaincodeStub) {
+        const ep = new KeyEndorsementPolicy();
+        ep.addOrgs(ENDORSER_ROLES.MEMBER, 'Org1MSP', 'Org3MSP');
+        ep.addOrgs(ENDORSER_ROLES.PEER, 'Org2MSP');
+        const orgs: string[] = ep.listOrgs();
+        ep.delOrgs('Org1MSP', 'Org2MSP');
+        ep.delOrgs('Org3MSP');
+        const policy: Buffer = ep.getPolicy();
+        await stub.setStateValidationParameter('aKey', policy);
+        await stub.setPrivateDataValidationParameter('aCollection', 'aKey', policy);
+
+        const policy2: Buffer = await stub.getStateValidationParameter('aKey');
+        const policy3: Buffer = await stub.getPrivateDataValidationParameter('aCollection', 'aKey');
+        const ep2 = new KeyEndorsementPolicy(policy2);
     }
 }
 Shim.start(new TestTS());

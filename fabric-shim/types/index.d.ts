@@ -83,6 +83,8 @@ declare module 'fabric-shim' {
         getState(key: string): Promise<Buffer>;
         putState(key: string, value: Buffer): Promise<void>;
         deleteState(key: string): Promise<void>;
+        setStateValidationParameter(key: string, ep: Buffer): Promise<void>;
+        getStateValidationParameter(key: string): Promise<Buffer>;
         getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator>;
         getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
         getStateByPartialCompositeKey(objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator>;
@@ -101,6 +103,8 @@ declare module 'fabric-shim' {
         getPrivateData(collection: string, key: string): Promise<Buffer>;
         putPrivateData(collection: string, key: string, value: Buffer): Promise<void>;
         deletePrivateData(collection: string, key: string): Promise<void>;
+        setPrivateDataValidationParameter(collection: string, key: string, ep: Buffer): Promise<void>;
+        getPrivateDataValidationParameter(collection: string, key: string): Promise<Buffer>;
         getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator>;
         getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator>;
         getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator>;
@@ -263,5 +267,18 @@ declare module 'fabric-shim' {
             CHAINCODE_PACKAGE = 6,
             PEER_ADMIN_OPERATION = 8
         }
+    }
+
+    export class KeyEndorsementPolicy {
+        constructor(policy?: Buffer);
+        getPolicy(): Buffer;
+        addOrgs(role: string, ...newOrgs: string[]): void;
+        delOrgs(...delOrgs: string[]):void;
+        listOrgs(): string[];
+    }
+
+    export enum ENDORSER_ROLES {
+        MEMBER = 'MEMBER',
+        PEER = 'PEER'
     }
 }

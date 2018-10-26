@@ -17,6 +17,7 @@ const logger = Logger.getLogger('lib/chaincode.js');
 const Handler = require('./handler');
 const Iterators = require('./iterators');
 const ChaincodeStub = require('./stub');
+const KeyEndorsementPolicy = require('./utils/statebased');
 const fs = require('fs');
 
 const StartCommand = require('./cmds/startCommand.js');
@@ -425,3 +426,4 @@ module.exports.Iterators = Iterators;
 module.exports.HistoryQueryIterator = Iterators.HistoryQueryIterator;
 module.exports.StateQueryIterator = Iterators.StateQueryIterator;
 module.exports.ChaincodeInterface = ChaincodeInterface;
+module.exports.KeyEndorsementPolicy = KeyEndorsementPolicy;
