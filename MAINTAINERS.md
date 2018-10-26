@@ -1,12 +1,13 @@
 Maintainers
 ===========
 
-| Name                      | Gerrit              | GitHub           | Chat     | email
-|---------------------------|---------------------|------------------|----------------|----------------------
+| Name                      | Gerrit              | GitHub           | Chat           | email                               |
+|---------------------------|---------------------|------------------|----------------|-------------------------------------|
 | Bret Harrison             | bretharrison        | harrisob         | bretharrison   | beharrison@nc.rr.com                |
 | David Kelsey              | davidkel            | davidkel         | davidkel       | d_kelsey@uk.ibm.com                 |
 | Jim Zhang                 | jimthematrix        | jimthematrix     | jimthematrix   | jim\_the\_matrix@hotmail.com        |
 | Chaoyi Zhao               | zhaochy             | zhaochy1990      | zhaochy        | zhaochy_2015@hotmail.com            |
+| Matthew B White           | mbwhite             | mbwhite          | mbwhite        | whitemat@uk.ibm.com                 |
 
 Also: Please see the [Release Manager section](https://github.com/hyperledger/fabric/blob/master/docs/source/MAINTAINERS.rst)
 
