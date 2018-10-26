@@ -1,3 +1,10 @@
+## v1.1.4
+Fri 26 Oct 2018 07:48:53 BST
+
+* [aa933df](https://github.com/hyperledger/fabric/commit/aa933df) [FAB-12580](https://jira.hyperledger.org/browse/FAB-12580) Peer can’t tolerate ping frequency
+* [afc026a](https://github.com/hyperledger/fabric/commit/afc026a) [FABCI-138] (https://jira.hyperledger.org/browse/FABCI-138) ChaincodeNode update npm tag
+* [2cdb3d0](https://github.com/hyperledger/fabric/commit/2cdb3d0) [FAB-12266](https://jira.hyperledger.org/browse/FAB-12266) Set JSDocs to correct dir
+
 ## v1.1.3
 Thu Sep 27 10:16:35 EDT 2018
 

@@ -1,0 +1,22 @@
+v1.1.4 Oct, 2018
+-----------------------------
+
+Release Notes
+-------------
+Reduce GRPC Keep-Alive frequency due to incorrect grpc handling
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.1/CHANGELOG.md#v114
