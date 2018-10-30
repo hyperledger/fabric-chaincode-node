@@ -50,7 +50,7 @@ describe('SystemContract', () => {
 
     });
 
-    describe('#getMetaData', () => {
+    describe('#GetMetadata', () => {
 
         it ('should get the buffer', async () => {
             const meta = new SystemContract();
@@ -60,7 +60,7 @@ describe('SystemContract', () => {
             };
             meta._setChaincode(chaincodeMock);
 
-            const data = meta.getMetaData();
+            const data = meta.GetMetadata();
             expect(data.toString()).to.equal('{}');
             sinon.assert.calledOnce(chaincodeMock.getContracts);
 

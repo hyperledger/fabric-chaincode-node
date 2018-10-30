@@ -104,7 +104,7 @@ gulp.task('query_functions', async (done) => {
         getTLSArgs(),
         CHANNEL_NAME,
         'mysmartcontract',
-        '{"Args":["org.hyperledger.fabric:getMetaData"]}').split(' ');
+        '{"Args":["org.hyperledger.fabric:GetMetadata"]}').split(' ');
 
     const {error, stdout, stderr} = await execFile(script, args, options);
     if (error) {
@@ -116,7 +116,7 @@ gulp.task('query_functions', async (done) => {
 
         const metadata = JSON.stringify(JSON.parse(stdout));
 
-        const expectedMetadata = '{"org.mynamespace.updates":{"functions":["unknownTransaction","beforeTransaction","createContext","setup","setNewAssetValue","doubleAssetValue"]},"org.mynamespace.removes":{"functions":["quarterAssetValue","getAssetValue"]},"org.hyperledger.fabric":{"functions":["getMetaData"]}}';
+        const expectedMetadata = '{"info":{"title":"chaincode","version":"1.0.0"},"contracts":[{"info":{"title":"org.mynamespace.updates","version":"1.0.0"},"transactions":[{"transactionId":"unknownTransaction"},{"transactionId":"beforeTransaction"},{"transactionId":"createContext"},{"transactionId":"setup"},{"transactionId":"setNewAssetValue"},{"transactionId":"doubleAssetValue"}],"namespace":"org.mynamespace.updates"},{"info":{"title":"org.mynamespace.removes","version":"1.0.0"},"transactions":[{"transactionId":"quarterAssetValue"},{"transactionId":"getAssetValue"}],"namespace":"org.mynamespace.removes"},{"info":{"title":"org.hyperledger.fabric","version":"1.0.0"},"transactions":[{"transactionId":"GetMetadata"}],"namespace":"org.hyperledger.fabric"}],"components":{}}';
 
         if (metadata !== expectedMetadata) {
             throw new Error(`Expected query response to equal ${expectedMetadata} \ninstead recieved: \n${metadata}`);

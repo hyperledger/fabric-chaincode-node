@@ -29,7 +29,7 @@ class SystemContract extends Contract {
     /**
      * Gets meta data associated with this Chaincode deployment
      */
-    getMetaData() {
+    GetMetadata() {
         return JSON.stringify(this.chaincode.getContracts());
     }
 

@@ -9,8 +9,12 @@ const shim = require('../chaincode');
 
 const Logger = require('../logger');
 const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
+const StartCommand = require('../cmds/startCommand.js');
 
 const ClientIdentity = require('../chaincode').ClientIdentity;
+
+const yargs = require('yargs');
+const path = require('path');
 
 /**
  * The user will have written a class than extends the 'Contract' interface; this
@@ -76,7 +80,14 @@ class ChaincodeFromContract {
 
             this.contracts[`${namespace}`] = {contractClass, functionNames, contract};
         }
+        const opts = StartCommand.getArgs(yargs);
+        const modPath = path.resolve(process.cwd(), opts['module-path']);
+        const jsonPath = path.resolve(modPath, 'package.json');
 
+        const json = require(jsonPath);
+
+        this.version = json.hasOwnProperty('version') ? json.version : '';
+        this.title = json.hasOwnProperty('name') ? json.name : '';
     }
 
     /**
@@ -182,10 +193,36 @@ class ChaincodeFromContract {
 	 * get information on the contracts
 	 */
     getContracts() {
-        const data = {};
-        // this.contracts[`${namespace}`] = { contractClass, functionNames, contract };
+        const data = {
+            info: {
+                title: this.title,
+                version: this.version
+            },
+            contracts: [],
+            components: {}
+        };
+
         for (const c in this.contracts) {
-            data[c] = {'functions':this.contracts[c].functionNames};
+            const contract = this.contracts[c];
+            const contractData = {
+                info: {
+                    title: contract.contract.getNamespace(),
+                    version: this.version
+                },
+                transactions: []
+            };
+
+            contractData.namespace = contract.contract.getNamespace();
+
+            contract.functionNames.forEach((func) => {
+                const transaction = {
+                    transactionId: func
+                };
+
+                contractData.transactions.push(transaction);
+            });
+
+            data.contracts.push(contractData);
         }
 
         return data;

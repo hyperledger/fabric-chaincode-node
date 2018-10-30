@@ -11,8 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* global describe it beforeEach afterEach   */
-/* eslint-disable no-console */
+/* global describe it beforeEach afterEach */
 'use strict';
 
 // test specific libraries
@@ -23,7 +22,7 @@ chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
 
-
+const mockery = require('mockery');
 
 // standard utility fns
 const path = require('path');
@@ -37,6 +36,7 @@ const ChaincodeFromContract = require(path.join(pathToRoot, 'fabric-shim/lib/con
 const SystemContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/systemcontract'));
 const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
 const FabricStubInterface = require(path.join(pathToRoot, 'fabric-shim/lib/stub'));
+const StartCommand = require(path.join(pathToRoot, 'fabric-shim/lib/cmds/startCommand.js'));
 let alphaStub;
 let betaStub;
 
@@ -47,7 +47,7 @@ let privateStub;
 let ctxStub;
 
 function log(...e) {
-    console.log(...e);
+    console.log(...e); /* eslint-disable-line */
 }
 
 describe('chaincodefromcontract', () => {
@@ -107,6 +107,7 @@ describe('chaincodefromcontract', () => {
     }
 
     let sandbox;
+    let getArgsStub;
 
     beforeEach('Sandbox creation', () => {
         sandbox = sinon.createSandbox();
@@ -114,21 +115,39 @@ describe('chaincodefromcontract', () => {
         afterFnStubA = sandbox.stub().named('afterFnStubA');
         alphaStub = sandbox.stub().named('alphaStub');
         betaStub = sandbox.stub().named('betaStub');
+        getArgsStub = sandbox.stub(StartCommand, 'getArgs').returns({
+            'module-path': '/some/path'
+        });
+
+        mockery.enable();
+        mockery.registerMock('./systemcontract', SystemContract);
+
+        const pathStub = sandbox.stub(path, 'resolve');
+        pathStub.withArgs(sinon.match.any, '/some/path').returns('/some/path');
+        pathStub.withArgs('/some/path', 'package.json').returns('packagejson');
+
+        const mock = {
+            version: '1.0.1',
+            name: 'some package'
+        };
+
+        mockery.registerMock('packagejson', mock);
     });
 
     afterEach('Sandbox restoration', () => {
         sandbox.restore();
+        mockery.disable();
     });
 
     describe('#constructor', () => {
 
-        it ('should handle no classes being past in', () => {
+        it ('should handle no classes being passed in', () => {
             (() => {
                 new ChaincodeFromContract();
             }).should.throw(/Missing argument/);
         });
 
-        it ('should handle classes that are not of the correc type', () => {
+        it ('should handle classes that are not of the correct type', () => {
             const tempClass =   class {
                 constructor() {}
             };
@@ -150,8 +169,32 @@ describe('chaincodefromcontract', () => {
             expect(cc.contracts.beta).to.include.keys('functionNames');
             expect(cc.contracts.beta.functionNames).to.include('beta');
             expect(cc.contracts.alpha.functionNames).to.include('alpha');
+
+            sinon.assert.calledOnce(getArgsStub);
+            expect(cc.version).to.deep.equal('1.0.1');
+            expect(cc.title).to.deep.equal('some package');
         });
 
+        it ('should correctly create valid chaincode instance when package.json does not have version or name', () => {
+            const mock = {};
+
+            mockery.deregisterMock('packagejson');
+            mockery.registerMock('packagejson', mock);
+
+            SCBeta.prototype.fred = 'fred';
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+
+            // get the contracts that have been defined
+            expect(cc.contracts).to.have.keys('alpha', 'beta', 'org.hyperledger.fabric');
+            expect(cc.contracts.alpha).to.include.keys('functionNames');
+            expect(cc.contracts.beta).to.include.keys('functionNames');
+            expect(cc.contracts.beta.functionNames).to.include('beta');
+            expect(cc.contracts.alpha.functionNames).to.include('alpha');
+
+            sinon.assert.calledOnce(getArgsStub);
+            expect(cc.version).to.deep.equal('');
+            expect(cc.title).to.deep.equal('');
+        });
     });
 
     describe('#init', () => {
@@ -421,39 +464,6 @@ describe('chaincodefromcontract', () => {
                 sinon.assert.calledOnce(beforeFnStubA);
                 sinon.assert.callOrder(beforeFnStubA, afterFnStubA);
             });
-
-            describe('getContracts', () => {
-                it ('should invoke getContracts', async () => {
-                    alphaStub.resolves('Hello');
-                    beforeFnStubA.resolves();
-                    afterFnStubA.resolves();
-
-                    const getMetaDataSpy = sandbox.spy(SystemContract.prototype, 'getMetaData');
-                    const getContractsSpy = sandbox.spy(ChaincodeFromContract.prototype, 'getContracts');
-
-                    const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                    stubInterface.getFunctionAndParameters.returns({
-                        fcn:'org.hyperledger.fabric:getMetaData',
-                        params: ['arg1', 'arg2']
-                    });
-
-                    const mockSigningId = {
-                        getMspid: sinon.stub(),
-                        getIdBytes: sinon.stub().returns(idBytes)
-                    };
-                    stubInterface.getCreator.returns(
-                        mockSigningId
-                    );
-
-                    const expectedResponse = JSON.stringify({'alpha':{'functions':['alpha']}, 'beta':{'functions':['beta', 'afterTransaction', 'beforeTransaction', 'unknownTransaction', 'createContext']}, 'org.hyperledger.fabric':{'functions':['getMetaData']}});
-
-                    await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                    sinon.assert.calledOnce(getContractsSpy);
-                    sinon.assert.calledOnce(getMetaDataSpy);
-                    expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
-                    expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal(expectedResponse);
-                });
-            });
         });
 
         describe('expecting error', () => {
@@ -568,4 +578,57 @@ describe('chaincodefromcontract', () => {
         });
     });
 
+    describe('getContracts', () => {
+        it ('should return the contract info', async () => {
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            cc.title = 'some title';
+            cc.version = '0.0.1';
+
+            const info = cc.getContracts();
+
+            expect(info).to.deep.equal({
+                info: {
+                    title: 'some title',
+                    version: '0.0.1'
+                },
+                contracts: [{
+                    info: {
+                        title: 'alpha',
+                        version: '0.0.1'
+                    },
+                    transactions: [{
+                        transactionId: 'alpha'
+                    }],
+                    namespace: 'alpha'
+                }, {
+                    info: {
+                        title: 'beta',
+                        version: '0.0.1'
+                    },
+                    transactions: [{
+                        transactionId: 'beta'
+                    }, {
+                        transactionId: 'afterTransaction'
+                    }, {
+                        transactionId: 'beforeTransaction'
+                    }, {
+                        transactionId: 'unknownTransaction'
+                    }, {
+                        transactionId: 'createContext'
+                    }],
+                    namespace: 'beta'
+                }, {
+                    info: {
+                        title: 'org.hyperledger.fabric',
+                        version: '0.0.1'
+                    },
+                    transactions: [{
+                        transactionId: 'GetMetadata'
+                    }],
+                    namespace: 'org.hyperledger.fabric'
+                }],
+                components: {}
+            });
+        });
+    });
 });

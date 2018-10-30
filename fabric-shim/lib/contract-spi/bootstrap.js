@@ -65,7 +65,7 @@ function bootstrap() {
         } else {
             register([r]);
         }
-    } else  {
+    } else {
         throw new Error('Can not detect any of the indications of how this is a contract instance');
     }
 }
