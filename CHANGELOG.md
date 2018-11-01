@@ -1,3 +1,17 @@
+## 1.4.0-beta
+Thu Nov  1 13:07:44 EDT 2018
+
+* [79e1906](https://github.com/hyperledger/fabric/commit/79e1906) [FAB-12539](https://jira.hyperledger.org/browse/FAB-12539) type definitions for state based EP APIs
+* [b3f0835](https://github.com/hyperledger/fabric/commit/b3f0835) [FAB-12580](https://jira.hyperledger.org/browse/FAB-12580) Peer can’t tolerate ping frequency
+* [f18b221](https://github.com/hyperledger/fabric/commit/f18b221) [FAB-12538](https://jira.hyperledger.org/browse/FAB-12538) chaincode handler for key-level metadata
+* [98c325d](https://github.com/hyperledger/fabric/commit/98c325d) [FAB-12537](https://jira.hyperledger.org/browse/FAB-12537) CC convenience layer for state-based EP
+* [d43ceca](https://github.com/hyperledger/fabric/commit/d43ceca) [FAB-12456](https://jira.hyperledger.org/browse/FAB-12456) Adding eslint to chaincode-node
+* [8506291](https://github.com/hyperledger/fabric/commit/8506291) [FAB-12336](https://jira.hyperledger.org/browse/FAB-12336) Allow no args to be passed for Init Command
+* [d5e5f27](https://github.com/hyperledger/fabric/commit/d5e5f27) [FAB-12482](https://jira.hyperledger.org/browse/FAB-12482) fix dependencies
+* [92f3798](https://github.com/hyperledger/fabric/commit/92f3798) [FAB-12422](https://jira.hyperledger.org/browse/FAB-12422) added module-path CLI option
+* [bfbd290](https://github.com/hyperledger/fabric/commit/bfbd290) [FAB-12429](https://jira.hyperledger.org/browse/FAB-12429) contract-api documentation
+* [264cf80](https://github.com/hyperledger/fabric/commit/264cf80) [FAB-12405](https://jira.hyperledger.org/browse/FAB-12405) fix success response format for contractapi
+
 ## v1.3.0
 Wed 10 Oct 17:04:37 BST 2018
 

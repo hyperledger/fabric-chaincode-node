@@ -1,0 +1,24 @@
+v1.4.0-beta November 1, 2018
+-----------------------------
+
+Release Notes
+-------------
+Bug fixes.
+Added the fabric contract API
+
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/master/CHANGELOG.md#v140-beta
