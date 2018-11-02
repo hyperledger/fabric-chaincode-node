@@ -29,7 +29,6 @@ const path = require('path');
 const pathToRoot = '../../../..';
 const bootstrap = rewire(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap'));
 const Contract = require('fabric-contract-api').Contract;
-const ChaincodeFromContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/chaincodefromcontract'));
 const StartCommand = require('../../../lib/cmds/startCommand.js');
 
 const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
@@ -38,7 +37,7 @@ function log(...e) {
     console.log(...e);
 }
 
-describe('contract.js', () => {
+describe('bootstrap.js', () => {
 
     /**
      * A fake  contract class; pure loading tests in this file
@@ -51,6 +50,19 @@ describe('contract.js', () => {
          * @param {object} api api
          */
         alpha(api) {
+            log(api);
+        }
+    }
+
+    class sc2 extends Contract {
+        /** */
+        constructor() {
+            super();
+        }
+        /**
+         * @param {object} api api
+         */
+        beta(api) {
             log(api);
         }
     }
@@ -68,9 +80,24 @@ describe('contract.js', () => {
     describe('#register', () => {
 
         it ('should pass on the register to the shim', () => {
+            let testArgs;
+
+            class MockChaincodeFromContract {
+                constructor(contractClasses) {
+                    testArgs = contractClasses;
+                }
+            }
+
+            const cfcClass = bootstrap.__get__('ChaincodeFromContract');
+            bootstrap.__set__('ChaincodeFromContract', MockChaincodeFromContract);
+
             sandbox.stub(shim, 'start');
             bootstrap.register([sc]);
+
+            testArgs.should.deep.equal([sc]);
             sinon.assert.calledOnce(shim.start);
+
+            bootstrap.__set__('ChaincodeFromContract', cfcClass);
         });
 
     });
@@ -81,6 +108,8 @@ describe('contract.js', () => {
 
         let getArgsStub;
         let pathStub;
+        let registerStub;
+        let ogRegister;
 
         beforeEach('enable mockery', () => {
             mockery.enable();
@@ -94,6 +123,11 @@ describe('contract.js', () => {
             pathStub = sandbox.stub(path, 'resolve');
             pathStub.withArgs(sinon.match.any, '/some/path').returns('/some/path');
             pathStub.withArgs('/some/path', 'package.json').returns('jsoncfg');
+
+            registerStub = sinon.stub();
+
+            ogRegister = bootstrap.__get__('register');
+            bootstrap.__set__('register', registerStub);
         });
 
         afterEach('disable mockery', () => {
@@ -104,6 +138,7 @@ describe('contract.js', () => {
 
         after(() => {
             bootstrap.__set__('yargs', theirYargs);
+            bootstrap.__set__('register', ogRegister);
         });
 
         it ('should use the package.json for the names classes; incorrect spec', () => {
@@ -116,36 +151,28 @@ describe('contract.js', () => {
             sinon.assert.calledWith(getArgsStub, myYargs);
         });
 
-
-        it ('should use the package.json for the names classes; incorrect spec', () => {
-            pathStub.withArgs('/some/path', 'nonexistant').returns('jsoncfg');
-
-            mockery.registerMock('jsoncfg', {
-                contracts:  {
-                    classes:['nonexistant']
-                }
-            });
-
-            (() => {
-                bootstrap.bootstrap();
-            }).should.throw(/is not a constructor/);
-        });
-
         it ('should use the package.json for the names classes; valid spec', () => {
 
-            mockery.registerMock('jsoncfg', {
-                contracts:  {
-                    classes:['sensibleContract']
+            const mock = {
+                contracts: {
+                    classes: ['sensibleContract', 'anotherSensibleContract']
                 }
-            });
-            sandbox.stub(shim, 'start');
+            };
+
+            mockery.registerMock('jsoncfg', mock);
 
             pathStub.withArgs('/some/path', sinon.match(/sensibleContract/)).returns('sensibleContract');
+            pathStub.withArgs('/some/path', sinon.match(/anotherSensibleContract/)).returns('anotherSensibleContract');
 
             mockery.registerMock('sensibleContract', sc);
+            mockery.registerMock('anotherSensibleContract', sc2);
+
             bootstrap.bootstrap();
-            sinon.assert.calledOnce(shim.start);
-            sinon.assert.calledWith(shim.start, sinon.match.instanceOf(ChaincodeFromContract));
+
+            sinon.assert.calledOnce(registerStub);
+            sinon.assert.calledWith(registerStub, [sc, sc2]);
+
+            bootstrap.__set__('register', ogRegister);
         });
 
         it ('should use the main class defined in the package.json', () => {
@@ -160,8 +187,8 @@ describe('contract.js', () => {
             mockery.registerMock('entryPoint', sc);
             mockery.registerMock('sensibleContract', sc);
             bootstrap.bootstrap();
-            sinon.assert.calledOnce(shim.start);
-            sinon.assert.calledWith(shim.start, sinon.match.instanceOf(ChaincodeFromContract));
+            sinon.assert.calledOnce(registerStub);
+            sinon.assert.calledWith(registerStub, [sc]);
 
         });
 
@@ -174,10 +201,10 @@ describe('contract.js', () => {
 
             pathStub.withArgs('/some/path', 'entrypoint2').returns('entryPoint2');
 
-            mockery.registerMock('entryPoint2', {contracts:[sc]});
+            mockery.registerMock('entryPoint2', {contracts: [sc]});
             bootstrap.bootstrap();
-            sinon.assert.calledOnce(shim.start);
-            sinon.assert.calledWith(shim.start, sinon.match.instanceOf(ChaincodeFromContract));
+            sinon.assert.calledOnce(registerStub);
+            sinon.assert.calledWith(registerStub, [sc]);
         });
 
         it ('should throw an error if none of the other methods work', () => {

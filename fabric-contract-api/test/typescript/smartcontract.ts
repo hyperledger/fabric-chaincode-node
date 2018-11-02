@@ -4,7 +4,7 @@
  SPDX-License-Identifier: Apache-2.0
 
 */
-/// <reference path="../../../fabric-shim/types/index.d.ts" />
+
 import { Contract, Context } from 'fabric-contract-api';
 import { ChaincodeStub, ClientIdentity } from 'fabric-shim';
 
