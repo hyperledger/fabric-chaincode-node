@@ -14,10 +14,10 @@ const fs = require('fs');
 
 const GOPATH = process.env.GOPATH;
 if (!GOPATH || GOPATH === '') {
-    console.error(
-        'The shim implementation depends on protobuf definitions from fabric GO package "%s", ' +
-		'but the GOPATH environment variable has not been set up',
-        'github.com/hyperledger/fabric/protos');
+    console.error('The shim implementation depends on protobuf definitions from fabric GO package "%s", ' +
+     'but the GOPATH environment variable has not been set up',
+    'github.com/hyperledger/fabric/protos'
+    );
     process.exit(1);
 }
 

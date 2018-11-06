@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "@types/node": "^8.9.4",
-    "fabric-shim": "file:./fabric-shim",
     "fabric-contract-api": "file:./fabric-contract-api",
+    "fabric-shim": "file:./fabric-shim",
     "fabric-shim-crypto": "file:./fabric-shim-crypto",
     "jsrsasign": "^8.0.4"
   },
@@ -28,8 +28,7 @@
     "chai-as-promised": "^7.1.1",
     "chai-things": "^0.2.0",
     "delay": "^3.1.0",
-    "eslint": "3.17.1",
-    "fs-extra": "^4.0.1",
+    "eslint": "4.0.0",
     "gulp": "^3.9.1",
     "gulp-debug": "^3.1.0",
     "gulp-eslint": "^4.0.0",

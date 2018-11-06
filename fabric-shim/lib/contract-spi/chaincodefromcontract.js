@@ -10,7 +10,6 @@ const shim = require('../chaincode');
 const Logger = require('../logger');
 const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
 const StartCommand = require('../cmds/startCommand.js');
-
 const ClientIdentity = require('../chaincode').ClientIdentity;
 
 const yargs = require('yargs');
@@ -21,7 +20,7 @@ const path = require('path');
  * is expressed in terms of domain specific functions - that need to be called in the
  * lower-level 'invoke' and 'init' functions.
  *
- * This class impelements the 'invoke' and 'init' functions and does the 'routing'
+ * This class implements the 'invoke' and 'init' functions and does the 'routing'
  * @ignore
  **/
 class ChaincodeFromContract {

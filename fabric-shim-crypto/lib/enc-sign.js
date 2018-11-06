@@ -63,7 +63,7 @@ class ChaincodeCryptoLibrary {
             return Buffer.from(ciphertext, 'hex');
         } else {
             throw new Error('The transient map in the chaincode invocation request' +
-				' must contain an "encrypt-key" entry in order to use encryption');
+    ' must contain an "encrypt-key" entry in order to use encryption');
         }
     }
 
@@ -74,14 +74,14 @@ class ChaincodeCryptoLibrary {
             return Buffer.from(plaintext, 'utf8');
         } else {
             throw new Error('The transient map in the chaincode invocation request' +
-				' must contain an "encrypt-key" entry in order to use decryption');
+    ' must contain an "encrypt-key" entry in order to use decryption');
         }
     }
 
     sign(message) {
         if (typeof this.signKey === 'undefined' || this.signKey === null) {
             throw new Error('The transient map in the chaincode invocation request' +
-				' must contain a "sign-key" entry in order to perform signing');
+    ' must contain a "sign-key" entry in order to perform signing');
         }
 
         if (typeof message === 'undefined' || message === null) {
@@ -99,7 +99,7 @@ class ChaincodeCryptoLibrary {
     verify(signature, message) {
         if (typeof this.signKey === 'undefined' || this.signKey === null) {
             throw new Error('The transient map in the chaincode invocation request' +
-				' must contain a "sign-key" entry in order to perform signature verification');
+    ' must contain a "sign-key" entry in order to perform signature verification');
         }
 
         if (typeof signature === 'undefined' || signature === null) {

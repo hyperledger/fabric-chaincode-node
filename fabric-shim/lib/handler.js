@@ -283,8 +283,7 @@ class ChaincodeSupportClient {
             if (state === STATES.Ready) {
                 const type = msg.type;
 
-                if (type !== MSG_TYPE.REGISTERED &&
-					type !== MSG_TYPE.READY) {
+                if (type !== MSG_TYPE.REGISTERED && type !== MSG_TYPE.READY) {
 
                     if (type === MSG_TYPE.RESPONSE || type === MSG_TYPE.ERROR) {
                         logger.debug('[%s-%s]Received %s,  handling good or error response', msg.channel_id, shortTxid(msg.txid), msg.type);
@@ -312,7 +311,7 @@ class ChaincodeSupportClient {
                     // from the peer when in "established" state
                     // send an error message telling the peer about this
                     logger.error(util.format('Chaincode is in "ready" state, can only ' +
-						'process messages of type "established", but received "%s"', msg.type));
+                     'process messages of type "established", but received "%s"', msg.type));
                     const errMsg = newErrorMsg(msg, state);
                     stream.write(errMsg);
                 }
@@ -327,7 +326,7 @@ class ChaincodeSupportClient {
                     // from the peer when in "created" state
                     // send an error message telling the peer about this
                     logger.error(util.format('Chaincode is in "created" state, can only ' +
-						'process messages of type "registered", but received "%s"', msg.type));
+                     'process messages of type "registered", but received "%s"', msg.type));
                     const errMsg = newErrorMsg(msg, state);
                     stream.write(errMsg);
                 }
@@ -571,8 +570,9 @@ class ChaincodeSupportClient {
 	 */
     toString() {
         return 'ChaincodeSupportClient : {' +
-			'url:' + this._url +
-		'}';
+         'url:' +
+          this._url +
+           '}';
     }
 }
 

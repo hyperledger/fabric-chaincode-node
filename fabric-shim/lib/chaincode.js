@@ -124,8 +124,10 @@ class Shim {
             const keyPath = process.env.CORE_TLS_CLIENT_KEY_PATH;
             const certPath = process.env.CORE_TLS_CLIENT_CERT_PATH;
             if (typeof keyPath !== 'string' || typeof certPath !== 'string') {
-                throw new Error('The client key and cert are needed when TLS is enabled, but environment ' +
-					'variables specifying the paths to these files are missing');
+                throw new Error(
+                    'The client key and cert are needed when TLS is enabled, but environment ' +
+                     'variables specifying the paths to these files are missing'
+                );
             }
 
             optsCpy.key = fs.readFileSync(keyPath).toString();
@@ -367,7 +369,7 @@ function parsePeerUrl(url) {
     } else {
         if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
             throw new Error('The "peer.address" program argument can not be set to an "http(s)" url, ' +
-				'use grpc(s) or omit the protocol');
+    'use grpc(s) or omit the protocol');
         } else {
             // if the url has grpc(s) prefix, use it, otherwise decide based on the TLS enablement
             if (url.indexOf('grpc://') !== 0 && url.indexOf('grpcs://') !== 0) {
