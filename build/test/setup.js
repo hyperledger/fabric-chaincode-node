@@ -14,6 +14,39 @@ const replace = require('gulp-replace');
 
 const constants = require('../../test/constants.js');
 
+const arch = process.arch;
+const release = require(path.join(__dirname, '../../package.json')).testFabricVersion;
+const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
+let dockerImageTag = '';
+let thirdpartyImageTag = '';
+let docker_arch = '';
+
+// this is a release build, need to build the proper docker image tag
+// to run the tests against the corresponding fabric released docker images
+if (arch.indexOf('x64') === 0) {
+    docker_arch = ':amd64';
+} else if (arch.indexOf('s390') === 0) {
+    docker_arch = ':s390x';
+} else if (arch.indexOf('ppc64') === 0) {
+    docker_arch = ':ppc64le';
+} else {
+    throw new Error('Unknown architecture: ' + arch);
+}
+
+// release check, if master is specified then we are using a fabric that has been
+// built from source, otherwise we are using specific published versions.
+
+// prepare thirdpartyImageTag (currently using couchdb image in tests)
+if (!/master/.test(thirdparty_release)) {
+    thirdpartyImageTag = docker_arch + '-' + thirdparty_release;
+}
+if (!/master/.test(release)) {
+    dockerImageTag = docker_arch + '-' + release;
+}
+// these environment variables would be read at test/fixtures/docker-compose.yaml
+process.env.DOCKER_IMG_TAG = dockerImageTag;
+process.env.THIRDPARTY_IMG_TAG = thirdpartyImageTag;
+
 // by default for running the tests print debug to a file
 const debugPath = path.join(constants.tempdir, 'logs/test-debug.log');
 console.log('\n####################################################');
