@@ -1,6 +1,7 @@
 coverage
 docs/gen
 node_modules/*
+fabric-contract-api/node_modules/*
 fabric-shim/node_modules/*
 fabric-shim/lib/protos/common/*
 fabric-shim/lib/protos/msp/*

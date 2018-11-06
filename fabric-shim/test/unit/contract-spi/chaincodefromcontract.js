@@ -160,15 +160,21 @@ describe('chaincodefromcontract', () => {
         });
 
         it ('should correctly create valid chaincode instance', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(['some', 'transactions']);
+
             SCBeta.prototype.fred = 'fred';
             const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
 
             // get the contracts that have been defined
             expect(cc.contracts).to.have.keys('alpha', 'beta', 'org.hyperledger.fabric');
-            expect(cc.contracts.alpha).to.include.keys('functionNames');
-            expect(cc.contracts.beta).to.include.keys('functionNames');
-            expect(cc.contracts.beta.functionNames).to.include('beta');
-            expect(cc.contracts.alpha.functionNames).to.include('alpha');
+            expect(cc.contracts.alpha).to.include.keys('transactions');
+            expect(cc.contracts.beta).to.include.keys('transactions');
+            expect(cc.contracts.alpha.transactions).to.deep.equal(['some', 'transactions']);
+            expect(cc.contracts.beta.transactions).to.deep.equal(['some', 'transactions']);
+
+            sinon.assert.calledThrice(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCAlpha));
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
 
             sinon.assert.calledOnce(getArgsStub);
             expect(cc.version).to.deep.equal('1.0.1');
@@ -176,6 +182,8 @@ describe('chaincodefromcontract', () => {
         });
 
         it ('should correctly create valid chaincode instance when package.json does not have version or name', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(['some', 'transactions']);
+
             const mock = {};
 
             mockery.deregisterMock('packagejson');
@@ -186,10 +194,36 @@ describe('chaincodefromcontract', () => {
 
             // get the contracts that have been defined
             expect(cc.contracts).to.have.keys('alpha', 'beta', 'org.hyperledger.fabric');
-            expect(cc.contracts.alpha).to.include.keys('functionNames');
-            expect(cc.contracts.beta).to.include.keys('functionNames');
-            expect(cc.contracts.beta.functionNames).to.include('beta');
-            expect(cc.contracts.alpha.functionNames).to.include('alpha');
+            expect(cc.contracts.alpha).to.include.keys('transactions');
+            expect(cc.contracts.beta).to.include.keys('transactions');
+            expect(cc.contracts.alpha.transactions).to.deep.equal(['some', 'transactions']);
+            expect(cc.contracts.beta.transactions).to.deep.equal(['some', 'transactions']);
+
+            sinon.assert.calledThrice(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCAlpha));
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
+
+            sinon.assert.calledOnce(getArgsStub);
+            expect(cc.version).to.deep.equal('');
+            expect(cc.title).to.deep.equal('');
+        });
+
+        it ('should handle when reflect cannot get metadata', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(undefined);
+
+            const mock = {};
+
+            mockery.registerMock('packagejson', mock);
+
+            SCBeta.prototype.fred = 'fred';
+            const cc = new ChaincodeFromContract([SCBeta]);
+
+            // get the contracts that have been defined
+            expect(cc.contracts).to.have.keys('beta', 'org.hyperledger.fabric');
+            expect(cc.contracts.beta).to.include.keys('transactions');
+            expect(cc.contracts.beta.transactions).to.deep.equal([{transactionId: 'beta'}, {transactionId: 'afterTransaction'}, {transactionId: 'beforeTransaction'}, {transactionId: 'unknownTransaction'}, {transactionId: 'createContext'}]);
+            sinon.assert.calledTwice(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
 
             sinon.assert.calledOnce(getArgsStub);
             expect(cc.version).to.deep.equal('');

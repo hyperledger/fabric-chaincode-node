@@ -38,7 +38,7 @@ class ChaincodeFromContract {
         const SystemContract = require('./systemcontract');
 
         // the structure that stores the 'function-pointers', contents of the form
-        // {  namespace : { ContractClass,  Contract,  functionNames[] }}
+        // {  namespace : { ContractClass,  Contract,  transactions[] }}
         this.contracts = {};
 
         if (!contractClasses) {
@@ -60,25 +60,30 @@ class ChaincodeFromContract {
                 contract._setChaincode(this);
             }
 
-            const propNames = Object.getOwnPropertyNames(Object.getPrototypeOf(contract));
+            const transactions = Reflect.getMetadata('fabric:transactions', contract) || [];
 
-            const functionNames = [];
-            for (const propName of propNames) {
-                const propValue = contract[propName];
-                if (typeof propValue !== 'function') {
-                    continue;
-                } else if (propName === 'constructor') {
-                    continue;
-                } else if (propName.startsWith('_')) {
-                    continue;
+            if (transactions.length === 0) {
+                const propNames = Object.getOwnPropertyNames(Object.getPrototypeOf(contract));
+
+                for (const propName of propNames) {
+                    const propValue = contract[propName];
+                    if (typeof propValue !== 'function') {
+                        continue;
+                    } else if (propName === 'constructor') {
+                        continue;
+                    } else if (propName.startsWith('_')) {
+                        continue;
+                    }
+
+                    transactions.push({
+                        transactionId: propName
+                    });
                 }
-
-                functionNames.push(propName);
             }
             const namespace = contract.getNamespace();
-            logger.debug(functionNames, contractClass, namespace);
+            logger.debug(transactions, contractClass, namespace);
 
-            this.contracts[`${namespace}`] = {contractClass, functionNames, contract};
+            this.contracts[`${namespace}`] = {contractClass, transactions, contract};
         }
         const opts = StartCommand.getArgs(yargs);
         const modPath = path.resolve(process.cwd(), opts['module-path']);
@@ -135,7 +140,9 @@ class ChaincodeFromContract {
             ctx.setChaincodeStub(stub);
             ctx.setClientIdentity(new ClientIdentity(stub));
 
-            const functionExists = this.contracts[ns].functionNames.indexOf(fn) !== -1;
+            const functionExists = this.contracts[ns].transactions.some((transaction) => {
+                return transaction.transactionId === fn;
+            });
             if (functionExists) {
                 // before tx fn
                 await contractInstance.beforeTransaction(ctx);
@@ -214,12 +221,8 @@ class ChaincodeFromContract {
 
             contractData.namespace = contract.contract.getNamespace();
 
-            contract.functionNames.forEach((func) => {
-                const transaction = {
-                    transactionId: func
-                };
-
-                contractData.transactions.push(transaction);
+            contract.transactions.forEach((tx) => {
+                contractData.transactions.push(tx);
             });
 
             data.contracts.push(contractData);
