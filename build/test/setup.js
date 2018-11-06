@@ -11,8 +11,32 @@ const fs = require('fs-extra');
 const path = require('path');
 const shell = require('gulp-shell');
 const replace = require('gulp-replace');
-
 const test = require('../../test/base.js');
+
+let arch = process.arch;
+let dockerImageTag = '';
+let thirdpartyImageTag = '';
+let docker_arch = '';
+const fabric_release     = require(path.join(__dirname, '../../package.json')).testFabricVersion;
+const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
+
+// this is a release build, need to build the proper docker image tag
+// to run the tests against the corresponding fabric released docker images
+if (arch.indexOf('x64') === 0) {
+	docker_arch = ':amd64';
+} else if (arch.indexOf('s390') === 0) {
+	docker_arch = ':s390x';
+} else if (arch.indexOf('ppc64') === 0) {
+	docker_arch = ':ppc64le';
+} else {
+	throw new Error('Unknown architecture: ' + arch);
+}
+console.log(util.format('# debug log thirdparty_release: %s', thirdparty_release));
+console.log(util.format('# debug log fabric_release: %s', fabric_release));
+
+// prepare thirdpartyImageTag (currently using couchdb image in tests)
+thirdpartyImageTag = docker_arch + '-' + thirdparty_release;
+dockerImageTag     = docker_arch + '-' + fabric_release;
 
 // by default for running the tests print debug to a file
 let debugPath = path.join(test.tempdir, 'logs/test-debug.log');
