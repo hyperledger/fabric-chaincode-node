@@ -2,15 +2,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+timeout(40) {
 node('hyp-z') {
     try {
      def ROOTDIR = pwd() // workspace dir (/w/workspace/<job_name>
      env.PROJECT_DIR = "gopath/src/github.com/hyperledger"
      env.PROJECT = "fabric-chaincode-node"
      env.GOPATH = "$WORKSPACE/gopath"
-     env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v6.9.5/bin:/home/jenkins/.nvm/versions/node/v8.9.4/bin:$PATH"
-     env.GOROOT = "/opt/go/go1.10.linux.s390x"
-     env.PATH = "$GOROOT/bin:$PATH"
+     env.NODE_VER = "8.9.4"
+     env.VERSION = sh(returnStdout: true, script: 'curl -O https://raw.githubusercontent.com/hyperledger/fabric/master/Makefile && cat Makefile | grep "BASE_VERSION =" | cut -d "=" -f2').trim()
+     env.VERSION = "$VERSION" // BASE_VERSION from fabric Makefile
+     env.ARCH = "s390x"
+     env.IMAGE_TAG = "${ARCH}-${VERSION}-stable" // fabric latest stable version from nexus
+     env.PROJECT_VERSION = "${VERSION}-stable"
+     env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v{NODE_VER}/bin:$PATH"
      def failure_stage = "none"
 // delete working directory
      deleteDir()
@@ -21,8 +26,8 @@ node('hyp-z') {
                  [ -e gopath/src/github.com/hyperledger/fabric-chaincode-node ] || mkdir -p $PROJECT_DIR
 
                  cd $PROJECT_DIR && git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/$PROJECT
+                 git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric-samples
                  cd $PROJECT && git checkout "$GERRIT_BRANCH" && git fetch origin "$GERRIT_REFSPEC" && git checkout FETCH_HEAD
-                 cd .. && git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
               '''
               }
           }
@@ -48,7 +53,7 @@ node('hyp-z') {
       stage("Pull Docker images") {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
-                 sh './CI_Script.sh --pull_Fabric_Images --pull_Fabric_CA_Image'
+                 sh './CI_Script.sh --pull_Docker_Images'
                  }
                }
            catch (err) {
@@ -70,8 +75,13 @@ node('hyp-z') {
            }
      }
     } finally { // Code for coverage report
-             junit '**/cobertura-coverage.xml'
              step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/cobertura-coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
-             archiveArtifacts artifacts: '**/*.log'
-      } // finally block end here
-} // node block end here
+             archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.log'
+             if (env.JOB_NAME == "fabric-chaincode-node-merge-s390x") {
+                if (currentBuild.result == 'FAILURE') { // Other values: SUCCESS, UNSTABLE
+               rocketSend "Build Notification - STATUS: ${currentBuild.result} - BRANCH: ${env.GERRIT_BRANCH} - PROJECT: ${env.PROJECT} - BUILD_URL - (<${env.BUILD_URL}|Open>)"
+              }
+           }
+      } // finally block
+} // node block
+} // timeout block

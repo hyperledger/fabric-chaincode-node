@@ -11,8 +11,11 @@ cd ${WORKSPACE}/gopath/src/github.com/hyperledger/fabric-chaincode-node
 CHAINCODE_NODE_COMMIT=$(git rev-parse --short HEAD)
 echo "---------> CHAINCODE_NODE_COMMIT:" $CHAINCODE_NODE_COMMIT
 TARGET_REPO=$CHAINCODE_NODE_USERNAME.github.io.git
+git config user.email "fabricchaincodenode@gmail.com"
+git config user.name "fabric-shim"
 git clone https://github.com/$CHAINCODE_NODE_USERNAME/$TARGET_REPO
 
+# build docs
 DOCS_ROOT=$CHAINCODE_NODE_USERNAME.github.io gulp docs
 
 cd $CHAINCODE_NODE_USERNAME.github.io

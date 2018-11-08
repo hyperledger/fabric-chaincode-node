@@ -2,16 +2,20 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+timeout(40) {
 node ('hyp-x') { // trigger build on x86_64 node
     try {
-     def ROOTDIR = pwd() // workspace dir (/w/workspace/<job_name>
+     def ROOTDIR = pwd() // workspace dir (/w/workspace/<job_name>)
      env.PROJECT_DIR = "gopath/src/github.com/hyperledger"
      env.PROJECT = "fabric-chaincode-node"
      env.GOPATH = "$WORKSPACE/gopath"
-     env.JAVA_HOME = "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
-     env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v6.9.5/bin:/home/jenkins/.nvm/versions/node/v8.9.4/bin:$PATH"
-     env.GOROOT = "/opt/go/go1.10.linux.amd64"
-     env.PATH = "$GOROOT/bin:$PATH"
+     env.NODE_VER = "8.9.4"
+     env.VERSION = sh(returnStdout: true, script: 'curl -O https://raw.githubusercontent.com/hyperledger/fabric/master/Makefile && cat Makefile | grep "BASE_VERSION =" | cut -d "=" -f2').trim()
+     env.VERSION = "$VERSION" // BASE_VERSION from fabric Makefile
+     env.ARCH = "amd64"
+     env.IMAGE_TAG = "${ARCH}-${VERSION}-stable" // fabric latest stable version from nexus
+     env.PROJECT_VERSION = "${VERSION}-stable"
+     env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v{NODE_VER}/bin:$PATH"
      def failure_stage = "none"
 // delete working directory
      deleteDir()
@@ -21,8 +25,8 @@ node ('hyp-x') { // trigger build on x86_64 node
               sh '''
                  [ -e gopath/src/github.com/hyperledger/ ] || mkdir -p $PROJECT_DIR
                  cd $PROJECT_DIR && git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/$PROJECT
+                 git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric-samples
                  cd $PROJECT && git checkout "$GERRIT_BRANCH" && git fetch origin "$GERRIT_REFSPEC" && git checkout FETCH_HEAD
-                 cd .. && git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
               '''
               }
           }
@@ -48,7 +52,7 @@ node ('hyp-x') { // trigger build on x86_64 node
       stage("Pull Docker images") {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
-                 sh './CI_Script.sh --pull_Fabric_Images --pull_Fabric_CA_Image'
+                 sh './CI_Script.sh --pull_Docker_Images'
                  }
                }
            catch (err) {
@@ -71,30 +75,34 @@ node ('hyp-x') { // trigger build on x86_64 node
       }
 
 // Publish unstable npm modules from merged job
-if (env.GERRIT_EVENT_TYPE == "change-merged") {
+if (env.JOB_NAME == "fabric-chaincode-node-merge-x86_64") {
     unstableNpm()
 }  else {
      echo "------> Don't publish npm modules from verify job"
    }
 
 // Publish API Docs from merged job only
-if (env.GERRIT_EVENT_TYPE == "change-merged") {
+if (env.JOB_NAME == "fabric-chaincode-node-merge-x86_64") {
     apiDocs()
 } else {
      echo "------> Don't publish API Docs from verify job"
    }
-
     } finally { // Code for coverage report
-           junit '**/cobertura-coverage.xml'
            step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/cobertura-coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
-           archiveArtifacts artifacts: '**/*.log'
-      } // finally block end here
-} // node block end here
+           archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.log'
+           if (env.JOB_NAME == "fabric-chaincode-node-merge-x86_64") {
+              if (currentBuild.result == 'FAILURE') { // Other values: SUCCESS, UNSTABLE
+               rocketSend "Build Notification - STATUS: ${currentBuild.result} - BRANCH: ${env.GERRIT_BRANCH} - PROJECT: ${env.PROJECT} - BUILD_URL - (<${env.BUILD_URL}|Open>)"
+              }
+           }
+      } // finally block
+} // node block
+} // timeout block
 
 def unstableNpm() {
-def ROOTDIR = pwd()
 // Publish unstable npm modules after successful merge
-      stage("Publish Unstable npm modules") {
+      stage("Publish Unstable npm Modules") {
+      def ROOTDIR = pwd()
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --publish_Unstable'
@@ -108,16 +116,16 @@ def ROOTDIR = pwd()
 }
 
 def apiDocs() {
-def ROOTDIR = pwd()
 // Publish SDK_NODE API docs after successful merge
       stage("Publish API Docs") {
+      def ROOTDIR = pwd()
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
-                 sh './CI_Script.sh --publish_Api_Docs'
+                 sh './CI_Script.sh --publish_ApiDocs'
                  }
                }
            catch (err) {
-                 failure_stage = "publish_Api_Docs"
+                 failure_stage = "publish_ApiDocs"
                  throw err
            }
       }
