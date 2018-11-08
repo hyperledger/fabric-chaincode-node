@@ -17,7 +17,7 @@ let arch = process.arch;
 let dockerImageTag = '';
 let thirdpartyImageTag = '';
 let docker_arch = '';
-const fabric_release     = require(path.join(__dirname, '../../package.json')).testFabricVersion;
+const release     = require(path.join(__dirname, '../../package.json')).testFabricVersion;
 const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
 
 // this is a release build, need to build the proper docker image tag
@@ -31,12 +31,20 @@ if (arch.indexOf('x64') === 0) {
 } else {
 	throw new Error('Unknown architecture: ' + arch);
 }
+
 console.log(util.format('# debug log thirdparty_release: %s', thirdparty_release));
-console.log(util.format('# debug log fabric_release: %s', fabric_release));
+console.log(util.format('# debug log release: %s', release));
 
 // prepare thirdpartyImageTag (currently using couchdb image in tests)
 thirdpartyImageTag = docker_arch + '-' + thirdparty_release;
-dockerImageTag     = docker_arch + '-' + fabric_release;
+
+// release check
+if (!/-snapshot/.test(release)) {
+	dockerImageTag = docker_arch + '-' + release;
+}
+// these environment variables would be read at test/fixtures/docker-compose.yaml
+process.env.DOCKER_IMG_TAG = dockerImageTag;
+process.env.THIRDPARTY_IMG_TAG = thirdpartyImageTag;
 
 // by default for running the tests print debug to a file
 let debugPath = path.join(test.tempdir, 'logs/test-debug.log');
