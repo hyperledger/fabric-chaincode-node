@@ -10,6 +10,7 @@ const path = require('path');
 gulp.task('lint', function () {
     return gulp.src([
         '**/*.js',
+        '!fabric-contract-api/node_modules/**',
         '!fabric-shim/node_modules/**',
         '!test/node_modules/**',
         '!**/typescript/*.js',
