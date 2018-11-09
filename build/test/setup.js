@@ -18,7 +18,7 @@ let arch = process.arch;
 let dockerImageTag = '';
 let thirdpartyImageTag = '';
 let docker_arch = '';
-const release     = require(path.join(__dirname, '../../package.json')).testFabricVersion;
+const release = require(path.join(__dirname, '../../package.json')).testFabricVersion;
 const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
 
 // this is a release build, need to build the proper docker image tag

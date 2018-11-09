@@ -7,20 +7,11 @@
 
 # exit on first error
 
-export BASE_FOLDER=$WORKSPACE/gopath/src/github.com/hyperledger
-# Modify this when change the image tag
-export STABLE_TAG=1.3.1-stable
-export NEXUS_URL=nexus3.hyperledger.org:10001
-export ORG_NAME="hyperledger/fabric"
-# Set this in GOPATH
-export NODE_VER=8.9.4 # Default nodejs version
-
-export OS_VER=$(dpkg --print-architecture)
-echo "-----------> OS_VER" $OS_VER
-
-# Published stable version from nexus
-export STABLE_TAG=$OS_VER-$STABLE_TAG
-echo "-----------> STABLE_TAG" $STABLE_TAG
+# error check
+err_Check() {
+echo -e "\033[31m $1" "\033[0m"
+exit 1
+}
 
 Parse_Arguments() {
       while [ $# -gt 0 ]; do
@@ -28,22 +19,16 @@ Parse_Arguments() {
                       --env_Info)
                             env_Info
                             ;;
-                      --pull_Fabric_Images)
-                            pull_Fabric_Images
-                            ;;
-                      --pull_Fabric_CA_Image)
-                            pull_Fabric_CA_Image
-                            ;;
                       --clean_Environment)
                             clean_Environment
                             ;;
                       --sdk_E2e_Tests)
                             sdk_E2e_Tests
                             ;;
-                      --publish_Unstable)
-                            publish_Unstable
+                      --publish_NpmModules)
+                            publish_NpmModules
                             ;;
-                      --publish_Api_Docs)
+                      --publish_ApiDocs)
                             publish_Api_Docs
                             ;;
               esac
@@ -86,6 +71,8 @@ function removeUnwantedImages() {
 rm -rf $HOME/.nvm/ $HOME/.node-gyp/ $HOME/.npm/ $HOME/.npmrc  || true
 
 mkdir $HOME/.nvm || true
+# Remove /tmp/fabric-shim
+docker run -v /tmp:/tmp library/alpine rm -rf /tmp/fabric-shim || true
 
 # remove tmp/hfc and hfc-key-store data
 rm -rf /home/jenkins/.nvm /home/jenkins/npm /tmp/fabric-shim /tmp/hfc* /tmp/npm* /home/jenkins/kvsTemp /home/jenkins/.hfc-key-store || true
@@ -103,7 +90,7 @@ removeUnwantedImages
 env_Info() {
         # This function prints system info
 
-        #### Build Env INFO
+        # Build Env INFO
         echo "-----------> Build Env INFO"
         # Output all information about the Jenkins environment
         uname -a
@@ -118,64 +105,46 @@ env_Info() {
         docker ps -a
 }
 
-# pull fabric images from nexus
-pull_Fabric_Images() {
-            for IMAGES in peer orderer; do
-                 echo "-----------> pull $IMAGES image"
-                 echo
-                 docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG
-                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG $ORG_NAME-$IMAGES
-                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG $ORG_NAME-$IMAGES:$STABLE_TAG
-                 docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG
-            done
-                 echo
-                 docker images | grep hyperledger/fabric
-}
-# pull fabric-ca images from nexus
-pull_Fabric_CA_Image() {
-        echo
-            for IMAGES in ca; do
-                 echo "-----------> pull $IMAGES image"
-                 echo
-                 docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG
-                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG $ORG_NAME-$IMAGES
-	         docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG $ORG_NAME-$IMAGES:$STABLE_TAG
-                 docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG
-            done
-                 echo
-                 docker images | grep hyperledger/fabric-ca
-}
-# run sdk e2e tests
-sdk_E2e_Tests() {
-        echo
-       
-        cd $BASE_FOLDER
-        git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric-samples
-        cd fabric-chaincode-node
-
-        # Install nvm to install multi node versions
-        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+# Install NPM
+install_Npm() {
+  echo "-------> ARCH:" $ARCH
+  if [[ $ARCH == "s390x" || $ARCH == "ppc64le" ]]; then
+       # Install nvm to install multi node versions
+        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
         # shellcheck source=/dev/null
         export NVM_DIR="$HOME/.nvm"
         # shellcheck source=/dev/null
         [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
         echo "------> Install NodeJS"
         # This also depends on the fabric-baseimage. Make sure you modify there as well.
-        echo "------> Use $NODE_VER for >=release-1.1 branches"
+        echo "------> Use $NODE_VER"
         nvm install $NODE_VER || true
-        # use nodejs 8.9.4 version
         nvm use --delete-prefix v$NODE_VER --silent
-
-        echo "npm version ------> $(npm -v)"
-        echo "node version ------> $(node -v)"
-        echo "npm install ------> starting"
-
         npm install || err_Check "ERROR!!! npm install failed"
         npm config set prefix ~/npm && npm install -g gulp
 
-        echo "###################"
+        echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
+        echo -e "\033[32m node version ------> $(node -v)" "\033[0m"
+
+   else
+        echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
+        echo -e "\033[32m node version ------> $(node -v)" "\033[0m"
+
+        npm install || err_Check "ERROR!!! npm install failed"
+        npm install -g gulp
+   fi
+}
+
+# Run Integration Tests
+sdk_E2e_Tests() {
+
+        cd ${WORKSPACE}/gopath/src/github.com/hyperledger/fabric-chaincode-node
+        # Install NPM before start the tests
+        install_Npm
+
+        echo "###########################"
         echo "------> Run Headless Tests"
-        echo "###################"
+        echo "###########################"
 
         gulp test-headless
         DEVMODE=false gulp channel-init
@@ -194,14 +163,14 @@ sdk_E2e_Tests() {
            cp /tmp/fabric-shim/logs/*.log $WORKSPACE
         fi
 
-        echo "#######################" 
+        echo "#######################"
         echo "------> Tests Complete"
-        echo "#######################" 
+        echo "#######################"
 }
-# Publish unstable npm modules after successful merge on amd64
-publish_Unstable() {
+# Publish npm modules after successful merge on amd64
+publish_NpmModules() {
         echo
-        echo "-----------> Publish unstable npm modules from amd64"
+        echo "-----------> Publish npm modules from amd64"
         ./Publish_NPM_Modules.sh
 }
 
@@ -212,3 +181,4 @@ publish_Api_Docs() {
         ./Publish_API_Docs.sh
 }
 Parse_Arguments $@
+
