@@ -83,9 +83,11 @@ async function query(ccName, func, args) {
 
 function parsePayload(input) {
     // eslint-disable-next-line
-    const regex = new RegExp(/payload:\"(.*?)\"/g);
+    const regex = new RegExp(/INFO.*payload:(\".*?\") $/gm);
     const outputs = regex.exec(input);
-    const output = new Buffer(JSON.parse(outputs[outputs.length - 1]));
+
+    const payload = outputs[outputs.length - 1];
+    const output = new Buffer(JSON.parse(payload));
     const jsonString = JSON.stringify(output.toString());
     let json = JSON.parse(jsonString);
     if (typeof json === 'string') {
@@ -95,8 +97,9 @@ function parsePayload(input) {
 }
 
 function parsePayloadQuery(input) {
-    const regex = new RegExp(/\[([0-9,]*?)]/g);
+    const regex = new RegExp(/\[([0-9,]*?)\]/g);
     const outputs = regex.exec(input);
+
     const output = new Buffer(JSON.parse(outputs[outputs.length - 2]));
     const jsonString = JSON.stringify(output.toString());
     let json = JSON.parse(jsonString);

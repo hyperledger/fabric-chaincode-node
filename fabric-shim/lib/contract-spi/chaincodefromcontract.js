@@ -10,6 +10,7 @@ const shim = require('../chaincode');
 const Logger = require('../logger');
 const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
 const StartCommand = require('../cmds/startCommand.js');
+const DataMarshall = require('./datamarshall.js');
 const ClientIdentity = require('../chaincode').ClientIdentity;
 
 const yargs = require('yargs');
@@ -33,7 +34,15 @@ class ChaincodeFromContract {
      *
      * @param {Contract[]} contractClasses array of  contracts to register
      */
-    constructor(contractClasses) {
+    constructor(contractClasses, serializers) {
+
+        if (!contractClasses) {
+            throw new Error('Missing argument: array of contract classes');
+        }
+
+        if (!serializers) {
+            throw new Error('Missing argument: serialization implement information');
+        }
 
         const Contract = require('fabric-contract-api').Contract;
         const SystemContract = require('./systemcontract');
@@ -41,14 +50,11 @@ class ChaincodeFromContract {
         // the structure that stores the 'function-pointers', contents of the form
         // {  name : { ContractClass,  Contract,  transactions[] }}
         this.contracts = {};
+        this.serializers = serializers;
 
-        if (!contractClasses) {
-            throw new Error('Missing argument: array of contract classes');
-        }
         // always add in the 'meta' class that has general abilities
         contractClasses.push(SystemContract);
         logger.debug(contractClasses);
-
 
         for (const contractClass of contractClasses) {
 
@@ -84,8 +90,15 @@ class ChaincodeFromContract {
             const name = contract.getName();
             logger.debug(transactions, contractClass, name);
 
-            this.contracts[`${name}`] = {contractClass, transactions, contract};
+            // determine the serialization structure that is needed for this contract
+            // create and store the dataMarshall that is needed
+            const requestedSerializer = serializers.transaction;
+            const dataMarshall = new DataMarshall(requestedSerializer, serializers.serializers);
+
+            this.contracts[`${name}`] = {contractClass, transactions, contract, dataMarshall};
         }
+
+
         const opts = StartCommand.getArgs(yargs);
         const modPath = path.resolve(process.cwd(), opts['module-path']);
         const jsonPath = path.resolve(modPath, 'package.json');
@@ -138,33 +151,27 @@ class ChaincodeFromContract {
             }
 
             const contractInstance = this.contracts[cn].contract;
+            const dataMarshall = this.contracts[cn].dataMarshall;
             const ctx = contractInstance.createContext();
+
             ctx.setChaincodeStub(stub);
             ctx.setClientIdentity(new ClientIdentity(stub));
 
             const functionExists = this.contracts[cn].transactions.some((transaction) => {
                 return transaction.name === fn;
             });
+
             if (functionExists) {
                 // before tx fn
                 await contractInstance.beforeTransaction(ctx);
 
                 // use the spread operator to make this pass the arguments seperately not as an array
-                let result = await contractInstance[fn](ctx, ...fAndP.params);
+                const result = await contractInstance[fn](ctx, ...fAndP.params);
 
                 // after tx fn
                 await contractInstance.afterTransaction(ctx, result);
 
-                if (Buffer.isBuffer(result)) {
-                    result = JSON.stringify([...result]);
-                } else if (Array.isArray(result)) {
-                    result = JSON.stringify(result);
-                } else {
-                    result = String(result);
-                }
-
-                result = Buffer.from(result);
-                return shim.success(result);
+                return shim.success(dataMarshall.toWireBuffer(result));
             } else {
                 await contractInstance.unknownTransaction(ctx);
             }

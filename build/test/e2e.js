@@ -428,11 +428,27 @@ gulp.task('test-e2e-invoke-v0-test22', ['test-e2e-invoke-v0-test21'], () => {
 
 gulp.task('test-e2e-shim', ['test-e2e-invoke-v0-test22']);
 
-gulp.task('test-fv-shim', ['fv-pre-test'], () => {
+gulp.task('test-fv-shim', ['fv-pre-test'], (done) => {
     const dir = path.join(__dirname, '../../test/fv');
-    return gulp.src('*.js', {read:false})
-        .pipe(wait(3000))
-        .pipe(shell([
-            util.format(`mocha --recursive ${dir}`)
-        ]));
+
+    const {spawn} = require('child_process');
+    const cmd = spawn('npx', ['mocha', '--recursive', dir], {shell:true, cwd:process.cwd(), env:process.env});
+
+    cmd.stdout.on('data', (data) => {
+        process.stdout.write(`${data}`);
+    });
+
+    cmd.stderr.on('data', (data) => {
+        process.stdout.write(`${data}`);
+    });
+
+    cmd.on('close', (code) => {
+        if (code !== 0) {
+            done(new Error(`child process exited with code ${code}`));
+        } else {
+            console.log(`child process exited with code ${code}`);
+            done();
+        }
+    });
+
 });

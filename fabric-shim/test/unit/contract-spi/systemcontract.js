@@ -89,7 +89,7 @@ describe('SystemContract', () => {
             pathExistsStub = sandbox.stub(fs, 'pathExists').returns(false);
 
             const data = await meta.GetMetadata();
-            expect(data.toString()).to.equal('{}');
+            expect(JSON.stringify(data)).to.equal('{}');
             sinon.assert.calledOnce(getArgsStub);
             sinon.assert.calledWith(getArgsStub, myYargs);
             sinon.assert.calledOnce(chaincodeMock.getContracts);
@@ -224,6 +224,49 @@ describe('SystemContract', () => {
             const schemaPath = path.join(rootPath, '../../../fabric-contract-api/schema/contract-schema.json');
             const schemaPathCheck = await fs.pathExists(schemaPath);
             expect(schemaPathCheck).to.equal(true, 'Current contract-schema path: ' + schemaPath + ' is incorrect');
+        });
+
+        it('Should correct validate a schema', async () => {
+            const json = `
+            {
+                "firstName": "John",
+                "lastName": "Doe",
+                "age": 21
+              }
+            `;
+            const schema = `
+            {
+                "$id": "https://example.com/person.schema.json",
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "title": "Person",
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "description": "The person's first name."
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "description": "The person's last name."
+                  },
+                  "age": {
+                    "description": "Age in years which must be equal to or greater than zero.",
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            `;
+            const meta = new SystemContract();
+            const metadataPath = 'some path';
+            const readFileStub = sandbox.stub(fs, 'readFile');
+            readFileStub.onFirstCall().returns(Buffer.from(json));
+            readFileStub.onSecondCall().returns(Buffer.from(schema));
+
+            const metadata = await meta._loadAndValidateMetadata(metadataPath);
+
+            expect(JSON.parse(metadata)).to.deep.equal(JSON.parse(json));
+
         });
     });
 
