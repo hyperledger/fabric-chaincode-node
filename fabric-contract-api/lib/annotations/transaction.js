@@ -13,26 +13,27 @@ module.exports.Transaction = function Transaction(commit = true) {
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
         const paramNames = getParams(target[propertyKey]);
         const description = '';
+        const contextType = target.createContext().constructor;
         const paramTypes = Reflect.getMetadata('design:paramtypes', target, propertyKey) || [];
-        const parameters = paramTypes.map((paramType, paramIdx) => {
-            const paramName = paramNames[paramIdx];
-            if (typeof paramType === 'function') {
-                return {
-                    name: paramName,
-                    description,
-                    schema: {
-                        type: paramType.name.toLowerCase()
-                    }
-                };
-            } else {
-                return {
-                    name: paramName,
-                    description,
-                    schema: {
-                        type: paramType.toString().toLowerCase()
-                    }
-                };
+
+        let numRemoved = 0;
+        const parameters = paramTypes.filter((paramType, paramIdx) => {
+            const filter = paramType === contextType;
+
+            if (filter) {
+                paramNames.splice(paramIdx - numRemoved++, 1);
             }
+
+            return !filter;
+        }).map((paramType, paramIdx) => {
+            const paramName = paramNames[paramIdx];
+            return {
+                name: paramName,
+                description,
+                schema: {
+                    type: typeof paramType === 'function' ? paramType.name.toLowerCase() : paramType.toString().toLowerCase()
+                }
+            };
         });
 
         const tag = [];

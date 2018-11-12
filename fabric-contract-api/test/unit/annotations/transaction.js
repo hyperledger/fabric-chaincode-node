@@ -21,11 +21,17 @@ const TransactionAnnotations = rewire('./../../../lib/annotations/transaction');
 const Transaction = TransactionAnnotations.Transaction;
 const Returns = TransactionAnnotations.Returns;
 const utils = require('../../../lib/annotations/utils');
+const Context = require('../../../lib/context');
 require('reflect-metadata');
 
 describe('Transaction.js', () => {
+    class MockContext extends Context {}
+
     const mockTarget = {
-        mockKey: 'something'
+        mockKey: 'something',
+        createContext() {
+            return new MockContext();
+        }
     };
 
     let appendSpy;
@@ -64,12 +70,15 @@ describe('Transaction.js', () => {
                 tag: ['submitTx'],
                 parameters: []
             }]).onSecondCall().returns([
+                MockContext,
                 mockFunc,
-                'someType'
+                MockContext,
+                'someType',
+                MockContext,
             ]);
 
             TransactionAnnotations.__set__('getParams', () => {
-                return ['param1', 'param2'];
+                return ['ctx', 'param1', 'ctx2', 'param2', 'ctx3'];
             });
 
             transaction(mockTarget, 'mockKey');
