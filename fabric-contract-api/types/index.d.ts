@@ -27,4 +27,6 @@ declare module 'fabric-contract-api' {
 
     export function Transaction(commit?: boolean): (target: any, propertyKey: string | symbol) => void;
     export function Returns(returnType?: string): (target: any, propertyKey: string | symbol) => void;
+    export function Object(type?: string): (target: any) => void;
+    export function Property(name?: string, type?: string): (target: any, propertyKey: string | symbol) => void;
 }

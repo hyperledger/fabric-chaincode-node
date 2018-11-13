@@ -162,7 +162,10 @@ describe('chaincodefromcontract', () => {
         });
 
         it ('should correctly create valid chaincode instance', () => {
-            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(['some', 'transactions']);
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata')
+                .onFirstCall().returns(['some', 'transactions'])
+                .onSecondCall().returns(['some', 'transactions'])
+                .onCall(3).returns({'some': 'objects'});
 
             SCBeta.prototype.fred = 'fred';
             const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
@@ -174,17 +177,22 @@ describe('chaincodefromcontract', () => {
             expect(cc.contracts.alpha.transactions).to.deep.equal(['some', 'transactions']);
             expect(cc.contracts.beta.transactions).to.deep.equal(['some', 'transactions']);
 
-            sinon.assert.calledThrice(getMetadataStub);
+            sinon.assert.callCount(getMetadataStub, 4);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCAlpha));
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
+            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
 
             sinon.assert.calledOnce(getArgsStub);
             expect(cc.version).to.deep.equal('1.0.1');
             expect(cc.title).to.deep.equal('some package');
+            expect(cc.objects).to.deep.equal({'some': 'objects'});
         });
 
         it ('should correctly create valid chaincode instance when package.json does not have version or name', () => {
-            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(['some', 'transactions']);
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata')
+                .onFirstCall().returns(['some', 'transactions'])
+                .onSecondCall().returns(['some', 'transactions'])
+                .onCall(3).returns({'some': 'objects'});
 
             const mock = {};
 
@@ -201,9 +209,10 @@ describe('chaincodefromcontract', () => {
             expect(cc.contracts.alpha.transactions).to.deep.equal(['some', 'transactions']);
             expect(cc.contracts.beta.transactions).to.deep.equal(['some', 'transactions']);
 
-            sinon.assert.calledThrice(getMetadataStub);
+            sinon.assert.callCount(getMetadataStub, 4);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCAlpha));
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
+            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
 
             sinon.assert.calledOnce(getArgsStub);
             expect(cc.version).to.deep.equal('');
@@ -211,7 +220,10 @@ describe('chaincodefromcontract', () => {
         });
 
         it ('should handle when reflect cannot get metadata', () => {
-            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(undefined);
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata')
+                .onFirstCall().returns(undefined)
+                .onSecondCall().returns(undefined)
+                .onCall(3).returns(undefined);
 
             const mock = {};
 
@@ -224,12 +236,16 @@ describe('chaincodefromcontract', () => {
             expect(cc.contracts).to.have.keys('beta', 'org.hyperledger.fabric');
             expect(cc.contracts.beta).to.include.keys('transactions');
             expect(cc.contracts.beta.transactions).to.deep.equal([{transactionId: 'beta'}, {transactionId: 'afterTransaction'}, {transactionId: 'beforeTransaction'}, {transactionId: 'unknownTransaction'}, {transactionId: 'createContext'}]);
-            sinon.assert.calledTwice(getMetadataStub);
+
+            sinon.assert.calledThrice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
+            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
 
             sinon.assert.calledOnce(getArgsStub);
             expect(cc.version).to.deep.equal('');
             expect(cc.title).to.deep.equal('');
+            expect(cc.objects).to.deep.equal({});
         });
     });
 
@@ -620,6 +636,66 @@ describe('chaincodefromcontract', () => {
             const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
             cc.title = 'some title';
             cc.version = '0.0.1';
+            cc.objects = {
+                'some': 'objects'
+            };
+
+            const info = cc.getContracts();
+
+            expect(info).to.deep.equal({
+                info: {
+                    title: 'some title',
+                    version: '0.0.1'
+                },
+                contracts: [{
+                    info: {
+                        title: 'alpha',
+                        version: '0.0.1'
+                    },
+                    transactions: [{
+                        transactionId: 'alpha'
+                    }],
+                    namespace: 'alpha'
+                }, {
+                    info: {
+                        title: 'beta',
+                        version: '0.0.1'
+                    },
+                    transactions: [{
+                        transactionId: 'beta'
+                    }, {
+                        transactionId: 'afterTransaction'
+                    }, {
+                        transactionId: 'beforeTransaction'
+                    }, {
+                        transactionId: 'unknownTransaction'
+                    }, {
+                        transactionId: 'createContext'
+                    }],
+                    namespace: 'beta'
+                }, {
+                    info: {
+                        title: 'org.hyperledger.fabric',
+                        version: '0.0.1'
+                    },
+                    transactions: [{
+                        transactionId: 'GetMetadata'
+                    }],
+                    namespace: 'org.hyperledger.fabric'
+                }],
+                components: {
+                    schemas: {
+                        'some': 'objects'
+                    }
+                }
+            });
+        });
+
+        it ('should not include components.schema when empty', () => {
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            cc.title = 'some title';
+            cc.version = '0.0.1';
+            cc.objects = {};
 
             const info = cc.getContracts();
 

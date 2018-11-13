@@ -94,6 +94,7 @@ class ChaincodeFromContract {
 
         this.version = json.hasOwnProperty('version') ? json.version : '';
         this.title = json.hasOwnProperty('name') ? json.name : '';
+        this.objects = Reflect.getMetadata('fabric:objects', global) || {};
     }
 
     /**
@@ -207,8 +208,14 @@ class ChaincodeFromContract {
                 version: this.version
             },
             contracts: [],
-            components: {}
+            components: {
+                schemas: this.objects
+            }
         };
+
+        if (Object.keys(this.objects).length === 0) {
+            delete data.components.schemas;
+        }
 
         for (const c in this.contracts) {
             const contract = this.contracts[c];
