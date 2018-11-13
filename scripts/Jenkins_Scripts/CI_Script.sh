@@ -8,11 +8,23 @@
 export BASE_FOLDER=$WORKSPACE/gopath/src/github.com/hyperledger
 export NEXUS_URL=nexus3.hyperledger.org:10001
 export ORG_NAME="hyperledger/fabric"
+export CONTAINER_LIST=(ca orderer peer0.org1)
 
 # error check
 err_Check() {
-echo "ERROR !!!! --------> $1 <---------"
-exit 1
+  echo -e "\033[31m $1" "\033[0m"
+  docker images | grep hyperledger && docker ps -a
+  # Write ca, orderer, peer logs
+  for CONTAINER in ${CONTAINER_LIST[*]}; do
+      	docker logs $CONTAINER.example.com >& $CONTAINER.log
+  done
+  # Write cli container logs into cli.log file
+  docker logs cli >& cli.log
+  # Write couchdb container logs into couchdb.log file
+  docker logs couchdb >& couchdb.log
+  # Copy debug log
+  cp /tmp/fabric-shim/logs/*.log $WORKSPACE
+  exit 1
 }
 
 Parse_Arguments() {
@@ -21,20 +33,17 @@ Parse_Arguments() {
                       --env_Info)
                             env_Info
                             ;;
-                      --pull_Fabric_Images)
-                            pull_Fabric_Images
-                            ;;
-                      --pull_Fabric_CA_Image)
-                            pull_Fabric_CA_Image
-                            ;;
                       --clean_Environment)
                             clean_Environment
                             ;;
-                      --sdk_E2e_Tests)
-                            sdk_E2e_Tests
+                      --pull_Docker_Images)
+                            pull_Docker_Images
                             ;;
-                      --publish_Unstable)
-                            publish_Unstable
+                      --e2e_Tests)
+                            e2e_Tests
+                            ;;
+                      --publish_NpmModules)
+                            publish_NpmModules
                             ;;
                       --publish_ApiDocs)
                             publish_ApiDocs
@@ -79,6 +88,12 @@ function removeUnwantedImages() {
 rm -rf $HOME/.nvm/ $HOME/.node-gyp/ $HOME/.npm/ $HOME/.npmrc  || true
 
 mkdir $HOME/.nvm || true
+
+ls -l /tmp/fabric-shim/chaincode/hyperledger/fabric
+ls -l /tmp/fabric-shim/chaincode/hyperledger
+
+# Remove /tmp/fabric-shim
+docker run -v /tmp:/tmp library/alpine rm -rf /tmp/fabric-shim || true
 
 # remove tmp/hfc and hfc-key-store data
 rm -rf /home/jenkins/.nvm /home/jenkins/npm /tmp/fabric-shim /tmp/hfc* /tmp/npm* /home/jenkins/kvsTemp /home/jenkins/.hfc-key-store || true
@@ -128,13 +143,13 @@ pull_Docker_Images() {
                  echo
                  docker images | grep hyperledger/fabric
 }
-# run sdk e2e tests
-sdk_E2e_Tests() {
-        echo
-       
-        echo -e "\033[32m Execute NODE SDK Integration Tests" "\033[0m"
-        cd ${WORKSPACE}/gopath/src/github.com/hyperledger/fabric-chaincode-node
 
+# Install NPM
+install_Npm() {
+
+    echo "-------> ARCH:" $ARCH
+    if [[ $ARCH == "s390x" || $ARCH == "ppc64le" ]]; then
+        # Install nvm to install multi node versions
         wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
         # shellcheck source=/dev/null
         export NVM_DIR="$HOME/.nvm"
@@ -146,45 +161,47 @@ sdk_E2e_Tests() {
         nvm install $NODE_VER || true
         nvm use --delete-prefix v$NODE_VER --silent
 
-       echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
-       echo -e "\033[32m node version ------> $(node -v)" "\033[0m"
+        echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
+        echo -e "\033[32m node version ------> $(node -v)" "\033[0m"
 
         npm install || err_Check "ERROR!!! npm install failed"
         npm config set prefix ~/npm && npm install -g gulp
+
+    else
+
+        echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
+        echo -e "\033[32m node version ------> $(node -v)" "\033[0m"
+
+        npm install || err_Check "ERROR!!! npm install failed"
+        npm install -g gulp
+    fi
+}
+
+# run sdk e2e tests
+e2e_Tests() {
+
+        echo -e "\033[32m Execute Chaincode Node Integration Tests" "\033[0m"
+        cd ${WORKSPACE}/gopath/src/github.com/hyperledger/fabric-chaincode-node
+
+        # Install NPM before start the tests
+        install_Npm
 
         echo "#################################################"
         echo -e "\033[32m ------> Run Headless Tests" "\033[0m"
         echo "#################################################"
 
-        gulp test-headless
-        DEVMODE=false gulp channel-init
+        gulp test-headless || err_Check "ERROR!!! test-headless failed"
+        DEVMODE=false gulp channel-init || err_Check "ERROR!!! channel-init failed"
 
         echo "#################################################################"
         echo -e "\033[32m ------> Run Integration and Scenario Tests" "\033[0m"
         echo "#################################################################"
 
-        gulp test-e2e
+        ls -l /tmp/fabric-shim/chaincode/hyperledger/fabric || true
+        ls -l /tmp/fabric-shim/chaincode/hyperledger || true
 
-        if [ $? != 0 ]; then
-           # Copy Debug log to $WORKSPACE
-           cp /tmp/fabric-shim/logs/*.log $WORKSPACE
-           exit 1
-        else
-           # Copy Debug log to $WORKSPACE
-           cp /tmp/fabric-shim/logs/*.log $WORKSPACE
-        fi
-
-        DEVMODE=true gulp channel-init
-        gulp test-devmode-cli
-
-        if [ $? != 0 ]; then
-           # Copy Debug log to $WORKSPACE
-           cp /tmp/fabric-shim/logs/*.log $WORKSPACE
-           exit 1
-        else
-           # Copy Debug log to $WORKSPACE
-           cp /tmp/fabric-shim/logs/*.log $WORKSPACE
-        fi
+        docker images | grep hyperledger && docker ps -a
+        gulp test-e2e || err_Check "ERROR!!! test-e2e failed"
 
         echo "#############################################"
         echo -e "\033[32m ------> Tests Complete" "\033[0m"
