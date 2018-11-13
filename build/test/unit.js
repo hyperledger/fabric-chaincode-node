@@ -31,7 +31,7 @@ gulp.task('typescript_check', shell.task([
     ignoreErrors: false // once compile failed, throw error
 }));
 
-gulp.task('test-headless', ['clean-up', 'lint', 'typescript_check', 'instrument', 'protos'], function() {
+gulp.task('test-headless', ['clean-up', 'lint', 'typescript_check', 'instrument', 'protos', 'test-schema'], function() {
     // this is needed to avoid a problem in tape-promise with adding
     // too many listeners to the "unhandledRejection" event
     process.setMaxListeners(0);

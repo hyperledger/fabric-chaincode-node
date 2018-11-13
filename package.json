@@ -12,7 +12,8 @@
   "engineStrict": true,
   "license": "Apache-2.0",
   "scripts": {
-    "test": "gulp test-headless"
+    "test": "gulp test-headless",
+    "schema:test": "ajv compile -s ./fabric-contract-api/schema/contract-schema.json && ajv validate -s ./fabric-contract-api/schema/contract-schema.json -d ./fabric-contract-api/schema/example-full.json"
   },
   "dependencies": {
     "@types/node": "^8.9.4",
@@ -22,6 +23,7 @@
     "jsrsasign": "^8.0.4"
   },
   "devDependencies": {
+    "ajv-cli": "^3.0.0",
     "chai": "^4.1.1",
     "chai-as-promised": "^7.1.1",
     "chai-things": "^0.2.0",

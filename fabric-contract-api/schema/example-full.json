@@ -1,0 +1,273 @@
+{
+    "info": {
+        "title": "Commercial Paper Smart Contract",
+        "description": "Smart Contract definitions for Commercial Paper, issuing and trading",
+        "termsOfService": "http://example.com/terms/",
+        "contact": {
+            "name": "Peso Phillips",
+            "url": "http://www.example.com/support",
+            "email": "peso.phillips@example.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.1"
+    },
+    "contracts": [
+        {
+            "name": "org.papernet.commercialpaper",
+            "info": {
+                "title": "Commercial Paper Trading Functions",
+                "description": "Smart Contract definitions for Commercial Paper, issuing and trading",
+                "termsOfService": "http://example.github.com/papertrading",
+                "contact": {
+                    "name": "Peso Phillips",
+                    "url": "http://www.example.com/support",
+                    "email": "peso.phillips@example.com"
+                },
+                "version": "1.0.1"
+            },
+            "transactions": [
+                {
+                    "name": "issue",
+                    "summary": "Issue commercial paper",
+                    "parameters": [
+                        {
+                            "name": "issuer",
+                            "description": "commercial paper issuer",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "paperNumber",
+                            "description": "paper number for this issuer",
+                            "required": true,
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+
+                        },
+                        {
+                            "name": "issueDateTime",
+                            "description": "paper issue date",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "maturityDateTime",
+                            "description": "paper maturity date",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "faceValue",
+                            "description": "face value of paper",
+                            "required": true,
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        }
+                    ],
+                    "return": [
+                        {
+                            "name": "commercialpaper",
+                            "description": "Commercial Paper Object",
+                            "required": true,
+                            "schema": {
+                                "$ref": "#/components/schemas/paper"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submitTx"
+                    ]
+                },
+                {
+                    "name": "buy",
+                    "summary": "Buy commercial paper",
+                    "parameters": [
+                        {
+                            "name": "issuer",
+                            "description": "commercial paper issuer",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "paperNumber",
+                            "description": "paper number for this issuer",
+                            "required": true,
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        },
+                        {
+                            "name": "currentOwner",
+                            "description": "current owner of paper",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "newOwner",
+                            "description": "current owner of paper",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "price",
+                            "description": "face value of paper",
+                            "required": true,
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        },
+                        {
+                            "name": "maturityDateTime",
+                            "description": "paper maturity date",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "return": [
+                        {
+                            "name": "commercialpaper",
+                            "description": "Commercial Paper Object",
+                            "required": true,
+                            "schema": {
+                                "$ref": "#/components/schemas/paper"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submitTx"
+                    ]
+                },
+                {
+                    "name": "redeem",
+                    "summary": "Redeem commercial paper",
+                    "parameters": [
+                        {
+                            "name": "issuer",
+                            "description": "commercial paper issuer",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "paperNumber",
+                            "description": "paper number for this issuer",
+                            "required": true,
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        },
+                        {
+                            "name": "redeemingOwner",
+                            "description": "redeeming owner of paper",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "redeemDateTime",
+                            "description": "time paper was redeemed",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "return": [
+                        {
+                            "name": "commercialpaper",
+                            "description": "Commercial Paper Object",
+                            "required": true,
+                            "schema": {
+                                "$ref": "#/components/schemas/paper"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submitTx"
+                    ]
+                }
+            ]
+        }
+    ],
+    "components": {
+        "schemas": {
+            "paper": {
+                "name": "paper",
+                "required": [
+                    "issuer",
+                    "paperNumber",
+                    "owner",
+                    "faceValue",
+                    "maturityDateTime"
+                ],
+                "properties": [
+                    {
+                        "name": "issuer",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "paperNumber",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "owner",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "issueDateTime",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "maturityDateTime",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "faceValue",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -35,6 +35,10 @@ const docSrc = [
     'fabric-contract-api/lib/**/*.js'
 ];
 
+gulp.task('schema-docs', () => {
+    gulp.src('fabric-contract-api/schema/*.json')
+        .pipe(gulp.dest(path.join(docsRoot, currentBranch)));
+});
 
 gulp.task('jsdocs', ['clean'], function (cb) {
     gulp.src(docSrc, {read: false}).pipe(jsdoc({
@@ -57,7 +61,7 @@ gulp.task('docs-dev', ['docs'], function() {
 });
 
 
-gulp.task('docs', ['jsdocs'], () => {
+gulp.task('docs', ['jsdocs', 'schema-docs'], () => {
 
     const relativePath = '.';
     const packageJson = require(path.join(__dirname, '..', 'package.json'));
