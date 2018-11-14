@@ -54,10 +54,10 @@ npmPublish() {
 }
 versions() {
 
-  CURRENT_TAG=$(cat package.json | grep version | awk -F\" '{ print $4 }')
+  CURRENT_TAG=$(cat package.json | grep tag | awk -F\" '{ print $4 }')
   echo -e "\033[32m ======> CURRENT_TAG: $CURRENT_TAG" "\033[0m"
 
-  RELEASE_VERSION=$(cat package.json | grep version | awk -F\" '{ print $4 }' | cut -d "-" -f 2)
+  RELEASE_VERSION=$(cat package.json | grep version | awk -F\" '{ print $4 }')
   echo -e "\033[32m ======> Current RELEASE_VERSION:" "\033[0m"
 }
 

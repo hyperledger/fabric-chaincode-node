@@ -109,7 +109,7 @@ if (env.JOB_NAME == "fabric-chaincode-node-merge-x86_64") {
            archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.log'
            if (env.JOB_NAME == "fabric-chaincode-node-merge-x86_64") {
               if (currentBuild.result == 'FAILURE') { // Other values: SUCCESS, UNSTABLE
-               rocketSend "Build Notification - STATUS: ${currentBuild.result} - BRANCH: ${env.GERRIT_BRANCH} - PROJECT: ${env.PROJECT} - BUILD_URL - (<${env.BUILD_URL}|Open>)"
+               rocketSend "Build Notification - STATUS: *${currentBuild.result}* - BRANCH: *${env.GERRIT_BRANCH}* - PROJECT: *${env.PROJECT}* - BUILD_URL - (<${env.BUILD_URL}|Open>)"
               }
            }
       } // finally block
@@ -122,6 +122,9 @@ def publishNpm() {
       stage("Publish npm Modules") {
         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
         def ROOTDIR = pwd()
+        withCredentials([[$class       : 'StringBinding',
+                      credentialsId: 'NPM_LOCAL',
+                      variable : 'NPM_TOKEN']]) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --publish_NpmModules'
@@ -133,24 +136,30 @@ def publishNpm() {
                  throw err
            }
         }
+        }
       }
 }
 
 def apiDocs() {
 // Publish SDK_NODE API docs after successful merge
       stage("Publish API Docs") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-         def ROOTDIR = pwd()
-           try {
+        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+        def ROOTDIR = pwd()
+        withCredentials([[$class     : 'UsernamePasswordMultiBinding',
+                         credentialsId: 'chaincode-node-credentials',
+                         usernameVariable: 'CHAINCODE_NODE_USERNAME',
+                         passwordVariable: 'CHAINCODE_NODE_PASSWORD']]) {
+          try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --publish_ApiDocs'
                  }
                }
-           catch (err) {
+          catch (err) {
                  failure_stage = "publish_ApiDocs"
                  currentBuild.result = 'FAILURE'
                  throw err
-           }
-         }
+          }
+        }
+        }
       }
 }

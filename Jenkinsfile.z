@@ -96,7 +96,7 @@ node('hyp-z') {
              archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.log'
              if (env.JOB_NAME == "fabric-chaincode-node-merge-s390x") {
                 if (currentBuild.result == 'FAILURE') { // Other values: SUCCESS, UNSTABLE
-               rocketSend "Build Notification - STATUS: ${currentBuild.result} - BRANCH: ${env.GERRIT_BRANCH} - PROJECT: ${env.PROJECT} - BUILD_URL - (<${env.BUILD_URL}|Open>)"
+               rocketSend "Build Notification - STATUS: *${currentBuild.result}* - BRANCH: *${env.GERRIT_BRANCH}* - PROJECT: *${env.PROJECT}* - BUILD_URL - (<${env.BUILD_URL}|Open>)"
               }
            }
       } // finally block
