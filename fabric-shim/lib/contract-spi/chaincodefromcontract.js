@@ -15,6 +15,8 @@ const ClientIdentity = require('../chaincode').ClientIdentity;
 const yargs = require('yargs');
 const path = require('path');
 
+require('reflect-metadata');
+
 /**
  * The user will have written a class than extends the 'Contract' interface; this
  * is expressed in terms of domain specific functions - that need to be called in the
