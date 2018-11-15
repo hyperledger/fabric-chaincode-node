@@ -55,7 +55,12 @@ module.exports.Returns = function Returns(returnType) {
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
 
         utils.appendOrUpdate(transactions, 'transactionId', propertyKey, {
-            returns: returnType.toLowerCase()
+            returns: {
+                name: 'success',
+                schema: {
+                    type: returnType.toLowerCase()
+                }
+            }
         });
 
         Reflect.defineMetadata('fabric:transactions', transactions, target);

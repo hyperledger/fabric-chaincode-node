@@ -189,7 +189,12 @@ describe('Transaction.js', () => {
                 parameters: []
             },  {
                 transactionId: 'mockKey',
-                returns: 'sometype'
+                returns: {
+                    name: 'success',
+                    schema: {
+                        type: 'sometype'
+                    }
+                }
             }], mockTarget);
 
             getMetadataStub.restore();
@@ -206,7 +211,12 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 transactionId: 'mockKey',
-                returns: 'sometype'
+                returns: {
+                    name: 'success',
+                    schema: {
+                        type: 'sometype'
+                    }
+                }
             }], mockTarget);
 
             getMetadataStub.restore();
