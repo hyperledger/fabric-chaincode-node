@@ -6,17 +6,21 @@
 'use strict';
 /* eslint-disable no-console*/
 const gulp = require('gulp');
+const del = require('del');
 const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
 const shell = require('gulp-shell');
 const replace = require('gulp-replace');
+const runSequence = require('run-sequence');
+const merge = require('merge-stream');
 
 const constants = require('../../test/constants.js');
 
 const arch = process.arch;
 const release = require(path.join(__dirname, '../../package.json')).testFabricVersion;
 const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
+const version = require(path.join(__dirname, '../../package.json')).version;
 let dockerImageTag = '';
 let thirdpartyImageTag = '';
 let docker_arch = '';
@@ -94,14 +98,61 @@ gulp.task('docker-copy', ['clean-up'], function() {
         path.join(samplesPath, 'configtx.yaml'),
         path.join(samplesPath, 'config'), // copy the empty folder only
         path.join(samplesPath, 'crypto-config/**'),
-        path.join(samplesPath, '../chaincode') // copy the empty folder only
+        path.join(samplesPath, '../chaincode'), // copy the empty folder only
     ], {base: samplesPath})
         .pipe(gulp.dest(testDir));
 
     return gulp.src([
-        'test/fixtures/channel-init.sh'
+        'test/fixtures/channel-init.sh',
     ])
         .pipe(gulp.dest(testDir));
+
+});
+
+gulp.task('fv-pre-test', () => {
+    const tasks = ['fv-pack', 'fv-copy', 'fv-clean'];
+    return runSequence(...tasks);
+});
+
+gulp.task('fv-pack', () => {
+    return gulp.src('*.js')
+        .pipe(shell([
+            'npm pack ./fabric-contract-api',
+            'npm pack ./fabric-shim',
+            'npm pack ./fabric-shim-crypto',
+        ]));
+});
+
+gulp.task('fv-copy', ['fv-copy-depts'], () => {
+    return gulp.src([
+        'test/fv/**/*',
+    ], {base: 'test'})
+        .pipe(gulp.dest(testDir));
+});
+
+gulp.task('fv-copy-depts', () => {
+    let dirContents = fs.readdirSync('test/fv');
+    dirContents = dirContents.filter(c => c.match(/.*.js/) && c !== 'utils.js');
+    const chaincodeNames = dirContents.map(n => n.replace('.js', ''));
+    const streams = [];
+    for (const c in chaincodeNames) {
+        const name = chaincodeNames[c];
+        const directory =  `test/fv/${name}`;
+        fs.ensureDirSync(path.join(testDir, 'test', name));
+        const stream = gulp.src([
+            path.join(__dirname, `../../fabric-contract-api-${version}.tgz`),
+            path.join(__dirname, `../../fabric-shim-${version}.tgz`),
+            path.join(__dirname, `../../fabric-shim-crypto-${version}.tgz`),
+        ])
+            .pipe(gulp.dest(directory));
+        streams.push(stream);
+    }
+
+    return merge(...streams);
+});
+
+gulp.task('fv-clean', () => {
+    return del(path.join(__dirname, '../../**/*.tgz'));
 });
 
 // This and other usage of the gulp-shell module cannot use the

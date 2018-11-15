@@ -427,3 +427,12 @@ gulp.task('test-e2e-invoke-v0-test22', ['test-e2e-invoke-v0-test21'], () => {
 });
 
 gulp.task('test-e2e-shim', ['test-e2e-invoke-v0-test22']);
+
+gulp.task('test-fv-shim', ['fv-pre-test'], () => {
+    const dir = path.join(__dirname, '../../test/fv');
+    return gulp.src('*.js', {read:false})
+        .pipe(wait(3000))
+        .pipe(shell([
+            util.format(`mocha --recursive ${dir}`)
+        ]));
+});
