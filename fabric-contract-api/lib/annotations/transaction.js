@@ -41,7 +41,7 @@ module.exports.Transaction = function Transaction(commit = true) {
             tag.push('submitTx');
         }
 
-        utils.appendOrUpdate(transactions, 'transactionId', propertyKey, {
+        utils.appendOrUpdate(transactions, 'name', propertyKey, {
             tag: tag,
             parameters: parameters
         });
@@ -54,7 +54,7 @@ module.exports.Returns = function Returns(returnType) {
     return (target, propertyKey) => {
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
 
-        utils.appendOrUpdate(transactions, 'transactionId', propertyKey, {
+        utils.appendOrUpdate(transactions, 'name', propertyKey, {
             returns: {
                 name: 'success',
                 schema: {

@@ -77,16 +77,16 @@ describe('contract.js', () => {
 
     describe('#constructor', () => {
 
-        it ('should create with default namespace', () => {
+        it ('should create with default name', () => {
             const sc0 = new Contract();
-            expect(sc0.getNamespace()).to.equal('');
+            expect(sc0.getName()).to.equal('');
 
             // should also create default when the supplied name is empty space
             const sc1 = new Contract('');
-            expect(sc1.getNamespace()).to.equal('');
+            expect(sc1.getName()).to.equal('');
 
             const sc2 = new Contract('  ');
-            expect(sc2.getNamespace()).to.equal('');
+            expect(sc2.getName()).to.equal('');
         });
 
         it ('should have default unknownTx fn', () => {
@@ -104,12 +104,12 @@ describe('contract.js', () => {
 
         it ('should create with the name specified', () => {
             const sc1 = new Contract('brain.size.planet.smart');
-            expect(sc1.namespace).to.equal('brain.size.planet.smart');
-            expect(sc1.getNamespace()).to.equal('brain.size.planet.smart');
+            expect(sc1.name).to.equal('brain.size.planet.smart');
+            expect(sc1.getName()).to.equal('brain.size.planet.smart');
 
             const sc2 = new Contract('   somewhat.padded.out ');
-            expect(sc2.namespace).to.equal('somewhat.padded.out');
-            expect(sc2.getNamespace()).to.equal('somewhat.padded.out');
+            expect(sc2.name).to.equal('somewhat.padded.out');
+            expect(sc2.getName()).to.equal('somewhat.padded.out');
         });
 
         it ('should call the default before/after functions', () => {
@@ -136,9 +136,9 @@ describe('contract.js', () => {
             createContextStub = sandbox.stub().returns();
         });
 
-        it ('should set the correct namespace', () => {
+        it ('should set the correct name', () => {
             const sc = new SCAlpha();
-            sc.getNamespace().should.equal('alpha.beta.delta');
+            sc.getName().should.equal('alpha.beta.delta');
         });
 
         it ('should call the correct subclassed fns', () => {

@@ -13,7 +13,7 @@ declare module 'fabric-contract-api' {
     }
 
     export class Contract {
-        constructor(namespace?: string);
+        constructor(name?: string);
 
         beforeTransaction(ctx : Context): Promise<void>;
         afterTransaction(ctx : Context,result: any): Promise<void>;
@@ -21,7 +21,7 @@ declare module 'fabric-contract-api' {
         unknownTransaction(ctx : Context): Promise<void>;
 
         createContext(): Context;
-        getNamespace(): string;
+        getName(): string;
 
     }
 

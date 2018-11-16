@@ -56,8 +56,8 @@ export default class TestContractOne extends Contract {
         const stubApi: ChaincodeStub = ctx.stub;
         const clientIdentity: ClientIdentity = ctx.clientIdentity;
 
-		// test that the namespace returns a string
-        const ns: string = this.getNamespace();
+		// test that the name returns a string
+        const ns: string = this.getName();
     }
 }
 

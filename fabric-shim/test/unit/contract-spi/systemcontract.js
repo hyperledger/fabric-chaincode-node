@@ -48,7 +48,7 @@ describe('SystemContract', () => {
 
         it ('should create correctly', () => {
             const meta = new SystemContract();
-            expect(meta.getNamespace()).to.equal('org.hyperledger.fabric');
+            expect(meta.getName()).to.equal('org.hyperledger.fabric');
         });
 
     });

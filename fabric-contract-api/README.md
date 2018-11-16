@@ -41,7 +41,7 @@ const util = require('util');
 class UpdateValuesContract extends Contract
 
     constructor(){
-		super('org.mynamespace.updates');
+		super('UpdateValuesContract');
 	}
 
 	async transactionA(ctx, newValue) {

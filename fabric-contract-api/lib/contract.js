@@ -12,22 +12,22 @@ const Context = require('./context');
  * The main Contact class that all code working within a Chaincode Container must be extending.
  *
  * Overriding of the `beforeTransaction` `afterTransaction` `unknownTransaction` and `createContext` are all optional
- * Supplying a namespace within the constructor is also option and will default to ''
+ * Supplying a name within the constructor is also option and will default to ''
  *
  * @memberof fabric-contract-api
  */
 class Contract {
 
     /**
-     * Constructor - supplying a namespace is recommended but is not mandatory.
+     * Constructor - supplying a name is recommended but is not mandatory.
 	 *
-     * @param {String} namespace namespace for the logic within this contract
+     * @param {String} name name for the logic within this contract
      */
-    constructor(namespace) {
-        if (namespace && namespace.trim() !== '') {
-            this.namespace = namespace.trim();
+    constructor(name) {
+        if (name && name.trim() !== '') {
+            this.name = name.trim();
         } else {
-            this.namespace = '';
+            this.name = '';
         }
     }
 
@@ -87,8 +87,8 @@ class Contract {
     /**
      * @return {String} returns the namepsace
      */
-    getNamespace() {
-        return this.namespace;
+    getName() {
+        return this.name;
     }
 
 }

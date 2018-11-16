@@ -13,7 +13,7 @@ const {Contract} = require('fabric-contract-api');
 class RemoveValues extends Contract {
 
     constructor() {
-        super('org.mynamespace.removes');
+        super('RemoveValues');
         // going to leave the default 'not known function' handling alone
     }
 

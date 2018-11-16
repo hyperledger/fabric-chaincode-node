@@ -39,7 +39,7 @@ class ChaincodeFromContract {
         const SystemContract = require('./systemcontract');
 
         // the structure that stores the 'function-pointers', contents of the form
-        // {  namespace : { ContractClass,  Contract,  transactions[] }}
+        // {  name : { ContractClass,  Contract,  transactions[] }}
         this.contracts = {};
 
         if (!contractClasses) {
@@ -77,14 +77,14 @@ class ChaincodeFromContract {
                     }
 
                     transactions.push({
-                        transactionId: propName
+                        name: propName
                     });
                 }
             }
-            const namespace = contract.getNamespace();
-            logger.debug(transactions, contractClass, namespace);
+            const name = contract.getName();
+            logger.debug(transactions, contractClass, name);
 
-            this.contracts[`${namespace}`] = {contractClass, transactions, contract};
+            this.contracts[`${name}`] = {contractClass, transactions, contract};
         }
         const opts = StartCommand.getArgs(yargs);
         const modPath = path.resolve(process.cwd(), opts['module-path']);
@@ -131,19 +131,19 @@ class ChaincodeFromContract {
      */
     async invokeFunctionality(stub, fAndP) {
         try {
-            const {namespace:ns, function:fn} = this._splitFunctionName(fAndP.fcn);
+            const {contractName:cn, function:fn} = this._splitFunctionName(fAndP.fcn);
 
-            if (!this.contracts[ns]) {
-                throw new Error(`Namespace is not known :${ns}:`);
+            if (!this.contracts[cn]) {
+                throw new Error(`Contract name is not known :${cn}:`);
             }
 
-            const contractInstance = this.contracts[ns].contract;
+            const contractInstance = this.contracts[cn].contract;
             const ctx = contractInstance.createContext();
             ctx.setChaincodeStub(stub);
             ctx.setClientIdentity(new ClientIdentity(stub));
 
-            const functionExists = this.contracts[ns].transactions.some((transaction) => {
-                return transaction.transactionId === fn;
+            const functionExists = this.contracts[cn].transactions.some((transaction) => {
+                return transaction.name === fn;
             });
             if (functionExists) {
                 // before tx fn
@@ -174,12 +174,12 @@ class ChaincodeFromContract {
     }
 
     /**
-	 * Parse the fcn name to be namespace and function.  These are separated by a :
+	 * Parse the fcn name to be name and function.  These are separated by a :
 	 * Anything after the : is treated as the function name
 	 * No : implies that the whole string is a function name
 	 *
 	 * @param {String} fcn the combined function and name string
-	 * @return {Object} split into namespace and string
+	 * @return {Object} split into name and string
 	 */
     _splitFunctionName(fcn) {
         // Did consider using a split(':') call to do this; however I chose regular expression for
@@ -189,10 +189,10 @@ class ChaincodeFromContract {
         // https://regex101.com/ is very useful for understanding
 
         const regex = /([^:]*)(?::|^)(.*)/g;
-        const result = {namespace:'', function:''};
+        const result = {contractName:'', function:''};
 
         const m = regex.exec(fcn);
-        result.namespace = m[1];
+        result.contractName = m[1];
         result.function = m[2];
 
         return result;
@@ -221,13 +221,13 @@ class ChaincodeFromContract {
             const contract = this.contracts[c];
             const contractData = {
                 info: {
-                    title: contract.contract.getNamespace(),
+                    title: contract.contract.getName(),
                     version: this.version
                 },
                 transactions: []
             };
 
-            contractData.namespace = contract.contract.getNamespace();
+            contractData.name = contract.contract.getName();
 
             contract.transactions.forEach((tx) => {
                 contractData.transactions.push(tx);

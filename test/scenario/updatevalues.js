@@ -12,11 +12,11 @@ class UpdateValues extends Contract {
         this.logBuffer.output.push(`::[UpdateValues] ${args}`);
     }
     /**
-	 * Sets a namespace so that the functions in this particular class can
+	 * Sets a name so that the functions in this particular class can
 	 * be separated from others.
 	 */
     constructor() {
-        super('org.mynamespace.updates');
+        super('UpdateValues');
         this.logBuffer = {output: []};
     }
 

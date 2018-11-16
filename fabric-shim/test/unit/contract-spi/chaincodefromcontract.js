@@ -235,7 +235,7 @@ describe('chaincodefromcontract', () => {
             // get the contracts that have been defined
             expect(cc.contracts).to.have.keys('beta', 'org.hyperledger.fabric');
             expect(cc.contracts.beta).to.include.keys('transactions');
-            expect(cc.contracts.beta.transactions).to.deep.equal([{transactionId: 'beta'}, {transactionId: 'afterTransaction'}, {transactionId: 'beforeTransaction'}, {transactionId: 'unknownTransaction'}, {transactionId: 'createContext'}]);
+            expect(cc.contracts.beta.transactions).to.deep.equal([{name: 'beta'}, {name: 'afterTransaction'}, {name: 'beforeTransaction'}, {name: 'unknownTransaction'}, {name: 'createContext'}]);
 
             sinon.assert.calledThrice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
@@ -563,7 +563,7 @@ describe('chaincodefromcontract', () => {
                 sinon.assert.calledOnce(beforeFnStubA);
             });
 
-            it ('should throw correct error with missing namespace', async () => {
+            it ('should throw correct error with missing name', async () => {
                 const stubInterface = sinon.createStubInstance(FabricStubInterface);
                 stubInterface.getFunctionAndParameters.returns({
                     fcn:'wibble:alpha',
@@ -573,7 +573,7 @@ describe('chaincodefromcontract', () => {
                 await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
                 sinon.assert.calledOnce(shim.error);
                 expect(fakeError.args[0][0]).to.be.instanceOf(Error);
-                expect(fakeError.args[0][0].toString()).to.match(/Error: Namespace is not known :wibble:/);
+                expect(fakeError.args[0][0].toString()).to.match(/Error: Contract name is not known :wibble:/);
             });
 
             it ('should throw correct error with wrong function name', async () => {
@@ -606,28 +606,28 @@ describe('chaincodefromcontract', () => {
         });
 
         it ('should handle the usual case of ns:fn', () => {
-            const result = cc._splitFunctionName('namespace:function');
-            result.should.deep.equal({namespace:'namespace', function:'function'});
+            const result = cc._splitFunctionName('name:function');
+            result.should.deep.equal({contractName:'name', function:'function'});
         });
 
-        it ('should handle the case of no namespace explicit', () => {
+        it ('should handle the case of no contractName explicit', () => {
             const result = cc._splitFunctionName(':function');
-            result.should.deep.equal({namespace:'', function:'function'});
+            result.should.deep.equal({contractName:'', function:'function'});
         });
 
-        it ('should handle the case of no namespace implict', () => {
+        it ('should handle the case of no contractName implict', () => {
             const result = cc._splitFunctionName('function');
-            result.should.deep.equal({namespace:'', function:'function'});
+            result.should.deep.equal({contractName:'', function:'function'});
         });
 
         it ('should handle the case of no input', () => {
             const result = cc._splitFunctionName('');
-            result.should.deep.equal({namespace:'', function:''});
+            result.should.deep.equal({contractName:'', function:''});
         });
 
         it ('should handle the case of multiple :', () => {
-            const result = cc._splitFunctionName('namespace:function:with:colons:');
-            result.should.deep.equal({namespace:'namespace', function:'function:with:colons:'});
+            const result = cc._splitFunctionName('name:function:with:colons:');
+            result.should.deep.equal({contractName:'name', function:'function:with:colons:'});
         });
     });
 
@@ -653,35 +653,35 @@ describe('chaincodefromcontract', () => {
                         version: '0.0.1'
                     },
                     transactions: [{
-                        transactionId: 'alpha'
+                        name: 'alpha'
                     }],
-                    namespace: 'alpha'
+                    name: 'alpha'
                 }, {
                     info: {
                         title: 'beta',
                         version: '0.0.1'
                     },
                     transactions: [{
-                        transactionId: 'beta'
+                        name: 'beta'
                     }, {
-                        transactionId: 'afterTransaction'
+                        name: 'afterTransaction'
                     }, {
-                        transactionId: 'beforeTransaction'
+                        name: 'beforeTransaction'
                     }, {
-                        transactionId: 'unknownTransaction'
+                        name: 'unknownTransaction'
                     }, {
-                        transactionId: 'createContext'
+                        name: 'createContext'
                     }],
-                    namespace: 'beta'
+                    name: 'beta'
                 }, {
                     info: {
                         title: 'org.hyperledger.fabric',
                         version: '0.0.1'
                     },
                     transactions: [{
-                        transactionId: 'GetMetadata'
+                        name: 'GetMetadata'
                     }],
-                    namespace: 'org.hyperledger.fabric'
+                    name: 'org.hyperledger.fabric'
                 }],
                 components: {
                     schemas: {
@@ -710,35 +710,35 @@ describe('chaincodefromcontract', () => {
                         version: '0.0.1'
                     },
                     transactions: [{
-                        transactionId: 'alpha'
+                        name: 'alpha'
                     }],
-                    namespace: 'alpha'
+                    name: 'alpha'
                 }, {
                     info: {
                         title: 'beta',
                         version: '0.0.1'
                     },
                     transactions: [{
-                        transactionId: 'beta'
+                        name: 'beta'
                     }, {
-                        transactionId: 'afterTransaction'
+                        name: 'afterTransaction'
                     }, {
-                        transactionId: 'beforeTransaction'
+                        name: 'beforeTransaction'
                     }, {
-                        transactionId: 'unknownTransaction'
+                        name: 'unknownTransaction'
                     }, {
-                        transactionId: 'createContext'
+                        name: 'createContext'
                     }],
-                    namespace: 'beta'
+                    name: 'beta'
                 }, {
                     info: {
                         title: 'org.hyperledger.fabric',
                         version: '0.0.1'
                     },
                     transactions: [{
-                        transactionId: 'GetMetadata'
+                        name: 'GetMetadata'
                     }],
-                    namespace: 'org.hyperledger.fabric'
+                    name: 'org.hyperledger.fabric'
                 }],
                 components: {}
             });

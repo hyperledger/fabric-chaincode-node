@@ -19,6 +19,7 @@ const log = require('fancy-log');
 const test = require('../../test/constants.js');
 
 const os = require('os');
+const Ajv = require('ajv');
 
 const execFile = util.promisify(require('child_process').execFile);
 const CHANNEL_NAME = 'mychannel';
@@ -81,7 +82,7 @@ gulp.task('invoke_functions', async (done) => {
         getTLSArgs(),
         CHANNEL_NAME,
         'mysmartcontract',
-        '{"Args":["org.mynamespace.updates:setNewAssetValue","42"]}').split(' ');
+        '{"Args":["UpdateValues:setNewAssetValue","42"]}').split(' ');
 
     const {error, stdout, stderr} = await execFile(script, args, options);
     if (error) {
@@ -114,12 +115,21 @@ gulp.task('query_functions', async (done) => {
         console.log(stdout);
         console.log(stderr);
 
-        const metadata = JSON.stringify(JSON.parse(stdout));
+        const metadata = JSON.parse(stdout);
 
-        const expectedMetadata = '{"info":{"title":"chaincode","version":"1.0.0"},"contracts":[{"info":{"title":"org.mynamespace.updates","version":"1.0.0"},"transactions":[{"transactionId":"unknownTransaction"},{"transactionId":"beforeTransaction"},{"transactionId":"createContext"},{"transactionId":"setup"},{"transactionId":"setNewAssetValue"},{"transactionId":"doubleAssetValue"}],"namespace":"org.mynamespace.updates"},{"info":{"title":"org.mynamespace.removes","version":"1.0.0"},"transactions":[{"transactionId":"quarterAssetValue"},{"transactionId":"getAssetValue"}],"namespace":"org.mynamespace.removes"},{"info":{"title":"org.hyperledger.fabric","version":"1.0.0"},"transactions":[{"transactionId":"GetMetadata"}],"namespace":"org.hyperledger.fabric"}],"components":{}}';
+        const expectedMetadata = '{"info":{"title":"chaincode","version":"1.0.0"},"contracts":[{"info":{"title":"UpdateValues","version":"1.0.0"},"transactions":[{"name":"unknownTransaction"},{"name":"beforeTransaction"},{"name":"createContext"},{"name":"setup"},{"name":"setNewAssetValue"},{"name":"doubleAssetValue"}],"name":"UpdateValues"},{"info":{"title":"RemoveValues","version":"1.0.0"},"transactions":[{"name":"quarterAssetValue"},{"name":"getAssetValue"}],"name":"RemoveValues"},{"info":{"title":"org.hyperledger.fabric","version":"1.0.0"},"transactions":[{"name":"GetMetadata"}],"name":"org.hyperledger.fabric"}],"components":{}}';
 
-        if (metadata !== expectedMetadata) {
-            throw new Error(`Expected query response to equal ${expectedMetadata} \ninstead recieved: \n${metadata}`);
+        const schema = fs.readFileSync(path.join(__dirname, '../../fabric-contract-api/schema/contract-schema.json'));
+
+        const ajv = new Ajv({schemaId: 'id'});
+        ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
+
+        if (!ajv.validate(JSON.parse(schema), metadata)) {
+            throw new Error('Expected generated metadata to match the schema');
+        }
+
+        if (JSON.stringify(metadata) !== expectedMetadata) {
+            throw new Error(`Expected query response to equal ${expectedMetadata} \ninstead recieved: \n${JSON.stringify(metadata)}`);
         }
     }
 });
@@ -220,7 +230,7 @@ gulp.task('st-instantiate_chaincode', () => {
                 getTLSArgs(),
                 CHANNEL_NAME,
                 'mysmartcontract',
-                '\'{"Args":["org.mynamespace.updates:setup"]}\'',
+                '\'{"Args":["UpdateValues:setup"]}\'',
                 '\'OR ("Org1MSP.member")\'')
         ]));
 });

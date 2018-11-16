@@ -60,7 +60,7 @@ Chaincode is deployed by the peer in response to issuing a number of (usually CL
 A docker image is built for this chaincode, the package.json and code copied in. and `npm install` run.
 > It is important to make sure that you have a `package-lock.json` to ensure the correct packages are imported.
 
-After the install there is a 'bootstrap' process that starts the chaincode up (more details later). The constructors of the exported Contracts will be run at this point; these constructors are for setting the namespace and optional setup of the 'error/monitoring functions', (again more later). This instance of the contract will existing whilst this chaincode docker image is up.
+After the install there is a 'bootstrap' process that starts the chaincode up (more details later). The constructors of the exported Contracts will be run at this point; these constructors are for setting the name and optional setup of the 'error/monitoring functions', (again more later). This instance of the contract will existing whilst this chaincode docker image is up.
 
 When chaincode is instantiated or updated, the `init()` function is the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialization or migration that might be needed.  These two functions have been abstracted away to focus on specific function implementations.
 
@@ -103,7 +103,7 @@ const util = require('util');
 class UpdateValues extends Contract
 
     constructor(){
-		super('org.mynamespace.updates');
+		super('UpdateValuesContract');
 	}
 
 	async instantiate(ctx){
@@ -128,7 +128,7 @@ Note that ALL the functions defined in these modules will be called by the clien
 - There are 3 functions `setup` `setNewAssetValue` and `doubleAssetValue` that can be called by issuing the appropriate invoke client side
 - The `ctx` in the function is a transaction context; each time a invoke is called this will be a new instance that can be used by the function implementation to access apis such as the world state of information on invoking identity.
 - The arguments are split out from the array passed on the invoke. 
-- The constructor contains a 'namespace' to help identify the sets of functions
+- The constructor contains a 'name' to help identify the sets of functions
 
 
 ### 5: Alternative ways of specifying the contracts
@@ -160,23 +160,23 @@ $ $(npm bin)/fabric-chaincode-node --peer.address localhost:7052
 Each of the functions can be invoked with arbitrary arguments. The name of the function is of the format
 
 ```
-[namespace:]functionname
+[name:]functionname
 ```
 
-If a namespace is given in the constructor then it will be prefixed separated by a : (colon)
+If a name is given in the constructor then it will be prefixed separated by a : (colon)
 
 > _assuming that you have a fabric up and running with the appropriate environment variables set_
 
 ```
 $ peer chaincode install --lang node --name mycontract --version v0 --path ~/chaincode-examples
-$ peer chaincode instantiate --orderer localhost:7050 --channelID mychannel --lang node --name mycontract --version v0 -c '{"Args":["org.mynamespace.updates.setup"]}'
+$ peer chaincode instantiate --orderer localhost:7050 --channelID mychannel --lang node --name mycontract --version v0 -c '{"Args":["UpdateValuesContract:setup"]}'
 ```
 
 Will get things working...
 Then you can invoke the chaincode via this command.
 
 ```
-$ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Args":["org.mynamespace.removes.getAssetValue"]}' -n mycontract4  
+$ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Args":["UpdateValuesContract:getAssetValue"]}' -n mycontract4  
 ```
 
 
@@ -190,11 +190,11 @@ For example
 
 ```
 	/** 
-	 * Sets a namespace so that the functions in this particular class can 
+	 * Sets a name so that the functions in this particular class can 
 	 * be separated from others.
 	 */
 	constructor() {
-		super('org.mynamespace.updates');
+		super('UpdateValuesContract');
 	}
 
 	/** The function to invoke if something unkown comes in.
@@ -263,10 +263,10 @@ Definitions as per https://www.ietf.org/rfc/rfc2119.txt
 
 - All the functions that are present in the prototype of a class that extends *Contract* will be invokable
 - The exports from the node module *MUST* include *contracts* that is an array of constructors (1 or more)
-- Each class *MAY* call in it's constructor pass a namespace. This is prefixed to each of the function names by an _  (underscore)
+- Each class *MAY* call in it's constructor pass a name. This is prefixed to each of the function names by an _  (underscore)
 - Each class *MAY* define functions that are executed before and functions that are executed after the invoked function.
   - These are part of the same fabric transaction
-  - They are scoped per namespace
+  - They are scoped per name
 - Each class *MAY* define a function that would be executed if a matching function name does not exist; otherwise a 'no function exists' error will be thrown
 - If too many parameters are passed, they will be discarded
 - If too few parameters are passed, then the remainder will be set to undefined
