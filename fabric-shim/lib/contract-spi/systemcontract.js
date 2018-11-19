@@ -52,10 +52,11 @@ class SystemContract extends Contract {
         const rootPath = path.dirname(__dirname);
         const metadata = (await fs.readFile(metadataPath)).toString();
         const schema = (await fs.readFile(path.join(rootPath, '../../fabric-contract-api/schema/contract-schema.json'))).toString();
-        const ajv = new Ajv();
-        const valid = ajv.validate(schema, metadata);
+        const ajv = new Ajv({schemaId: 'id'});
+        ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
+        const valid = ajv.validate(JSON.parse(schema), JSON.parse(metadata));
         if (!valid) {
-            throw new Error('Contract metadata does not match the schema: ' + ajv.errors);
+            throw new Error('Contract metadata does not match the schema: ' + JSON.stringify(ajv.errors));
         }
 
         return metadata;
