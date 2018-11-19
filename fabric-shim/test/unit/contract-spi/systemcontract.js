@@ -57,9 +57,9 @@ describe('SystemContract', () => {
         let getArgsStub;
         let readFileStub;
         let pathExistsStub;
-        const jsonObject = {
+        const jsonObject = JSON.stringify({
             name: 'some string'
-        };
+        });
         const myYargs = {
             'argv': {
                 '$0': 'fabric-chaincode-node',
@@ -98,10 +98,11 @@ describe('SystemContract', () => {
 
         it ('should validate the developers metadata and return it', async () => {
             const meta = new SystemContract();
-
             class validator {
                 constructor() {}
-
+                addMetaSchema() {
+                    return true;
+                }
                 validate() {
                     return true;
                 }
@@ -110,15 +111,15 @@ describe('SystemContract', () => {
             SystemContract.__set__('Ajv', validator);
 
             const chaincodeMock = {
-                getContracts : sandbox.stub().returns('some string')
+                getContracts : sandbox.stub().returns({})
             };
             pathExistsStub = sandbox.stub(fs, 'pathExists').returns(true);
             readFileStub = sandbox.stub(fs, 'readFile');
-            readFileStub.onFirstCall().returns(Buffer.from(JSON.stringify(jsonObject)));
-            readFileStub.onSecondCall().returns(Buffer.from('some string'));
+            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
+            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some string'})));
             const data = await meta.GetMetadata();
 
-            expect(data.toString()).to.equal(JSON.stringify(jsonObject));
+            expect(data).to.equal(jsonObject);
             sinon.assert.calledOnce(getArgsStub);
             sinon.assert.calledOnce(pathExistsStub);
             sinon.assert.calledTwice(readFileStub);
@@ -130,15 +131,17 @@ describe('SystemContract', () => {
 
         it ('should throw an error when validating the developers incorrect metadata', async () => {
             const meta = new SystemContract();
-            SystemContract.__set__('yargs', myYargs);
-            const ajvOriginal = SystemContract.__get__('Ajv');
             class validator {
                 constructor() {}
-
+                addMetaSchema() {
+                    return true;
+                }
                 validate() {
                     return false;
                 }
             }
+            SystemContract.__set__('yargs', myYargs);
+            const ajvOriginal = SystemContract.__get__('Ajv');
             SystemContract.__set__('Ajv', validator);
 
             const chaincodeMock = {
@@ -146,8 +149,8 @@ describe('SystemContract', () => {
             };
             pathExistsStub = sandbox.stub(fs, 'pathExists').returns(true);
             readFileStub = sandbox.stub(fs, 'readFile');
-            readFileStub.onFirstCall().returns(Buffer.from(JSON.stringify(jsonObject)));
-            readFileStub.onSecondCall().returns(Buffer.from('some other string'));
+            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
+            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some other string'})));
 
             await expect(meta.GetMetadata()).to.eventually.be.rejectedWith(Error, 'Contract metadata does not match the schema');
             sinon.assert.calledOnce(getArgsStub);
@@ -158,36 +161,30 @@ describe('SystemContract', () => {
 
             SystemContract.__set__('Ajv', ajvOriginal);
         });
-
     });
 
-    describe('#GetMetadata', () => {
-        let readFileStub;
-        const jsonObject = JSON.stringify({
+    describe('#_loadAndValidate', () => {
+        const jsonObject =  JSON.stringify({
             name: 'some string'
         });
-
         afterEach('', () => {
             sandbox.restore();
         });
 
         it ('validate and return the metadata', async () => {
+            const readFileStub = sandbox.stub(fs, 'readFile');
             const meta = new SystemContract();
             const metadataPath = 'some path';
-            readFileStub = sandbox.stub(fs, 'readFile');
             readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().returns(Buffer.from('some string'));
+            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some string'})));
             class validator {
                 constructor() {}
-
+                addMetaSchema() {
+                }
                 validate() {
                     return true;
                 }
             }
-            const chaincodeMock = {
-                getContracts : sandbox.stub().returns('some string')
-            };
-            meta._setChaincode(chaincodeMock);
             const ajvOriginal = SystemContract.__get__('Ajv');
             SystemContract.__set__('Ajv', validator);
 
@@ -199,14 +196,15 @@ describe('SystemContract', () => {
         });
 
         it ('fail to validate and throw an error', async () => {
+            const readFileStub = sandbox.stub(fs, 'readFile');
             const meta = new SystemContract();
             const metadataPath = 'some path';
-            readFileStub = sandbox.stub(fs, 'readFile');
             readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().returns(Buffer.from('some other string'));
+            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some other string'})));
             class validator {
                 constructor() {}
-
+                addMetaSchema() {
+                }
                 validate() {
                     this.errors = 'some error string';
                     return false;
@@ -215,7 +213,7 @@ describe('SystemContract', () => {
             const ajvOriginal = SystemContract.__get__('Ajv');
             SystemContract.__set__('Ajv', validator);
 
-            await expect(meta._loadAndValidateMetadata(metadataPath)).to.eventually.be.rejectedWith(Error, 'Contract metadata does not match the schema: some error string');
+            await expect(meta._loadAndValidateMetadata(metadataPath)).to.eventually.be.rejectedWith(Error, 'Contract metadata does not match the schema: "some error string"');
             sinon.assert.calledTwice(readFileStub);
             SystemContract.__set__('Ajv', ajvOriginal);
 
