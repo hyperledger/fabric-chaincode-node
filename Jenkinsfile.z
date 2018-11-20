@@ -28,9 +28,9 @@ node('hyp-z') {
 
                  cd $PROJECT_DIR && git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/$PROJECT
                  # clone fabric repository
-                 git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
+                 git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric
                  # clone fabric-samples repository
-                 git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric-samples
+                 git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
                  # Checkout to patch Refspec
                  cd $PROJECT && git checkout "$GERRIT_BRANCH" && git fetch origin "$GERRIT_REFSPEC" && git checkout FETCH_HEAD
                  git log -n2 --pretty=oneline --abbrev-commit
