@@ -17,7 +17,7 @@ gulp.task('default', ['lint'], function () {
 // Setup the e2e tests and sequence tests to run in sequence;
 // when the control of the tests is in the scripts in this repo we could remove this.
 gulp.task('test-e2e', (done) => {
-    const tasks = ['test-e2e-shim', 'test-scenario'];
+    const tasks = ['test-e2e-shim', 'test-fv-shim', 'test-scenario'];
     runSequence(...tasks, done);
 });
 
