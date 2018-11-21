@@ -42,16 +42,6 @@ describe('Stub', () => {
 				validateCompositeKeyAttribute('');
 			}).to.throw(/object type or attribute not a non-zero length string/);
 		});
-
-		it ('should call ut8.decode on attribute', () => {
-			const utf8 = Stub.__get__('utf8');
-			const decodeStub = sinon.stub(utf8, 'decode');
-
-			validateCompositeKeyAttribute('arg');
-
-			expect(decodeStub.calledOnce).to.be.ok;
-			expect(decodeStub.firstCall.args).to.deep.equal(['arg']);
-		});
 	});
 
 	describe('computeProposalBinding', () => {
