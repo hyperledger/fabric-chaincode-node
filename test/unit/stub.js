@@ -521,23 +521,6 @@ test('CreateCompositeKey', (t) => {
 		'Test catching invalid attributes'
 	);
 
-	t.throws(
-		() => {
-			stub.createCompositeKey('k\x99x33ey', []);
-		},
-		/Invalid UTF-8/,
-		'Test bad utf-8 in object type'
-	);
-
-	t.throws(
-		() => {
-			stub.createCompositeKey('type', ['k\x99x33ey']);
-		},
-		/Invalid UTF-8/,
-		'Test bad utf-8 in attributes'
-	);
-
-
 	t.equal(stub.createCompositeKey('key', []), '\u0000key\u0000', 'Test createCompositeKey with no attributes returns expected key');
 	t.equal(stub.createCompositeKey('key', ['attr1']), '\u0000key\u0000attr1\u0000', 'Test createCompositeKey with single attribute returns expected key');
 	t.equal(stub.createCompositeKey('key', ['attr1', 'attr2','attr3']), '\u0000key\u0000attr1\u0000attr2\u0000attr3\u0000', 'Test createCompositeKey with multiple attributes returns expected key');
