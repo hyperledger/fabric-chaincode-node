@@ -10,7 +10,6 @@
 const grpc = require('grpc');
 const path = require('path');
 const util = require('util');
-const utf8 = require('utf8');
 const crypto = require('crypto');
 
 const _commonProto = grpc.load({
@@ -56,7 +55,6 @@ function validateCompositeKeyAttribute(attr) {
 	if (!attr || typeof attr !== 'string' || attr.length === 0) {
 		throw new Error('object type or attribute not a non-zero length string');
 	}
-	utf8.decode(attr);
 }
 
 function computeProposalBinding(decodedSP) {
