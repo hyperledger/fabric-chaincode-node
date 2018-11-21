@@ -54,19 +54,6 @@ describe('bootstrap.js', () => {
         }
     }
 
-    class sc2 extends Contract {
-        /** */
-        constructor() {
-            super();
-        }
-        /**
-         * @param {object} api api
-         */
-        beta(api) {
-            log(api);
-        }
-    }
-
     let sandbox;
 
     beforeEach('Sandbox creation', () => {
@@ -138,40 +125,6 @@ describe('bootstrap.js', () => {
 
         after(() => {
             bootstrap.__set__('yargs', theirYargs);
-            bootstrap.__set__('register', ogRegister);
-        });
-
-        it ('should use the package.json for the names classes; incorrect spec', () => {
-            mockery.registerMock('jsoncfg', {contracts: 'nonexistant'});
-            (() => {
-                bootstrap.bootstrap();
-            }).should.throw(/not usable/);
-
-            sinon.assert.calledOnce(getArgsStub);
-            sinon.assert.calledWith(getArgsStub, myYargs);
-        });
-
-        it ('should use the package.json for the names classes; valid spec', () => {
-
-            const mock = {
-                contracts: {
-                    classes: ['sensibleContract', 'anotherSensibleContract']
-                }
-            };
-
-            mockery.registerMock('jsoncfg', mock);
-
-            pathStub.withArgs('/some/path', sinon.match(/sensibleContract/)).returns('sensibleContract');
-            pathStub.withArgs('/some/path', sinon.match(/anotherSensibleContract/)).returns('anotherSensibleContract');
-
-            mockery.registerMock('sensibleContract', sc);
-            mockery.registerMock('anotherSensibleContract', sc2);
-
-            bootstrap.bootstrap();
-
-            sinon.assert.calledOnce(registerStub);
-            sinon.assert.calledWith(registerStub, [sc, sc2]);
-
             bootstrap.__set__('register', ogRegister);
         });
 

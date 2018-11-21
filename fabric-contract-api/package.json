@@ -26,6 +26,5 @@
     "reflect-metadata": "^0.1.12"
   },
   "types": "./types/index.d.ts",
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

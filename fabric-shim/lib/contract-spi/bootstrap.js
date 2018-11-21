@@ -41,21 +41,7 @@ function bootstrap() {
     const json = require(jsonPath);
     logger.debug('starting up and reading package.json at %s', jsonPath);
     logger.debug(json);
-    if (json.contracts) {
-        logger.debug('Using contracts spec in the package.json');
-        // this is the declaratitive way of specifing the classes that should be used.
-        if (json.contracts.classes) {
-            const classesToRegister = json.contracts.classes.map((value) => {
-                // p is the path to the file contain the defined contract
-                const p = (path.resolve(modPath, value));
-                const r = require(p);
-                return r;
-            });
-            register(classesToRegister);
-        } else {
-            throw new Error('Contracts element specified in package.json, but the contents are not usable');
-        }
-    } else if (json.main) {
+    if (json.main) {
         logger.debug('Using the main entry %s', json.main);
         const p = (path.resolve(modPath, json.main));
         const r = require(p);
