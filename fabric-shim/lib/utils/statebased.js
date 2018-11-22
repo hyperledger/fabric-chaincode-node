@@ -152,4 +152,4 @@ class KeyEndorsementPolicy {
     }
 }
 
-module.exports.KeyEndorsementPolicy = KeyEndorsementPolicy;
+module.exports = KeyEndorsementPolicy;

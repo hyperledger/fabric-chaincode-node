@@ -9,7 +9,7 @@
 
 const chai = require('chai');
 const expect = chai.expect;
-const {KeyEndorsementPolicy} = require('../../../lib/utils/statebased');
+const KeyEndorsementPolicy = require('../../../lib/utils/statebased');
 
 describe('KeyEndorsementPolicy', () => {
     describe('#constructor', () => {
