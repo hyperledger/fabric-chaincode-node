@@ -160,6 +160,54 @@ describe('bootstrap.js', () => {
             sinon.assert.calledWith(registerStub, [sc]);
         });
 
+        it ('should use the main class defined with contracts exported, and custom serialization', () => {
+            mockery.registerMock('jsoncfg', {
+                main: 'entrypoint2'
+            });
+
+            sandbox.stub(shim, 'start');
+
+            pathStub.withArgs('/some/path', 'entrypoint2').returns('entryPoint2');
+
+            mockery.registerMock('entryPoint2',
+                {
+                    contracts: [sc],
+                    serializers : {
+                        transaction: 'wibble',
+                        serializers: {
+                            'wibble':'wibbleimpl'
+                        }
+                    }
+                });
+            bootstrap.bootstrap();
+            sinon.assert.calledOnce(registerStub);
+            sinon.assert.calledWith(registerStub, [sc]);
+        });
+
+        it ('should use the main class defined with contracts exported, and custom serialization', () => {
+            mockery.registerMock('jsoncfg', {
+                main: 'entrypoint2'
+            });
+
+            sandbox.stub(shim, 'start');
+
+            pathStub.withArgs('/some/path', 'entrypoint2').returns('entryPoint2');
+
+            mockery.registerMock('entryPoint2',
+                {
+                    contracts: [sc],
+                    serializers : {
+                        serializers: {
+                            'wibble':'wibbleimpl'
+                        }
+                    }
+                });
+            (() => {
+                bootstrap.bootstrap();
+            }).should.throw(/There should be a 'transaction' property to define the serializer for use with transactions/);
+
+        });
+
         it ('should throw an error if none of the other methods work', () => {
             path.resolve.restore();
             pathStub = sandbox.stub(path, 'resolve');

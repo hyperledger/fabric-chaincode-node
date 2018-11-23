@@ -109,9 +109,9 @@ gulp.task('docker-copy', ['clean-up'], function() {
 
 });
 
-gulp.task('fv-pre-test', () => {
+gulp.task('fv-pre-test', (done) => {
     const tasks = ['fv-pack', 'fv-copy', 'fv-clean'];
-    return runSequence(...tasks);
+    runSequence(...tasks, done);
 });
 
 gulp.task('fv-pack', () => {

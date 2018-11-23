@@ -13,3 +13,5 @@ module.exports.Contract = require('./lib/contract.js');
 module.exports.Context = require('./lib/context.js');
 
 Object.assign(module.exports, require('./lib/annotations'));
+
+module.exports.JSONSerializer = require('./lib/jsontransactionserializer.js');

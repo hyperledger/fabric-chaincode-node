@@ -33,11 +33,19 @@ const pathToRoot = '../../../..';
 
 const Contract = require('fabric-contract-api').Contract;
 const Context = require(path.join(pathToRoot, 'fabric-contract-api/lib/context'));
+const JSONSerializer = require(path.join(pathToRoot, 'fabric-contract-api/lib/jsontransactionserializer.js'));
 const ChaincodeFromContract = rewire(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/chaincodefromcontract'));
 const SystemContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/systemcontract'));
 const StartCommand = require(path.join(pathToRoot, 'fabric-shim/lib/cmds/startCommand.js'));
 const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
 const FabricStubInterface = require(path.join(pathToRoot, 'fabric-shim/lib/stub'));
+console.log(JSONSerializer);
+const defaultSerialization = {
+    transaction: 'jsonSerializer',
+    serializers: {
+        jsonSerializer : JSONSerializer
+    }
+};
 let alphaStub;
 let betaStub;
 
@@ -121,7 +129,10 @@ describe('chaincodefromcontract', () => {
             'module-path': '/some/path'
         });
 
-        mockery.enable();
+        mockery.enable({
+            warnOnReplace: false,
+            warnOnUnregistered: false
+        });
         mockery.registerMock('./systemcontract', SystemContract);
 
         const pathStub = sandbox.stub(path, 'resolve');
@@ -157,8 +168,20 @@ describe('chaincodefromcontract', () => {
             (() => {
                 new ChaincodeFromContract([
                     tempClass
-                ]);
+                ], defaultSerialization);
             }).should.throw(/invalid contract/);
+        });
+
+        it ('should handle missing serialization information', () => {
+            const tempClass =   class {
+                constructor() {}
+            };
+
+            (() => {
+                new ChaincodeFromContract([
+                    tempClass
+                ]);
+            }).should.throw(/Missing argument/);
         });
 
         it ('should correctly create valid chaincode instance', () => {
@@ -168,7 +191,7 @@ describe('chaincodefromcontract', () => {
                 .onCall(3).returns({'some': 'objects'});
 
             SCBeta.prototype.fred = 'fred';
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
 
             // get the contracts that have been defined
             expect(cc.contracts).to.have.keys('alpha', 'beta', 'org.hyperledger.fabric');
@@ -200,7 +223,7 @@ describe('chaincodefromcontract', () => {
             mockery.registerMock('packagejson', mock);
 
             SCBeta.prototype.fred = 'fred';
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
 
             // get the contracts that have been defined
             expect(cc.contracts).to.have.keys('alpha', 'beta', 'org.hyperledger.fabric');
@@ -230,7 +253,7 @@ describe('chaincodefromcontract', () => {
             mockery.registerMock('packagejson', mock);
 
             SCBeta.prototype.fred = 'fred';
-            const cc = new ChaincodeFromContract([SCBeta]);
+            const cc = new ChaincodeFromContract([SCBeta], defaultSerialization);
 
             // get the contracts that have been defined
             expect(cc.contracts).to.have.keys('beta', 'org.hyperledger.fabric');
@@ -262,7 +285,7 @@ describe('chaincodefromcontract', () => {
             });
             sandbox.replace(shim, 'success', fakesuccess);
 
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
             sandbox.stub(cc, 'invokeFunctionality');
 
             await cc.Init(stubInterface);
@@ -283,7 +306,7 @@ describe('chaincodefromcontract', () => {
             });
             sandbox.replace(shim, 'success', fakesuccess);
 
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
             sandbox.stub(cc, 'invokeFunctionality');
 
             await cc.Init(stubInterface);
@@ -303,7 +326,7 @@ describe('chaincodefromcontract', () => {
                 params: ['arg1', 'arg2']
             });
 
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
             sandbox.stub(cc, 'invokeFunctionality');
             await cc.Invoke(stubInterface);
 
@@ -348,7 +371,7 @@ describe('chaincodefromcontract', () => {
         let cc;
 
         beforeEach(() => {
-            cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
 
             defaultBeforeSpy = sandbox.spy(Contract.prototype, 'beforeTransaction');
             defaultAfterSpy = sandbox.spy(Contract.prototype, 'afterTransaction');
@@ -396,7 +419,7 @@ describe('chaincodefromcontract', () => {
                 sinon.assert.calledOnce(defaultCreateContext);
                 sinon.assert.callOrder(defaultCreateContext, defaultBeforeSpy, alphaStub, defaultAfterSpy);
                 expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
-                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('Hello');
+                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('"Hello"');
             });
 
             it ('should invoke the alpha function handling non-string response', async () => {
@@ -456,7 +479,7 @@ describe('chaincodefromcontract', () => {
                 sinon.assert.calledOnce(defaultCreateContext);
                 sinon.assert.callOrder(defaultCreateContext, defaultBeforeSpy, alphaStub, defaultAfterSpy);
                 expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
-                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('[104,101,108,108,111]');
+                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('{"type":"Buffer","data":[104,101,108,108,111]}');
             });
 
             it ('should invoke alpha and handle when function response is an array', async () => {
@@ -602,7 +625,7 @@ describe('chaincodefromcontract', () => {
         let cc;
         beforeEach(() => {
             // actual contract instance is not important for this test
-            cc = new ChaincodeFromContract([SCBeta]);
+            cc = new ChaincodeFromContract([SCBeta], defaultSerialization);
         });
 
         it ('should handle the usual case of ns:fn', () => {
@@ -633,7 +656,7 @@ describe('chaincodefromcontract', () => {
 
     describe('getContracts', () => {
         it ('should return the contract info', async () => {
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
             cc.title = 'some title';
             cc.version = '0.0.1';
             cc.objects = {
@@ -692,7 +715,7 @@ describe('chaincodefromcontract', () => {
         });
 
         it ('should not include components.schema when empty', () => {
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta]);
+            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
             cc.title = 'some title';
             cc.version = '0.0.1';
             cc.objects = {};

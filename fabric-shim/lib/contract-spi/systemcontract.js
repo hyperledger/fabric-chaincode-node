@@ -43,10 +43,11 @@ class SystemContract extends Contract {
         if (pathCheck) {
             metadata = await this._loadAndValidateMetadata(metadataPath);
         } else {
-            metadata = JSON.stringify(this.chaincode.getContracts());
+            metadata = this.chaincode.getContracts();
         }
         return metadata;
     }
+
 
     async _loadAndValidateMetadata(metadataPath) {
         const rootPath = path.dirname(__dirname);
