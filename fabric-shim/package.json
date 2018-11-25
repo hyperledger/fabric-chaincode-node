@@ -41,7 +41,7 @@
     "jsrsasign": "^8.0.4",
     "reflect-metadata": "^0.1.12",
     "winston": "^2.4.1",
-    "x509": "^0.3.2",
+    "x509": "0.3.3",
     "yargs": "^10.0.2",
     "yargs-parser": "^11.0.0"
   },

@@ -65,6 +65,8 @@ services:
       - CORE_PEER_ID=peer0.org1.example.com
       - CORE_LOGGING_PEER=debug
       - CORE_CHAINCODE_LOGGING_LEVEL=DEBUG
+      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-nodeenv:latest
+      - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:latest
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
