@@ -1,6 +1,9 @@
 {
   "name": "fabric-shim-test",
   "version": "1.1.4",
+  "testFabricVersion": "1.1.1",
+  "testFabricCaVersion": "1.1.0",
+  "testFabricThirdParty": "0.4.6",
   "description": "Test suite for fabric-shim",
   "engines": {
     "node": "^8.9.0",

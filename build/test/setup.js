@@ -14,6 +14,48 @@ const replace = require('gulp-replace');
 
 const test = require('../../test/base.js');
 
+let arch = process.arch;
+let dockerImageTag = '';
+let dockerCaImageTag = '';
+let thirdpartyImageTag = '';
+let docker_arch = '';
+const release     = require(path.join(__dirname, '../../package.json')).testFabricVersion;
+const ca_release     = require(path.join(__dirname, '../../package.json')).testFabricCaVersion;
+const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
+
+// this is a release build, need to build the proper docker image tag
+// to run the tests against the corresponding fabric released docker images
+if (arch.indexOf('x64') === 0) {
+	docker_arch = ':x86_64';
+} else if (arch.indexOf('s390') === 0) {
+	docker_arch = ':s390x';
+} else if (arch.indexOf('ppc64') === 0) {
+	docker_arch = ':ppc64le';
+} else {
+	throw new Error('Unknown architecture: ' + arch);
+}
+
+console.log(util.format('# debug log thirdparty_release: %s', thirdparty_release));
+console.log(util.format('# debug log release: %s', release));
+console.log(util.format('# debug log ca_release: %s', ca_release));
+
+// prepare thirdpartyImageTag (currently using couchdb image in tests)
+thirdpartyImageTag = docker_arch + '-' + thirdparty_release;
+
+// release check
+if (!/-snapshot/.test(release)) {
+	dockerImageTag = docker_arch + '-' + release;
+}
+// release check
+if (!/-snapshot/.test(ca_release)) {
+	dockerCaImageTag = docker_arch + '-' + ca_release;
+}
+
+// these environment variables would be read at test/fixtures/docker-compose.yaml
+process.env.DOCKER_IMG_TAG = dockerImageTag;
+process.env.DOCKER_CA_IMG_TAG = dockerCaImageTag;
+process.env.THIRDPARTY_IMG_TAG = thirdpartyImageTag;
+
 // by default for running the tests print debug to a file
 let debugPath = path.join(test.tempdir, 'logs/test-debug.log');
 console.log('\n####################################################');
