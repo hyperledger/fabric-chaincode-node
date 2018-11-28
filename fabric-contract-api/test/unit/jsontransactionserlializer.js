@@ -94,7 +94,7 @@ describe('jsontransactionserializer.js', () => {
         it ('should return inflated data from the buffer', () => {
             const sc0 = new JSONSerializer();
             for (let i = 0; i < data.length; i++) {
-                expect(sc0.fromBuffer(buffer[i])).to.deep.equal(data[i]);
+                expect(sc0.fromBuffer(buffer[i])).to.deep.equal({value: data[i]});
             }
         });
 

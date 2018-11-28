@@ -11,9 +11,11 @@
             "$ref": "#/definitions/info"
         },
         "contracts": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/contract"
+            "type": "object",
+            "patternProperties": {
+                "^.*$": {
+                    "$ref": "#/definitions/contract"
+                }
             }
         },
         "components": {
@@ -118,11 +120,11 @@
             "type": "object",
             "description": "A complex type used in a domain",
             "required": [
-                "name",
+                "$id",
                 "properties"
             ],
             "properties": {
-                "name": {
+                "$id": {
                     "type": "string"
                 },
                 "properties": {

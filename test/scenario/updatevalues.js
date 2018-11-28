@@ -54,6 +54,7 @@ class UpdateValues extends Contract {
 	 * @param {int|string} newAssetValue new asset value to set
 	 */
     async setNewAssetValue(ctx, newAssetValue) {
+        console.log(newAssetValue);
         this._log(`New Asset value will be ${newAssetValue}`);
         await ctx.stub.putState(ctx.generateKey(), Buffer.from(newAssetValue));
 

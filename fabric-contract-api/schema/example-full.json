@@ -14,8 +14,8 @@
         },
         "version": "1.0.1"
     },
-    "contracts": [
-        {
+    "contracts": {
+        "org.papernet.commercialpaper": {
             "name": "org.papernet.commercialpaper",
             "info": {
                 "title": "Commercial Paper Trading Functions",
@@ -214,11 +214,28 @@
                 }
             ]
         }
-    ],
+    },
     "components": {
         "schemas": {
+            "owner": {
+                "$id": "owner",
+                "properties": [
+                    {
+                        "name": "firstName",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "lastName",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            },
             "paper": {
-                "name": "paper",
+                "$id": "paper",
                 "required": [
                     "issuer",
                     "paperNumber",
@@ -244,7 +261,7 @@
                     {
                         "name": "owner",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/components/schema/owner"
                         }
                     },
                     {

@@ -34,6 +34,7 @@ describe('Transaction.js', () => {
         }
     };
 
+
     let appendSpy;
     let defineMetadataStub;
     beforeEach(() => {
@@ -100,14 +101,67 @@ describe('Transaction.js', () => {
                         name: 'param1',
                         description: '',
                         schema: {
-                            type: 'somefunc'
+                            $ref: '#/components/schemas/someFunc'
                         }
                     },
                     {
                         name: 'param2',
                         description: '',
                         schema: {
-                            type: 'sometype'
+                            $ref: '#/components/schemas/someType'
+                        }
+                    }
+                ]
+            }], mockTarget);
+            getMetadataStub.restore();
+        });
+
+        it ('should handle existing transactions with primitives', () => {
+            const mockFunc = function someFunc() {};
+
+            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').onFirstCall().returns([{
+                name: 'someTransaction',
+                tag: ['submitTx'],
+                parameters: []
+            }]).onSecondCall().returns([
+                MockContext,
+                mockFunc,
+                MockContext,
+                'string',
+                MockContext,
+            ]);
+
+            TransactionAnnotations.__set__('getParams', () => {
+                return ['ctx', 'param1', 'ctx2', 'param2', 'ctx3'];
+            });
+
+            transaction(mockTarget, 'mockKey');
+
+            sinon.assert.calledTwice(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledWith(getMetadataStub, 'design:paramtypes', mockTarget, 'mockKey');
+            sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledOnce(defineMetadataStub);
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
+                name: 'someTransaction',
+                tag: ['submitTx'],
+                parameters: []
+            }, {
+                name: 'mockKey',
+                tag: ['submitTx'],
+                parameters: [
+                    {
+                        name: 'param1',
+                        description: '',
+                        schema: {
+                            $ref: '#/components/schemas/someFunc'
+                        }
+                    },
+                    {
+                        name: 'param2',
+                        description: '',
+                        schema: {
+                            type:'string'
                         }
                     }
                 ]
@@ -189,12 +243,12 @@ describe('Transaction.js', () => {
                 parameters: []
             },  {
                 name: 'mockKey',
-                returns: {
+                returns: [{
                     name: 'success',
                     schema: {
-                        type: 'sometype'
+                        $ref: '#/components/schemas/someType'
                     }
-                }
+                }]
             }], mockTarget);
 
             getMetadataStub.restore();
@@ -211,15 +265,39 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
-                returns: {
+                returns:[{
                     name: 'success',
                     schema: {
-                        type: 'sometype'
+                        $ref: '#/components/schemas/someType'
                     }
-                }
+                }]
             }], mockTarget);
 
             getMetadataStub.restore();
         });
+
+        it ('should handle when it is a string', () => {
+            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').returns(undefined);
+
+            returns = Returns('string');
+            returns(mockTarget, 'mockKey');
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledOnce(defineMetadataStub);
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
+                name: 'mockKey',
+                returns:[{
+                    name: 'success',
+                    schema: {
+                        type: 'string'
+                    }
+                }]
+            }], mockTarget);
+
+            getMetadataStub.restore();
+        });
+
     });
 });

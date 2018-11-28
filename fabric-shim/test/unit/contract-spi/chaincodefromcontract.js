@@ -17,13 +17,13 @@
 // test specific libraries
 const chai = require('chai');
 chai.should();
-const expect = chai.expect;
+
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
 
 const mockery = require('mockery');
-const rewire = require('rewire');
+
 
 // standard utility fns
 const path = require('path');
@@ -32,18 +32,17 @@ const path = require('path');
 const pathToRoot = '../../../..';
 
 const Contract = require('fabric-contract-api').Contract;
-const Context = require(path.join(pathToRoot, 'fabric-contract-api/lib/context'));
 const JSONSerializer = require(path.join(pathToRoot, 'fabric-contract-api/lib/jsontransactionserializer.js'));
-const ChaincodeFromContract = rewire(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/chaincodefromcontract'));
+
 const SystemContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/systemcontract'));
 const StartCommand = require(path.join(pathToRoot, 'fabric-shim/lib/cmds/startCommand.js'));
+const ChaincodeFromContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/chaincodefromcontract'));
 const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
-const FabricStubInterface = require(path.join(pathToRoot, 'fabric-shim/lib/stub'));
-console.log(JSONSerializer);
+
 const defaultSerialization = {
     transaction: 'jsonSerializer',
     serializers: {
-        jsonSerializer : JSONSerializer
+        jsonSerializer: JSONSerializer
     }
 };
 let alphaStub;
@@ -54,6 +53,7 @@ let afterFnStubA;
 let unknownStub;
 let privateStub;
 let ctxStub;
+let getSchemaMock;
 
 function log(...e) {
     // eslint-disable-next-line
@@ -61,6 +61,18 @@ function log(...e) {
 }
 
 describe('chaincodefromcontract', () => {
+
+    class MockDataMarhsall {
+        constructor() {
+
+        }
+    }
+
+    class mockAjv {
+        constructor() {
+
+        }
+    }
 
     /**
     * A fake  contract class;
@@ -116,24 +128,36 @@ describe('chaincodefromcontract', () => {
 
     }
 
+    /**
+    * A fake  contract class;
+    */
+    class SCDelta extends Contract {
+
+
+        constructor() {
+            super('delta');
+        }
+
+    }
+
     let sandbox;
-    let getArgsStub;
 
     beforeEach('Sandbox creation', () => {
+        mockery.enable({
+            warnOnReplace: false,
+            warnOnUnregistered: false,
+            useCleanCache: false
+        });
         sandbox = sinon.createSandbox();
         beforeFnStubA = sandbox.stub().named('beforeFnStubA');
         afterFnStubA = sandbox.stub().named('afterFnStubA');
         alphaStub = sandbox.stub().named('alphaStub');
         betaStub = sandbox.stub().named('betaStub');
-        getArgsStub = sandbox.stub(StartCommand, 'getArgs').returns({
-            'module-path': '/some/path'
-        });
+        getSchemaMock = sandbox.stub();
+        mockAjv.getSchema = getSchemaMock;
 
-        mockery.enable({
-            warnOnReplace: false,
-            warnOnUnregistered: false
-        });
         mockery.registerMock('./systemcontract', SystemContract);
+        mockery.registerMock('ajv', mockAjv);
 
         const pathStub = sandbox.stub(path, 'resolve');
         pathStub.withArgs(sinon.match.any, '/some/path').returns('/some/path');
@@ -145,6 +169,12 @@ describe('chaincodefromcontract', () => {
         };
 
         mockery.registerMock('packagejson', mock);
+        // mockery.registerMock('./datamarshall.js', MockDataMarhsall);
+
+        sandbox.stub(StartCommand, 'getArgs').returns({
+            'module-path': '/some/path'
+        });
+
     });
 
     afterEach('Sandbox restoration', () => {
@@ -154,27 +184,15 @@ describe('chaincodefromcontract', () => {
 
     describe('#constructor', () => {
 
-        it ('should handle no classes being passed in', () => {
+        it('should handle no classes being passed in', () => {
             (() => {
                 new ChaincodeFromContract();
             }).should.throw(/Missing argument/);
         });
 
-        it ('should handle classes that are not of the correct type', () => {
-            const tempClass =   class {
-                constructor() {}
-            };
-
-            (() => {
-                new ChaincodeFromContract([
-                    tempClass
-                ], defaultSerialization);
-            }).should.throw(/invalid contract/);
-        });
-
-        it ('should handle missing serialization information', () => {
-            const tempClass =   class {
-                constructor() {}
+        it('should handle missing serialization information', () => {
+            const tempClass = class {
+                constructor() { }
             };
 
             (() => {
@@ -184,440 +202,196 @@ describe('chaincodefromcontract', () => {
             }).should.throw(/Missing argument/);
         });
 
-        it ('should correctly create valid chaincode instance', () => {
-            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata')
-                .onFirstCall().returns(['some', 'transactions'])
-                .onSecondCall().returns(['some', 'transactions'])
-                .onCall(3).returns({'some': 'objects'});
 
-            SCBeta.prototype.fred = 'fred';
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
-
-            // get the contracts that have been defined
-            expect(cc.contracts).to.have.keys('alpha', 'beta', 'org.hyperledger.fabric');
-            expect(cc.contracts.alpha).to.include.keys('transactions');
-            expect(cc.contracts.beta).to.include.keys('transactions');
-            expect(cc.contracts.alpha.transactions).to.deep.equal(['some', 'transactions']);
-            expect(cc.contracts.beta.transactions).to.deep.equal(['some', 'transactions']);
-
-            sinon.assert.callCount(getMetadataStub, 4);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCAlpha));
-            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
-            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
-
-            sinon.assert.calledOnce(getArgsStub);
-            expect(cc.version).to.deep.equal('1.0.1');
-            expect(cc.title).to.deep.equal('some package');
-            expect(cc.objects).to.deep.equal({'some': 'objects'});
+        it('should handle a single class being passed as a contract', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
         });
 
-        it ('should correctly create valid chaincode instance when package.json does not have version or name', () => {
-            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata')
-                .onFirstCall().returns(['some', 'transactions'])
-                .onSecondCall().returns(['some', 'transactions'])
-                .onCall(3).returns({'some': 'objects'});
+        it('should handle a case where the metadata is incompatible with code', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            _checkSuppliedStub.returns({errors:'totally unaceptable'});
+            (() => {
+                new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            }).should.throw();
 
-            const mock = {};
 
-            mockery.deregisterMock('packagejson');
-            mockery.registerMock('packagejson', mock);
-
-            SCBeta.prototype.fred = 'fred';
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
-
-            // get the contracts that have been defined
-            expect(cc.contracts).to.have.keys('alpha', 'beta', 'org.hyperledger.fabric');
-            expect(cc.contracts.alpha).to.include.keys('transactions');
-            expect(cc.contracts.beta).to.include.keys('transactions');
-            expect(cc.contracts.alpha.transactions).to.deep.equal(['some', 'transactions']);
-            expect(cc.contracts.beta.transactions).to.deep.equal(['some', 'transactions']);
-
-            sinon.assert.callCount(getMetadataStub, 4);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCAlpha));
-            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
-            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
-
-            sinon.assert.calledOnce(getArgsStub);
-            expect(cc.version).to.deep.equal('');
-            expect(cc.title).to.deep.equal('');
         });
 
-        it ('should handle when reflect cannot get metadata', () => {
-            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata')
-                .onFirstCall().returns(undefined)
-                .onSecondCall().returns(undefined)
-                .onCall(3).returns(undefined);
+    });
 
-            const mock = {};
+    describe('#_compileSchemas', () => {
+        it('should handle no complex objects being available', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({
+                components: {
+                    schemas: {
 
-            mockery.registerMock('packagejson', mock);
+                    }
+                }
+            });
+            sandbox.stub(ChaincodeFromContract.prototype, '_dataMarshall').returns(MockDataMarhsall);
 
-            SCBeta.prototype.fred = 'fred';
-            const cc = new ChaincodeFromContract([SCBeta], defaultSerialization);
+            new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+        });
 
-            // get the contracts that have been defined
-            expect(cc.contracts).to.have.keys('beta', 'org.hyperledger.fabric');
-            expect(cc.contracts.beta).to.include.keys('transactions');
-            expect(cc.contracts.beta.transactions).to.deep.equal([{name: 'beta'}, {name: 'afterTransaction'}, {name: 'beforeTransaction'}, {name: 'unknownTransaction'}, {name: 'createContext'}]);
+        it('should handle complex objects being available', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
 
-            sinon.assert.calledThrice(getMetadataStub);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
-            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', new(SCBeta));
-            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
+            const metadata = {
+                components: {
+                    schemas: {
+                        Asset :{
+                            $id:'Asset',
+                            properties: [
+                                {
+                                    name:'thename',
+                                    schema: {
+                                        type:'string'
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            };
 
-            sinon.assert.calledOnce(getArgsStub);
-            expect(cc.version).to.deep.equal('');
-            expect(cc.title).to.deep.equal('');
-            expect(cc.objects).to.deep.equal({});
+
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns(metadata);
+            sandbox.stub(ChaincodeFromContract.prototype, '_ajv').returns(mockAjv);
+            sandbox.stub(ChaincodeFromContract.prototype, '_dataMarshall').returns(MockDataMarhsall);
+            new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
         });
     });
+
+    describe('#_resolveContractImplementations', () => {
+        it('should handle a single class being passed as a contract', () => {
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            mockery.registerMock('SCAlpha', SCAlpha);
+            new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+        });
+        it('should handle a single class being passed that is not valid', () => {
+
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            sandbox.stub(ChaincodeFromContract.prototype, '_dataMarshall').returns(MockDataMarhsall);
+            mockery.registerMock('SCAlpha', function() {});
+            (() => {
+                new ChaincodeFromContract([String], defaultSerialization);
+            }).should.throw(/invalid contract instance/);
+
+        });
+    });
+
 
     describe('#init', () => {
-
-        it ('should call the invokeFunctionality method', async () => {
-            const stubInterface = sinon.createStubInstance(FabricStubInterface);
-            stubInterface.getFunctionAndParameters.returns({
-                fcn:'alpha:alpha',
-                params: ['arg1', 'arg2']
-            });
-            const fakesuccess = sinon.fake((e) => {
-                log(e);
-            });
-            sandbox.replace(shim, 'success', fakesuccess);
-
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
-            sandbox.stub(cc, 'invokeFunctionality');
-
-            await cc.Init(stubInterface);
-            sinon.assert.calledOnce(cc.invokeFunctionality);
-            sinon.assert.calledWith(cc.invokeFunctionality, stubInterface);
-            sinon.assert.notCalled(fakesuccess);
-
-        });
-
-        it ('should return a shim.success when no args are passed through the init function', async () => {
-            const stubInterface = sinon.createStubInstance(FabricStubInterface);
-            stubInterface.getFunctionAndParameters.returns({
-                fcn: '',
-                params: []
-            });
-            const fakesuccess = sinon.fake((e) => {
-                log(e);
-            });
-            sandbox.replace(shim, 'success', fakesuccess);
-
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
-            sandbox.stub(cc, 'invokeFunctionality');
-
-            await cc.Init(stubInterface);
-            sinon.assert.calledOnce(fakesuccess);
-            sinon.assert.notCalled(cc.invokeFunctionality);
-
-        });
-
-    });
-
-    describe('#invoke', () => {
-
-        it ('should call the invokeFunctionality method', async () => {
-            const stubInterface = sinon.createStubInstance(FabricStubInterface);
-            stubInterface.getFunctionAndParameters.returns({
-                fcn:'alpha:alpha',
-                params: ['arg1', 'arg2']
-            });
-
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
-            sandbox.stub(cc, 'invokeFunctionality');
-            await cc.Invoke(stubInterface);
-
-            sinon.assert.calledOnce(cc.invokeFunctionality);
-            sinon.assert.calledWith(cc.invokeFunctionality, stubInterface);
-
-        });
-
-    });
-
-    describe('#invokeFunctionality', () => {
-
         let fakeSuccess;
         let fakeError;
 
-        let defaultBeforeSpy;
-        let defaultAfterSpy;
-        let defaultCreateContext;
-
-        const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-  'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-  'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-  'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-  'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-  'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-  'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-  'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-  'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-  '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-  'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-  'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-  'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-  'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-  '-----END CERTIFICATE-----';
-
-        const idBytes = {
-            toBuffer: () => {
-                return new Buffer(certWithoutAttrs);
-            }
-        };
-
-        let cc;
-
         beforeEach(() => {
-            cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
+            fakeSuccess = sinon.fake((e) => {
+                sinon.assert.fail(e);
+            });
 
-            defaultBeforeSpy = sandbox.spy(Contract.prototype, 'beforeTransaction');
-            defaultAfterSpy = sandbox.spy(Contract.prototype, 'afterTransaction');
-            defaultCreateContext = sandbox.spy(Contract.prototype, 'createContext');
+            fakeError = sinon.fake((e) => {
+                log(e);
+            });
+
+            sandbox.replace(shim, 'success', fakeSuccess);
+            sandbox.replace(shim, 'error', fakeError);
         });
-
-        describe('expected successful', () => {
-            beforeEach(() => {
-                fakeSuccess = sinon.fake((e) => {
-                    log(e);
-                });
-
-                fakeError = sinon.fake((e) => {
-                    sinon.assert.fail(e);
-                });
-
-                sandbox.replace(shim, 'success', fakeSuccess);
-                sandbox.replace(shim, 'error', fakeError);
-            });
-
-            it ('should invoke the alpha function', async () => {
-                alphaStub.resolves('Hello');
-                beforeFnStubA.resolves();
-                afterFnStubA.resolves();
-
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'alpha:alpha',
-                    params: ['arg1', 'arg2']
-                });
-
-                const mockSigningId = {
-                    getMspid: sinon.stub(),
-                    getIdBytes: sinon.stub().returns(idBytes)
-                };
-                stubInterface.getCreator.returns(
-                    mockSigningId
-                );
-
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(alphaStub);
-                sinon.assert.calledWith(alphaStub, sinon.match.any, 'arg1', 'arg2');
-                sinon.assert.calledOnce(defaultBeforeSpy);
-                sinon.assert.calledOnce(defaultAfterSpy);
-                sinon.assert.calledOnce(defaultCreateContext);
-                sinon.assert.callOrder(defaultCreateContext, defaultBeforeSpy, alphaStub, defaultAfterSpy);
-                expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
-                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('"Hello"');
-            });
-
-            it ('should invoke the alpha function handling non-string response', async () => {
-                alphaStub.resolves(123);
-                beforeFnStubA.resolves();
-                afterFnStubA.resolves();
-
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'alpha:alpha',
-                    params: ['arg1', 'arg2']
-                });
-
-                const mockSigningId = {
-                    getMspid: sinon.stub(),
-                    getIdBytes: sinon.stub().returns(idBytes)
-                };
-                stubInterface.getCreator.returns(
-                    mockSigningId
-                );
-
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(alphaStub);
-                sinon.assert.calledWith(alphaStub, sinon.match.any, 'arg1', 'arg2');
-                sinon.assert.calledOnce(defaultBeforeSpy);
-                sinon.assert.calledOnce(defaultAfterSpy);
-                sinon.assert.calledOnce(defaultCreateContext);
-                sinon.assert.callOrder(defaultCreateContext, defaultBeforeSpy, alphaStub, defaultAfterSpy);
-                expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
-                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('123');
-            });
-
-            it ('should invoke alpha and handle when function response is a buffer', async () => {
-                alphaStub.resolves(Buffer.from('hello'));
-                beforeFnStubA.resolves();
-                afterFnStubA.resolves();
-
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'alpha:alpha',
-                    params: ['arg1', 'arg2']
-                });
-
-                const mockSigningId = {
-                    getMspid: sinon.stub(),
-                    getIdBytes: sinon.stub().returns(idBytes)
-                };
-                stubInterface.getCreator.returns(
-                    mockSigningId
-                );
-
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(alphaStub);
-                sinon.assert.calledWith(alphaStub, sinon.match.any, 'arg1', 'arg2');
-                sinon.assert.calledOnce(defaultBeforeSpy);
-                sinon.assert.calledOnce(defaultAfterSpy);
-                sinon.assert.calledOnce(defaultCreateContext);
-                sinon.assert.callOrder(defaultCreateContext, defaultBeforeSpy, alphaStub, defaultAfterSpy);
-                expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
-                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('{"type":"Buffer","data":[104,101,108,108,111]}');
-            });
-
-            it ('should invoke alpha and handle when function response is an array', async () => {
-                alphaStub.resolves([1, 2, 3, 4]);
-                beforeFnStubA.resolves();
-                afterFnStubA.resolves();
-
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'alpha:alpha',
-                    params: ['arg1', 'arg2']
-                });
-
-                const mockSigningId = {
-                    getMspid: sinon.stub(),
-                    getIdBytes: sinon.stub().returns(idBytes)
-                };
-                stubInterface.getCreator.returns(
-                    mockSigningId
-                );
+        it('should handle a single class being passed as a contract', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
 
 
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(alphaStub);
-                sinon.assert.calledWith(alphaStub, sinon.match.any, 'arg1', 'arg2');
-                sinon.assert.calledOnce(defaultBeforeSpy);
-                sinon.assert.calledOnce(defaultAfterSpy);
-                sinon.assert.calledOnce(defaultCreateContext);
-                sinon.assert.callOrder(defaultCreateContext, defaultBeforeSpy, alphaStub, defaultAfterSpy);
-                expect(Buffer.isBuffer(fakeSuccess.getCall(0).args[0])).to.be.ok;
-                expect(fakeSuccess.getCall(0).args[0].toString()).to.deep.equal('[1,2,3,4]');
-            });
+            const mockStub = {getBufferArgs : sandbox.stub().returns([])};
+            cc.invokeFunctionality = sandbox.stub();
+            cc.Init(mockStub);
 
-            it ('should invoke the correct before/after fns function', async () => {
-                beforeFnStubA.resolves();
-                afterFnStubA.resolves();
-                ctxStub = sandbox.createStubInstance(Context);
-
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'beta:beta',
-                    params: ['arg1', 'arg2']
-                });
-
-                const mockSigningId = {
-                    getMspid: sinon.stub(),
-                    getIdBytes: sinon.stub().returns(idBytes)
-                };
-                stubInterface.getCreator.returns(
-                    mockSigningId
-                );
-
-
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(betaStub);
-                sinon.assert.calledOnce(afterFnStubA);
-                sinon.assert.calledOnce(beforeFnStubA);
-                sinon.assert.callOrder(beforeFnStubA, afterFnStubA);
-            });
         });
-
-        describe('expecting error', () => {
-
-            beforeEach(() => {
-                fakeSuccess = sinon.fake((e) => {
-                    sinon.assert.fail(e);
-                });
-
-                fakeError = sinon.fake((e) => {
-                    log(e);
-                });
-
-                sandbox.replace(shim, 'success', fakeSuccess);
-                sandbox.replace(shim, 'error', fakeError);
-            });
-
-            it ('should correctly handle case of failing before hook', async () => {
-                beforeFnStubA.rejects(new Error('failure failure'));
-                afterFnStubA.resolves();
-                ctxStub = sandbox.createStubInstance(Context);
-
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'beta:beta',
-                    params: ['arg1', 'arg2']
-                });
-
-                const mockSigningId = {
-                    getMspid: sinon.stub(),
-                    getIdBytes: sinon.stub().returns(idBytes)
-                };
-                stubInterface.getCreator.returns(
-                    mockSigningId
-                );
+        it('should handle a single class being passed as a contract', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
 
 
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(shim.error);
-                expect(fakeError.args[0][0]).to.be.instanceOf(Error);
-                expect(fakeError.args[0][0].toString()).to.match(/failure failure/);
-                sinon.assert.notCalled(betaStub);
-                sinon.assert.notCalled(afterFnStubA);
+            const mockStub = {getBufferArgs : sandbox.stub().returns([Buffer.from('Hello')])};
+            cc.invokeFunctionality = sandbox.stub();
+            cc.Init(mockStub);
 
-                sinon.assert.calledOnce(beforeFnStubA);
-            });
+        });
+    });
 
-            it ('should throw correct error with missing name', async () => {
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'wibble:alpha',
-                    params: ['arg1', 'arg2']
-                });
+    describe('#invoke', () => {
+        it('should handle a single class being passed as a contract', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
 
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(shim.error);
-                expect(fakeError.args[0][0]).to.be.instanceOf(Error);
-                expect(fakeError.args[0][0].toString()).to.match(/Error: Contract name is not known :wibble:/);
-            });
 
-            it ('should throw correct error with wrong function name', async () => {
-                const stubInterface = sinon.createStubInstance(FabricStubInterface);
-                stubInterface.getFunctionAndParameters.returns({
-                    fcn:'alpha:wibble',
-                    params: ['arg1', 'arg2']
-                });
+            const mockStub = {getBufferArgs : sandbox.stub().returns([Buffer.from('arg1'), Buffer.from('args2')])};
+            cc.invokeFunctionality = sandbox.stub();
+            cc.Invoke(mockStub);
 
-                const mockSigningId = {
-                    getMspid: sinon.stub(),
-                    getIdBytes: sinon.stub().returns(idBytes)
-                };
-                stubInterface.getCreator.returns(
-                    mockSigningId
-                );
-                await cc.invokeFunctionality(stubInterface, stubInterface.getFunctionAndParameters());
-                sinon.assert.calledOnce(shim.error);
-                expect(fakeError.args[0][0]).to.be.instanceOf(Error);
-                expect(fakeError.args[0][0].toString()).to.match(/Error: You've asked to invoke a function that does not exist/);
-            });
         });
     });
 
@@ -625,146 +399,298 @@ describe('chaincodefromcontract', () => {
         let cc;
         beforeEach(() => {
             // actual contract instance is not important for this test
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            sandbox.stub(ChaincodeFromContract.prototype, '_dataMarshall').returns(MockDataMarhsall);
             cc = new ChaincodeFromContract([SCBeta], defaultSerialization);
         });
 
-        it ('should handle the usual case of ns:fn', () => {
+        it('should handle the usual case of ns:fn', () => {
             const result = cc._splitFunctionName('name:function');
-            result.should.deep.equal({contractName:'name', function:'function'});
+            result.should.deep.equal({contractName: 'name', function: 'function'});
         });
 
-        it ('should handle the case of no contractName explicit', () => {
+        it('should handle the case of no contractName explicit', () => {
             const result = cc._splitFunctionName(':function');
-            result.should.deep.equal({contractName:'', function:'function'});
+            result.should.deep.equal({contractName: '', function: 'function'});
         });
 
-        it ('should handle the case of no contractName implict', () => {
+        it('should handle the case of no contractName implict', () => {
             const result = cc._splitFunctionName('function');
-            result.should.deep.equal({contractName:'', function:'function'});
+            result.should.deep.equal({contractName: '', function: 'function'});
         });
 
-        it ('should handle the case of no input', () => {
+        it('should handle the case of no input', () => {
             const result = cc._splitFunctionName('');
-            result.should.deep.equal({contractName:'', function:''});
+            result.should.deep.equal({contractName: '', function: ''});
         });
 
-        it ('should handle the case of multiple :', () => {
+        it('should handle the case of multiple :', () => {
             const result = cc._splitFunctionName('name:function:with:colons:');
-            result.should.deep.equal({contractName:'name', function:'function:with:colons:'});
+            result.should.deep.equal({contractName: 'name', function: 'function:with:colons:'});
         });
     });
 
-    describe('getContracts', () => {
-        it ('should return the contract info', async () => {
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
-            cc.title = 'some title';
-            cc.version = '0.0.1';
-            cc.objects = {
-                'some': 'objects'
+    describe('#invokeFunctionality', () => {
+        let fakeSuccess;
+        let fakeError;
+
+        beforeEach(() => {
+            fakeSuccess = sinon.fake((e) => {
+                sinon.assert.fail(e);
+            });
+
+            fakeError = sinon.fake((e) => {
+                log(e);
+            });
+
+            sandbox.replace(shim, 'success', fakeSuccess);
+            sandbox.replace(shim, 'error', fakeError);
+        });
+
+        it('should handle missing function', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+
+
+            const mockStub = {getBufferArgs : sandbox.stub().returns([])};
+            cc.invokeFunctionality(mockStub, 'name:missing', [Buffer.from('args2')]);
+
+            sinon.assert.called(fakeError);
+
+        });
+
+        it('should handle valid contract name, but missing function', () => {
+
+            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
+            'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
+            'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+            'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
+            'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
+            'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
+            'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
+            'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
+            'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
+            '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
+            'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
+            'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
+            'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
+            'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
+            '-----END CERTIFICATE-----';
+
+            const idBytes = {
+                toBuffer: () => {
+                    return new Buffer(certWithoutAttrs);
+                }
             };
 
-            const info = cc.getContracts();
 
-            expect(info).to.deep.equal({
-                info: {
-                    title: 'some title',
-                    version: '0.0.1'
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+
+            const mockSigningId = {
+                getMspid: sinon.stub(),
+                getIdBytes: sinon.stub().returns(idBytes)
+            };
+
+            const ctx = {
+                setChaincodeStub : sandbox.stub(),
+                setClientIdentity : sandbox.stub()
+            };
+
+            const mockStub = {
+                getBufferArgs : sandbox.stub().returns([]),
+                getCreator: sandbox.stub().returns(mockSigningId)
+            };
+            cc.contractImplementations.name = {
+                contractInstance:{
+                    createContext: sandbox.stub().returns(ctx),
+                    unknownTransaction: sandbox.stub()
                 },
-                contracts: [{
-                    info: {
-                        title: 'alpha',
-                        version: '0.0.1'
-                    },
-                    transactions: [{
-                        name: 'alpha'
-                    }],
-                    name: 'alpha'
-                }, {
-                    info: {
-                        title: 'beta',
-                        version: '0.0.1'
-                    },
-                    transactions: [{
-                        name: 'beta'
-                    }, {
-                        name: 'afterTransaction'
-                    }, {
-                        name: 'beforeTransaction'
-                    }, {
-                        name: 'unknownTransaction'
-                    }, {
-                        name: 'createContext'
-                    }],
-                    name: 'beta'
-                }, {
-                    info: {
-                        title: 'org.hyperledger.fabric',
-                        version: '0.0.1'
-                    },
-                    transactions: [{
-                        name: 'GetMetadata'
-                    }],
-                    name: 'org.hyperledger.fabric'
-                }],
-                components: {
-                    schemas: {
-                        'some': 'objects'
-                    }
-                }
-            });
+                dataMarhsall:{},
+                transactions:[]
+
+            };
+            cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+
         });
+        it('should handle valid contract name, with valid function', () => {
 
-        it ('should not include components.schema when empty', () => {
-            const cc = new ChaincodeFromContract([SCAlpha, SCBeta], defaultSerialization);
-            cc.title = 'some title';
-            cc.version = '0.0.1';
-            cc.objects = {};
+            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
+            'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
+            'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+            'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
+            'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
+            'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
+            'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
+            'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
+            'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
+            '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
+            'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
+            'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
+            'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
+            'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
+            '-----END CERTIFICATE-----';
 
-            const info = cc.getContracts();
+            const idBytes = {
+                toBuffer: () => {
+                    return new Buffer(certWithoutAttrs);
+                }
+            };
 
-            expect(info).to.deep.equal({
-                info: {
-                    title: 'some title',
-                    version: '0.0.1'
+
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+
+            const mockSigningId = {
+                getMspid: sinon.stub(),
+                getIdBytes: sinon.stub().returns(idBytes)
+            };
+
+            const ctx = {
+                setChaincodeStub : sandbox.stub(),
+                setClientIdentity : sandbox.stub()
+            };
+
+            const mockStub = {
+                getBufferArgs : sandbox.stub().returns([]),
+                getCreator: sandbox.stub().returns(mockSigningId)
+            };
+            cc.contractImplementations.name = {
+                contractInstance:{
+                    createContext: sandbox.stub().returns(ctx),
+                    unknownTransaction: sandbox.stub(),
+                    beforeTransaction: sandbox.stub(),
+                    afterTransaction: sandbox.stub(),
+                    fn: sandbox.stub().resolves()
                 },
-                contracts: [{
-                    info: {
-                        title: 'alpha',
-                        version: '0.0.1'
-                    },
-                    transactions: [{
-                        name: 'alpha'
-                    }],
-                    name: 'alpha'
-                }, {
-                    info: {
-                        title: 'beta',
-                        version: '0.0.1'
-                    },
-                    transactions: [{
-                        name: 'beta'
-                    }, {
-                        name: 'afterTransaction'
-                    }, {
-                        name: 'beforeTransaction'
-                    }, {
-                        name: 'unknownTransaction'
-                    }, {
-                        name: 'createContext'
-                    }],
-                    name: 'beta'
-                }, {
-                    info: {
-                        title: 'org.hyperledger.fabric',
-                        version: '0.0.1'
-                    },
-                    transactions: [{
-                        name: 'GetMetadata'
-                    }],
-                    name: 'org.hyperledger.fabric'
-                }],
-                components: {}
-            });
+                dataMarshall:{
+                    handleParameters: sandbox.stub().returns(['args2']),
+                    toWireBuffer: sandbox.stub()
+                },
+                transactions:[
+                    {name:'fn'}
+                ]
+
+            };
+            cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+
         });
     });
+
+
+    describe('#_processContractTransactions', () => {
+
+
+        it('should handle a single class being passed as a contract that has no functions', () => {
+            mockery.registerMock('SCDelta', SCDelta);
+            SCDelta.prototype.foo = 'foo';
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            new ChaincodeFromContract([SCDelta], defaultSerialization);
+
+            sinon.assert.calledOnce(_checkSuppliedStub);
+        });
+
+        it('should handle a single class being passed as a contract that has no functions', () => {
+            mockery.registerMock('SCDelta', SCDelta);
+            SCDelta.prototype.foo = 'foo';
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+
+            sandbox.stub(Reflect, 'getMetadata').returns(['info']);
+
+            new ChaincodeFromContract([SCDelta], defaultSerialization);
+
+            sinon.assert.calledOnce(_checkSuppliedStub);
+        });
+    });
+
+    describe('#_augmentmetadata', () => {
+
+        it('should meta data being passed in ', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            new ChaincodeFromContract([SCAlpha], defaultSerialization, {
+                contracts: {data:'here'},
+                info:'info',
+                components:'data'
+            });
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+        });
+
+        it('should handle a single class being passed as a contract', () => {
+            const systemCotract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({'org.hyperledger.fabric':{
+                    contractInstance: systemCotract
+                }});
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            mockery.registerMock('packagejson', {});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+        });
+
+    });
+
+    describe('#helper constructors', () => {
+        it('should create the DataMarshall', () => {
+            it('should handle a single class being passed as a contract', () => {
+                const systemCotract = new SystemContract();
+                sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                    .returns({'org.hyperledger.fabric':{
+                        contractInstance: systemCotract
+                    }});
+
+                sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+                const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+                cc._dataMarshall('');
+
+            });
+
+
+        });
+    });
+
 });

@@ -82,7 +82,7 @@ gulp.task('invoke_functions', async (done) => {
         getTLSArgs(),
         CHANNEL_NAME,
         'mysmartcontract',
-        '{"Args":["UpdateValues:setNewAssetValue","42"]}').split(' ');
+        '{"Args":["UpdateValues:setNewAssetValue","\'42\'"]}').split(' ');  //eslint-disable-line
 
     const {error, stdout, stderr} = await execFile(script, args, options);
     if (error) {
@@ -117,7 +117,8 @@ gulp.task('query_functions', async (done) => {
 
         const metadata = JSON.parse(stdout);
 
-        const expectedMetadata = '{"info":{"title":"chaincode","version":"1.0.0"},"contracts":[{"info":{"title":"UpdateValues","version":"1.0.0"},"transactions":[{"name":"unknownTransaction"},{"name":"beforeTransaction"},{"name":"createContext"},{"name":"setup"},{"name":"setNewAssetValue"},{"name":"doubleAssetValue"}],"name":"UpdateValues"},{"info":{"title":"RemoveValues","version":"1.0.0"},"transactions":[{"name":"quarterAssetValue"},{"name":"getAssetValue"}],"name":"RemoveValues"},{"info":{"title":"org.hyperledger.fabric","version":"1.0.0"},"transactions":[{"name":"GetMetadata"}],"name":"org.hyperledger.fabric"}],"components":{}}';
+        const expectedMetadata =
+        '{"contracts":{"UpdateValues":{"name":"UpdateValues","contractInstance":{"name":"UpdateValues","logBuffer":{"output":[]}},"transactions":[{"name":"unknownTransaction"},{"name":"beforeTransaction"},{"name":"createContext"},{"name":"setup"},{"name":"setNewAssetValue"},{"name":"doubleAssetValue"}],"info":{"title":"","version":""}},"RemoveValues":{"name":"RemoveValues","contractInstance":{"name":"RemoveValues"},"transactions":[{"name":"quarterAssetValue"},{"name":"getAssetValue"}],"info":{"title":"","version":""}},"org.hyperledger.fabric":{"name":"org.hyperledger.fabric","contractInstance":{"name":"org.hyperledger.fabric"},"transactions":[{"name":"GetMetadata"}],"info":{"title":"","version":""}}},"info":{"version":"1.0.0","title":"chaincode"},"components":{"schemas":{}}}';
 
         const schema = fs.readFileSync(path.join(__dirname, '../../fabric-contract-api/schema/contract-schema.json'));
 

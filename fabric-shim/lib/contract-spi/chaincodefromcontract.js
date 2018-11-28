@@ -15,6 +15,7 @@ const ClientIdentity = require('../chaincode').ClientIdentity;
 
 const yargs = require('yargs');
 const path = require('path');
+const Ajv = require('ajv');
 
 require('reflect-metadata');
 
@@ -34,28 +35,115 @@ class ChaincodeFromContract {
      *
      * @param {Contract[]} contractClasses array of  contracts to register
      */
-    constructor(contractClasses, serializers) {
+    constructor(contractClasses, serializers, metadata = {}) {
 
         if (!contractClasses) {
             throw new Error('Missing argument: array of contract classes');
         }
-
         if (!serializers) {
             throw new Error('Missing argument: serialization implement information');
         }
 
-        const Contract = require('fabric-contract-api').Contract;
-        const SystemContract = require('./systemcontract');
-
-        // the structure that stores the 'function-pointers', contents of the form
-        // {  name : { ContractClass,  Contract,  transactions[] }}
-        this.contracts = {};
         this.serializers = serializers;
+        logger.info(serializers);
 
         // always add in the 'meta' class that has general abilities
+        const SystemContract = require('./systemcontract');
         contractClasses.push(SystemContract);
-        logger.debug(contractClasses);
 
+        // Produce the internal data structure that represents the code that is
+        // loaded.This should be optimized for the invocation of functions at runtime
+        this.contractImplementations = this._resolveContractImplementations(contractClasses);
+
+
+        // validate the supplied metadata against what code we have (just in case)
+        const errors = this._checkAgainstSuppliedMetadata(metadata);
+        if (errors) {
+            throw new Error(JSON.stringify(errors));
+        }
+
+        // process the metadata. If nothing supplied the code has to be introspected
+        // as much as possible
+        this.metadata = this._augmentMetadataFromCode(metadata);
+
+        // really do not like this method of duplicating an object
+        // But it works and is quick (allegedly)
+        const systemContract = this.contractImplementations['org.hyperledger.fabric'].contractInstance;
+
+        systemContract._setMetadata(JSON.parse(JSON.stringify(this.metadata)));
+
+        // compile the schemas, and in addition sets upt eh data marhsalls with this information
+        this._compileSchemas();
+
+    }
+
+    /**
+     * Compile the complex object schemas into validator functions that can be used
+     * for arguments.
+     */
+    _compileSchemas() {
+
+        const schemaList = [];
+        for (const name in  this.metadata.components.schemas) {
+            const s =  this.metadata.components.schemas[name];
+            const props = {};
+            s.properties.forEach((e) => {
+                props[e.name] = e;
+            });
+
+            s.properties = props;
+            schemaList.push(s);
+        }
+
+        if (schemaList.length > 0) {
+            // provide the list of schemas (of the complex types) to AJV, identified by name
+
+            const ajv = this._ajv(schemaList);
+            // create validators for each complex type
+            // have lowercases the ids
+            this.contractImplementations.schemas = {};
+            schemaList.forEach((e) => {
+                const id = e.$id;
+                this.contractImplementations.schemas[id] = {};
+                this.contractImplementations.schemas[id].validator = ajv.getSchema(id);
+            });
+
+        }
+        // final step is to setup up data marhsall instances
+        const requestedSerializer = this.serializers.transaction;
+        for (const contractName in this.contractImplementations) {
+            // determine the serialization structure that is needed for this contract
+            // create and store the dataMarshall that is needed
+            const dataMarshall = this._dataMarshall(requestedSerializer);
+            this.contractImplementations[contractName].dataMarshall = dataMarshall;
+        }
+    }
+    /* istanbul ignore next */
+    _dataMarshall(requestedSerializer) {
+        return new DataMarshall(requestedSerializer, this.serializers.serializers,  this.contractImplementations.schemas);
+    }
+    /* istanbul ignore next */
+    _ajv(schemaList) {
+        return new Ajv({useDefaults: true,
+            coerceTypes: false,
+            allErrors: true,
+            schemas: schemaList});
+    }
+
+    /**
+     * TODO: Review the supplied metadata and check that the functions that have been given are the same ones as have been supplied
+     */
+    _checkAgainstSuppliedMetadata() {
+        let errors;
+        return errors;
+    }
+
+    /** Load the contract implementation code
+     *
+     */
+    _resolveContractImplementations(contractClasses) {
+        const Contract = require('fabric-contract-api').Contract;
+        const implementations = {};
         for (const contractClass of contractClasses) {
 
             const contract = new(contractClass);
@@ -63,51 +151,81 @@ class ChaincodeFromContract {
                 throw new Error(`invalid contract instance ${contract}`);
             }
 
-            if (contract instanceof SystemContract) {
-                contract._setChaincode(this);
-            }
-
-            const transactions = Reflect.getMetadata('fabric:transactions', contract) || [];
-
-            if (transactions.length === 0) {
-                const propNames = Object.getOwnPropertyNames(Object.getPrototypeOf(contract));
-
-                for (const propName of propNames) {
-                    const propValue = contract[propName];
-                    if (typeof propValue !== 'function') {
-                        continue;
-                    } else if (propName === 'constructor') {
-                        continue;
-                    } else if (propName.startsWith('_')) {
-                        continue;
-                    }
-
-                    transactions.push({
-                        name: propName
-                    });
-                }
-            }
             const name = contract.getName();
-            logger.debug(transactions, contractClass, name);
+            const transactions = this._processContractTransactions(contract);
+            const info = this._processContractInfo(contract);
 
-            // determine the serialization structure that is needed for this contract
-            // create and store the dataMarshall that is needed
-            const requestedSerializer = serializers.transaction;
-            const dataMarshall = new DataMarshall(requestedSerializer, serializers.serializers);
+            implementations[name] = {name, contractInstance : contract, transactions, info};
 
-            this.contracts[`${name}`] = {contractClass, transactions, contract, dataMarshall};
+        }
+        return implementations;
+    }
+
+    /** read the code and create the internal structure representing the code */
+    _processContractTransactions(contract) {
+
+        let transactions = [];
+        transactions = Reflect.getMetadata('fabric:transactions', contract) || [];
+        if (transactions.length === 0) {
+            const propNames = Object.getOwnPropertyNames(Object.getPrototypeOf(contract));
+
+            for (const propName of propNames) {
+                const propValue = contract[propName];
+                if (typeof propValue !== 'function') {
+                    continue;
+                } else if (propName === 'constructor') {
+                    continue;
+                } else if (propName.startsWith('_')) {
+                    continue;
+                }
+
+                transactions.push({
+                    name: propName
+                });
+            }
+        }
+        return transactions;
+    }
+
+    /**
+     * TODO: get information on this contract
+     * @param {*} contract
+     */
+    _processContractInfo(contract) {
+        return {
+            title:'',
+            version:''
+        };
+    }
+
+    /** Create the standard method from the code that has been loaded
+     * This can use introspection and, if applicable, typescript annotations
+     */
+    _augmentMetadataFromCode(metadata) {
+
+        if (!metadata.contracts) {
+            metadata.contracts = this.contractImplementations;
         }
 
+        // look for the general information representing all the contracts
+        // add if nothing has been given by the application
+        if (!metadata.info) {
+            const opts = StartCommand.getArgs(yargs);
+            const modPath = path.resolve(process.cwd(), opts['module-path']);
+            const jsonPath = path.resolve(modPath, 'package.json');
 
-        const opts = StartCommand.getArgs(yargs);
-        const modPath = path.resolve(process.cwd(), opts['module-path']);
-        const jsonPath = path.resolve(modPath, 'package.json');
+            const json = require(jsonPath);
+            metadata.info = {};
+            metadata.info.version = json.hasOwnProperty('version') ? json.version : '';
+            metadata.info.title = json.hasOwnProperty('name') ? json.name : '';
+        }
 
-        const json = require(jsonPath);
-
-        this.version = json.hasOwnProperty('version') ? json.version : '';
-        this.title = json.hasOwnProperty('name') ? json.name : '';
-        this.objects = Reflect.getMetadata('fabric:objects', global) || {};
+        // obtain the information relating to the complex objects
+        if (!metadata.components) {
+            metadata.components = {};
+            metadata.components.schemas = Reflect.getMetadata('fabric:objects', global) || {};
+        }
+        return metadata;
     }
 
     /**
@@ -117,12 +235,13 @@ class ChaincodeFromContract {
      * @param {ChaincodeStub} stub Stub class giving the full api
      */
     async Init(stub) {
-        const fAndP = stub.getFunctionAndParameters();
-        if (fAndP.fcn === '') {
+        const args = stub.getBufferArgs();
+        if (args.length >= 1) {
+            const fnName = args[0].toString();
+            return this.invokeFunctionality(stub, fnName, args.slice(1));
+        } else {
             const message = 'Default initiator successful.';
             return shim.success(Buffer.from(message));
-        } else {
-            return this.invokeFunctionality(stub, fAndP);
         }
     }
 
@@ -132,8 +251,9 @@ class ChaincodeFromContract {
      * @param {ChaincodeStub} stub Stub class giving the full api
      */
     async Invoke(stub) {
-        const fAndP = stub.getFunctionAndParameters();
-        return this.invokeFunctionality(stub, fAndP);
+        const args = stub.getBufferArgs();
+        const fnName = args[0].toString();
+        return this.invokeFunctionality(stub, fnName, args.slice(1));
     }
 
     /**
@@ -142,40 +262,57 @@ class ChaincodeFromContract {
      * @param {ChaincodeStub} stub Stub class giving the full api
 	 * @param {Object} fAndP Function and Paramters obtained from the smart contract argument
      */
-    async invokeFunctionality(stub, fAndP) {
+    async invokeFunctionality(stub, fAndP, bufferArgs) {
         try {
-            const {contractName:cn, function:fn} = this._splitFunctionName(fAndP.fcn);
+            const {contractName:cn, function:fn} = this._splitFunctionName(fAndP);
+            logger.debug(`Invoking ${cn} ${fn}`);
 
-            if (!this.contracts[cn]) {
+            const contractData = this.contractImplementations[cn];
+            if (!contractData) {
                 throw new Error(`Contract name is not known :${cn}:`);
             }
 
-            const contractInstance = this.contracts[cn].contract;
-            const dataMarshall = this.contracts[cn].dataMarshall;
-            const ctx = contractInstance.createContext();
+            const contractInstance = contractData.contractInstance;
+            const dataMarshall = contractData.dataMarshall;
 
+            // setup the transaction context that is passed to each transaction function
+            const ctx = contractInstance.createContext();
             ctx.setChaincodeStub(stub);
             ctx.setClientIdentity(new ClientIdentity(stub));
 
-            const functionExists = this.contracts[cn].transactions.some((transaction) => {
+            // get the specific information for this tx function
+            const functionExists = contractData.transactions.find((transaction) => {
                 return transaction.name === fn;
             });
 
+            // if the function exists, then we can call it otherwise, call the unkownn tx handler
             if (functionExists) {
-                // before tx fn
+
+                // marhsall the parameters into the correct types for hanlding by
+                // the tx function
+                const parameters = dataMarshall.handleParameters(functionExists, bufferArgs);
+
+                // before tx
                 await contractInstance.beforeTransaction(ctx);
 
                 // use the spread operator to make this pass the arguments seperately not as an array
-                const result = await contractInstance[fn](ctx, ...fAndP.params);
+                // this is the point at which control is handed to the tx function
+                const result = await contractInstance[fn](ctx, ...parameters);
 
-                // after tx fn
+                // after tx fn, assuming that the smart contract hasn't gone wrong
                 await contractInstance.afterTransaction(ctx, result);
 
+                // return the data value, if any to the shim. Including converting the result to the wire format
                 return shim.success(dataMarshall.toWireBuffer(result));
             } else {
+                // if we've never heard of this function, then call the unknown tx function
                 await contractInstance.unknownTransaction(ctx);
+                return shim.error(new Error('Unknown function `${fn}'));
             }
+
         } catch (error) {
+            // log the error and then fail the transaction
+            logger.error(error);
             return shim.error(error);
         }
     }
@@ -203,47 +340,6 @@ class ChaincodeFromContract {
         result.function = m[2];
 
         return result;
-    }
-
-    /**
-	 * get information on the contracts
-	 */
-    getContracts() {
-        const data = {
-            info: {
-                title: this.title,
-                version: this.version
-            },
-            contracts: [],
-            components: {
-                schemas: this.objects
-            }
-        };
-
-        if (Object.keys(this.objects).length === 0) {
-            delete data.components.schemas;
-        }
-
-        for (const c in this.contracts) {
-            const contract = this.contracts[c];
-            const contractData = {
-                info: {
-                    title: contract.contract.getName(),
-                    version: this.version
-                },
-                transactions: []
-            };
-
-            contractData.name = contract.contract.getName();
-
-            contract.transactions.forEach((tx) => {
-                contractData.transactions.push(tx);
-            });
-
-            data.contracts.push(contractData);
-        }
-
-        return data;
     }
 
 }

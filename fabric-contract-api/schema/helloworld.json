@@ -1,0 +1,105 @@
+{
+    "contracts": {
+      "Greeting": {
+        "name": "Greeting",
+        "contractInstance": {
+          "name": "Greeting"
+        },
+        "transactions": [
+          {
+            "tag": [
+              "submitTx"
+            ],
+            "parameters": [],
+            "name": "instantiate"
+          },
+          {
+            "tag": [
+              "submitTx"
+            ],
+            "parameters": [
+              {
+                "name": "text",
+                "description": "",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            ],
+            "name": "setGreetingText"
+          },
+          {
+            "tag": [
+              "submitTx"
+            ],
+            "parameters": [
+              {
+                "name": "greeting",
+                "description": "",
+                "schema": {
+                  "$ref": "#/components/schemas/greeting"
+                }
+              }
+            ],
+            "name": "setGreeting"
+          },
+          {
+            "returns": [
+              {
+                "name": "success",
+                "schema": {
+                  "$ref": "#/components/schemas/greeting"
+                }
+              }
+            ],
+            "name": "getGreeting",
+            "tag": [
+              "submitTx"
+            ],
+            "parameters": []
+          }
+        ],
+        "info": {
+          "title": "",
+          "version": ""
+        }
+      },
+      "org.hyperledger.fabric": {
+        "name": "org.hyperledger.fabric",
+        "contractInstance": {
+          "name": "org.hyperledger.fabric"
+        },
+        "transactions": [
+          {
+            "name": "setMetadata"
+          },
+          {
+            "name": "GetMetadata"
+          }
+        ],
+        "info": {
+          "title": "",
+          "version": ""
+        }
+      }
+    },
+    "info": {
+      "version": "0.0.1",
+      "title": "helloworld-ts"
+    },
+    "components": {
+      "schemas": {
+        "Greeting": {
+          "$id": "Greeting",
+          "properties": [
+            {
+              "name": "text",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }

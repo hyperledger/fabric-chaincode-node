@@ -338,6 +338,16 @@ describe('Stub', () => {
             });
         });
 
+        describe('getBufferArgs', () => {
+            it ('should return the args', () => {
+                const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+                    args: [buf1, buf2, buf3]
+                });
+
+                expect(stub.getBufferArgs()).to.deep.equal([buf1.buffer, buf2.buffer, buf3.buffer]);
+            });
+        });
+
         describe('getFunctionAndParameters', () => {
             it ('should return the function name parameters', () => {
                 const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {

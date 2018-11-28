@@ -22,10 +22,8 @@ const rewire = require('rewire');
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
-const fs = require('fs-extra');
 
 const path = require('path');
-const StartCommand = require('../../../lib/cmds/startCommand.js');
 
 // class under test
 const pathToRoot = '../../../..';
@@ -54,220 +52,17 @@ describe('SystemContract', () => {
     });
 
     describe('#GetMetadata', () => {
-        let getArgsStub;
-        let readFileStub;
-        let pathExistsStub;
-        const jsonObject = JSON.stringify({
-            name: 'some string'
-        });
-        const myYargs = {
-            'argv': {
-                '$0': 'fabric-chaincode-node',
-                'peer.address': 'localhost:7051',
-                'chaincode-id-name': 'mycc'
-            }
-        };
-
-        beforeEach('', () => {
-            getArgsStub = sandbox.stub(StartCommand, 'getArgs').returns({
-                'module-path': '/some/path'
-            });
-            SystemContract.__set__('yargs', myYargs);
-        });
-
-        afterEach('', () => {
-            sandbox.restore();
-        });
 
         it ('should get the buffer', async () => {
             const meta = new SystemContract();
-
-            const chaincodeMock = {
-                getContracts : sandbox.stub().returns({})
-            };
-            meta._setChaincode(chaincodeMock);
-            pathExistsStub = sandbox.stub(fs, 'pathExists').returns(false);
-
-            const data = await meta.GetMetadata();
-            expect(JSON.stringify(data)).to.equal('{}');
-            sinon.assert.calledOnce(getArgsStub);
-            sinon.assert.calledWith(getArgsStub, myYargs);
-            sinon.assert.calledOnce(chaincodeMock.getContracts);
+            meta._setMetadata({wibble:'good'});
+            const md = await meta.GetMetadata();
+            expect(md).to.deep.equal({wibble:'good'});
 
         });
 
-        it ('should validate the developers metadata and return it', async () => {
-            const meta = new SystemContract();
-            class validator {
-                constructor() {}
-                addMetaSchema() {
-                    return true;
-                }
-                validate() {
-                    return true;
-                }
-            }
-            const ajvOriginal = SystemContract.__get__('Ajv');
-            SystemContract.__set__('Ajv', validator);
 
-            const chaincodeMock = {
-                getContracts : sandbox.stub().returns({})
-            };
-            pathExistsStub = sandbox.stub(fs, 'pathExists').returns(true);
-            readFileStub = sandbox.stub(fs, 'readFile');
-            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some string'})));
-            const data = await meta.GetMetadata();
-
-            expect(data).to.equal(jsonObject);
-            sinon.assert.calledOnce(getArgsStub);
-            sinon.assert.calledOnce(pathExistsStub);
-            sinon.assert.calledTwice(readFileStub);
-            sinon.assert.calledWith(getArgsStub, myYargs);
-            sinon.assert.notCalled(chaincodeMock.getContracts);
-
-            SystemContract.__set__('Ajv', ajvOriginal);
-        });
-
-        it ('should throw an error when validating the developers incorrect metadata', async () => {
-            const meta = new SystemContract();
-            class validator {
-                constructor() {}
-                addMetaSchema() {
-                    return true;
-                }
-                validate() {
-                    return false;
-                }
-            }
-            SystemContract.__set__('yargs', myYargs);
-            const ajvOriginal = SystemContract.__get__('Ajv');
-            SystemContract.__set__('Ajv', validator);
-
-            const chaincodeMock = {
-                getContracts : sandbox.stub().returns('test')
-            };
-            pathExistsStub = sandbox.stub(fs, 'pathExists').returns(true);
-            readFileStub = sandbox.stub(fs, 'readFile');
-            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some other string'})));
-
-            await expect(meta.GetMetadata()).to.eventually.be.rejectedWith(Error, 'Contract metadata does not match the schema');
-            sinon.assert.calledOnce(getArgsStub);
-            sinon.assert.calledOnce(pathExistsStub);
-            sinon.assert.calledTwice(readFileStub);
-            sinon.assert.calledWith(getArgsStub, myYargs);
-            sinon.assert.notCalled(chaincodeMock.getContracts);
-
-            SystemContract.__set__('Ajv', ajvOriginal);
-        });
     });
 
-    describe('#_loadAndValidate', () => {
-        const jsonObject =  JSON.stringify({
-            name: 'some string'
-        });
-        afterEach('', () => {
-            sandbox.restore();
-        });
-
-        it ('validate and return the metadata', async () => {
-            const readFileStub = sandbox.stub(fs, 'readFile');
-            const meta = new SystemContract();
-            const metadataPath = 'some path';
-            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some string'})));
-            class validator {
-                constructor() {}
-                addMetaSchema() {
-                }
-                validate() {
-                    return true;
-                }
-            }
-            const ajvOriginal = SystemContract.__get__('Ajv');
-            SystemContract.__set__('Ajv', validator);
-
-            const metadata = await meta._loadAndValidateMetadata(metadataPath);
-            expect(metadata).to.equal(jsonObject);
-            sinon.assert.calledTwice(readFileStub);
-            SystemContract.__set__('Ajv', ajvOriginal);
-
-        });
-
-        it ('fail to validate and throw an error', async () => {
-            const readFileStub = sandbox.stub(fs, 'readFile');
-            const meta = new SystemContract();
-            const metadataPath = 'some path';
-            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some other string'})));
-            class validator {
-                constructor() {}
-                addMetaSchema() {
-                }
-                validate() {
-                    this.errors = 'some error string';
-                    return false;
-                }
-            }
-            const ajvOriginal = SystemContract.__get__('Ajv');
-            SystemContract.__set__('Ajv', validator);
-
-            await expect(meta._loadAndValidateMetadata(metadataPath)).to.eventually.be.rejectedWith(Error, 'Contract metadata does not match the schema: "some error string"');
-            sinon.assert.calledTwice(readFileStub);
-            SystemContract.__set__('Ajv', ajvOriginal);
-
-        });
-
-        it ('Correct schema path is pointed to in the validate method', async () => {
-            const rootPath = path.dirname(__dirname);
-            const schemaPath = path.join(rootPath, '../../../fabric-contract-api/schema/contract-schema.json');
-            const schemaPathCheck = await fs.pathExists(schemaPath);
-            expect(schemaPathCheck).to.equal(true, 'Current contract-schema path: ' + schemaPath + ' is incorrect');
-        });
-
-        it('Should correct validate a schema', async () => {
-            const json = `
-            {
-                "firstName": "John",
-                "lastName": "Doe",
-                "age": 21
-              }
-            `;
-            const schema = `
-            {
-                "$id": "https://example.com/person.schema.json",
-                "$schema": "http://json-schema.org/draft-04/schema#",
-                "title": "Person",
-                "type": "object",
-                "properties": {
-                  "firstName": {
-                    "type": "string",
-                    "description": "The person's first name."
-                  },
-                  "lastName": {
-                    "type": "string",
-                    "description": "The person's last name."
-                  },
-                  "age": {
-                    "description": "Age in years which must be equal to or greater than zero.",
-                    "type": "integer",
-                    "minimum": 0
-                  }
-                }
-              }
-            `;
-            const meta = new SystemContract();
-            const metadataPath = 'some path';
-            const readFileStub = sandbox.stub(fs, 'readFile');
-            readFileStub.onFirstCall().returns(Buffer.from(json));
-            readFileStub.onSecondCall().returns(Buffer.from(schema));
-
-            const metadata = await meta._loadAndValidateMetadata(metadataPath);
-
-            expect(JSON.parse(metadata)).to.deep.equal(JSON.parse(json));
-
-        });
-    });
 
 });

@@ -128,6 +128,11 @@ class ChaincodeStub {
         this.args = chaincodeInput.args.map((entry) => {
             return entry.toBuffer().toString();
         });
+
+        this.bufferArgs = chaincodeInput.args.map((entry) => {
+            return entry.toBuffer();
+        });
+
         this.handler = client;
         this.validationParameterMetakey = VALIDATION_PARAMETER;
 
@@ -218,6 +223,10 @@ class ChaincodeStub {
 	 */
     getStringArgs() {
         return this.args;
+    }
+
+    getBufferArgs() {
+        return this.bufferArgs;
     }
 
     /**

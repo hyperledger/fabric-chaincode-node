@@ -17,22 +17,21 @@
 
 const chai = require('chai');
 chai.should();
-
+const expect = chai.expect;
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
+
+const fs = require('fs-extra');
 const mockery = require('mockery');
-const rewire = require('rewire');
+
 
 const path = require('path');
 // class under test
 const pathToRoot = '../../../..';
-const bootstrap = rewire(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap'));
+let Bootstrap;
 const Contract = require('fabric-contract-api').Contract;
-const StartCommand = require('../../../lib/cmds/startCommand.js');
-
-const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
-
+// const Shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
 function log(...e) {
     console.log(...e);
 }
@@ -54,122 +53,209 @@ describe('bootstrap.js', () => {
         }
     }
 
+    class MockChaincodeFromContract {
+        constructor(contractClasses) {
+
+        }
+    }
     let sandbox;
+    let mockShim;
+    let mockCmd;
+    let readFileStub;
+    let pathExistsStub;
+
+    let getArgsStub;
 
     beforeEach('Sandbox creation', () => {
+
+        mockery.enable({
+            warnOnReplace: true,
+            warnOnUnregistered: false,
+            useCleanCache: true
+        });
         sandbox = sinon.createSandbox();
+        mockShim = {start : sandbox.stub()};
+        getArgsStub = sandbox.stub();
+        mockCmd = {getArgs : getArgsStub};
+        readFileStub = sandbox.stub();
+        pathExistsStub = sandbox.stub();
+
+
+        getArgsStub.returns({'module-path':'fakepath'});
+        mockery.registerMock('yargs', {});
+        mockery.registerMock('../chaincode', mockShim);
+        // mockery.registerMock('ajv', validator);
+        mockery.registerMock('../cmds/startCommand.js', mockCmd);
+        mockery.registerMock('./chaincodefromcontract', MockChaincodeFromContract);
+        mockery.registerMock('fs-extra', {readFile : readFileStub, pathExists:pathExistsStub});
+
+        Bootstrap = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap'));
+
     });
 
     afterEach('Sandbox restoration', () => {
+        mockery.disable();
         sandbox.restore();
+    });
+
+    describe('#loadAndValidateMetadata', () => {
+
+        const jsonObject =  JSON.stringify({
+            name: 'some string'
+        });
+
+
+        it ('validate and return the metadata', async () => {
+            // const readFileStub = sandbox.stub(fs, 'readFile');
+            const metadataPath = 'some path';
+            readFileStub.onFirstCall().resolves(Buffer.from(jsonObject));
+            readFileStub.onSecondCall().resolves(Buffer.from(JSON.stringify({name: 'some string'})));
+
+
+            const metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
+            expect(metadata).to.equal(jsonObject);
+            sinon.assert.calledTwice(readFileStub);
+        });
+
+        it ('fail to validate and throw an error', async () => {
+            // const readFileStub = sandbox.stub(fs, 'readFile');
+            const metadataPath = 'some path';
+            readFileStub.onFirstCall().resolves(Buffer.from(jsonObject));
+            readFileStub.onSecondCall().resolves(Buffer.from(JSON.stringify(
+
+                {
+                    $id: 'https://example.com/person.schema.json',
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    title: 'Person',
+                    type: 'object',
+                    additionalProperties: false,
+                    properties: {
+                        one : {
+                            type : 'string'
+                        }
+                    }
+                }
+
+
+            )));
+
+            return expect(Bootstrap.loadAndValidateMetadata(metadataPath)).to.eventually.be.rejectedWith(Error, /Contract metadata does not match the schema/);
+        });
+
+        it ('Correct schema path is pointed to in the validate method', async () => {
+            const rootPath = path.dirname(__dirname);
+            const schemaPath = path.join(rootPath, '../../../fabric-contract-api/schema/contract-schema.json');
+            const schemaPathCheck = await fs.pathExists(schemaPath);
+            expect(schemaPathCheck).to.equal(true, 'Current contract-schema path: ' + schemaPath + ' is incorrect');
+        });
+
+        it('Should correct validate a schema', async () => {
+            const json = `
+            {
+                "firstName": "John",
+                "lastName": "Doe",
+                "age": 21
+              }
+            `;
+            const schema = `
+            {
+                "$id": "https://example.com/person.schema.json",
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "title": "Person",
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "description": "The person's first name."
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "description": "The person's last name."
+                  },
+                  "age": {
+                    "description": "Age in years which must be equal to or greater than zero.",
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            `;
+
+            const metadataPath = 'some path';
+            // const readFileStub = sandbox.stub(fs, 'readFile');
+            readFileStub.onFirstCall().resolves(Buffer.from(json));
+            readFileStub.onSecondCall().resolves(Buffer.from(schema));
+
+            const metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
+
+            expect(JSON.parse(metadata)).to.deep.equal(JSON.parse(json));
+
+        });
+
+
     });
 
     describe('#register', () => {
 
-        it ('should pass on the register to the shim', () => {
-            let testArgs;
+        it ('should pass on the register to the shim', async () => {
 
-            class MockChaincodeFromContract {
-                constructor(contractClasses) {
-                    testArgs = contractClasses;
-                }
-            }
+            Bootstrap.getMetadata = sandbox.stub().resolves();
 
-            const cfcClass = bootstrap.__get__('ChaincodeFromContract');
-            bootstrap.__set__('ChaincodeFromContract', MockChaincodeFromContract);
+            await Bootstrap.register([sc], {}, {});
+            sinon.assert.calledOnce(mockShim.start);
 
-            sandbox.stub(shim, 'start');
-            bootstrap.register([sc]);
-
-            testArgs.should.deep.equal([sc]);
-            sinon.assert.calledOnce(shim.start);
-
-            bootstrap.__set__('ChaincodeFromContract', cfcClass);
         });
 
     });
 
     describe('#bootstrap', () => {
-        const theirYargs = bootstrap.__get__('yargs');
-        const myYargs = {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc'}};
-
-        let getArgsStub;
-        let pathStub;
-        let registerStub;
-        let ogRegister;
-
-        beforeEach('enable mockery', () => {
-            mockery.enable();
-
-            bootstrap.__set__('yargs', myYargs);
-
-            getArgsStub = sinon.stub(StartCommand, 'getArgs').returns({
-                'module-path': '/some/path'
-            });
-
-            pathStub = sandbox.stub(path, 'resolve');
-            pathStub.withArgs(sinon.match.any, '/some/path').returns('/some/path');
-            pathStub.withArgs('/some/path', 'package.json').returns('jsoncfg');
-
-            registerStub = sinon.stub();
-
-            ogRegister = bootstrap.__get__('register');
-            bootstrap.__set__('register', registerStub);
-        });
-
-        afterEach('disable mockery', () => {
-            mockery.disable();
-
-            getArgsStub.restore();
-        });
-
-        after(() => {
-            bootstrap.__set__('yargs', theirYargs);
-            bootstrap.__set__('register', ogRegister);
-        });
 
         it ('should use the main class defined in the package.json', () => {
-            mockery.registerMock('jsoncfg', {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
                 main: 'entrypoint'
             });
-
-            sandbox.stub(shim, 'start');
-
-            pathStub.withArgs('/some/path', 'entrypoint').returns('entryPoint');
-
-            mockery.registerMock('entryPoint', sc);
-            mockery.registerMock('sensibleContract', sc);
-            bootstrap.bootstrap();
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
+            const registerStub = sandbox.stub();
+            Bootstrap.register = registerStub;
+            Bootstrap.bootstrap();
             sinon.assert.calledOnce(registerStub);
             sinon.assert.calledWith(registerStub, [sc]);
 
         });
 
-        it ('should use the main class defined with contracts exported', () => {
-            mockery.registerMock('jsoncfg', {
-                main: 'entrypoint2'
+        it ('should use the main class defined in the package.json with a single element', () => {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                main: 'entrypoint'
             });
-
-            sandbox.stub(shim, 'start');
-
-            pathStub.withArgs('/some/path', 'entrypoint2').returns('entryPoint2');
-
-            mockery.registerMock('entryPoint2', {contracts: [sc]});
-            bootstrap.bootstrap();
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), sc);
+            const registerStub = sandbox.stub();
+            Bootstrap.register = registerStub;
+            Bootstrap.bootstrap();
             sinon.assert.calledOnce(registerStub);
             sinon.assert.calledWith(registerStub, [sc]);
+
+        });
+
+        it ('should throw an error if none of the other methods work', () => {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                not_here_main: 'entrypoint'
+            });
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
+            const registerStub = sandbox.stub();
+            Bootstrap.register = registerStub;
+
+
+            (() => {
+                Bootstrap.bootstrap();
+            }).should.throw(/package.json does not contain a 'main' entry for the module/);
         });
 
         it ('should use the main class defined with contracts exported, and custom serialization', () => {
-            mockery.registerMock('jsoncfg', {
-                main: 'entrypoint2'
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                main: 'entrypoint3'
             });
 
-            sandbox.stub(shim, 'start');
-
-            pathStub.withArgs('/some/path', 'entrypoint2').returns('entryPoint2');
-
-            mockery.registerMock('entryPoint2',
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint3'),
                 {
                     contracts: [sc],
                     serializers : {
@@ -179,21 +265,20 @@ describe('bootstrap.js', () => {
                         }
                     }
                 });
-            bootstrap.bootstrap();
+            const registerStub = sandbox.stub();
+            Bootstrap.register = registerStub;
+            Bootstrap.bootstrap();
             sinon.assert.calledOnce(registerStub);
             sinon.assert.calledWith(registerStub, [sc]);
+
         });
 
         it ('should use the main class defined with contracts exported, and custom serialization', () => {
-            mockery.registerMock('jsoncfg', {
-                main: 'entrypoint2'
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                main: 'entrypoint3'
             });
 
-            sandbox.stub(shim, 'start');
-
-            pathStub.withArgs('/some/path', 'entrypoint2').returns('entryPoint2');
-
-            mockery.registerMock('entryPoint2',
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint3'),
                 {
                     contracts: [sc],
                     serializers : {
@@ -202,28 +287,32 @@ describe('bootstrap.js', () => {
                         }
                     }
                 });
+            const registerStub = sandbox.stub();
+            Bootstrap.register = registerStub;
+
             (() => {
-                bootstrap.bootstrap();
+                Bootstrap.bootstrap();
             }).should.throw(/There should be a 'transaction' property to define the serializer for use with transactions/);
 
         });
 
-        it ('should throw an error if none of the other methods work', () => {
-            path.resolve.restore();
-            pathStub = sandbox.stub(path, 'resolve');
 
-            pathStub.returns('another.json');
-
-            mockery.registerMock('another.json', {
-                author: 'fred'
-            });
-
-            (() => {
-                bootstrap.bootstrap();
-            }).should.throw(/Can not detect any of the indications of how this is a contract instance/);
-        });
 
     });
 
+    describe('#getMetadata', () => {
+        it ('should handle when there are files available', async () => {
+            pathExistsStub.returns(true);
+            Bootstrap.loadAndValidateMetadata = sandbox.stub().resolves({'hello':'world'});
+            const metadata = await Bootstrap.getMetadata();
+            metadata.should.deep.equal({'hello':'world'});
+        });
+
+        it ('should handle when files not available', async () => {
+            pathExistsStub.returns(false);
+            const metadata = await Bootstrap.getMetadata();
+            metadata.should.deep.equal({});
+        });
+    });
 
 });

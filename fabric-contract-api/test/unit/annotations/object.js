@@ -58,8 +58,10 @@ describe ('Object.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:objects', {
                 'steve':  {
-                    name: 'steve',
-                    properties: ['some', 'properties']
+                    $id: 'steve',
+                    additionalProperties: false,
+                    properties: ['some', 'properties'],
+                    type: 'object'
                 }
             });
         });
@@ -78,8 +80,10 @@ describe ('Object.js', () => {
             sinon.assert.calledWith(defineMetadataStub, 'fabric:objects', {
                 'object1': {},
                 'steve':  {
-                    name: 'steve',
-                    properties: []
+                    $id: 'steve',
+                    additionalProperties: false,
+                    properties: [],
+                    type: 'object'
                 }
             });
         });
