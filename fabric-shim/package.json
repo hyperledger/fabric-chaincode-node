@@ -8,7 +8,7 @@
     "fabric-chaincode-node": "cli.js"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "./startup.sh",
     "compile": "tsc --project test/typescript",
     "test": "nyc mocha --recursive 'test/unit/**/*.js'"
   },
@@ -35,6 +35,7 @@
     "@types/node": "^8.9.4",
     "@types/winston": "^2.3.9",
     "ajv": "^6.5.5",
+    "fabric-contract-api": "unstable",
     "fs-extra": "^7.0.1",
     "grpc": "1.17.0-pre1",
     "jsrsasign": "^8.0.4",

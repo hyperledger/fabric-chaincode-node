@@ -60,7 +60,21 @@ console.log('####################################################\n');
 gulp.task('clean-up', function() {
     // some tests create temporary files or directories
     // they are all created in the same temp folder
-    fs.removeSync(constants.tempdir);
+
+    try {
+        const tmpFiles = fs.readdirSync(constants.tempdir);
+
+        tmpFiles.forEach((el) => {
+            try {
+                fs.removeSync(path.join(constants.tempdir, el));
+            } catch (err) {
+                console.log('FAILED TO REMOVE -> ', path.join(constants.tempdir, el));
+            }
+        });
+    } catch (err) {
+        // directory does not exist
+    }
+
     return fs.ensureFileSync(debugPath);
 });
 

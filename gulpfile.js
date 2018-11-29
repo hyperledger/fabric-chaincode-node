@@ -25,3 +25,8 @@ gulp.task('test-devmode-cli', (done) => {
     const tasks = ['test-devmode'];
     runSequence(...tasks, done);
 });
+
+gulp.task('test-invctrl-cli', (done) => {
+    const tasks = ['test-invctrl'];
+    runSequence(...tasks, done);
+});

@@ -203,10 +203,25 @@ e2e_Tests() {
         docker images | grep hyperledger && docker ps -a
         gulp test-e2e || err_Check "ERROR!!! test-e2e failed"
 
+        echo "###############################################"
+        echo -e "\033[32m ------> Run DevMode tests" "\033[0m"
+        echo "###############################################"
+
+        DEVMODE=true gulp channel-init || err_Check "ERROR!!! channel-init failed"
+        gulp test-devmode-cli || err_Check "ERROR!!! test-devmode-cli failed"
+
+        echo "###############################################"
+        echo -e "\033[32m ------> Run InvCtrl tests" "\033[0m"
+        echo "###############################################"
+
+        DEVMODE=true gulp channel-init || err_Check "ERROR!!! channel-init failed"
+        gulp test-invctrl-cli || err_Check "ERROR!!! test-invctrl-cli failed"
+
         echo "#############################################"
         echo -e "\033[32m ------> Tests Complete" "\033[0m"
         echo "#############################################" 
 }
+
 # Publish npm modules after successful merge on amd64
 publish_NpmModules() {
         echo

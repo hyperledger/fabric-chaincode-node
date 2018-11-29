@@ -148,10 +148,9 @@ class ChaincodeFromContract {
         const implementations = {};
 
         for (const contractClass of contractClasses) {
-
             const contract = new(contractClass);
-            if (!(contract instanceof Contract)) {
-                throw new Error(`invalid contract instance ${contract}`);
+            if (!(Contract._isContract(contract))) {
+                throw new Error(`invalid contract instance ${JSON.stringify(contract)}`);
             }
 
             const name = contract.getName();

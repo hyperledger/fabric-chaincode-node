@@ -141,6 +141,7 @@ describe('chaincodefromcontract', () => {
     }
 
     let sandbox;
+    let isContractStub;
 
     beforeEach('Sandbox creation', () => {
         mockery.enable({
@@ -149,12 +150,14 @@ describe('chaincodefromcontract', () => {
             useCleanCache: false
         });
         sandbox = sinon.createSandbox();
+
         beforeFnStubA = sandbox.stub().named('beforeFnStubA');
         afterFnStubA = sandbox.stub().named('afterFnStubA');
         alphaStub = sandbox.stub().named('alphaStub');
         betaStub = sandbox.stub().named('betaStub');
         getSchemaMock = sandbox.stub();
         mockAjv.getSchema = getSchemaMock;
+        isContractStub = sandbox.stub(Contract, '_isContract').returns(true);
 
         mockery.registerMock('./systemcontract', SystemContract);
         mockery.registerMock('ajv', mockAjv);
@@ -313,7 +316,7 @@ describe('chaincodefromcontract', () => {
             cc.defaultContractName.should.deep.equal('alpha');
         });
         it('should handle a single class being passed that is not valid', () => {
-
+            isContractStub.returns(false);
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
             sandbox.stub(ChaincodeFromContract.prototype, '_dataMarshall').returns(MockDataMarhsall);
