@@ -125,6 +125,31 @@ describe('contract.js', () => {
             const sc0 = new Contract();
             sc0.createContext().should.be.an.instanceOf(Context);
         });
+
+        it ('should set the __isContract value', () => {
+            const sc0 = new Contract();
+            expect(sc0.__isContract).to.deep.equal(true);
+        });
+    });
+
+    describe('_isContract', () => {
+        it ('should return true when class is a contract', () => {
+            expect(Contract._isContract(new SCAlpha())).to.deep.equal(true);
+        });
+
+        it ('should return true when class is not a contract', () => {
+            class Something {}
+            expect(Contract._isContract(new Something())).to.deep.equal(false);
+        });
+
+        it ('should return true when class is not instanceOf contract but does have __isContract true', () => {
+            class Something {
+                constructor () {
+                    this.__isContract = true;
+                }
+            }
+            expect(Contract._isContract(new Something())).to.deep.equal(true);
+        });
     });
 
     describe('subclass specific functioning', () => {

@@ -24,11 +24,21 @@ class Contract {
      * @param {String} name name for the logic within this contract
      */
     constructor(name) {
+        this.__isContract = true;
         if (name && name.trim() !== '') {
             this.name = name.trim();
         } else {
             this.name = '';
         }
+    }
+
+    /**
+     * isContract provides functionality to check if a passed object is a contract type. Enables
+     * checking if its a contract for when contract-api is "required" by different modules
+     * @param {Object} obj
+     */
+    static _isContract(obj) {
+        return obj instanceof Contract || Boolean(obj.__isContract);
     }
 
     /**

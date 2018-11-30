@@ -204,7 +204,16 @@ class ChaincodeFromContract {
     _augmentMetadataFromCode(metadata) {
 
         if (!metadata.contracts) {
-            metadata.contracts = this.contractImplementations;
+            metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));
+
+            for (const contractKey in metadata.contracts) {
+                const contract = metadata.contracts[contractKey];
+                for (const instanceKey in contract.contractInstance) {
+                    if (instanceKey.startsWith('_')) {
+                        delete contract.contractInstance[instanceKey];
+                    }
+                }
+            }
         }
 
         // look for the general information representing all the contracts
