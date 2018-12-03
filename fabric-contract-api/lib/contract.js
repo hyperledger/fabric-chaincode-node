@@ -25,10 +25,10 @@ class Contract {
      */
     constructor(name) {
         this.__isContract = true;
-        if (name && name.trim() !== '') {
-            this.name = name.trim();
+        if (typeof name === 'undefined' || name === null) {
+            this.name = this.constructor.name;
         } else {
-            this.name = '';
+            this.name = name.trim();
         }
     }
 

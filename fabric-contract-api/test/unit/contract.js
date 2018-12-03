@@ -61,7 +61,15 @@ class SCAlpha extends Contract {
     }
 }
 
+class SCBeta extends Contract {
 
+    /** */
+    constructor() {
+        super();
+
+    }
+
+}
 
 describe('contract.js', () => {
 
@@ -79,7 +87,7 @@ describe('contract.js', () => {
 
         it ('should create with default name', () => {
             const sc0 = new Contract();
-            expect(sc0.getName()).to.equal('');
+            expect(sc0.getName()).to.equal('Contract');
 
             // should also create default when the supplied name is empty space
             const sc1 = new Contract('');
@@ -110,6 +118,10 @@ describe('contract.js', () => {
             const sc2 = new Contract('   somewhat.padded.out ');
             expect(sc2.name).to.equal('somewhat.padded.out');
             expect(sc2.getName()).to.equal('somewhat.padded.out');
+
+            const sc3 = new SCBeta();
+            expect(sc3.name).to.equal('SCBeta');
+            expect(sc3.getName()).to.equal('SCBeta');
         });
 
         it ('should call the default before/after functions', () => {
