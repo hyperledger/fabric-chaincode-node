@@ -23,23 +23,13 @@ async function getAllResults(iterator, getKeys) {
     }
 }
 
-class CrudChaincode extends Contract {
-
-    _log(args) {
-        this.logBuffer.output.push(`::[UpdateValues] ${args}`);
-    }
-
+class QueryChaincode extends Contract {
     async unknownTransaction({stub}) {
         throw new Error(`Could not find chaincode function: ${stub.getFunctionAndParameters()}`);
     }
 
-    async beforeTransaction(ctx) {
-        this._log(`Transaction ID: ${ctx.stub.getTxID()}`);
-    }
-
     constructor() {
         super('org.mynamespace.query');
-        this.logBuffer = {output: []};
     }
 
     async instantiate(ctx) {
@@ -57,18 +47,14 @@ class CrudChaincode extends Contract {
         for (let i = 0; i < 5; i++) {
             await stub.putState(`jsonkey${i}`, Buffer.from(JSON.stringify({value: `value${i}`})));
         }
-        return Buffer.from(JSON.stringify(this.logBuffer));
     }
 
-    async query({stub}) {
-        const {params} = stub.getFunctionAndParameters();
-        const query = params[0];
+    async query({stub}, query) {
         const iterator = await stub.getQueryResult(query);
         const results = await getAllResults(iterator);
-        this.logBuffer.result = results;
-        return Buffer.from(JSON.stringify(this.logBuffer));
+        return JSON.stringify(results);
     }
 }
 
 
-module.exports = CrudChaincode;
+module.exports = QueryChaincode;

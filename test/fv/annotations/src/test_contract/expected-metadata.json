@@ -1,0 +1,103 @@
+{
+    "components": {
+        "schemas": {
+            "Asset": {
+                "$id": "Asset",
+                "additionalProperties": false,
+                "properties": [
+                    {
+                        "name": "id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "type": "object"
+            }
+        }
+    },
+    "contracts": {
+        "": {
+            "contractInstance": {
+                "name": ""
+            },
+            "info": {
+                "title": "",
+                "version": ""
+            },
+            "name": "",
+            "transactions": [
+                {
+                    "name": "createAsset",
+                    "parameters": [
+                        {
+                            "description": "",
+                            "name": "id",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "description": "",
+                            "name": "name",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submitTx"
+                    ]
+                },
+                {
+                    "name": "getAsset",
+                    "parameters": [
+                        {
+                            "description": "",
+                            "name": "id",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "returns": [
+                        {
+                            "name": "success",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submitTx"
+                    ]
+                }
+            ]
+        },
+        "org.hyperledger.fabric": {
+            "contractInstance": {
+                "name": "org.hyperledger.fabric"
+            },
+            "info": {
+                "title": "",
+                "version": ""
+            },
+            "name": "org.hyperledger.fabric",
+            "transactions": [
+                {
+                    "name": "GetMetadata"
+                }
+            ]
+        }
+    },
+    "info": {
+        "title": "ts_chaincode",
+        "version": "1.0.0"
+    }
+}

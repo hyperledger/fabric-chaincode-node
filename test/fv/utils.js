@@ -1,7 +1,9 @@
 'use strict';
 
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const childProcess = require('child_process');
+const exec = util.promisify(childProcess.exec);
+const execFile = util.promisify(childProcess.execFile);
 const fs = require('fs');
 const path = require('path');
 
@@ -44,19 +46,22 @@ async function install(ccName) {
     await exec(cmd);
 }
 
-async function instantiate(ccName) {
-    const cmd = `docker exec cli peer chaincode instantiate ${getTLSArgs()} -o orderer.example.com:7050 -l node -C mychannel -n ${ccName} -v v0 -c '{"Args": ["org.mynamespace.${ccName}:instantiate"]}' -P 'OR ("Org1MSP.member")'`;
+async function instantiate(ccName, func, args) {
+    const cmd = `docker exec cli peer chaincode instantiate ${getTLSArgs()} -o orderer.example.com:7050 -l node -C mychannel -n ${ccName} -v v0 -c '${printArgs(func, args)}' -P 'OR ("Org1MSP.member")'`;
     const res = await exec(cmd);
     await new Promise(resolve => setTimeout(resolve, 5000));
     return res;
 }
 
 function printArgs(func, args) {
-    if (!Array.isArray(args)) {
+    if (!Array.isArray(args) && func) {
         args = [func];
-    } else {
+    } else if (func) {
         args = [func, ...args];
+    } else {
+        args = [];
     }
+
     for (const key in args) {
         args[key] = `${args[key]}`;
     }
@@ -65,56 +70,32 @@ function printArgs(func, args) {
 
 async function invoke(ccName, func, args) {
     const cmd = `docker exec cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent 2>&1`;
-    const {stdout, error} = await exec(cmd);
-    if (error) {
-        throw new Error(error);
+    const {stderr} = await exec(cmd);
+    if (stderr) {
+        throw new Error(stderr);
     }
-    return parsePayload(stdout);
 }
 
 async function query(ccName, func, args) {
-    const cmd = `docker exec cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' 2>&1`;
-    const {stdout, error} = await exec(cmd);
+    const options = {};
+    const script = 'docker';
+    const execArgs = util.format('exec cli peer chaincode query %s -C %s -n %s -c %s',
+        getTLSArgs(),
+        'mychannel',
+        ccName,
+        printArgs(func, args)).split(' ');
+
+    const {error, stdout, stderr} = await execFile(script, execArgs, options);
     if (error) {
-        throw new Error(error);
+        throw new Error(error, stderr);
     }
-    return parsePayloadQuery(stdout);
+
+    return stdout.trim().replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"'); // remove surrounding quotes and unescape
 }
 
-function parsePayload(input) {
-    // eslint-disable-next-line
-    const regex = new RegExp(/INFO.*payload:(\".*?\") $/gm);
-    const outputs = regex.exec(input);
-
-    const payload = outputs[outputs.length - 1];
-    const output = new Buffer(JSON.parse(payload));
-    const jsonString = JSON.stringify(output.toString());
-    let json = JSON.parse(jsonString);
-    if (typeof json === 'string') {
-        json = JSON.parse(json);
-    }
-    return json;
-}
-
-function parsePayloadQuery(input) {
-    const regex = new RegExp(/\[([0-9,]*?)\]/g);
-    const outputs = regex.exec(input);
-
-    const output = new Buffer(JSON.parse(outputs[outputs.length - 2]));
-    const jsonString = JSON.stringify(output.toString());
-    let json = JSON.parse(jsonString);
-    if (typeof json === 'string') {
-        json = JSON.parse(json);
-    }
-    return json;
-}
-
-async function installAndInstantiate(ccName, args) {
-    if (!args) {
-        args = [];
-    }
+async function installAndInstantiate(ccName, instantiateFunc, instantiateArgs) {
     await install(ccName);
-    return instantiate(ccName);
+    return instantiate(ccName, instantiateFunc, instantiateArgs);
 }
 
 function getTLSArgs() {
