@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim",
-  "version": "1.4.0-beta.2",
+  "version": "1.4.0-beta2",
   "tag": "beta",
   "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
   "main": "index.js",
@@ -36,7 +36,7 @@
     "@types/winston": "^2.3.9",
     "ajv": "^6.5.5",
     "fs-extra": "^7.0.1",
-    "grpc": "1.10.1",
+    "grpc": "1.17.0-pre1",
     "jsrsasign": "^8.0.4",
     "reflect-metadata": "^0.1.12",
     "winston": "^2.4.1",
