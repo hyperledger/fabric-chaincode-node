@@ -36,7 +36,7 @@ const docSrc = [
 ];
 
 gulp.task('schema-docs', () => {
-    gulp.src('fabric-contract-api/schema/*.json')
+    return gulp.src('fabric-contract-api/schema/contract-schema.json')
         .pipe(gulp.dest(path.join(docsRoot, currentBranch)));
 });
 
@@ -60,8 +60,12 @@ gulp.task('docs-dev', ['docs'], function() {
     gulp.watch(docSrc, ['docs']);
 });
 
+// for the rare occurance where something needs to be bootsrap in the docs ahead of a release
+gulp.task('bootstrap', function() {
+    gulp.src('./docs/bootstrap/**/*').pipe(gulp.dest(docsRoot));
+});
 
-gulp.task('docs', ['jsdocs', 'schema-docs'], () => {
+gulp.task('docs', ['jsdocs', 'schema-docs', 'bootstrap'], () => {
 
     const relativePath = '.';
     const packageJson = require(path.join(__dirname, '..', 'package.json'));
@@ -84,8 +88,10 @@ gulp.task('docs', ['jsdocs', 'schema-docs'], () => {
     // jsdocs produced
     // if this is the master build then we need to ensure that the index.html and
     // the 404.html page are properly setup and configured.
+    // also copies the
     if (currentBranch === 'master') {
-        gulp.src('./docs/redirectTemplates/*.html')
+        const pathToReleasedSchema = path.resolve(docsRoot, packageJson.docsLatestVersion, 'contract-schema.json');
+        return gulp.src(['./docs/redirectTemplates/*.html', pathToReleasedSchema])
             .pipe(replace('LATEST__VERSION', packageJson.docsLatestVersion))
             .pipe(replace('FILENAME__MAPPING', mapping.join(',')))
             .pipe(replace('RELATIVE__PATH', relativePath))
