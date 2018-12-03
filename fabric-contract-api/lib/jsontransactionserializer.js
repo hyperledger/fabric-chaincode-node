@@ -48,21 +48,30 @@ module.exports = class JSONSerializer {
         if (!data) {
             throw new Error('Buffer needs to be supplied');
         }
-
         let value;
-
-        const json = JSON.parse(data.toString());
-        if (json.type) {
-            if (json.type === 'Buffer') {
-                value = Buffer.from(json.data);
-            } else {
-                throw new Error(`Type of ${json.type} is not understood, can't recreate data`);
-            }
+        let jsonForValidation;
+        // check that schema to see exactly how we should de-marshall this
+        if (schema.type && (schema.type === 'string' || schema.type === 'number')) {
+            // ok so this is a basic primitive type, and for strings and numbers the wireprotocol is different
+            value = data.toString();
+            jsonForValidation = JSON.stringify(value);
         } else {
-            value = json;
+
+            const json = JSON.parse(data.toString());
+            if (json.type) {
+                if (json.type === 'Buffer') {
+                    value = Buffer.from(json.data);
+                } else {
+                    throw new Error(`Type of ${json.type} is not understood, can't recreate data`);
+                }
+            } else {
+                value = json;
+            }
+            // as JSON then this si the same
+            jsonForValidation = value;
         }
 
-        return {value};
+        return {value, jsonForValidation};
     }
 
 };

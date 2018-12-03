@@ -57,6 +57,13 @@ describe('jsontransactionserializer.js', () => {
         Buffer.from('hello')
     ];
 
+    const dataForValidation = [
+        'HelloWorld',
+        42,
+        {text:'hello', value: {i:'root -1'}},
+        Buffer.from('hello')
+    ];
+
     const buffer = [];
 
     before(() => {
@@ -94,9 +101,28 @@ describe('jsontransactionserializer.js', () => {
         it ('should return inflated data from the buffer', () => {
             const sc0 = new JSONSerializer();
             for (let i = 0; i < data.length; i++) {
-                expect(sc0.fromBuffer(buffer[i])).to.deep.equal({value: data[i]});
+                expect(sc0.fromBuffer(buffer[i])).to.deep.equal({value: data[i], jsonForValidation: dataForValidation[i]});
             }
         });
+
+        it('should handle specific String case', () => {
+            const sc0 = new JSONSerializer();
+            const v = sc0.fromBuffer(Buffer.from('HelloWorld'), {type:'string'});
+            v.should.deep.equal({value:'HelloWorld', jsonForValidation:JSON.stringify('HelloWorld')});
+        });
+
+        it('should handle specific Number case', () => {
+            const sc0 = new JSONSerializer();
+            const v = sc0.fromBuffer(Buffer.from('102345679'), {type:'number'});
+            v.should.deep.equal({value:'102345679', jsonForValidation:JSON.stringify('102345679')});
+        });
+
+        it('should handle specific Number case', () => {
+            const sc0 = new JSONSerializer();
+            const v = sc0.fromBuffer(Buffer.from(JSON.stringify({'wibble':'wobble'})), {type:'whatever'});
+            v.should.deep.equal({value:{'wibble':'wobble'}, jsonForValidation:{'wibble':'wobble'}});
+        });
+
 
         it ('should handle errors of unkown type', () => {
             const sc0 = new JSONSerializer();
