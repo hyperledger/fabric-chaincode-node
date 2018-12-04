@@ -12,5 +12,22 @@
  * limitations under the License.
  */
 
-'use strict';
-Object.assign(module.exports, require('./transaction'), require('./object'), require('./info'));
+require('reflect-metadata');
+
+module.exports.Info = function Info (info = {}) {
+    return (target) => {
+        const data = Reflect.getMetadata('fabric:info', global) || {};
+        if (!info.name) {
+            info.name = target.name;
+        }
+        if (!info.version) {
+            info.version = '';
+        }
+
+        data[target.name] = {};
+        Object.assign(data[target.name], info);
+
+        Reflect.defineMetadata('fabric:info', data, global);
+    };
+};
+

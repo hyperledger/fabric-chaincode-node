@@ -630,6 +630,44 @@ describe('chaincodefromcontract', () => {
         });
     });
 
+    describe('#_processContractInfo', () => {
+        it ('should be able to handle no annotations suppled', () => {
+            mockery.registerMock('SCAlpha', SCDelta);
+            SCDelta.prototype.foo = 'foo';
+            sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            const data = cc._processContractInfo(cc.contractImplementations.alpha.contractInstance);
+
+            sinon.assert.called(getMetadataStub);
+            data.should.deep.equal({
+                title:'',
+                version:''
+            });
+        });
+        it ('should be able to handle no annotations suppled', () => {
+            mockery.registerMock('SCAlpha', SCDelta);
+            SCDelta.prototype.foo = 'foo';
+            sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata');
+            getMetadataStub.returns({SCAlpha:{
+                title:'contract info',
+                version:'3333'
+            }});
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            const data = cc._processContractInfo(cc.contractImplementations.alpha.contractInstance);
+
+            sinon.assert.called(getMetadataStub);
+            data.should.deep.equal({
+                title:'contract info',
+                version:'3333'
+            });
+        });
+    });
 
     describe('#_processContractTransactions', () => {
 

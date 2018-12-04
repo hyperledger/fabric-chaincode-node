@@ -163,7 +163,6 @@ class ChaincodeFromContract {
 
     /** read the code and create the internal structure representing the code */
     _processContractTransactions(contract) {
-
         let transactions = [];
         transactions = Reflect.getMetadata('fabric:transactions', contract) || [];
         if (transactions.length === 0) {
@@ -188,14 +187,21 @@ class ChaincodeFromContract {
     }
 
     /**
-     * TODO: get information on this contract
+     * get information on this contract
      * @param {*} contract
      */
     _processContractInfo(contract) {
-        return {
-            title:'',
-            version:''
-        };
+
+        const info = Reflect.getMetadata('fabric:info', global) || {};
+        console.log(contract.constructor.name);
+        if (info[contract.constructor.name]) {
+            return info[contract.constructor.name];
+        } else {
+            return {
+                title:'',
+                version:''
+            };
+        }
     }
 
     /** Create the standard method from the code that has been loaded
