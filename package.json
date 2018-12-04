@@ -24,6 +24,7 @@
     "jsrsasign": "^8.0.4"
   },
   "devDependencies": {
+    "ajv": "^6.5.5",
     "ajv-cli": "^3.0.0",
     "chai": "^4.1.1",
     "chai-as-promised": "^7.1.1",
