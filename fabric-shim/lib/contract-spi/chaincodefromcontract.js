@@ -193,7 +193,6 @@ class ChaincodeFromContract {
     _processContractInfo(contract) {
 
         const info = Reflect.getMetadata('fabric:info', global) || {};
-        console.log(contract.constructor.name);
         if (info[contract.constructor.name]) {
             return info[contract.constructor.name];
         } else {
@@ -209,7 +208,7 @@ class ChaincodeFromContract {
      */
     _augmentMetadataFromCode(metadata) {
 
-        if (!metadata.contracts) {
+        if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
             metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));
 
             for (const contractKey in metadata.contracts) {
@@ -240,6 +239,7 @@ class ChaincodeFromContract {
             metadata.components = {};
             metadata.components.schemas = Reflect.getMetadata('fabric:objects', global) || {};
         }
+
         return metadata;
     }
 

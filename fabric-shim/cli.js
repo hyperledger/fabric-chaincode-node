@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const version = 'v' + require('./package.json').version;
 
-require('yargs')
+const results = require('yargs')
     .commandDir('./lib/cmds')
     .demandCommand()
     .help()
@@ -11,3 +11,14 @@ require('yargs')
     .describe('v', 'show version information')
     .env('CORE')
     .argv;
+
+if (typeof(results.thePromise) !== 'undefined') {
+    results.thePromise.then(() => {
+        console.log('\nCommand succeeded\n');
+    }).catch((error) => {
+        console.log(error + '\nCommand failed\n');
+        process.exit(1);
+    });
+} else {
+    process.exit(0);
+}

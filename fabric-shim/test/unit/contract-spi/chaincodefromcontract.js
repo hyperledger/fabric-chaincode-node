@@ -698,7 +698,7 @@ describe('chaincodefromcontract', () => {
         });
     });
 
-    describe('#_augmentmetadata', () => {
+    describe('#_augmentMetadataFromCode', () => {
         const exampleMetadata = {
             contracts: {
                 contractImplementations: {
@@ -728,6 +728,47 @@ describe('chaincodefromcontract', () => {
 
         it('should not add extra detail for metadata, info and components when metadata supplied with those fields', () => {
             ChaincodeFromContract.prototype._augmentMetadataFromCode(exampleMetadata).should.deep.equal(exampleMetadata);
+        });
+
+        it('should add extra detail if the contracts element is left blank meaning that just info is being added', () => {
+            const fakeCcfc = {
+                contractImplementations: {
+                    myContract: {
+                        contractInstance: {
+                            name: 'some name',
+                            _someProperty: 'should ignore'
+                        }
+                    }
+                },
+                _augmentMetadataFromCode: ChaincodeFromContract.prototype._augmentMetadataFromCode
+            };
+            const partialMetadata = {
+                info: {
+                    version: '0.1.1',
+                    title: 'some title'
+                }
+            };
+            const metadata = fakeCcfc._augmentMetadataFromCode(partialMetadata);
+
+            const correctData =       {
+                'components': {
+                    'schemas': {}
+                },
+                'contracts': {
+                    'myContract': {
+                        'contractInstance': {
+                            'name': 'some name'
+                        }
+                    }
+                },
+                'info': {
+                    'title': 'some title',
+                    'version': '0.1.1'
+                }
+            };
+
+
+            metadata.should.deep.equal(correctData);
         });
 
         it ('should handle contracts and remove underscore lead properties of contractInstance', () => {

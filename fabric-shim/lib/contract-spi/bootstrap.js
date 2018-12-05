@@ -43,7 +43,7 @@ class Bootstrap {
      *
      * @ignore
      */
-    static bootstrap() {
+    static async bootstrap() {
         const opts = StartCommand.getArgs(yargs);
 
         const modPath = path.resolve(process.cwd(), opts['module-path']);
@@ -85,9 +85,9 @@ class Bootstrap {
 
             // check the contracts and setup those up.
             if (r.contracts) {
-                Bootstrap.register(r.contracts, serializers);
+                await Bootstrap.register(r.contracts, serializers);
             } else {
-                Bootstrap.register([r], serializers);
+                await Bootstrap.register([r], serializers);
             }
         } else {
             throw new Error('package.json does not contain a \'main\' entry for the module');
@@ -106,6 +106,7 @@ class Bootstrap {
 
         if (pathCheck) {
             metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
+            logger.info('Meta data file has been located');
         } else {
             logger.info('No metadata file supplied in contract, introspection will generate all the data');
         }
@@ -115,14 +116,18 @@ class Bootstrap {
 
     static async loadAndValidateMetadata(metadataPath) {
         const rootPath = path.dirname(__dirname);
-        const metadata = (await fs.readFile(metadataPath)).toString();
-        const schema = (await fs.readFile(path.join(rootPath, '../../fabric-contract-api/schema/contract-schema.json'))).toString();
+        const metadataString = (await fs.readFile(metadataPath)).toString();
+        const schemaString = (await fs.readFile(path.join(rootPath, '../../fabric-contract-api/schema/contract-schema.json'))).toString();
+
+        const metadata = JSON.parse(metadataString);
 
         const ajv = new Ajv({schemaId: 'id'});
         ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
-        const valid = ajv.validate(JSON.parse(schema), JSON.parse(metadata));
+        const valid = ajv.validate(JSON.parse(schemaString), metadata);
         if (!valid) {
             throw new Error('Contract metadata does not match the schema: ' + JSON.stringify(ajv.errors));
+        } else {
+            logger.info('Metadata validated against schema correctly');
         }
         return metadata;
     }
