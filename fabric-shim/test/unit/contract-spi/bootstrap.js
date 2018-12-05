@@ -99,10 +99,10 @@ describe('bootstrap.js', () => {
     });
 
     describe('#loadAndValidateMetadata', () => {
-
-        const jsonObject =  JSON.stringify({
+        const obj = {
             name: 'some string'
-        });
+        };
+        const jsonObject =  JSON.stringify(obj);
 
 
         it ('validate and return the metadata', async () => {
@@ -113,7 +113,7 @@ describe('bootstrap.js', () => {
 
 
             const metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
-            expect(metadata).to.equal(jsonObject);
+            expect(metadata).to.deep.equal(obj);
             sinon.assert.calledTwice(readFileStub);
         });
 
@@ -188,7 +188,7 @@ describe('bootstrap.js', () => {
 
             const metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
 
-            expect(JSON.parse(metadata)).to.deep.equal(JSON.parse(json));
+            expect(metadata).to.deep.equal(JSON.parse(json));
 
         });
 
@@ -245,9 +245,8 @@ describe('bootstrap.js', () => {
             Bootstrap.register = registerStub;
 
 
-            (() => {
-                Bootstrap.bootstrap();
-            }).should.throw(/package.json does not contain a 'main' entry for the module/);
+
+            return Bootstrap.bootstrap().should.eventually.be.rejectedWith(/package.json does not contain a 'main' entry for the module/);
         });
 
         it ('should use the main class defined with contracts exported, and custom serialization', () => {
@@ -290,9 +289,7 @@ describe('bootstrap.js', () => {
             const registerStub = sandbox.stub();
             Bootstrap.register = registerStub;
 
-            (() => {
-                Bootstrap.bootstrap();
-            }).should.throw(/There should be a 'transaction' property to define the serializer for use with transactions/);
+            return Bootstrap.bootstrap().should.eventually.be.rejectedWith(/There should be a 'transaction' property to define the serializer for use with transactions/);
 
         });
 

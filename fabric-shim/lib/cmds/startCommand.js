@@ -44,8 +44,8 @@ exports.builder = (yargs) => {
 
     return yargs;
 };
-exports.handler = function () {
-    Bootstrap.bootstrap();
+exports.handler = function (argv) {
+    return argv.thePromise = Bootstrap.bootstrap();
 };
 
 exports.getArgs = function (yargs) {
