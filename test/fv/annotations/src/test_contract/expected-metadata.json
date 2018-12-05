@@ -23,15 +23,15 @@
         }
     },
     "contracts": {
-        "": {
+        "TestContract": {
             "contractInstance": {
-                "name": ""
+                "name": "TestContract"
             },
             "info": {
                 "title": "",
                 "version": ""
             },
-            "name": "",
+            "name": "TestContract",
             "transactions": [
                 {
                     "name": "createAsset",

@@ -7,7 +7,7 @@ const expect = chai.expect;
 const utils = require('./utils');
 const {SHORT_INC, LONG_STEP} = utils.TIMEOUTS;
 
-describe.only('Typescript chaincode', () => {
+describe('Typescript chaincode', () => {
     const suite = 'annotations';
     before(async function() {
         this.timeout(LONG_STEP);
@@ -18,8 +18,8 @@ describe.only('Typescript chaincode', () => {
     describe('Scenario', () => {
         it('should write an asset', async function () {
             this.timeout(SHORT_INC);
-            await utils.invoke(suite, 'createAsset', ['GLD', 'GOLD_BAR']);
-            const payload = JSON.parse(await utils.query(suite, 'getAsset', ['GLD']));
+            await utils.invoke(suite, 'TestContract:createAsset', ['GLD', 'GOLD_BAR']);
+            const payload = JSON.parse(await utils.query(suite, 'TestContract:getAsset', ['GLD']));
 
             expect(payload).to.eql({id: 'GLD', name: 'GOLD_BAR'});
         });
@@ -37,7 +37,6 @@ describe.only('Typescript chaincode', () => {
             }
 
             const expectedMetadata = fs.readFileSync(path.join(__dirname, './annotations/src/test_contract/expected-metadata.json'));
-            console.log(JSON.stringify(payload));
             expect(payload).to.eql(JSON.parse(expectedMetadata));
         });
     });
