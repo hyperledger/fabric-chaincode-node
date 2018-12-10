@@ -25,7 +25,8 @@
     "contracts": {
         "TestContract": {
             "contractInstance": {
-                "name": "TestContract"
+                "name": "TestContract",
+                "default":true
             },
             "info": {
                 "title": "",

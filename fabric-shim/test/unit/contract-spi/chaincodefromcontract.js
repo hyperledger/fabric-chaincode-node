@@ -308,8 +308,9 @@ describe('chaincodefromcontract', () => {
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
             mockery.registerMock('SCAlpha', SCAlpha);
-            new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
+            cc.defaultContractName.should.deep.equal('alpha');
         });
         it('should handle a single class being passed that is not valid', () => {
 
@@ -321,6 +322,15 @@ describe('chaincodefromcontract', () => {
                 new ChaincodeFromContract([String], defaultSerialization);
             }).should.throw(/invalid contract instance/);
 
+        });
+        it('should handle a two classes being passed as a contract', () => {
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            mockery.registerMock('SCAlpha', SCAlpha);
+            const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+            cc.defaultContractName.should.deep.equal('beta');
         });
     });
 
@@ -422,6 +432,7 @@ describe('chaincodefromcontract', () => {
                 });
             sandbox.stub(ChaincodeFromContract.prototype, '_dataMarshall').returns(MockDataMarhsall);
             cc = new ChaincodeFromContract([SCBeta], defaultSerialization);
+            cc.defaultContractName = 'default';
         });
 
         it('should handle the usual case of ns:fn', () => {
@@ -430,18 +441,19 @@ describe('chaincodefromcontract', () => {
         });
 
         it('should handle the case of no contractName explicit', () => {
+
             const result = cc._splitFunctionName(':function');
-            result.should.deep.equal({contractName: '', function: 'function'});
+            result.should.deep.equal({contractName: 'default', function: 'function'});
         });
 
         it('should handle the case of no contractName implict', () => {
             const result = cc._splitFunctionName('function');
-            result.should.deep.equal({contractName: '', function: 'function'});
+            result.should.deep.equal({contractName: 'default', function: 'function'});
         });
 
         it('should handle the case of no input', () => {
             const result = cc._splitFunctionName('');
-            result.should.deep.equal({contractName: '', function: ''});
+            result.should.deep.equal({contractName: 'default', function: ''});
         });
 
         it('should handle the case of multiple :', () => {

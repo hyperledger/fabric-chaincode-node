@@ -47,6 +47,8 @@ class ChaincodeFromContract {
         this.serializers = serializers;
         logger.info(serializers);
 
+
+
         // always add in the 'meta' class that has general abilities
         const SystemContract = require('./systemcontract');
         contractClasses.push(SystemContract);
@@ -144,6 +146,7 @@ class ChaincodeFromContract {
     _resolveContractImplementations(contractClasses) {
         const Contract = require('fabric-contract-api').Contract;
         const implementations = {};
+
         for (const contractClass of contractClasses) {
 
             const contract = new(contractClass);
@@ -152,6 +155,10 @@ class ChaincodeFromContract {
             }
 
             const name = contract.getName();
+            if (!this.defaultContractName) {
+                this.defaultContractName = name;
+                contract.default = true;
+            }
             const transactions = this._processContractTransactions(contract);
             const info = this._processContractInfo(contract);
 
@@ -363,6 +370,10 @@ class ChaincodeFromContract {
         const m = regex.exec(fcn);
         result.contractName = m[1];
         result.function = m[2];
+
+        if (!result.contractName || result.contractName.trim() === '') {
+            result.contractName = this.defaultContractName;
+        }
 
         return result;
     }
