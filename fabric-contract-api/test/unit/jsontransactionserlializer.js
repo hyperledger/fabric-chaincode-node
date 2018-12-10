@@ -74,18 +74,33 @@ describe('jsontransactionserializer.js', () => {
 
     describe('#toBuffer', () => {
 
-        it ('should return undefined if nothing passed in ', () => {
+        it ('should return undefined if nothing passed in (no schema) ', () => {
             const sc0 = new JSONSerializer();
             expect(sc0.toBuffer()).to.be.equal(undefined);
         });
 
-        it ('should return stringifed result', () => {
-
+        it ('should return stringifed result (no schema)', () => {
             const sc0 = new JSONSerializer();
-
             for (let i = 0; i < data.length; i++) {
                 expect(sc0.toBuffer(data[i])).to.deep.equal(buffer[i]);
             }
+        });
+
+        it ('should return string from a string in result if schema given', () => {
+            const sc0 = new JSONSerializer();
+            expect(sc0.toBuffer('hello world', {type:'string'})).to.deep.equal(Buffer.from('hello world'));
+        });
+        it ('should return number from a number in result if schema given', () => {
+            const sc0 = new JSONSerializer();
+            expect(sc0.toBuffer(42, {type:'number'})).to.deep.equal(Buffer.from('42'));
+        });
+
+        it ('should throw an error if the type of data passed does not match schema given', () => {
+            const sc0 = new JSONSerializer();
+            (() => {
+                sc0.toBuffer(42, {type:'string'});
+
+            }).should.throw(/Returned value is .* does not match schema type of .*/);
         });
     });
 
