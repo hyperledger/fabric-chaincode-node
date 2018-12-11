@@ -15,7 +15,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-      "fabric-shim": "file:./fabric-shim-1.4.0-rc1.tgz",
-      "fabric-contract-api": "file:./fabric-contract-api-1.4.0-rc1.tgz"
+      "fabric-shim": "file:./fabric-shim-1.4.0-snapshot.tgz",
+      "fabric-contract-api": "file:./fabric-contract-api-1.4.0-snapshot.tgz"
     }
   }

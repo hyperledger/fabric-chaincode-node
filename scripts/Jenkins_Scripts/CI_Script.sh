@@ -36,9 +36,6 @@ Parse_Arguments() {
                       --clean_Environment)
                             clean_Environment
                             ;;
-                      --pull_Docker_Images)
-                            pull_Docker_Images
-                            ;;
                       --e2e_Tests)
                             e2e_Tests
                             ;;
@@ -124,24 +121,6 @@ env_Info() {
         pgrep -a docker
         docker images
         docker ps -a
-}
-
-# pull fabric, ca images from nexus
-pull_Docker_Images() {
-            for IMAGES in peer orderer tools ca; do
-                 docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG} > /dev/null 2>&1
-                          if [ $? -ne 0 ]; then
-                                echo -e "\033[31m FAILED to pull docker images" "\033[0m"
-                                exit 1
-                          fi
-                 echo "\033[32m ----------> pull $IMAGES image" "\033[0m"
-                 echo
-                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG} $ORG_NAME-$IMAGES
-                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG} $ORG_NAME-$IMAGES:${ARCH}-${VERSION}
-                 docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG}
-            done
-                 echo
-                 docker images | grep hyperledger/fabric
 }
 
 # Install NPM

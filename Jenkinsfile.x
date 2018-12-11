@@ -9,35 +9,69 @@ node ('hyp-x') { // trigger build on x86_64 node
      def ROOTDIR = pwd() // workspace dir (/w/workspace/<job_name>)
      env.PROJECT_DIR = "gopath/src/github.com/hyperledger"
      env.PROJECT = "fabric-chaincode-node"
-     env.VERSION = sh(returnStdout: true, script: 'curl -O https://raw.githubusercontent.com/hyperledger/fabric/master/Makefile && cat Makefile | grep "BASE_VERSION =" | cut -d "=" -f2').trim()
-     env.VERSION = "$VERSION" // BASE_VERSION from fabric Makefile
      env.ARCH = "amd64"
-     env.IMAGE_TAG = "${ARCH}-${VERSION}-stable" // fabric latest stable version from nexus
-     env.PROJECT_VERSION = "${VERSION}-stable"
      env.GOPATH = "$WORKSPACE/gopath"
      def nodeHome = tool 'nodejs-8.11.3'
+     def jobname = sh(returnStdout: true, script: 'echo ${JOB_NAME} | grep -q "verify" && echo patchset || echo merge').trim()
      env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
      def failure_stage = "none"
 // delete working directory
      deleteDir()
       stage("Fetch Patchset") { // fetch gerrit refspec on latest commit
+      cleanWs()
           try {
-              dir("${ROOTDIR}"){
+              if (jobname == "patchset")  {
+                   println "$GERRIT_REFSPEC"
+                   println "$GERRIT_BRANCH"
+                   checkout([
+                       $class: 'GitSCM',
+                       branches: [[name: '$GERRIT_REFSPEC']],
+                       extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gopath/src/github.com/hyperledger/$PROJECT'], [$class: 'CheckoutOption', timeout: 10]],
+                       userRemoteConfigs: [[credentialsId: 'hyperledger-jobbuilder', name: 'origin', refspec: '$GERRIT_REFSPEC:$GERRIT_REFSPEC', url: '$GIT_BASE']]])
+                    dir("${ROOTDIR}/$PROJECT_DIR") {
+                    sh '''
+                       # Clone fabric repository
+                       git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
+                       if [ "$GERRIT_BRANCH" = "release-1.4" ]; then
+                          # Clone fabric-samples repository
+                          git clone --single-branch -b master --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
+                       else
+                          # Clone fabric-samples repository
+                          git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
+                       fi
+                    '''
+                    }
+              } else {
+                   // Clone fabric-chaincode-node on merge
+                   println "Clone $PROJECT repository"
+                   checkout([
+                       $class: 'GitSCM',
+                       branches: [[name: 'refs/heads/$GERRIT_BRANCH']],
+                       extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gopath/src/github.com/hyperledger/$PROJECT']],
+                       userRemoteConfigs: [[credentialsId: 'hyperledger-jobbuilder', name: 'origin', refspec: '+refs/heads/$GERRIT_BRANCH:refs/remotes/origin/$GERRIT_BRANCH', url: '$GIT_BASE']]])
+                    dir("${ROOTDIR}/$PROJECT_DIR") {
+                    sh '''
+                       # Clone fabric repository
+                       git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
+                       if [ "$GERRIT_BRANCH" = "release-1.4" ]; then
+                          # Clone fabric-samples repository
+                          git clone --single-branch -b master --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
+                       else
+                          # Clone fabric-samples repository
+                          git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
+                       fi
+                    '''
+                    }
+              }
+              dir("${ROOTDIR}/$PROJECT_DIR/$PROJECT") {
               sh '''
-                 [ -e gopath/src/github.com/hyperledger/ ] || mkdir -p $PROJECT_DIR
-                 cd $PROJECT_DIR && git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/$PROJECT
-                 # clone fabric repository
-                 git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric
-                 # clone fabric-samples repository
-                 git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
-                 # Checkout to patch Refspec
-                 cd $PROJECT && git checkout "$GERRIT_BRANCH" && git fetch origin "$GERRIT_REFSPEC" && git checkout FETCH_HEAD
+                 # Print last two commit details
+                 echo
                  git log -n2 --pretty=oneline --abbrev-commit
-
+                 echo
               '''
               }
-          }
-          catch (err) {
+            } catch (err) {
                  failure_stage = "Fetch patchset"
                  currentBuild.result = 'FAILURE'
                  throw err
@@ -53,22 +87,6 @@ node ('hyp-x') { // trigger build on x86_64 node
                }
            catch (err) {
                  failure_stage = "Clean Environment - Get Env Info"
-                 currentBuild.result = 'FAILURE'
-                 throw err
-           }
-         }
-      }
-
-// Pull Fabric, Fabric-ca Images
-      stage("Pull Docker Images") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-           try {
-                 dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
-                 sh './CI_Script.sh --pull_Docker_Images'
-                 }
-               }
-           catch (err) {
-                 failure_stage = "Pull fabric, fabric-ca docker images"
                  currentBuild.result = 'FAILURE'
                  throw err
            }
