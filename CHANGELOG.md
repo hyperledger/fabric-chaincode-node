@@ -1,3 +1,61 @@
+## v1.4.0-rc1
+Tue 11 Dec 08:58:56 GMT 2018
+
+* [5ac251c](https://github.com/hyperledger/fabric/commit/5ac251c) [FAB-13217](https://jira.hyperledger.org/browse/FAB-13217) default name of contract
+* [1a5d311](https://github.com/hyperledger/fabric/commit/1a5d311) [FAB-13205](https://jira.hyperledger.org/browse/FAB-13205) Return type is 100pc symetric
+* [520ab29](https://github.com/hyperledger/fabric/commit/520ab29) [FAB-13131](https://jira.hyperledger.org/browse/FAB-13131) Chaincode Release notes
+* [e845805](https://github.com/hyperledger/fabric/commit/e845805) fixing FV test metadata
+* [844076c](https://github.com/hyperledger/fabric/commit/844076c) [FAB-13172](https://jira.hyperledger.org/browse/FAB-13172) Supplying INFO only from file
+* [830ee39](https://github.com/hyperledger/fabric/commit/830ee39) beta -> snapshot
+* [2a4f112](https://github.com/hyperledger/fabric/commit/2a4f112) [FAB-13148](https://jira.hyperledger.org/browse/FAB-13148) Info annotation
+* [4b182f4](https://github.com/hyperledger/fabric/commit/4b182f4) [FAB-13047](https://jira.hyperledger.org/browse/FAB-13047) beta2
+* [83628fd](https://github.com/hyperledger/fabric/commit/83628fd) [FAB-13134 ] Correct super type name
+* [66ed193](https://github.com/hyperledger/fabric/commit/66ed193) [FAB-12609](https://jira.hyperledger.org/browse/FAB-12609) adding FV test for annotations
+* [586dfbf](https://github.com/hyperledger/fabric/commit/586dfbf) [FAB-13047](https://jira.hyperledger.org/browse/FAB-13047) beta.2
+* [b42c60c](https://github.com/hyperledger/fabric/commit/b42c60c) [FAB-13109](https://jira.hyperledger.org/browse/FAB-13109) Serialzed form of primitives
+* [81170d7](https://github.com/hyperledger/fabric/commit/81170d7) [FAB-12072](https://jira.hyperledger.org/browse/FAB-12072) add isContract
+* [cd06d8f](https://github.com/hyperledger/fabric/commit/cd06d8f) [FAB-12999](https://jira.hyperledger.org/browse/FAB-12999) Refactor to support param validation
+* [84fe5f2](https://github.com/hyperledger/fabric/commit/84fe5f2) [FAB-12961](https://jira.hyperledger.org/browse/FAB-12961) remove incorrect utf8 check
+* [e347539](https://github.com/hyperledger/fabric/commit/e347539) [FAB-12961](https://jira.hyperledger.org/browse/FAB-12961) Return type marshaling
+* [1bd6e4f](https://github.com/hyperledger/fabric/commit/1bd6e4f) [FAB-12958](https://jira.hyperledger.org/browse/FAB-12958) no using package.json for contract specs
+* [fc42f59](https://github.com/hyperledger/fabric/commit/fc42f59) [FAB-12921](https://jira.hyperledger.org/browse/FAB-12921) Fix s390x build failures
+* [daa54f9](https://github.com/hyperledger/fabric/commit/daa54f9) [FAB-12498](https://jira.hyperledger.org/browse/FAB-12498) Test suite framework
+* [e8845dd](https://github.com/hyperledger/fabric/commit/e8845dd) [FAB-12886](https://jira.hyperledger.org/browse/FAB-12886) namespace and transactionId -> name
+* [5df1b1d](https://github.com/hyperledger/fabric/commit/5df1b1d) [FAB-12920](https://jira.hyperledger.org/browse/FAB-12920) fixes to GetMetadata and _loadAndValidate
+* [cb51b1a](https://github.com/hyperledger/fabric/commit/cb51b1a) [FAB-12894](https://jira.hyperledger.org/browse/FAB-12894) fix node shim module exports path
+* [0021a78](https://github.com/hyperledger/fabric/commit/0021a78) [FAB-12845](https://jira.hyperledger.org/browse/FAB-12845) make returns match schema
+* [48d1148](https://github.com/hyperledger/fabric/commit/48d1148) [FAB-12837](https://jira.hyperledger.org/browse/FAB-12837) adding object and property annotations
+* [a5d566d](https://github.com/hyperledger/fabric/commit/a5d566d) [FAB-12885](https://jira.hyperledger.org/browse/FAB-12885) Added token/expectations.proto
+* [2cd99b5](https://github.com/hyperledger/fabric/commit/2cd99b5) [FAB-12856](https://jira.hyperledger.org/browse/FAB-12856) Add Credentials to publish npm modules
+* [97e2428](https://github.com/hyperledger/fabric/commit/97e2428) [FAB-12562](https://jira.hyperledger.org/browse/FAB-12562) Allow importing metadata files
+* [1877f2c](https://github.com/hyperledger/fabric/commit/1877f2c) [FAB-12564](https://jira.hyperledger.org/browse/FAB-12564) Schema meta-data
+* [4d6d889](https://github.com/hyperledger/fabric/commit/4d6d889) [FAB-12781](https://jira.hyperledger.org/browse/FAB-12781) Pipeline Changes
+* [e60e886](https://github.com/hyperledger/fabric/commit/e60e886) [FAB-12825](https://jira.hyperledger.org/browse/FAB-12825) Add reflect-metadata to shim
+* [52a0381](https://github.com/hyperledger/fabric/commit/52a0381) [FAB-12818](https://jira.hyperledger.org/browse/FAB-12818) Removing context from metadata params
+* [b6c39fd](https://github.com/hyperledger/fabric/commit/b6c39fd) [FAB-12781](https://jira.hyperledger.org/browse/FAB-12781) Update pipeline scripts
+* [06377b3](https://github.com/hyperledger/fabric/commit/06377b3) [FAB-12750](https://jira.hyperledger.org/browse/FAB-12750) - Build configuration in package.json
+* [8286f24](https://github.com/hyperledger/fabric/commit/8286f24) [FAB-12609](https://jira.hyperledger.org/browse/FAB-12609) adding transaction annotations
+* [fcb538f](https://github.com/hyperledger/fabric/commit/fcb538f) [FAB-12681](https://jira.hyperledger.org/browse/FAB-12681) ChaincodeNode test zip name
+* [6193f20](https://github.com/hyperledger/fabric/commit/6193f20) [FAB-12681](https://jira.hyperledger.org/browse/FAB-12681) ChaincodeNode return to snapshot publish
+* [a80235b](https://github.com/hyperledger/fabric/commit/a80235b) [FAB-12681](https://jira.hyperledger.org/browse/FAB-12681) Chaincode Node - prepare for 1.4.0-beta
+* [39a0224](https://github.com/hyperledger/fabric/commit/39a0224) [FAB-12510](https://jira.hyperledger.org/browse/FAB-12510) added checks to ensure dev mode
+* [b8dfde0](https://github.com/hyperledger/fabric/commit/b8dfde0) [FAB-12561](https://jira.hyperledger.org/browse/FAB-12561) basic metadata
+* [4ecf61b](https://github.com/hyperledger/fabric/commit/4ecf61b) request for maintainer rights
+* [79e1906](https://github.com/hyperledger/fabric/commit/79e1906) [FAB-12539](https://jira.hyperledger.org/browse/FAB-12539) type definitions for state based EP APIs
+* [b3f0835](https://github.com/hyperledger/fabric/commit/b3f0835) [FAB-12580](https://jira.hyperledger.org/browse/FAB-12580) Peer can’t tolerate ping frequency
+* [f18b221](https://github.com/hyperledger/fabric/commit/f18b221) [FAB-12538](https://jira.hyperledger.org/browse/FAB-12538) chaincode handler for key-level metadata
+* [98c325d](https://github.com/hyperledger/fabric/commit/98c325d) [FAB-12537](https://jira.hyperledger.org/browse/FAB-12537) CC convenience layer for state-based EP
+* [d43ceca](https://github.com/hyperledger/fabric/commit/d43ceca) [FAB-12456](https://jira.hyperledger.org/browse/FAB-12456) Adding eslint to chaincode-node
+* [8506291](https://github.com/hyperledger/fabric/commit/8506291) [FAB-12336](https://jira.hyperledger.org/browse/FAB-12336) Allow no args to be passed for Init Command
+* [d5e5f27](https://github.com/hyperledger/fabric/commit/d5e5f27) [FAB-12482](https://jira.hyperledger.org/browse/FAB-12482) fix dependencies
+* [92f3798](https://github.com/hyperledger/fabric/commit/92f3798) [FAB-12422](https://jira.hyperledger.org/browse/FAB-12422) added module-path CLI option
+* [bfbd290](https://github.com/hyperledger/fabric/commit/bfbd290) [FAB-12429](https://jira.hyperledger.org/browse/FAB-12429) contract-api documentation
+* [264cf80](https://github.com/hyperledger/fabric/commit/264cf80) [FAB-12405](https://jira.hyperledger.org/browse/FAB-12405) fix success response format for contractapi
+* [82708ca](https://github.com/hyperledger/fabric/commit/82708ca) [FAB-12239](https://jira.hyperledger.org/browse/FAB-12239) added CLI option for cc name
+* [abe38f1](https://github.com/hyperledger/fabric/commit/abe38f1) [FAB-12227](https://jira.hyperledger.org/browse/FAB-12227) Namespace:Function
+* [b247234](https://github.com/hyperledger/fabric/commit/b247234) [FAB-12131](https://jira.hyperledger.org/browse/FAB-12131) ensure keepalive pings from chaincode
+* [f2994eb](https://github.com/hyperledger/fabric/commit/f2994eb) [FAB-11926](https://jira.hyperledger.org/browse/FAB-11926) check for simple keys for getStateByRange
+
 ## 1.4.0-beta
 Thu Nov  1 13:07:44 EDT 2018
 
