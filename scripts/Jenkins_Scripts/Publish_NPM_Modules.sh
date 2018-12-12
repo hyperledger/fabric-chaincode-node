@@ -14,6 +14,7 @@ npmPublish() {
   if [[ "$CURRENT_TAG" = *"skip"* ]]; then
       echo "----> Don't publish npm modules on skip tag"
   elif [[ "$CURRENT_TAG" = *"unstable"* ]]; then
+: <<'END_COMMENT'
       echo
       UNSTABLE_VER=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
       ver=$NF
@@ -22,6 +23,7 @@ npmPublish() {
       print ver}')
 
       echo "======> UNSTABLE VERSION:" $UNSTABLE_VER
+
 # Increment unstable version here
       UNSTABLE_INCREMENT=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
       ver=$NF
@@ -29,9 +31,8 @@ npmPublish() {
       sub(/.*\./,"",rel)
       sub(/\.[[:digit:]]+$/,"",ver)
       print ver"."rel+1}')
-
       echo "======> Incremented UNSTABLE VERSION:" $UNSTABLE_INCREMENT
-
+END_COMMENT
       # Get last digit of the unstable version of $CURRENT_TAG
       UNSTABLE_INCREMENT=$(echo $UNSTABLE_INCREMENT| rev | cut -d '.' -f 1 | rev)
       echo "======> UNSTABLE_INCREMENT:" $UNSTABLE_INCREMENT
@@ -58,7 +59,7 @@ versions() {
   echo -e "\033[32m ======> CURRENT_TAG: $CURRENT_TAG" "\033[0m"
 
   RELEASE_VERSION=$(cat package.json | grep version | awk -F\" '{ print $4 }')
-  echo -e "\033[32m ======> Current RELEASE_VERSION:" "\033[0m"
+  echo -e "\033[32m ======> Current RELEASE_VERSION: $RELEASE_VERSION" "\033[0m"
 }
 
 cd $WORKSPACE/gopath/src/github.com/hyperledger/fabric-chaincode-node
@@ -67,14 +68,17 @@ npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
 cd fabric-shim
 versions
 echo -e "\033[32m ======> fabric-shim" "\033[0m"
+UNSTABLE_INCREMENT=1.4.0-snapshot.62
 npmPublish fabric-shim
 
 cd ../fabric-shim-crypto
 versions
 echo -e "\033[32m ======> fabric-shim-crypto" "\033[0m"
 npmPublish fabric-shim-crypto
+UNSTABLE_INCREMENT=1.4.0-snapshot.62
 
 cd ../fabric-contract-api
 versions
 echo -e "\033[32m ======> fabric-contract-api" "\033[0m"
+UNSTABLE_INCREMENT=1.4.0-snapshot.52
 npmPublish fabric-contract-api
