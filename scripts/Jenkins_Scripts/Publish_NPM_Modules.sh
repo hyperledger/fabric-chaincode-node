@@ -74,8 +74,8 @@ npmPublish fabric-shim
 cd ../fabric-shim-crypto
 versions
 echo -e "\033[32m ======> fabric-shim-crypto" "\033[0m"
-npmPublish fabric-shim-crypto
 UNSTABLE_INCREMENT=1.4.0-snapshot.62
+npmPublish fabric-shim-crypto
 
 cd ../fabric-contract-api
 versions
