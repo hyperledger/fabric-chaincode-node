@@ -17,7 +17,7 @@ node ('hyp-x') { // trigger build on x86_64 node
      def failure_stage = "none"
 // delete working directory
      deleteDir()
-      stage("Fetch Patchset") { // fetch gerrit refspec on latest commit
+      stage("Fetch Patchset") {
       cleanWs()
           try {
               if (jobname == "patchset")  {

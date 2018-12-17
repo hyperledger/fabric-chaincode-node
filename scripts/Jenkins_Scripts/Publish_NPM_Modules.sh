@@ -14,14 +14,6 @@ npmPublish() {
   if [[ "$CURRENT_TAG" = *"skip"* ]]; then
       echo "----> Don't publish npm modules on skip tag"
   elif [[ "$CURRENT_TAG" = *"unstable"* ]]; then
-      echo
-      UNSTABLE_VER=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
-      ver=$NF
-      sub(/.*\./,"",rel)
-      sub(/\.[[:digit:]]+$/,"",ver)
-      print ver}')
-
-      echo "======> UNSTABLE VERSION:" $UNSTABLE_VER
 
       # Increment unstable version here
       UNSTABLE_INCREMENT=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
@@ -30,11 +22,17 @@ npmPublish() {
       sub(/.*\./,"",rel)
       sub(/\.[[:digit:]]+$/,"",ver)
       print ver"."rel+1}')
-      echo "======> Incremented UNSTABLE VERSION:" $UNSTABLE_INCREMENT
 
-      # Get last digit of the unstable version of $CURRENT_TAG
-      UNSTABLE_INCREMENT=$(echo $UNSTABLE_INCREMENT| rev | cut -d '.' -f 1 | rev)
-      echo "======> UNSTABLE_INCREMENT:" $UNSTABLE_INCREMENT
+      if [[ $UNSTABLE_VER = "" ]]; then
+        echo -e "\033[34m  ----> unstable ver is blank" "\033[0m"
+        UNSTABLE_INCREMENT=1
+      else
+        # Get last digit of the unstable version of $CURRENT_TAG
+        UNSTABLE_INCREMENT=$(echo $UNSTABLE_INCREMENT| rev | cut -d '.' -f 1 | rev)
+        echo "======> UNSTABLE_INCREMENT:" $UNSTABLE_INCREMENT
+      fi
+
+      echo -e "\033[32m======> UNSTABLE_INCREMENT:" $UNSTABLE_INCREMENT "\033[0m"
 
       # Append last digit with the package.json version
       export UNSTABLE_INCREMENT_VERSION=$RELEASE_VERSION.$UNSTABLE_INCREMENT
@@ -64,17 +62,13 @@ versions() {
 cd $WORKSPACE/gopath/src/github.com/hyperledger/fabric-chaincode-node
 npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
 
-cd fabric-shim
-versions
-echo -e "\033[32m ======> fabric-shim" "\033[0m"
-npmPublish fabric-shim
-
-cd ../fabric-shim-crypto
-versions
-echo -e "\033[32m ======> fabric-shim-crypto" "\033[0m"
-npmPublish fabric-shim-crypto
-
-cd ../fabric-contract-api
-versions
-echo -e "\033[32m ======> fabric-contract-api" "\033[0m"
-npmPublish fabric-contract-api
+# Add or delete modules from here.. 
+for modules in fabric-shim fabric-shim-crypto fabric-contract-api; do
+     if [ -d "$modules" ]; then
+        echo -e "\033[32m Publishing $modules" "\033[0m"
+        cd $modules
+        versions
+        npmPublish $modules
+        cd -
+     fi
+done

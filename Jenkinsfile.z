@@ -6,7 +6,7 @@ timeout(40) {
 node('hyp-z') {
    timestamps {
     try {
-     def ROOTDIR = pwd() // workspace dir (/w/workspace/<job_name>
+     def ROOTDIR = pwd() // workspace dir (/w/workspace/<job_name>)
      env.PROJECT_DIR = "gopath/src/github.com/hyperledger"
      env.PROJECT = "fabric-chaincode-node"
      env.GOPATH = "$WORKSPACE/gopath"
@@ -17,7 +17,7 @@ node('hyp-z') {
      def failure_stage = "none"
 // delete working directory
      deleteDir()
-      stage("Fetch Patchset") { // fetch gerrit refspec on latest commit (Both on Verify & Merge jobs)
+      stage("Fetch Patchset") {
        cleanWs()
           try {
              if (jobname == "patchset")  {
