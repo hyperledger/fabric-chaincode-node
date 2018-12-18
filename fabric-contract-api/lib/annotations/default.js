@@ -12,5 +12,21 @@
  * limitations under the License.
  */
 
-'use strict';
-Object.assign(module.exports, require('./transaction'), require('./object'), require('./info'), require('./default'));
+require('reflect-metadata');
+
+module.exports.Default = function Default () {
+
+    return (target) => {
+        let dflt = Reflect.getMetadata('fabric:default', global);
+
+        if (dflt) {
+            throw new Error('A default has already been specified');
+        }
+
+        const contract = new(target);
+
+        dflt = contract.getName();
+
+        Reflect.defineMetadata('fabric:default', dflt, global);
+    };
+};

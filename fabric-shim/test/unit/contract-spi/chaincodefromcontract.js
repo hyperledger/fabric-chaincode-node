@@ -332,6 +332,17 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
             cc.defaultContractName.should.deep.equal('beta');
         });
+
+        it('should handle the default tag being used', () => {
+            sandbox.stub(Reflect, 'getMetadata').withArgs('fabric:default', global).returns('alpha');
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            mockery.registerMock('SCAlpha', SCAlpha);
+            const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+            cc.defaultContractName.should.deep.equal('alpha');
+        });
     });
 
 
