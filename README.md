@@ -75,6 +75,12 @@ The resulting folder structure should be:
    |_ fabric-samples
 ```
 
+Before you launch a fabric network, run these commands from the fabric-chaincode-node folder first:
+```
+npm install
+gulp protos
+```
+
 Next run this single command to bring up a basic network of one orderer (using "SOLO"), one peer (using CouchDB as state database), then create a channel called "mychannel", and join the peer to that channel:
 ```
 gulp channel-init
@@ -90,19 +96,13 @@ bfd9120b530c        hyperledger/fabric-couchdb:latest   "tini -- /docker-e..."  
 c2aaaed2056d        hyperledger/fabric-tools:latest     "/bin/bash"              18 hours ago        Up 18 hours                                                          cli
 ```
 
-One more thing to do before you start testing the chaincode. The docker-based network uses organization MSPs that are defined in the basic-network sample, instead of the default. Therefore when you send requests with the `peer` command to the network later, the command must also have the proper corresponding MSP configurations in order to be properly recognized by the peer and orderer. To do that, you need to set the following environment variables:
-```
-export CORE_PEER_LOCALMSPID=Org1MSP
-export CORE_PEER_MSPCONFIGPATH=<path to fabric-samples>/basic-network/crypto-config/peerOrganizations/org1.example.com/users/Admin\@org1.example.com/msp
-```
-
 You can now proceed to the section "Test Node.js Chaincode".
 
 #### Using Command Binaries
 
 Alternatively you can use the `peer` and `orderer` binaries to manually start the target network and initialize the channel.
 
-Run these commands to build the executables needed for the test environment:
+Run these commands from the fabric project to build the executables needed for the test environment:
 ```
 make peer
 make orderer
@@ -111,25 +111,70 @@ make configtxgen
 
 Use the configtxgen tool to generate a genesis block and a channel config:
 ```
-./build/bin/configtxgen -outputBlock sampleconfig/test.genesis.block -profile SampleSingleMSPSolo
-./build/bin/configtxgen -outputCreateChannelTx sampleconfig/test.tx -profile SampleSingleMSPChannel -channelID mychannel
+FABRIC_CFG_PATH=./sampleconfig .build/bin/configtxgen -outputBlock sampleconfig/test.genesis.block -profile SampleSingleMSPSolo
+FABRIC_CFG_PATH=./sampleconfig .build/bin/configtxgen -outputCreateChannelTx sampleconfig/test.tx -profile SampleSingleMSPChannel -channelID mychannel
 ```
 
-Then you can launch a peer node and an orderer node with the following commands:
+Then you can launch a peer node with the following commands:
 ```
-CORE_CHAINCODE_LOGGING_SHIM=debug CORE_LOGGING_PEER=debug CORE_PEER_ADDRESSAUTODETECT=true ./build/bin/peer node start --peer-chaincodedev
-ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 ORDERER_GENERAL_GENESISMETHOD=file ORDERER_GENERAL_GENESISFILE=./test.genesis.block ./build/bin/orderer
+FABRIC_CFG_PATH=./sampleconfig CORE_CHAINCODE_LOGGING_SHIM=debug FABRIC_LOGGING_SPEC=debug CORE_PEER_ADDRESSAUTODETECT=true .build/bin/peer node start --peer-chaincodedev
+```
+
+Then you can launch an orderer node with the following commands:
+```
+FABRIC_CFG_PATH=./sampleconfig ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 ORDERER_GENERAL_GENESISMETHOD=file ORDERER_GENERAL_GENESISFILE=./test.genesis.block .build/bin/orderer
 ```
 
 Create a channel and join the peer to the channel:
 ```
-./build/bin/peer channel create -o localhost:7050 -c mychannel -f ./sampleconfig/test.tx
-./build/bin/peer channel join -b ./test.block
+FABRIC_CFG_PATH=./sampleconfig .build/bin/peer channel create -o localhost:7050 -c mychannel -f ./sampleconfig/test.tx
+FABRIC_CFG_PATH=./sampleconfig .build/bin/peer channel join -b ./mychannel.block
 ```
 
 ### Test Node.js Chaincode
 
-Now you are ready to test the node.js chaincode. Change directory to the fabric-chaincode-node folder. For now only a simple test is available, which is "test.js". Before you can launch that, run these commands first:
+#### Using Docker
+Now you are ready to test the node.js chaincode. Change directory to the fabric-chaincode-node folder. For now only a simple test is available, which is "test.js".
+
+Run the following command to launch the test:
+```
+CORE_CHAINCODE_ID_NAME="mycc:v0" node test/integration/test.js --peer.address grpc://localhost:7052
+```
+
+You should see a confirmation message in the peer's log about the REGISTER request being handled successfully.
+
+Next, open a second terminal and change directory to the fabric-chaincode-node folder. Run the following command to copy a chaincode to the test directory which is mounted on the CLI container.
+```
+cp -r test/integration /tmp/fabric-shim/chaincode
+```
+
+Then, enter the CLI container using the docker exec command:
+```
+docker exec -it cli bash
+```
+
+You can then issue commands to install and instantiate the chaincode.:
+```
+peer chaincode install -l node -n mycc -p /opt/gopath/src/github.com/integration -v v0
+peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -l node -n mycc -v v0 -c '{"Args":["init"]}' -P 'OR ("Org1MSP.member")'
+```
+
+Note that in the above steps, an "install" call was made to upload the chaincode source to the peer, even though the chaincode is running locally already and has registered with the peer. This is a dummy step only to make the peer logic happy when it checks for the file corresponding to the chaincode during instantiate.
+
+Once the chaincode instantiation has completely successfully, you can send transaction proposals to it with the following commands.
+
+```
+peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n mycc -c '{"Args":["test1"]}'
+```
+
+In the output of the command, you should see the following indicating successful completion of the transaction:
+```
+2017-08-14 16:24:04.225 EDT [chaincodeCmd] chaincodeInvokeOrQuery -> INFO 00a Chaincode invoke successful. result: status:200
+```
+
+#### Using Command Binaries
+
+Alternatively you can use the `peer` binary to test the node.js chaincode. Change directory to the fabric-chaincode-node folder. Before launching the chaincode, run these commands first:
 ```
 npm install
 gulp protos
@@ -140,20 +185,15 @@ Run the following command to launch the test (replacing "192.168.1.64" with the 
 CORE_CHAINCODE_ID_NAME="mycc:v0" node test/integration/test.js --peer.address grpc://192.168.1.64:7052
 ```
 
-You should see a confirmation message in the peer's log about the REGISTER request being handled successfully.
-
-You can then issue commands to install and instantiate the chaincode. From the "fabric" folder:
+Once the REGISTER request has been handled successfully, you can issue commands to install and instantiate the chaincode. From the "fabric" folder:
 ```
-CORE_LOGGING_PEER=debug ./build/bin/peer chaincode install -l node -n mycc -p <path to test/integration> -v v0
-CORE_LOGGING_PEER=debug ./build/bin/peer chaincode instantiate -o localhost:7050 -C mychannel -l node -n mycc -v v0 -c '{"Args":["init"]}' -P 'OR ("DEFAULT.member")'
+FABRIC_CFG_PATH=./sampleconfig FABRIC_LOGGING_SPEC=debug .build/bin/peer chaincode install -l node -n mycc -p <path to test/integration> -v v0
+FABRIC_CFG_PATH=./sampleconfig FABRIC_LOGGING_SPEC=debug .build/bin/peer chaincode instantiate -o localhost:7050 -C mychannel -l node -n mycc -v v0 -c '{"Args":["init"]}' -P 'OR ("Org1MSP.member")'
 ```
 
-Note that in the above steps, an "install" call was made to upload the chaincode source to the peer, even though the chaincode is running locally already and has registered with the peer. This is a dummy step only to make the peer logic happy when it checks for the file corresponding to the chaincode during instantiate.
-
-Once the chaincode instantiation has completely successfully, you can send transaction proposals to it with the following commands.
-
+Once the chaincode instantiation has completely successfully, you can send transaction proposals to it with the following command.
 ```
-CORE_LOGGING_PEER=debug ./build/bin/peer chaincode invoke -o localhost:7050 -C test -c '{"Args":["test1"]}' -n mycc
+FABRIC_CFG_PATH=./sampleconfig FABRIC_LOGGING_SPEC=debug .build/bin/peer chaincode invoke -o localhost:7050 -C mychannel -n mycc -c '{"Args":["test1"]}'
 ```
 
 In the output of the command, you should see the following indicating successful completion of the transaction:
@@ -189,7 +229,21 @@ First of all, you need to provide all the necessary files for running the chainc
 
 #### Writing your own chaincode
 
-To write your own chaincode is very easy. Create a file named `mychaincode.js` anywhere in the file system, and put in it the following minimum implementation:
+To write your own chaincode is very easy. Create a file named `mychaincode.js` anywhere in the file system.
+```
+cd ~
+mkdir mycc
+cd mycc
+// create a new node project
+npm init
+// install fabric-shim at master branch
+npm install fabric-shim@unstable
+// or using the released version
+npm install fabric-shim
+touch mychaincode.js
+```
+
+Put the following minimum implementation to `mychaincode.js`:
 ```
 const shim = require('fabric-shim');
 const util = require('util');
@@ -228,7 +282,7 @@ var Chaincode = class {
 shim.start(new Chaincode());
 ```
 
-Finally, create a file package.json at the same location, and put in the following content:
+Finally, update the "start" script in package.json to "node mychaincode.js":
 ```
 {
 	"name": "mychaincode",
@@ -243,31 +297,67 @@ Finally, create a file package.json at the same location, and put in the followi
 	"engineStrict": true,
 	"license": "Apache-2.0",
 	"dependencies": {
-		"fabric-shim": "unastable"
+		"fabric-shim": "unstable"
 	}
 }
 ```
 
-Now you need to restart the peer in "network" mode instead of "dev" mode:
-* If you used binary command `peer`, restart the peer process in network mode by eliminating the `--peer-chaincodev` program argument
-* If you used 'gulp channel-init', set an environment variable "DEVMODE=false" and run the command again
+Now you need to restart the peer in "network" mode instead of "dev" mode.
 
-Install the chaincode. The peer CLI will package the node.js chaincode source, without the "node_modules" folder, and send to the peer to install. If you have previously installed a chaincode called by the same name and version, you can delete it from the peer by removing the file /var/hyperledger/production/chaincodes/<name>.<version>.
+#### Using Docker
+
+If you used 'gulp channel-init', change directory to the fabric-chaincode-node, set an environment variable "DEVMODE=false" and run the command again.
 ```
-CORE_LOGGING_PEER=debug ./build/bin/peer chaincode install -l node -n mycc -v v0 -p <path to chaincode folder>
+cd fabric-chaincode-node
+DEVMODE=false gulp channel-init
 ```
 
-Upon successful response, instantiate the chaincode on the "test" channel created above:
+Next, copy a chaincode to the folder mounted on CLI container and enter the CLI container.
 ```
-CORE_LOGGING_PEER=debug ./build/bin/peer chaincode instantiate -o localhost:7050 -C mychannel -l node -n mycc -v v0 -c '{"Args":["init"]}' -P 'OR ("Org1MSP.member")'
+cp -r ~/mycc /tmp/fabric-shim/chaincode
+docker exec -it cli bash
+```
+
+Install the chaincode. The peer CLI will package the node.js chaincode source, without the "node_modules" folder, and send to the peer to install.
+```
+peer chaincode install -l node -n mycc -p /opt/gopath/src/github.com/mycc -v v0
+```
+
+Upon successful response, instantiate the chaincode on the "mychannel" channel created above:
+```
+peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -l node -n mycc -v v0 -c '{"Args":["init"]}' -P 'OR ("Org1MSP.member")'
 ```
 
 This will take a while to complete as the peer must perform npm install in order to build a custom docker image to launch the chaincode. When successfully completed, you should see in peer's log message confirmation of committing a new block. This new block contains the transaction to instantiate the chaincode "mycc:v0".
 
 To further inspect the result of the chaincode instantiate command, run `docker images` and you will see a new image listed at the top of the list with the name starting with `dev-`. You can inspect the content of this image by running the following command:
 ```
-docker run -it dev-jdoe-mycc-v0 bash
+docker exec -it dev-peer0.org1.example.com-mycc-v0 bash
 root@c188ae089ee5:/# ls /usr/local/src
 chaincode.js  fabric-shim  node_modules  package.json
 root@c188ae089ee5:/#
+```
+
+Once the chaincode instantiation has completely successfully, you can send transaction proposals to it with the following commands.
+```
+peer chaincode invoke -o orderer.example.com:7050 -C mychannel -c '{"Args":["dummy"]}' -n mycc
+```
+
+#### Using Command Binaries
+
+If you used binary command `peer`, restart peer and orderer, and initialize the channel.
+If you have previously installed and instantiated a chaincode called by the same name and version, please clear peer's ledger before restarting the network by removing the folder /var/hyperledger/production.
+```
+rm -r /var/hyperledger/production
+```
+
+When launching a peer node, eliminate the `--peer-chaincodev` program argument to start the peer process in network mode.
+```
+FABRIC_CFG_PATH=./sampleconfig CORE_CHAINCODE_LOGGING_SHIM=debug FABRIC_LOGGING_SPEC=debug CORE_PEER_ADDRESSAUTODETECT=true .build/bin/peer node start
+```
+
+Install and instantiate the chaincode with the following commands.
+```
+FABRIC_CFG_PATH=./sampleconfig FABRIC_LOGGING_SPEC=debug .build/bin/peer chaincode install -l node -n mycc -v v0 -p ~/mycc
+FABRIC_CFG_PATH=./sampleconfig FABRIC_LOGGING_SPEC=debug .build/bin/peer chaincode instantiate -o localhost:7050 -C mychannel -l node -n mycc -v v0 -c '{"Args":["init"]}' -P 'OR ("Org1MSP.member")'
 ```
