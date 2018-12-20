@@ -1,3 +1,13 @@
+## v1.4.0-rc2
+Thu 20 Dec 09:08:23 GMT 2018
+
+* [ea78e98](https://github.com/hyperledger/fabric/commit/ea78e98) [FAB-13323](https://jira.hyperledger.org/browse/FAB-13323) Add new environment variable for logging spec
+* [f876aee](https://github.com/hyperledger/fabric/commit/f876aee) [FAB-13322](https://jira.hyperledger.org/browse/FAB-13322) Update pipeline CI scripts
+* [c637a61](https://github.com/hyperledger/fabric/commit/c637a61) [FAB-13252](https://jira.hyperledger.org/browse/FAB-13252) Revert unstable-1.4 node_module fix
+* [51280c5](https://github.com/hyperledger/fabric/commit/51280c5) fix unstable-1.4. node module
+* [341c1d4](https://github.com/hyperledger/fabric/commit/341c1d4) [FAB-13252](https://jira.hyperledger.org/browse/FAB-13252) fix unstable-1.4 node modules
+* [e5550a5](https://github.com/hyperledger/fabric/commit/e5550a5) [FAB-13229](https://jira.hyperledger.org/browse/FAB-13229) 1.4 prepare next release
+
 ## v1.4.0-rc1
 Tue 11 Dec 08:58:56 GMT 2018
 
