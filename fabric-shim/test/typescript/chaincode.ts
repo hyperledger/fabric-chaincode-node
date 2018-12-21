@@ -165,8 +165,8 @@ class TestTS implements ChaincodeInterface {
         timestamp = keyMod.getTimestamp();
         let txid: string = keyMod.tx_id;
         txid = keyMod.getTxId();
-        let value: Buffer = keyMod.value;
-        value = keyMod.getValue();
+        let value: Buffer = keyMod.value.toBuffer();
+        value = keyMod.getValue().toBuffer();
     }
 
     async testStateQueryIterator(stateQuery: Iterators.StateQueryIterator) {
@@ -176,8 +176,8 @@ class TestTS implements ChaincodeInterface {
         const keyVal: Iterators.KV = stateNext.value;
         let key: string = keyVal.key;
         key = keyVal.getKey();
-        let val: Buffer = keyVal.value;
-        val = keyVal.getValue();
+        let val: Buffer = keyVal.value.toBuffer();
+        val = keyVal.getValue().toBuffer();
     }
 
     async testPrivateData(stub: ChaincodeStub): Promise<void> {
