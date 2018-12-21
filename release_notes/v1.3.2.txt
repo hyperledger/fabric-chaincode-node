@@ -1,0 +1,25 @@
+v1.3.2 December 21 2018
+-----------------------------
+
+Release Notes
+-------------
+* Lock x509 level - to prevent errors parsing certifcates
+* Remove incorrect utf8 check
+
+
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.3/CHANGELOG.md#v132

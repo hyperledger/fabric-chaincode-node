@@ -1,3 +1,12 @@
+## v1.3.2
+Fri 21 Dec 11:08:32 GMT 2018
+
+* [3d9b93a](https://github.com/hyperledger/fabric/commit/3d9b93a) [FAB-13364](https://jira.hyperledger.org/browse/FAB-13364) Lock x509 level
+* [c92e49a](https://github.com/hyperledger/fabric/commit/c92e49a) [FAB-12961](https://jira.hyperledger.org/browse/FAB-12961) remove incorrect utf8 check
+* [6e3beee](https://github.com/hyperledger/fabric/commit/6e3beee) [FAB-12921](https://jira.hyperledger.org/browse/FAB-12921) Use depth on cloning for release-1.3
+* [0cf7de9](https://github.com/hyperledger/fabric/commit/0cf7de9) [FAB-12781](https://jira.hyperledger.org/browse/FAB-12781) Update pipeline scripts
+* [0d6e546](https://github.com/hyperledger/fabric/commit/0d6e546) [FAB-12736](https://jira.hyperledger.org/browse/FAB-12736) - Build configuration in package.json
+
 ## v1.3.1
 Fri 26 Oct 2018 08:12:55 BST
 
