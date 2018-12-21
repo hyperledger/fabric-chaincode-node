@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim-test",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "testFabricVersion": "1.1.1",
   "testFabricCaVersion": "1.1.0",
   "testFabricThirdParty": "0.4.6",

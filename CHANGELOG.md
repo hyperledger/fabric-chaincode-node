@@ -1,3 +1,10 @@
+## v1.1.5
+Fri 21 Dec 2018 14:11:36 GMT
+
+* [c447fac](https://github.com/hyperledger/fabric/commit/c447fac) [FAB-13364](https://jira.hyperledger.org/browse/FAB-13364) Lock x509 level
+* [2c63d78](https://github.com/hyperledger/fabric/commit/2c63d78) [FAB-12961](https://jira.hyperledger.org/browse/FAB-12961) remove incorrect utf8 check
+* [365cd56](https://github.com/hyperledger/fabric/commit/365cd56) [FAB-12996](https://jira.hyperledger.org/browse/FAB-12996) Pipeline changes on release-1.1
+
 ## v1.1.4
 Fri 26 Oct 2018 07:48:53 BST
 
