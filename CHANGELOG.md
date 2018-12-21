@@ -1,3 +1,11 @@
+## v1.2.4
+Fri 21 Dec 2018 13:49:26 GMT
+
+* [61e25ec](https://github.com/hyperledger/fabric/commit/61e25ec) [FAB-13364](https://jira.hyperledger.org/browse/FAB-13364) Lock x509 level
+* [b41fe9d](https://github.com/hyperledger/fabric/commit/b41fe9d) [FAB-12961](https://jira.hyperledger.org/browse/FAB-12961) remove incorrect utf8 check
+* [186dad5](https://github.com/hyperledger/fabric/commit/186dad5) [FAB-12783](https://jira.hyperledger.org/browse/FAB-12783) Update pipeline scripts
+* [894ab75](https://github.com/hyperledger/fabric/commit/894ab75) [FAB-12735](https://jira.hyperledger.org/browse/FAB-12735) - Build configuration in package.json
+
 ## v1.2.3
 Fri 26 Oct 2018 08:09:12 BST
 
