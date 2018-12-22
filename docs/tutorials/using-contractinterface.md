@@ -150,7 +150,7 @@ If present this takes precedence over the exports.
 This is quite easy - as you need to run the startChaincode command.
 
 ```
-$ $(npm bin)/fabric-chaincode-node --peer.address localhost:7052
+$ $(npm bin)/fabric-chaincode-node start --peer.address localhost:7052 --chaincode-id-name "mycontract:v0"
 ```
 
 (this is actually what the peer does; this does mean that any chaincode that is written using the existing chaincode interface will continue to work as is.)
