@@ -10,29 +10,58 @@ node ('hyp-x') { // trigger build on x86_64 node
      env.PROJECT_DIR = "gopath/src/github.com/hyperledger"
      env.PROJECT = "fabric-chaincode-node"
      env.GOPATH = "$WORKSPACE/gopath"
-     env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:$PATH"
-     def failure_stage = "none"
      def nodeHome = tool 'nodejs-8.9.4'
-     env.PATH = "${env.PATH}:${nodeHome}/bin"
+     env.ARCH = "amd64"
+     def jobname = sh(returnStdout: true, script: 'echo ${JOB_NAME} | grep -q "verify" && echo patchset || echo merge').trim()
+     env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
+     def failure_stage = "none"
 // delete working directory
      deleteDir()
-      stage("Fetch Patchset") { // fetch gerrit refspec on latest commit
+      stage("Fetch Patchset") {
+      cleanWs()
           try {
-              dir("${ROOTDIR}"){
+              if (jobname == "patchset")  {
+                   println "$GERRIT_REFSPEC"
+                   println "$GERRIT_BRANCH"
+                   checkout([
+                       $class: 'GitSCM',
+                       branches: [[name: '$GERRIT_REFSPEC']],
+                       extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '$BASE_DIR'], [$class: 'CheckoutOption', timeout: 10]],
+                       userRemoteConfigs: [[credentialsId: 'hyperledger-jobbuilder', name: 'origin', refspec: '$GERRIT_REFSPEC:$GERRIT_REFSPEC', url: '$GIT_BASE']]])
+                    dir("${ROOTDIR}/$PROJECT_DIR") {
+                    sh '''
+                       # Clone fabric repository
+                       git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
+                       # Clone fabric-samples repository
+                       git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
+                    '''
+                    }
+              } else {
+                   // Clone fabric-chaincode-node on merge
+                   println "Clone $PROJECT repository"
+                   checkout([
+                       $class: 'GitSCM',
+                       branches: [[name: 'refs/heads/$GERRIT_BRANCH']],
+                       extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '$BASE_DIR']],
+                       userRemoteConfigs: [[credentialsId: 'hyperledger-jobbuilder', name: 'origin', refspec: '+refs/heads/$GERRIT_BRANCH:refs/remotes/origin/$GERRIT_BRANCH', url: '$GIT_BASE']]])
+                    dir("${ROOTDIR}/$PROJECT_DIR") {
+                    sh '''
+                       # Clone fabric repository
+                       git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
+                       # Clone fabric-samples repository
+                       git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
+                    '''
+                    }
+              }
+              dir("${ROOTDIR}/$PROJECT_DIR/$PROJECT") {
               sh '''
-                 [ -e gopath/src/github.com/hyperledger/ ] || mkdir -p $PROJECT_DIR
-                 cd $PROJECT_DIR && git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/$PROJECT
-                 # clone fabric repository
-                 git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
-                 # clone fabric-samples repository
-                 git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric-samples
-                 # Checkout to patch Refspec
-                 cd $PROJECT && git checkout "$GERRIT_BRANCH" && git fetch origin "$GERRIT_REFSPEC" && git checkout FETCH_HEAD
+                 # Print last two commit details
+                 echo
                  git log -n2 --pretty=oneline --abbrev-commit
+                 echo
               '''
               }
-          }
-          catch (err) {
+         } catch (err) {
                  failure_stage = "Fetch patchset"
                  currentBuild.result = 'FAILURE'
                  throw err
