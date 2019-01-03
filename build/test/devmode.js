@@ -84,6 +84,15 @@ gulp.task('dm-startup-chaincode', async (done) => {
     try {
         await new Promise((resolve, reject) => {
             const child = exec(script);
+            let successful = false;
+
+            child.stderr.on('data', (data) => {
+                if (Buffer.isBuffer(data)) {
+                    data = data.toString();
+                }
+
+                console.log('dm-startup-chaincode', 'stderr', data);
+            });
 
             child.stdout.on('data', (data) => {
                 if (Buffer.isBuffer(data)) {
@@ -91,12 +100,18 @@ gulp.task('dm-startup-chaincode', async (done) => {
                 }
 
                 if (data.includes('Successfully established communication with peer node')) {
+                    successful = true;
                     resolve(child);
                 }
+
+                console.log('dm-startup-chaincode', 'stdout', data);
             });
 
             child.on('close', (code, signal) => {
-                reject('Starting up chaincode via CLI failed');
+                console.log('dm-startup-chaincode', 'close', code, signal);
+                if (!successful) {
+                    reject(new Error(`Starting up chaincode via CLI failed, code = ${code}, signal = ${signal}`));
+                }
             });
         });
     } catch (err) {
