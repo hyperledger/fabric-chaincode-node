@@ -10,6 +10,11 @@ declare module 'fabric-shim' {
     import { EventEmitter } from 'events';
     import { LoggerInstance } from 'winston';
 
+    interface ProtobufBytes {
+        toBuffer(force_copy?: boolean): Buffer;
+        toString(encoding?: string): string;
+    }
+
     interface ChaincodeResponse {
         status: number;
         message: string;
@@ -149,18 +154,18 @@ declare module 'fabric-shim' {
 
         interface KV {
             key: string;
-            value: Buffer;
+            value: ProtobufBytes;
             getKey(): string;
-            getValue(): Buffer;
+            getValue(): ProtobufBytes;
         }
 
         interface KeyModification {
             is_delete: boolean;
-            value: Buffer;
+            value: ProtobufBytes;
             timestamp: Timestamp;
             tx_id: string;
             getIsDelete(): boolean;
-            getValue(): Buffer;
+            getValue(): ProtobufBytes;
             getTimestamp(): Timestamp;
             getTxId(): string;
         }
