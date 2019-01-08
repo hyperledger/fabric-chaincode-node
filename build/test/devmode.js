@@ -10,49 +10,10 @@ const gulp = require('gulp');
 const shell = require('gulp-shell');
 
 const util = require('util');
-const runSequence = require('run-sequence');
 
 const childProcess = require('child_process');
 const exec = childProcess.exec;
 const execFile = util.promisify(childProcess.execFile);
-
-gulp.task('test-devmode', ['invokeAllFnsInDev']);
-
-gulp.task('invokeAllFnsInDev', (done) => {
-
-    const tasks = [
-
-        // ensure that the fabric shim in it's entirity is copied over and verdaccioed
-        'st-copy-shim-crypto',
-
-        // ensure that the fabric is setup and the chaincode has been constructed
-        'st-copy-chaincode',
-
-        // Use the CLI to start up the chaincode
-        'dm-startup-chaincode',
-
-        // install
-        'st-install_chaincode',
-
-        // instantiate
-        'st-instantiate_chaincode',
-        'delay',
-
-        // check it didn't start up a docker image but used devmode
-        'check-docker',
-
-        // invoke all functions
-        'invoke_functions',
-
-        // kill the dev mode cc
-        'kill-cli'
-
-    ];
-
-    console.log('=== Starting Dev Mode Tests');
-    runSequence(...tasks, done);
-
-});
 
 gulp.task('check-docker', async (done) => {
     const options = {};
@@ -128,3 +89,4 @@ gulp.task('kill-cli', () => {
             ignoreErrors: true // kill and rm may fail because the containers may have been cleaned up
         }));
 });
+

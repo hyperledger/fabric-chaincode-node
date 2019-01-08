@@ -49,34 +49,34 @@ function getTLSArgs() {
     }
     return args;
 }
-gulp.task('copy-shim', ['protos'], () => {
+gulp.task('copy-shim', gulp.series('protos', () => {
     // first ensure the chaincode folder has the latest shim code
     srcPath = path.join(__dirname, '../../fabric-shim/**');
     destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim');
     fs.ensureDirSync(destPath);
     return gulp.src(srcPath)
         .pipe(gulp.dest(destPath));
-});
+}));
 
-gulp.task('copy-api', ['copy-shim'], () => {
+gulp.task('copy-api', gulp.series('copy-shim', () => {
     // first ensure the chaincode folder has the latest shim code
     srcPath = path.join(__dirname, '../../fabric-contract-api/**');
     destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-contract-api');
     fs.ensureDirSync(destPath);
     return gulp.src(srcPath)
         .pipe(gulp.dest(destPath));
-});
+}));
 
-gulp.task('copy-shim-crypto', ['copy-api'], () => {
+gulp.task('copy-shim-crypto', gulp.series('copy-api', () => {
     // first ensure the chaincode folder has the latest shim code
     srcPath = path.join(__dirname, '../../fabric-shim-crypto/**');
     destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/fabric-shim-crypto');
     fs.ensureDirSync(destPath);
     return gulp.src(srcPath)
         .pipe(gulp.dest(destPath));
-});
+}));
 
-gulp.task('copy-chaincode', ['copy-shim-crypto'], () => {
+gulp.task('copy-chaincode', gulp.series('copy-shim-crypto', () => {
     // create a package.json in the chaincode folder
     destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0/package.json');
     fs.writeFileSync(destPath, packageJson, 'utf8');
@@ -86,10 +86,10 @@ gulp.task('copy-chaincode', ['copy-shim-crypto'], () => {
     destPath = path.join(constants.BasicNetworkTestDir, 'src/mycc.v0');
     return gulp.src(srcPath)
         .pipe(gulp.dest(destPath));
-});
+}));
 
 // make sure `gulp channel-init` is run first
-gulp.task('test-e2e-install-v0', ['copy-chaincode'], () => {
+gulp.task('test-e2e-install-v0', gulp.series('copy-chaincode', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
             util.format('docker exec cli peer chaincode install -l node -n %s -v v0 -p %s',
@@ -104,9 +104,9 @@ gulp.task('test-e2e-install-v0', ['copy-chaincode'], () => {
                 '/etc/hyperledger/config/src/mycc.v0'),
 
         ]));
-});
+}));
 
-gulp.task('test-e2e-instantiate-v0', ['test-e2e-install-v0'], () => {
+gulp.task('test-e2e-instantiate-v0', gulp.series('test-e2e-install-v0', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
             util.format('docker exec cli peer chaincode instantiate -o %s %s -l node -C %s -n %s -v v0 -c %s -P %s',
@@ -125,9 +125,9 @@ gulp.task('test-e2e-instantiate-v0', ['test-e2e-install-v0'], () => {
                 '\'OR ("Org1MSP.member")\'')
 
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test1-test2', ['test-e2e-instantiate-v0'], () => {
+gulp.task('test-e2e-invoke-v0-test1-test2', gulp.series('test-e2e-instantiate-v0', () => {
     return gulp.src('*.js', {read: false})
         // because the peer CLI for the instantiate call returns
         // before the transaction gets committed to the ledger, we
@@ -147,9 +147,9 @@ gulp.task('test-e2e-invoke-v0-test1-test2', ['test-e2e-instantiate-v0'], () => {
                 CC_NAME,
                 '\'{"Args":["test2"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test3', ['test-e2e-invoke-v0-test1-test2'], () => {
+gulp.task('test-e2e-invoke-v0-test3', gulp.series('test-e2e-invoke-v0-test1-test2', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -159,9 +159,9 @@ gulp.task('test-e2e-invoke-v0-test3', ['test-e2e-invoke-v0-test1-test2'], () => 
                 CC_NAME,
                 '\'{"Args":["test3"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test4', ['test-e2e-invoke-v0-test3'], () => {
+gulp.task('test-e2e-invoke-v0-test4', gulp.series('test-e2e-invoke-v0-test3', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -171,9 +171,9 @@ gulp.task('test-e2e-invoke-v0-test4', ['test-e2e-invoke-v0-test3'], () => {
                 CC_NAME,
                 '\'{"Args":["test4"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test5', ['test-e2e-invoke-v0-test4'], () => {
+gulp.task('test-e2e-invoke-v0-test5', gulp.series('test-e2e-invoke-v0-test4', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -183,10 +183,10 @@ gulp.task('test-e2e-invoke-v0-test5', ['test-e2e-invoke-v0-test4'], () => {
                 CC_NAME,
                 '\'{"Args":["test5"]}\'')
         ]));
-});
+}));
 
 
-gulp.task('test-e2e-invoke-v0-test6', ['test-e2e-invoke-v0-test5'], () => {
+gulp.task('test-e2e-invoke-v0-test6', gulp.series('test-e2e-invoke-v0-test5', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -196,9 +196,9 @@ gulp.task('test-e2e-invoke-v0-test6', ['test-e2e-invoke-v0-test5'], () => {
                 CC_NAME,
                 '\'{"Args":["test6"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test7', ['test-e2e-invoke-v0-test6'], () => {
+gulp.task('test-e2e-invoke-v0-test7', gulp.series('test-e2e-invoke-v0-test6', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -208,9 +208,9 @@ gulp.task('test-e2e-invoke-v0-test7', ['test-e2e-invoke-v0-test6'], () => {
                 CC_NAME,
                 '\'{"Args":["test7"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test8', ['test-e2e-invoke-v0-test7'], () => {
+gulp.task('test-e2e-invoke-v0-test8', gulp.series('test-e2e-invoke-v0-test7', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -220,9 +220,9 @@ gulp.task('test-e2e-invoke-v0-test8', ['test-e2e-invoke-v0-test7'], () => {
                 CC_NAME,
                 '\'{"Args":["test8"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test9', ['test-e2e-invoke-v0-test8'], () => {
+gulp.task('test-e2e-invoke-v0-test9', gulp.series('test-e2e-invoke-v0-test8', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -232,9 +232,9 @@ gulp.task('test-e2e-invoke-v0-test9', ['test-e2e-invoke-v0-test8'], () => {
                 CC_NAME,
                 '\'{"Args":["test9"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test10', ['test-e2e-invoke-v0-test9'], () => {
+gulp.task('test-e2e-invoke-v0-test10', gulp.series('test-e2e-invoke-v0-test9', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -244,10 +244,10 @@ gulp.task('test-e2e-invoke-v0-test10', ['test-e2e-invoke-v0-test9'], () => {
                 CC_NAME,
                 '\'{"Args":["test10"]}\'')
         ]));
-});
+}));
 
 // Test encryption support in fabric-shim-crypto
-gulp.task('test-e2e-invoke-v0-test11', ['test-e2e-invoke-v0-test10'], () => {
+gulp.task('test-e2e-invoke-v0-test11', gulp.series('test-e2e-invoke-v0-test10', () => {
     const cmd = 'docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent --transient ' +
         '\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
 
@@ -261,10 +261,10 @@ gulp.task('test-e2e-invoke-v0-test11', ['test-e2e-invoke-v0-test10'], () => {
                 CC_NAME,
                 '\'{"Args":["test11","newkey","newvalue"]}\'')
         ]));
-});
+}));
 
 // Test decryption support in fabric-shim-crypto
-gulp.task('test-e2e-invoke-v0-test12', ['test-e2e-invoke-v0-test11'], () => {
+gulp.task('test-e2e-invoke-v0-test12', gulp.series('test-e2e-invoke-v0-test11', () => {
     const cmd = 'docker exec cli peer chaincode query %s -C %s -n %s -c %s --transient ' +
         '\'{"encrypt-key":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=","iv":"MDEyMzQ1Njc4OTAxMjM0NQ=="}\'';
 
@@ -278,10 +278,10 @@ gulp.task('test-e2e-invoke-v0-test12', ['test-e2e-invoke-v0-test11'], () => {
                 CC_NAME,
                 '\'{"Args":["test12","newkey","newvalue"]}\'')
         ]));
-});
+}));
 
 // Test decryption support in fabric-shim-crypto
-gulp.task('test-e2e-invoke-v0-test13', ['test-e2e-invoke-v0-test12'], () => {
+gulp.task('test-e2e-invoke-v0-test13', gulp.series('test-e2e-invoke-v0-test12', () => {
     const cmd = 'docker exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent --transient ' +
         '\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
         'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
@@ -299,10 +299,10 @@ gulp.task('test-e2e-invoke-v0-test13', ['test-e2e-invoke-v0-test12'], () => {
                 CC_NAME,
                 '\'{"Args":["test13","newkey1","newvalue"]}\'')
         ]));
-});
+}));
 
 // Test decryption support in fabric-shim-crypto
-gulp.task('test-e2e-invoke-v0-test14', ['test-e2e-invoke-v0-test13'], () => {
+gulp.task('test-e2e-invoke-v0-test14', gulp.series('test-e2e-invoke-v0-test13', () => {
     const cmd = 'docker exec cli peer chaincode query %s -C %s -n %s -c %s --transient ' +
         '\'{"sign-key":"LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tTUlHSEFnRUFNQk1HQnlxR1NNNDlB' +
         'Z0VHQ0NxR1NNNDlBd0VIQkcwd2F3SUJBUVFnWllNdmYzdzVWa3p6c1RRWUk4WjhJWHVHRlptbWZqSVg' +
@@ -320,10 +320,10 @@ gulp.task('test-e2e-invoke-v0-test14', ['test-e2e-invoke-v0-test13'], () => {
                 CC_NAME,
                 '\'{"Args":["test14","newkey1","newvalue"]}\'')
         ]));
-});
+}));
 
 // Test invoke where chaincode responds with an error
-gulp.task('test-e2e-invoke-v0-test15', ['test-e2e-invoke-v0-test14'], () => {
+gulp.task('test-e2e-invoke-v0-test15', gulp.series('test-e2e-invoke-v0-test14', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -333,9 +333,9 @@ gulp.task('test-e2e-invoke-v0-test15', ['test-e2e-invoke-v0-test14'], () => {
                 CC_NAME,
                 '\'{"Args":["test15"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test16', ['test-e2e-invoke-v0-test15'], () => {
+gulp.task('test-e2e-invoke-v0-test16', gulp.series('test-e2e-invoke-v0-test15', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -345,10 +345,10 @@ gulp.task('test-e2e-invoke-v0-test16', ['test-e2e-invoke-v0-test15'], () => {
                 CC_NAME,
                 '\'{"Args":["test16"]}\'')
         ]));
-});
+}));
 
 
-gulp.task('test-e2e-invoke-v0-test17', ['test-e2e-invoke-v0-test16'], () => {
+gulp.task('test-e2e-invoke-v0-test17', gulp.series('test-e2e-invoke-v0-test16', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -358,9 +358,9 @@ gulp.task('test-e2e-invoke-v0-test17', ['test-e2e-invoke-v0-test16'], () => {
                 CC_NAME,
                 '\'{"Args":["test17"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test18', ['test-e2e-invoke-v0-test17'], () => {
+gulp.task('test-e2e-invoke-v0-test18', gulp.series('test-e2e-invoke-v0-test17', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -370,9 +370,9 @@ gulp.task('test-e2e-invoke-v0-test18', ['test-e2e-invoke-v0-test17'], () => {
                 CC_NAME,
                 '\'{"Args":["test18"]}\'')
         ]));
-});
+}));
 
-gulp.task('test-e2e-invoke-v0-test19', ['test-e2e-invoke-v0-test18'], () => {
+gulp.task('test-e2e-invoke-v0-test19', gulp.series('test-e2e-invoke-v0-test18', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -382,10 +382,10 @@ gulp.task('test-e2e-invoke-v0-test19', ['test-e2e-invoke-v0-test18'], () => {
                 CC_NAME,
                 '\'{"Args":["test19"]}\'')
         ]));
-});
+}));
 
 
-gulp.task('test-e2e-invoke-v0-test20', ['test-e2e-invoke-v0-test19'], () => {
+gulp.task('test-e2e-invoke-v0-test20', gulp.series('test-e2e-invoke-v0-test19', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -396,10 +396,10 @@ gulp.task('test-e2e-invoke-v0-test20', ['test-e2e-invoke-v0-test19'], () => {
                 '\'{"Args":["test20"]}\'',
                 ';exit $((!($?!=0)))')
         ]));
-});
+}));
 
 // set key-level validation params
-gulp.task('test-e2e-invoke-v0-test21', ['test-e2e-invoke-v0-test20'], () => {
+gulp.task('test-e2e-invoke-v0-test21', gulp.series('test-e2e-invoke-v0-test20', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -410,10 +410,10 @@ gulp.task('test-e2e-invoke-v0-test21', ['test-e2e-invoke-v0-test20'], () => {
                 '\'{"Args":["test21"]}\'',
                 ';exit $((!($?!=0)))')
         ]));
-});
+}));
 
 // get key-level validation params
-gulp.task('test-e2e-invoke-v0-test22', ['test-e2e-invoke-v0-test21'], () => {
+gulp.task('test-e2e-invoke-v0-test22', gulp.series('test-e2e-invoke-v0-test21', () => {
     return gulp.src('*.js', {read: false})
         .pipe(wait(3000))
         .pipe(shell([
@@ -424,31 +424,6 @@ gulp.task('test-e2e-invoke-v0-test22', ['test-e2e-invoke-v0-test21'], () => {
                 '\'{"Args":["test22"]}\'',
                 ';exit $((!($?!=0)))')
         ]));
-});
+}));
 
-gulp.task('test-e2e-shim', ['test-e2e-invoke-v0-test22']);
-
-gulp.task('test-fv-shim', ['fv-pre-test'], (done) => {
-    const dir = path.join(__dirname, '../../test/fv');
-
-    const {spawn} = require('child_process');
-    const cmd = spawn('npx', ['mocha', '--recursive', dir], {shell:true, cwd:process.cwd(), env:process.env});
-
-    cmd.stdout.on('data', (data) => {
-        process.stdout.write(`${data}`);
-    });
-
-    cmd.stderr.on('data', (data) => {
-        process.stdout.write(`${data}`);
-    });
-
-    cmd.on('close', (code) => {
-        if (code !== 0) {
-            done(new Error(`child process exited with code ${code}`));
-        } else {
-            console.log(`child process exited with code ${code}`);
-            done();
-        }
-    });
-
-});
+gulp.task('test-e2e-shim', gulp.series('test-e2e-invoke-v0-test22'));

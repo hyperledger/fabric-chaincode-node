@@ -18,51 +18,9 @@ const gulp = require('gulp');
 const shell = require('gulp-shell');
 
 const util = require('util');
-const runSequence = require('run-sequence');
 
 const childProcess = require('child_process');
 const exec = childProcess.exec;
-
-gulp.task('test-invctrl', ['invokeAllFnsInvCtrl']);
-
-gulp.task('invokeAllFnsInvCtrl', (done) => {
-
-    const tasks = [
-
-        // ensure that the fabric shim in it's entirity is copied over and verdaccioed
-        'st-copy-shim-crypto',
-
-        // ensure that the fabric is setup and the chaincode has been constructed
-        'st-copy-chaincode',
-
-        // ensure that chaincode is npm installed
-        'npm-install-chaincode',
-
-        // Use the CLI to start up the chaincode
-        'inv-startup-chaincode',
-
-        // install
-        'st-install_chaincode',
-
-        // instantiate
-        'st-instantiate_chaincode',
-        'delay',
-
-        // check it didn't start up a docker image but used devmode
-        'check-docker',
-
-        // invoke all functions
-        'invoke_functions',
-
-        // kill the dev mode cc
-        'kill-cli'
-
-    ];
-
-    console.log('=== Starting Inv Ctrl Tests');
-    runSequence(...tasks, done);
-
-});
 
 gulp.task('npm-install-chaincode', () => {
     return gulp.src('*.js', {read: false})

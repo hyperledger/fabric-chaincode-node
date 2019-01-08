@@ -31,7 +31,7 @@ gulp.task('typescript_check', shell.task([
     ignoreErrors: false // once compile failed, throw error
 }));
 
-gulp.task('test-headless', ['clean-up', 'lint', 'typescript_check', 'instrument', 'protos', 'test-schema'], function() {
+gulp.task('test-headless', gulp.series(['clean-up', 'lint', 'typescript_check', 'instrument', 'protos', 'test-schema'], function() {
     // this is needed to avoid a problem in tape-promise with adding
     // too many listeners to the "unhandledRejection" event
     process.setMaxListeners(0);
@@ -49,4 +49,4 @@ gulp.task('test-headless', ['clean-up', 'lint', 'typescript_check', 'instrument'
                 'text-summary', 'cobertura', 'html']
         }))
         .pipe(istanbul.enforceThresholds({thresholds: {global: 100}}));
-});
+}));

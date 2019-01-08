@@ -12,7 +12,6 @@ const fs = require('fs-extra');
 const path = require('path');
 const shell = require('gulp-shell');
 const replace = require('gulp-replace');
-const runSequence = require('run-sequence');
 const merge = require('merge-stream');
 
 const constants = require('../../test/constants.js');
@@ -57,7 +56,7 @@ console.log('\n####################################################');
 console.log(util.format('# debug log: %s', debugPath));
 console.log('####################################################\n');
 
-gulp.task('clean-up', function() {
+gulp.task('clean-up', async() => {
     // some tests create temporary files or directories
     // they are all created in the same temp folder
 
@@ -75,7 +74,7 @@ gulp.task('clean-up', function() {
         // directory does not exist
     }
 
-    return fs.ensureFileSync(debugPath);
+    return await fs.ensureFile(debugPath);
 });
 
 // re-use the "basic-network" artifacts from fabric-samples
@@ -90,7 +89,8 @@ console.log('####################################################\n');
 
 const devmode = process.env.DEVMODE ? process.env.DEVMODE : 'true';
 const tls = process.env.TLS ? process.env.TLS : 'false';
-gulp.task('docker-copy', ['clean-up'], function() {
+
+gulp.task('docker-copy', gulp.series('clean-up', function() {
     gulp.src([
         path.join(__dirname, 'docker-compose.yml'),
     ], {base: __dirname})
@@ -121,28 +121,7 @@ gulp.task('docker-copy', ['clean-up'], function() {
     ])
         .pipe(gulp.dest(testDir));
 
-});
-
-gulp.task('fv-pre-test', (done) => {
-    const tasks = ['fv-pack', 'fv-copy', 'fv-clean'];
-    runSequence(...tasks, done);
-});
-
-gulp.task('fv-pack', () => {
-    return gulp.src('*.js')
-        .pipe(shell([
-            'npm pack ./fabric-contract-api',
-            'npm pack ./fabric-shim',
-            'npm pack ./fabric-shim-crypto',
-        ]));
-});
-
-gulp.task('fv-copy', ['fv-copy-depts'], () => {
-    return gulp.src([
-        'test/fv/**/*',
-    ], {base: 'test'})
-        .pipe(gulp.dest(testDir));
-});
+}));
 
 gulp.task('fv-copy-depts', () => {
     let dirContents = fs.readdirSync('test/fv');
@@ -165,16 +144,59 @@ gulp.task('fv-copy-depts', () => {
     return merge(...streams);
 });
 
+gulp.task('fv-copy', gulp.series('fv-copy-depts', () => {
+    return gulp.src([
+        'test/fv/**/*',
+    ], {base: 'test'})
+        .pipe(gulp.dest(testDir));
+}));
+
+gulp.task('fv-pack', () => {
+    return gulp.src('*.js')
+        .pipe(shell([
+            'npm pack ./fabric-contract-api',
+            'npm pack ./fabric-shim',
+            'npm pack ./fabric-shim-crypto',
+        ]));
+});
+
 gulp.task('fv-clean', () => {
     return del(path.join(__dirname, '../../**/*.tgz'));
 });
+
+gulp.task('fv-pre-test', gulp.series(['fv-pack', 'fv-copy', 'fv-clean']));
+
+gulp.task('test-fv-shim', gulp.series('fv-pre-test', (done) => {
+    const dir = path.join(__dirname, '../../test/fv');
+
+    const {spawn} = require('child_process');
+    const cmd = spawn('npx', ['mocha', '--recursive', dir], {shell:true, cwd:process.cwd(), env:process.env});
+
+    cmd.stdout.on('data', (data) => {
+        process.stdout.write(`${data}`);
+    });
+
+    cmd.stderr.on('data', (data) => {
+        process.stdout.write(`${data}`);
+    });
+
+    cmd.on('close', (code) => {
+        if (code !== 0) {
+            done(new Error(`child process exited with code ${code}`));
+        } else {
+            console.log(`child process exited with code ${code}`);
+            done();
+        }
+    });
+
+}));
 
 // This and other usage of the gulp-shell module cannot use the
 // short-hand style because we must delay the use of the testDir
 // to task invocation time, rather than module load time (which
 // using the short-hand style will cause), because the testDir
 // is not defined until the 'clean-up' task has been run
-gulp.task('docker-clean', ['docker-copy'], () => {
+gulp.task('docker-clean', gulp.series('docker-copy', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
             // stop and remove chaincode docker instances
@@ -190,17 +212,17 @@ gulp.task('docker-clean', ['docker-copy'], () => {
             verbose: true, // so we can see the docker command output
             ignoreErrors: true // kill and rm may fail because the containers may have been cleaned up
         }));
-});
+}));
 
-gulp.task('docker-cli-ready', ['docker-clean'], () => {
+gulp.task('docker-cli-ready', gulp.series('docker-clean', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
             // make sure that necessary containers are up by docker-compose
             util.format('docker-compose -f %s up -d cli', fs.realpathSync(path.join(testDir, 'docker-compose.yml')))
         ]));
-});
+}));
 
-gulp.task('generate-config', ['docker-cli-ready'], () => {
+gulp.task('generate-config', gulp.series('docker-cli-ready', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
             util.format('docker exec cli configtxgen -profile OneOrgOrdererGenesis -outputBlock %s',
@@ -212,21 +234,21 @@ gulp.task('generate-config', ['docker-cli-ready'], () => {
             verbose: true, // so we can see the docker command output
             ignoreErrors: true // kill and rm may fail because the containers may have been cleaned up
         }));
-});
+}));
 
 // variable to construct the docker network name used by
 // chaincode container to find peer node
 process.env.COMPOSE_PROJECT_NAME = 'basicnetwork';
 
-gulp.task('docker-ready', ['generate-config'], () => {
+gulp.task('docker-ready', gulp.series('generate-config', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
             // make sure that necessary containers are up by docker-compose
             util.format('docker-compose -f %s up -d', fs.realpathSync(path.join(testDir, 'docker-compose.yml')))
         ]));
-});
+}));
 
-gulp.task('channel-init', ['docker-ready'], shell.task([
+gulp.task('channel-init', gulp.series('docker-ready', shell.task([
     // create channel, join peer0 to the channel
     'docker exec cli /etc/hyperledger/config/channel-init.sh'
-]));
+])));

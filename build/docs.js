@@ -15,7 +15,6 @@ if (!currentBranch) {
     currentBranch = 'master';
 }
 
-
 let docsRoot;
 if (process.env.DOCS_ROOT) {
     docsRoot = process.env.DOCS_ROOT;
@@ -35,12 +34,7 @@ const docSrc = [
     'fabric-contract-api/lib/**/*.js'
 ];
 
-gulp.task('schema-docs', () => {
-    return gulp.src('fabric-contract-api/schema/contract-schema.json')
-        .pipe(gulp.dest(path.join(docsRoot, currentBranch)));
-});
-
-gulp.task('jsdocs', ['clean'], function (cb) {
+gulp.task('jsdocs', gulp.series('clean', function (cb) {
     gulp.src(docSrc, {read: false}).pipe(jsdoc({
         opts: {
             tutorials: './docs/tutorials',
@@ -53,11 +47,11 @@ gulp.task('jsdocs', ['clean'], function (cb) {
 
     }, cb)
     );
-});
+}));
 
-
-gulp.task('docs-dev', ['docs'], function() {
-    gulp.watch(docSrc, ['docs']);
+gulp.task('schema-docs', () => {
+    return gulp.src('fabric-contract-api/schema/contract-schema.json')
+        .pipe(gulp.dest(path.join(docsRoot, currentBranch)));
 });
 
 // for the rare occurance where something needs to be bootsrap in the docs ahead of a release
@@ -65,7 +59,7 @@ gulp.task('bootstrap', function() {
     gulp.src('./docs/bootstrap/**/*').pipe(gulp.dest(docsRoot));
 });
 
-gulp.task('docs', ['jsdocs', 'schema-docs', 'bootstrap'], () => {
+gulp.task('docs', gulp.series(['jsdocs', 'schema-docs', 'bootstrap'], () => {
 
     const relativePath = '.';
     const packageJson = require(path.join(__dirname, '..', 'package.json'));
@@ -99,4 +93,4 @@ gulp.task('docs', ['jsdocs', 'schema-docs', 'bootstrap'], () => {
     } else {
         console.log(`Not updating or routing logic, as not master branch - it is ${currentBranch}`);
     }
-});
+}));
