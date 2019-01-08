@@ -1,3 +1,8 @@
+## v1.4.0
+Tue  8 Jan 16:15:05 GMT 2019
+
+* [5c3874d](https://github.com/hyperledger/fabric/commit/5c3874d) [FAB-13398](https://jira.hyperledger.org/browse/FAB-13398) Prepare next release
+
 ## v1.4.0-rc2
 Thu 20 Dec 09:08:23 GMT 2018
 
