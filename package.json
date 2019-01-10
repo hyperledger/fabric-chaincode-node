@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim-test",
-  "version": "1.4.0",
+  "version": "1.4.1-snapshot",
   "description": "fabric-shim, fabric-shim-crypto",
   "testFabricVersion": "1.4.0",
   "testFabricThirdParty": "0.4.14",
