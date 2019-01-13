@@ -48,6 +48,9 @@ Parse_Arguments() {
                       --publish_ApiDocs)
                             publish_ApiDocs
                             ;;
+                      --publish_Nodeenv_Image)
+                            publish_Nodeenv_Image
+                            ;;
               esac
               shift
       done
@@ -74,7 +77,7 @@ function removeUnwantedImages() {
         else
                 docker rmi -f $DOCKER_IMAGES_SNAPSHOTS || true
         fi
-        DOCKER_IMAGE_IDS=$(docker images | grep -v 'base*\|couchdb\|kafka\|zookeeper\|cello' | awk '{print $3}')
+        DOCKER_IMAGE_IDS=$(docker images | grep -v 'couchdb\|kafka\|zookeeper\|cello' | awk '{print $3}')
 
         if [ -z "$DOCKER_IMAGE_IDS" ] || [ "$DOCKER_IMAGE_IDS" = " " ]; then
                 echo "---- No images available for deletion ----"
@@ -85,9 +88,7 @@ function removeUnwantedImages() {
 }
 
 # Delete nvm prefix & then delete nvm
-rm -rf $HOME/.nvm/ $HOME/.node-gyp/ $HOME/.npm/ $HOME/.npmrc  || true
-
-mkdir $HOME/.nvm || true
+rm -rf $HOME/.node-gyp/ $HOME/.npm/ $HOME/.npmrc  || true
 
 ls -l /tmp/fabric-shim/chaincode/hyperledger/fabric
 ls -l /tmp/fabric-shim/chaincode/hyperledger
@@ -95,14 +96,13 @@ ls -l /tmp/fabric-shim/chaincode/hyperledger
 # Remove /tmp/fabric-shim
 docker run -v /tmp:/tmp library/alpine rm -rf /tmp/fabric-shim || true
 
+ls -l /tmp/fabric-shim/chaincode/hyperledger/fabric
+ls -l /tmp/fabric-shim/chaincode/hyperledger
+
 # remove tmp/hfc and hfc-key-store data
-rm -rf /home/jenkins/.nvm /home/jenkins/npm /tmp/fabric-shim /tmp/hfc* /tmp/npm* /home/jenkins/kvsTemp /home/jenkins/.hfc-key-store || true
+rm -rf /home/jenkins/npm /tmp/fabric-shim /tmp/hfc* /tmp/npm* /home/jenkins/kvsTemp /home/jenkins/.hfc-key-store || true
 
 rm -rf /var/hyperledger/*
-
-rm -rf gopath/src/github.com/hyperledger/fabric-ca/vendor/github.com/cloudflare/cfssl/vendor/github.com/cloudflare/cfssl_trust/ca-bundle || true
-# yamllint disable-line rule:line-length
-rm -rf gopath/src/github.com/hyperledger/fabric-ca/vendor/github.com/cloudflare/cfssl/vendor/github.com/cloudflare/cfssl_trust/intermediate_ca || true
 
 clearContainers
 removeUnwantedImages
@@ -128,7 +128,7 @@ env_Info() {
 
 # pull fabric, ca images from nexus
 pull_Docker_Images() {
-            for IMAGES in peer orderer tools ca; do
+            for IMAGES in peer orderer tools ca baseos; do
                  docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG} > /dev/null 2>&1
                           if [ $? -ne 0 ]; then
                                 echo -e "\033[31m FAILED to pull docker images" "\033[0m"
@@ -138,6 +138,7 @@ pull_Docker_Images() {
                  echo
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG} $ORG_NAME-$IMAGES
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG} $ORG_NAME-$IMAGES:${ARCH}-${VERSION}
+                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG} $ORG_NAME-$IMAGES:${VERSION}
                  docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:${IMAGE_TAG}
             done
                  echo
@@ -149,12 +150,8 @@ install_Npm() {
 
     echo "-------> ARCH:" $ARCH
     if [[ $ARCH == "s390x" || $ARCH == "ppc64le" ]]; then
-        # Install nvm to install multi node versions
-        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-        # shellcheck source=/dev/null
-        export NVM_DIR="$HOME/.nvm"
-        # shellcheck source=/dev/null
-        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+        # Source nvmrc.sh
+        source /etc/profile.d/nvmrc.sh
         echo "------> Install NodeJS"
         # This also depends on the fabric-baseimage. Make sure you modify there as well.
         echo "------> Use $NODE_VER"
@@ -221,6 +218,23 @@ e2e_Tests() {
         echo "#############################################"
         echo -e "\033[32m ------> Tests Complete" "\033[0m"
         echo "#############################################"
+}
+
+# Publish nodeenv docker image after successful merge
+publish_Nodeenv_Image() {
+        echo
+        echo -e "\033[32m -----------> Publish nodeenv docker image" "\033[0m"
+        # 10003 points to docker.snapshot
+        DOCKER_REPOSITORY=nexus3.hyperledger.org:10003
+        # SETTINGS_FILE stores the nexus credentials
+        USER=$(xpath -e "//servers/server[id='$DOCKER_REPOSITORY']/username/text()" "$SETTINGS_FILE")
+        PASS=$(xpath -e "//servers/server[id='$DOCKER_REPOSITORY']/password/text()" "$SETTINGS_FILE")
+        docker login $DOCKER_REPOSITORY -u "$USER" -p "$PASS"
+        # tag nodeenv latest tag to nexus3 repo
+        docker tag hyperledger/fabric-nodeenv $DOCKER_REPOSITORY/hyperledger/fabric-nodeenv:$ARCH-latest
+        # Push nodeenv image to nexus3 docker.snapshot
+        docker push $DOCKER_REPOSITORY/hyperledger/fabric-nodeenv:$ARCH-latest
+        docker images
 }
 
 # Publish npm modules after successful merge on amd64
