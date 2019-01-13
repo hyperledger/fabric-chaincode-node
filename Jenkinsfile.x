@@ -32,13 +32,8 @@ node ('hyp-x') { // trigger build on x86_64 node
                     sh '''
                        # Clone fabric repository
                        git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
-                       if [ "$GERRIT_BRANCH" = "release-1.4" ]; then
-                          # Clone fabric-samples repository
-                          git clone --single-branch -b master --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
-                       else
-                          # Clone fabric-samples repository
-                          git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
-                       fi
+                       # Clone fabric-samples repository
+                       git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
                     '''
                     }
               } else {
@@ -53,13 +48,8 @@ node ('hyp-x') { // trigger build on x86_64 node
                     sh '''
                        # Clone fabric repository
                        git clone --single-branch -b $GERRIT_BRANCH git://cloud.hyperledger.org/mirror/fabric
-                       if [ "$GERRIT_BRANCH" = "release-1.4" ]; then
-                          # Clone fabric-samples repository
-                          git clone --single-branch -b master --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
-                       else
-                          # Clone fabric-samples repository
-                          git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
-                       fi
+                       # Clone fabric-samples repository
+                       git clone --single-branch -b $GERRIT_BRANCH --depth=1 git://cloud.hyperledger.org/mirror/fabric-samples
                     '''
                     }
               }
