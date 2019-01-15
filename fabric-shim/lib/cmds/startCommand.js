@@ -14,10 +14,7 @@
 
 'use strict';
 
-
 const YargsParser = require('yargs-parser');
-
-const Bootstrap = require('../contract-spi/bootstrap');
 
 const validOptions = {
     'peer.address': {type: 'string', required: true},
@@ -45,6 +42,7 @@ exports.builder = (yargs) => {
     return yargs;
 };
 exports.handler = function (argv) {
+    const Bootstrap = require('../contract-spi/bootstrap');
     return argv.thePromise = Bootstrap.bootstrap();
 };
 

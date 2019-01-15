@@ -988,31 +988,29 @@ describe('chaincodefromcontract', () => {
             metadata.info.should.deep.equal(metadataToSend.info);
             metadata.components.should.deep.equal(metadataToSend.components);
         });
-
-        it ('should fill in info field when not set with package.json data', () => {
+        it('should correctly retrieve info with the constructor title and version data', () => {
             const metadataToSend = {
                 contracts: exampleMetadata.contracts,
-                components: exampleMetadata.components
+                components: exampleMetadata.components,
             };
-
+            ChaincodeFromContract.prototype.title = 'some title';
+            ChaincodeFromContract.prototype.version = '0.1.1';
             const metadata = ChaincodeFromContract.prototype._augmentMetadataFromCode(metadataToSend);
             metadata.contracts.should.deep.equal(metadataToSend.contracts);
             metadata.info.should.deep.equal({
-                version: '1.0.1',
-                title: 'some package'
+                version: '0.1.1',
+                title: 'some title'
             });
             metadata.components.should.deep.equal(metadataToSend.components);
         });
 
-        it ('should fill in info field when not set and package.json missing data', () => {
+        it('should fill in info when there is no constructor title and version data', () => {
             const metadataToSend = {
                 contracts: exampleMetadata.contracts,
-                components: exampleMetadata.components
+                components: exampleMetadata.components,
             };
-
-            mockery.deregisterMock('packagejson');
-            mockery.registerMock('packagejson', {});
-
+            ChaincodeFromContract.prototype.title = undefined;
+            ChaincodeFromContract.prototype.version = undefined;
             const metadata = ChaincodeFromContract.prototype._augmentMetadataFromCode(metadataToSend);
             metadata.contracts.should.deep.equal(metadataToSend.contracts);
             metadata.info.should.deep.equal({

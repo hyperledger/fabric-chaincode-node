@@ -21,17 +21,17 @@ const expect = chai.expect;
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-things'));
 const sinon = require('sinon');
+const rewire = require('rewire');
 
 const fs = require('fs-extra');
 const mockery = require('mockery');
-
-
 const path = require('path');
+
 // class under test
 const pathToRoot = '../../../..';
 let Bootstrap;
 const Contract = require('fabric-contract-api').Contract;
-// const Shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
+
 function log(...e) {
     console.log(...e);
 }
@@ -54,75 +54,270 @@ describe('bootstrap.js', () => {
     }
 
     class MockChaincodeFromContract {
-        constructor(contractClasses) {
-
-        }
+        constructor(contractClasses) {}
     }
+
     let sandbox;
     let mockShim;
     let mockCmd;
     let readFileStub;
     let pathExistsStub;
-
     let getArgsStub;
+    let getInfoFromContractStub;
+    let getMetadataStub;
 
     beforeEach('Sandbox creation', () => {
-
         mockery.enable({
-            warnOnReplace: true,
+            warnOnReplace: false,
             warnOnUnregistered: false,
             useCleanCache: true
         });
         sandbox = sinon.createSandbox();
         mockShim = {start : sandbox.stub()};
         getArgsStub = sandbox.stub();
+
         mockCmd = {getArgs : getArgsStub};
         readFileStub = sandbox.stub();
         pathExistsStub = sandbox.stub();
 
-
         getArgsStub.returns({'module-path':'fakepath'});
         mockery.registerMock('yargs', {});
         mockery.registerMock('../chaincode', mockShim);
-        // mockery.registerMock('ajv', validator);
         mockery.registerMock('../cmds/startCommand.js', mockCmd);
         mockery.registerMock('./chaincodefromcontract', MockChaincodeFromContract);
-        mockery.registerMock('fs-extra', {readFile : readFileStub, pathExists:pathExistsStub});
+        mockery.registerMock('fs-extra', {pathExists:pathExistsStub, readFileSync : readFileStub});
 
-        Bootstrap = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap'));
-
+        Bootstrap = rewire(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap'));
     });
 
     afterEach('Sandbox restoration', () => {
+        mockery.deregisterAll();
         mockery.disable();
         sandbox.restore();
     });
 
+    describe('#register', () => {
+
+        it('should pass on the register to the shim', async () => {
+            await Bootstrap.register([sc], {}, {}, 'some title', 'some version');
+            sinon.assert.calledOnce(mockShim.start);
+        });
+
+    });
+
+    describe('#bootstrap', () => {
+
+        beforeEach('Sandbox creation', () => {
+            getMetadataStub = sandbox.stub(Bootstrap, 'getMetadata');
+            getInfoFromContractStub = sandbox.stub(Bootstrap, 'getInfoFromContract');
+        });
+
+        afterEach('Sandbox restoration', () => {
+            getMetadataStub.restore();
+            getInfoFromContractStub.restore();
+        });
+
+        it ('should correctly call the register method', async () => {
+            getMetadataStub.resolves({});
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
+            const registerStub = sandbox.stub();
+            Bootstrap.register = registerStub;
+            getInfoFromContractStub.returns({contracts: [sc], serializers : {}, title: 'some title', version: 'some version'});
+
+            await Bootstrap.bootstrap();
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledOnce(getInfoFromContractStub);
+            sinon.assert.calledOnce(registerStub);
+            sinon.assert.calledWith(registerStub, [sc], {}, {}, 'some title', 'some version');
+        });
+    });
+
+    describe('#getInfoFromContract', () => {
+
+        beforeEach('Sandbox creation', () => {
+            getMetadataStub = sandbox.stub(Bootstrap, 'getMetadata');
+        });
+
+        afterEach('Sandbox restoration', () => {
+            getMetadataStub.restore();
+        });
+
+        it ('should use the main class defined in the package.json', () => {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                main: 'entrypoint'
+            });
+            mockery.registerMock('fabric-contract-api',
+                {
+                    JSONSerializer: {
+                        'wibble1': 'wibbleimpl1'
+                    }
+                }
+            );
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
+            const {contracts} = Bootstrap.getInfoFromContract('fakepath');
+
+            expect({contracts}).to.deep.equal({contracts: [sc]});
+        });
+
+        it ('should use the main class defined in the package.json with a single element', () => {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                main: 'entrypoint2',
+                name: 'some title',
+                version: 'some version'
+            });
+            mockery.registerMock('fabric-contract-api',
+                {
+                    JSONSerializer: {
+                        'wibble1': 'wibbleimpl1'
+                    }
+                }
+            );
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint2'), sc);
+
+            const {contracts} = Bootstrap.getInfoFromContract('fakepath');
+
+            expect(contracts).to.deep.equal([sc]);
+        });
+
+        it ('should throw an error if there is no json.main', () => {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                not_here_main: 'entrypoint',
+            });
+            mockery.registerMock('fabric-contract-api',
+                {
+                    JSONSerializer: {
+                        'wibble': 'wibbleimpl'
+                    }
+                }
+            );
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
+            expect(() => {
+                Bootstrap.getInfoFromContract('fakepath');
+            }).to.throw(/package.json does not contain a 'main' entry for the module/);
+        });
+
+        it ('should use the main class defined with contracts exported, and custom serialization', () => {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                main: 'entrypoint3',
+                name: 'some title',
+                version: 'some version'
+            });
+            mockery.registerMock('fabric-contract-api',
+                {
+                    JSONSerializer: {
+                        'wibble1': 'wibbleimpl1'
+                    }
+                }
+            );
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint3'),
+                {
+                    contracts: [sc],
+                    serializers : {
+                        transaction: 'wibble',
+                        serializers: {
+                            'wibble2': 'wibbleimpl2'
+                        }
+                    }
+                }
+            );
+
+            const {contracts, serializers, title, version} = Bootstrap.getInfoFromContract('fakepath');
+
+            expect({contracts, serializers, title, version}).to.deep.equal({contracts: [sc],
+                serializers : {
+                    transaction: 'wibble',
+                    serializers: {
+                        jsonSerializer: {
+                            'wibble1': 'wibbleimpl1',
+                        },
+                        'wibble2': 'wibbleimpl2'
+                    }
+                }, title: 'some title', version: 'some version'});
+
+        });
+
+        it ('should throw an error if there is no transaction property', () => {
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
+                main: 'entrypoint3',
+                name: 'some title',
+                version: 'some version'
+            });
+            mockery.registerMock('fabric-contract-api',
+                {
+                    JSONSerializer: {
+                        'wibble1': 'wibbleimpl1'
+                    }
+                }
+            );
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint3'),
+                {
+                    contracts: [sc],
+                    serializers : {
+                        serializers: {
+                            'wibble2': 'wibbleimpl2'
+                        }
+                    }
+                }
+            );
+
+            expect(() => {
+                Bootstrap.getInfoFromContract('fakepath');
+            }).to.throw(/There should be a 'transaction' property to define the serializer for use with transactions/);
+        });
+
+    });
+
+    describe('#getMetadata', () => {
+
+        it ('should handle when there are files available', async () => {
+            pathExistsStub.returns(true);
+            Bootstrap.loadAndValidateMetadata = sandbox.stub().resolves({'hello':'world'});
+
+            const metadata = await Bootstrap.getMetadata('fake path');
+
+            metadata.should.deep.equal({'hello':'world'});
+        });
+
+        it ('should handle when files not available', async () => {
+            pathExistsStub.returns(false);
+
+            const metadata = await Bootstrap.getMetadata('fake path');
+
+            metadata.should.deep.equal({});
+        });
+
+    });
+
     describe('#loadAndValidateMetadata', () => {
+
         const obj = {
             name: 'some string'
         };
         const jsonObject =  JSON.stringify(obj);
+        class mockAjv {
+            constructor() {}
+            addMetaSchema() {}
+            validate() {
+                this.errors = 'some error';
+                return false;
+            }
+        }
 
-
-        it ('validate and return the metadata', async () => {
-            // const readFileStub = sandbox.stub(fs, 'readFile');
+        it ('validate and return the metadata', () => {
             const metadataPath = 'some path';
-            readFileStub.onFirstCall().resolves(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().resolves(Buffer.from(JSON.stringify({name: 'some string'})));
+            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
+            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify({name: 'some string'})));
 
-
-            const metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
+            const metadata = Bootstrap.loadAndValidateMetadata(metadataPath);
             expect(metadata).to.deep.equal(obj);
             sinon.assert.calledTwice(readFileStub);
         });
 
-        it ('fail to validate and throw an error', async () => {
-            // const readFileStub = sandbox.stub(fs, 'readFile');
+        it ('fail to validate and throw an error', () => {
             const metadataPath = 'some path';
-            readFileStub.onFirstCall().resolves(Buffer.from(jsonObject));
-            readFileStub.onSecondCall().resolves(Buffer.from(JSON.stringify(
-
+            readFileStub.onFirstCall().returns(Buffer.from(jsonObject));
+            readFileStub.onSecondCall().returns(Buffer.from(JSON.stringify(
                 {
                     $id: 'https://example.com/person.schema.json',
                     $schema: 'http://json-schema.org/draft-04/schema#',
@@ -135,21 +330,23 @@ describe('bootstrap.js', () => {
                         }
                     }
                 }
-
-
             )));
+            const originalAjv = Bootstrap.__get__('Ajv');
+            Bootstrap.__set__('Ajv', mockAjv);
+            (() => {
+                Bootstrap.loadAndValidateMetadata(metadataPath);
+            }).should.throw(Error, /Contract metadata does not match the schema: "some error"/);
 
-            return expect(Bootstrap.loadAndValidateMetadata(metadataPath)).to.eventually.be.rejectedWith(Error, /Contract metadata does not match the schema/);
+            Bootstrap.__set__('Ajv', originalAjv);
         });
 
-        it ('Correct schema path is pointed to in the validate method', async () => {
-            const rootPath = path.dirname(__dirname);
-            const schemaPath = path.join(rootPath, '../../../fabric-contract-api/schema/contract-schema.json');
-            const schemaPathCheck = await fs.pathExists(schemaPath);
+        it ('Correct schema path is pointed to in the validate method', () => {
+            const schemaPath = path.resolve(__dirname, '../../../../fabric-contract-api/schema/contract-schema.json');
+            const schemaPathCheck = fs.pathExistsSync(schemaPath);
             expect(schemaPathCheck).to.equal(true, 'Current contract-schema path: ' + schemaPath + ' is incorrect');
         });
 
-        it('Should correct validate a schema', async () => {
+        it('Should correct validate a schema', () => {
             const json = `
             {
                 "firstName": "John",
@@ -182,134 +379,14 @@ describe('bootstrap.js', () => {
             `;
 
             const metadataPath = 'some path';
-            // const readFileStub = sandbox.stub(fs, 'readFile');
-            readFileStub.onFirstCall().resolves(Buffer.from(json));
-            readFileStub.onSecondCall().resolves(Buffer.from(schema));
+            readFileStub.onFirstCall().returns(Buffer.from(json));
+            readFileStub.onSecondCall().returns(Buffer.from(schema));
 
-            const metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
+            const metadata = Bootstrap.loadAndValidateMetadata(metadataPath);
 
             expect(metadata).to.deep.equal(JSON.parse(json));
-
         });
 
-
-    });
-
-    describe('#register', () => {
-
-        it ('should pass on the register to the shim', async () => {
-
-            Bootstrap.getMetadata = sandbox.stub().resolves();
-
-            await Bootstrap.register([sc], {}, {});
-            sinon.assert.calledOnce(mockShim.start);
-
-        });
-
-    });
-
-    describe('#bootstrap', () => {
-
-        it ('should use the main class defined in the package.json', () => {
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
-                main: 'entrypoint'
-            });
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
-            const registerStub = sandbox.stub();
-            Bootstrap.register = registerStub;
-            Bootstrap.bootstrap();
-            sinon.assert.calledOnce(registerStub);
-            sinon.assert.calledWith(registerStub, [sc]);
-
-        });
-
-        it ('should use the main class defined in the package.json with a single element', () => {
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
-                main: 'entrypoint'
-            });
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), sc);
-            const registerStub = sandbox.stub();
-            Bootstrap.register = registerStub;
-            Bootstrap.bootstrap();
-            sinon.assert.calledOnce(registerStub);
-            sinon.assert.calledWith(registerStub, [sc]);
-
-        });
-
-        it ('should throw an error if none of the other methods work', () => {
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
-                not_here_main: 'entrypoint'
-            });
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
-            const registerStub = sandbox.stub();
-            Bootstrap.register = registerStub;
-
-
-
-            return Bootstrap.bootstrap().should.eventually.be.rejectedWith(/package.json does not contain a 'main' entry for the module/);
-        });
-
-        it ('should use the main class defined with contracts exported, and custom serialization', () => {
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
-                main: 'entrypoint3'
-            });
-
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint3'),
-                {
-                    contracts: [sc],
-                    serializers : {
-                        transaction: 'wibble',
-                        serializers: {
-                            'wibble':'wibbleimpl'
-                        }
-                    }
-                });
-            const registerStub = sandbox.stub();
-            Bootstrap.register = registerStub;
-            Bootstrap.bootstrap();
-            sinon.assert.calledOnce(registerStub);
-            sinon.assert.calledWith(registerStub, [sc]);
-
-        });
-
-        it ('should use the main class defined with contracts exported, and custom serialization', () => {
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'package.json'), {
-                main: 'entrypoint3'
-            });
-
-            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint3'),
-                {
-                    contracts: [sc],
-                    serializers : {
-                        serializers: {
-                            'wibble':'wibbleimpl'
-                        }
-                    }
-                });
-            const registerStub = sandbox.stub();
-            Bootstrap.register = registerStub;
-
-            return Bootstrap.bootstrap().should.eventually.be.rejectedWith(/There should be a 'transaction' property to define the serializer for use with transactions/);
-
-        });
-
-
-
-    });
-
-    describe('#getMetadata', () => {
-        it ('should handle when there are files available', async () => {
-            pathExistsStub.returns(true);
-            Bootstrap.loadAndValidateMetadata = sandbox.stub().resolves({'hello':'world'});
-            const metadata = await Bootstrap.getMetadata();
-            metadata.should.deep.equal({'hello':'world'});
-        });
-
-        it ('should handle when files not available', async () => {
-            pathExistsStub.returns(false);
-            const metadata = await Bootstrap.getMetadata();
-            metadata.should.deep.equal({});
-        });
     });
 
 });

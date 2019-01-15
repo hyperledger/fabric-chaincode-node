@@ -28,12 +28,11 @@ class Bootstrap {
      * @ignore
      * @param {Contract} contracts contract to register to use
      */
-    static async register(contracts, serializers) {
+    static register(contracts, serializers, fileMetadata, title, version) {
         // load up the meta data that the user may have specified
         // this will need to passed in and rationalized with the
         // code as implemented
-        const filemetadata = await Bootstrap.getMetadata();
-        const chaincode = new ChaincodeFromContract(contracts, serializers, filemetadata);
+        const chaincode = new ChaincodeFromContract(contracts, serializers, fileMetadata, title, version);
 
         // say hello to the peer
         shim.start(chaincode);
@@ -45,9 +44,13 @@ class Bootstrap {
      */
     static async bootstrap() {
         const opts = StartCommand.getArgs(yargs);
+        const {contracts, serializers, title, version} = this.getInfoFromContract(opts['module-path']);
+        const fileMetadata = await Bootstrap.getMetadata(opts['module-path']);
+        Bootstrap.register(contracts, serializers, fileMetadata, title, version);
+    }
 
-        const modPath = path.resolve(process.cwd(), opts['module-path']);
-
+    static getInfoFromContract(modulePath) {
+        const modPath = path.resolve(process.cwd(), modulePath);
         const jsonPath = path.resolve(modPath, 'package.json');
         // let's find the package.json file
         const json = require(jsonPath);
@@ -83,29 +86,26 @@ class Bootstrap {
 
             }
 
-            // check the contracts and setup those up.
             if (r.contracts) {
-                await Bootstrap.register(r.contracts, serializers);
-            } else {
-                await Bootstrap.register([r], serializers);
+                return {contracts: r.contracts, serializers, title: json.name, version: json.version};
             }
+
+            return {contracts: [r], serializers, title: json.name, version: json.version};
         } else {
             throw new Error('package.json does not contain a \'main\' entry for the module');
         }
     }
-
     /**
      * Gets meta data associated with this Chaincode deployment
      */
-    static async getMetadata() {
+    static async getMetadata(modulePath) {
         let metadata = {};
-        const opts = StartCommand.getArgs(yargs);
-        const modPath = path.resolve(process.cwd(), opts['module-path']);
+        const modPath = path.resolve(process.cwd(), modulePath);
         const metadataPath = path.resolve(modPath, 'contract-metadata', 'metadata.json');
         const pathCheck = await fs.pathExists(metadataPath);
 
         if (pathCheck) {
-            metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
+            metadata = Bootstrap.loadAndValidateMetadata(metadataPath);
             logger.info('Meta data file has been located');
         } else {
             logger.info('No metadata file supplied in contract, introspection will generate all the data');
@@ -114,10 +114,10 @@ class Bootstrap {
     }
 
 
-    static async loadAndValidateMetadata(metadataPath) {
+    static loadAndValidateMetadata(metadataPath) {
         const rootPath = path.dirname(__dirname);
-        const metadataString = (await fs.readFile(metadataPath)).toString();
-        const schemaString = (await fs.readFile(path.join(rootPath, '../../fabric-contract-api/schema/contract-schema.json'))).toString();
+        const metadataString = fs.readFileSync(metadataPath).toString();
+        const schemaString = fs.readFileSync(path.join(rootPath, '../../fabric-contract-api/schema/contract-schema.json')).toString();
 
         const metadata = JSON.parse(metadataString);
 

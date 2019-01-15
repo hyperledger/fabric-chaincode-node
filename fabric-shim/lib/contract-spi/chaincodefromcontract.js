@@ -9,12 +9,8 @@ const shim = require('../chaincode');
 
 const Logger = require('../logger');
 const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
-const StartCommand = require('../cmds/startCommand.js');
 const DataMarshall = require('./datamarshall.js');
 const ClientIdentity = require('../chaincode').ClientIdentity;
-
-const yargs = require('yargs');
-const path = require('path');
 const Ajv = require('ajv');
 
 require('reflect-metadata');
@@ -33,9 +29,9 @@ class ChaincodeFromContract {
      * Takes an array contract classes, and looks for the functions within those files.
      * Stores a reference to those, so they can be specifically called at a later time
      *
-     * @param {Contract[]} contractClasses array of  contracts to register
+     * @param {Contract[]} contractClasses array of contracts to register
      */
-    constructor(contractClasses, serializers, metadata = {}) {
+    constructor(contractClasses, serializers, metadata = {}, title, version) {
 
         if (!contractClasses) {
             throw new Error('Missing argument: array of contract classes');
@@ -47,7 +43,8 @@ class ChaincodeFromContract {
         this.serializers = serializers;
         logger.info(serializers);
 
-
+        this.title = title;
+        this.version = version;
 
         // always add in the 'meta' class that has general abilities
         const SystemContract = require('./systemcontract');
@@ -232,14 +229,9 @@ class ChaincodeFromContract {
         // look for the general information representing all the contracts
         // add if nothing has been given by the application
         if (!metadata.info) {
-            const opts = StartCommand.getArgs(yargs);
-            const modPath = path.resolve(process.cwd(), opts['module-path']);
-            const jsonPath = path.resolve(modPath, 'package.json');
-
-            const json = require(jsonPath);
             metadata.info = {};
-            metadata.info.version = json.hasOwnProperty('version') ? json.version : '';
-            metadata.info.title = json.hasOwnProperty('name') ? json.name : '';
+            metadata.info.version = this.version ? this.version : '';
+            metadata.info.title = this.title ? this.title : '';
         }
 
         // obtain the information relating to the complex objects
