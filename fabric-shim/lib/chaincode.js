@@ -9,7 +9,7 @@
 const grpc = require('grpc');
 const path = require('path');
 const util = require('util');
-const X509 = require('x509');
+const X509 = require('@ampretia/x509');
 const jsrsasign = require('jsrsasign');
 const Logger = require('./logger');
 
