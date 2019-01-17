@@ -16,7 +16,7 @@ npmPublish() {
   elif [[ "$CURRENT_TAG" = *"unstable"* ]]; then
 
       # Increment unstable version here
-      UNSTABLE_INCREMENT=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
+      UNSTABLE_VER=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
       ver=$NF
       rel=$NF
       sub(/.*\./,"",rel)
@@ -28,7 +28,7 @@ npmPublish() {
         UNSTABLE_INCREMENT=1
       else
         # Get last digit of the unstable version of $CURRENT_TAG
-        UNSTABLE_INCREMENT=$(echo $UNSTABLE_INCREMENT| rev | cut -d '.' -f 1 | rev)
+        UNSTABLE_INCREMENT=$(echo $UNSTABLE_VER| rev | cut -d '.' -f 1 | rev)
         echo "======> UNSTABLE_INCREMENT:" $UNSTABLE_INCREMENT
       fi
 
