@@ -68,12 +68,6 @@ gulp.task('default', gulp.series('lint'));
 gulp.task('test-e2e', gulp.series(['test-e2e-shim', 'test-fv-shim', 'test-scenario']));
 
 // FAB-13462 - disabled this test temporarily pending rewrite for Fabric v2.0 changes.
-// gulp.task('test-devmode-cli', (done) => {
-//     const tasks = ['test-devmode'];
-//     runSequence(...tasks, done);
-// });
-
-// FAB-13462 - disabled this test temporarily pending rewrite for Fabric v2.0 changes.
 // gulp.task('test-invctrl-cli', (done) => {
 //     const tasks = ['test-invctrl'];
 //     runSequence(...tasks, done);

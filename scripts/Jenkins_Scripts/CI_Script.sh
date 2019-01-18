@@ -207,8 +207,8 @@ e2e_Tests() {
         # echo -e "\033[32m ------> Run DevMode tests" "\033[0m"
         # echo "###############################################"
 
-        # DEVMODE=true gulp channel-init || err_Check "ERROR!!! channel-init failed"
-        # gulp test-devmode-cli || err_Check "ERROR!!! test-devmode-cli failed"
+        DEVMODE=true gulp channel-init || err_Check "ERROR!!! channel-init failed"
+        gulp test-devmode || err_Check "ERROR!!! test-devmode-cli failed"
 
         # FAB-13462 - disabled this test temporarily pending rewrite for Fabric v2.0 changes.
         # echo "###############################################"

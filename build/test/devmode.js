@@ -35,7 +35,7 @@ gulp.task('check-docker', async (done) => {
 });
 
 gulp.task('dm-startup-chaincode', async (done) => {
-    const script = util.format('docker exec cli bash -c "cd %s; npm install; node_modules/.bin/fabric-chaincode-node start --peer.address peer0.org1.example.com:7052 --chaincode-id-name %s --module-path %s"',
+    const script = util.format('docker exec cli bash -c "apk add nodejs nodejs-npm python make g++; cd %s; npm install; npm rebuild; node_modules/.bin/fabric-chaincode-node start --peer.address peer0.org1.example.com:7052 --chaincode-id-name %s --module-path %s"',
     // the /etc/hyperledger/config has been mapped to the
     // basic-network folder in the test setup for the CLI docker
         '/etc/hyperledger/config/scenario/src/mysmartcontract.v0',
