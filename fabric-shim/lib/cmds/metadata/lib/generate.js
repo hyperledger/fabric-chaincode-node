@@ -30,7 +30,7 @@ class Generate {
         if (opts.file) {
             const fileName = path.extname(opts.file) === '' ? opts.file + '.json' : opts.file;
             const filePath = path.resolve(process.cwd(), fileName);
-            await fs.writeJSON(filePath, chaincode.metadata);
+            await fs.writeJSON(filePath, JSON.stringify(chaincode.metadata, null, 4));
             logger.info(`File containing metadata has been saved to ${filePath}`);
         } else {
             logger.info('Metadata is : \n', util.inspect(chaincode.metadata, {depth: Infinity}));

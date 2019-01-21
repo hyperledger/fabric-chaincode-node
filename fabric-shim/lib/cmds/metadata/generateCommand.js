@@ -14,7 +14,6 @@ module.exports.builder = (yargs) => {
         'file': {alias: 'f', required: false, describe: 'The file name/path to save the generated metadata file, if no file is specified, it will print to stdout', type: 'string'},
         'module-path': {alias: 'p', required: false, describe: 'The path to the directory of your smart contract project which contains your chaincode, default is your current working directory', type: 'string', default: process.cwd()}
     });
-    yargs.strict(true);
     yargs.usage('fabric-chaincode-node metadata generate --file "fileName"');
 
     return yargs;
