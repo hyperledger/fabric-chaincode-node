@@ -82,24 +82,18 @@ function removeUnwantedImages() {
 }
 
 # Delete nvm prefix & then delete nvm
-rm -rf $HOME/.nvm/ $HOME/.node-gyp/ $HOME/.npm/ $HOME/.npmrc  || true
-
-mkdir $HOME/.nvm || true
+rm -rf $HOME/.node-gyp/ $HOME/.npm/ $HOME/.npmrc  || true
 
 ls -l /tmp/fabric-shim/chaincode/hyperledger/fabric
 ls -l /tmp/fabric-shim/chaincode/hyperledger
 
-# Remove /tmp/fabric-shim
+# Remove /tmp/fabric-shim FABCI-61
 docker run -v /tmp:/tmp library/alpine rm -rf /tmp/fabric-shim || true
 
 # remove tmp/hfc and hfc-key-store data
-rm -rf /home/jenkins/.nvm /home/jenkins/npm /tmp/fabric-shim /tmp/hfc* /tmp/npm* /home/jenkins/kvsTemp /home/jenkins/.hfc-key-store || true
+rm -rf /home/jenkins/npm /tmp/fabric-shim /tmp/hfc* /tmp/npm* /home/jenkins/kvsTemp /home/jenkins/.hfc-key-store || true
 
 rm -rf /var/hyperledger/*
-
-rm -rf gopath/src/github.com/hyperledger/fabric-ca/vendor/github.com/cloudflare/cfssl/vendor/github.com/cloudflare/cfssl_trust/ca-bundle || true
-# yamllint disable-line rule:line-length
-rm -rf gopath/src/github.com/hyperledger/fabric-ca/vendor/github.com/cloudflare/cfssl/vendor/github.com/cloudflare/cfssl_trust/intermediate_ca || true
 
 clearContainers
 removeUnwantedImages
@@ -128,16 +122,12 @@ install_Npm() {
 
     echo "-------> ARCH:" $ARCH
     if [[ $ARCH == "s390x" || $ARCH == "ppc64le" ]]; then
-        # Install nvm to install multi node versions
-        wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-        # shellcheck source=/dev/null
-        export NVM_DIR="$HOME/.nvm"
-        # shellcheck source=/dev/null
-        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+        # Source nvmrc.sh
+        source /etc/profile.d/nvmrc.sh
         echo "------> Install NodeJS"
         # This also depends on the fabric-baseimage. Make sure you modify there as well.
         echo "------> Use $NODE_VER"
-        nvm install $NODE_VER || true
+        nvm install $NODE_VER
         nvm use --delete-prefix v$NODE_VER --silent
 
         echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
