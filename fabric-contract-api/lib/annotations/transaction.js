@@ -10,31 +10,12 @@ const Logger = require('../logger');
 const logger = Logger.getLogger('./lib/annotations/object.js');
 require('reflect-metadata');
 
-// there appears to be confusions within the meta data handling
-// whether string or String is correct.
-// string is the preferred for JSON Schema
-function isPrimitive(type) {
-    const lowerCase = type.toLowerCase();
-    switch (lowerCase) {
-        case 'string':
-        case 'number':
-        case 'boolean':
-            return lowerCase;
-
-        default:
-            return undefined;
-    }
-
-}
-
 module.exports.Transaction = function Transaction(commit = true) {
     return (target, propertyKey) => {
         logger.info('@Transaction args', target, propertyKey, commit);
 
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
-
-        logger.debug('Existing fabric:transactions', transactions);
-
+        const transaction = utils.findByValue(transactions, 'name', propertyKey);
         const paramNames = getParams(target[propertyKey]);
 
         logger.debug(`Transaction ${target} -> ${propertyKey} params`, paramNames);
@@ -60,27 +41,25 @@ module.exports.Transaction = function Transaction(commit = true) {
             const paramName = paramNames[paramIdx];
             const obj = {
                 name: paramName,
-                description,
-                schema: {
-
-                }
+                description
             };
 
             const type = typeof paramType === 'function' ? paramType.name : paramType.toString();
 
-            // for reasons best known to the annotations, the primtive types end up being first letter capitlized
-            // where in all other places including Typescript, they are lower case
-            // hence this bit of logic
-
-            const checkedType = isPrimitive(type);
-            if (checkedType) {
-                obj.schema.type = checkedType;
-            } else {
-                obj.schema.$ref = `#/components/schemas/${type}`;
-            }
+            obj.schema = utils.generateSchema(type);
 
             return obj;
         });
+
+        if (transaction && transaction.parameters) {
+            transaction.parameters.forEach((tParam) => {
+                for (let i = 0; i < parameters.length; i++) {
+                    if (parameters[i].name === tParam.name) {
+                        parameters[i] = tParam;
+                    }
+                }
+            });
+        }
 
         const tag = [];
         if (commit) {
@@ -106,18 +85,10 @@ module.exports.Returns = function Returns(returnType) {
         logger.debug('Existing fabric:transactions', transactions);
 
         const obj = {
-            name: 'success',
-            schema: {
-
-            }
+            name: 'success'
         };
 
-        const checkedType = isPrimitive(returnType);
-        if (checkedType) {
-            obj.schema.type = checkedType;
-        } else {
-            obj.schema.$ref = `#/components/schemas/${returnType}`;
-        }
+        obj.schema = utils.generateSchema(returnType);
 
         utils.appendOrUpdate(transactions, 'name', propertyKey, {
             returns: [obj]
@@ -125,5 +96,41 @@ module.exports.Returns = function Returns(returnType) {
 
         Reflect.defineMetadata('fabric:transactions', transactions, target);
         logger.debug('Updated fabric:transactions', transactions);
+    };
+};
+
+module.exports.Param = function Param(paramName, paramType, description) {
+    return (target, propertyKey) => {
+        const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
+
+        const transaction = utils.findByValue(transactions, 'name', propertyKey);
+
+        const paramSchema = utils.generateSchema(paramType);
+        const paramDesc = description || '';
+
+        if (transaction && transaction.parameters) {
+            const param = utils.findByValue(transaction.parameters, 'name', paramName);
+
+            if (param) {
+                param.schema = paramSchema;
+                param.description = paramDesc;
+            } else {
+                transaction.parameters.push({
+                    name: paramName,
+                    description: paramDesc,
+                    schema: paramSchema
+                });
+            }
+        } else {
+            utils.appendOrUpdate(transactions, 'name', propertyKey, {
+                parameters: [{
+                    name: paramName,
+                    description: paramDesc,
+                    schema: paramSchema
+                }]
+            });
+        }
+
+        Reflect.defineMetadata('fabric:transactions', transactions, target);
     };
 };
