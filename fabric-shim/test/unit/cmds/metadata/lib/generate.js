@@ -112,7 +112,7 @@ describe('generate', () => {
             await Generate.handler(args);
 
             sinon.assert.calledOnce(writeJSONStub);
-            sinon.assert.calledWith(writeJSONStub, args.file + '.json', {title: 'some title'});
+            sinon.assert.calledWith(writeJSONStub, args.file + '.json', JSON.stringify({title: 'some title'}, null, 4));
             sinon.assert.calledOnce(getInfoFromContractStub);
             sinon.assert.calledOnce(getMetadataStub);
 
@@ -139,7 +139,7 @@ describe('generate', () => {
             await Generate.handler(args);
 
             sinon.assert.calledOnce(writeJSONStub);
-            sinon.assert.calledWith(writeJSONStub, args.file, {title: 'some title'});
+            sinon.assert.calledWith(writeJSONStub, args.file, JSON.stringify({title: 'some title'}, null, 4));
             sinon.assert.calledOnce(getInfoFromContractStub);
             sinon.assert.calledOnce(getMetadataStub);
 
@@ -166,7 +166,7 @@ describe('generate', () => {
             await Generate.handler(args);
 
             sinon.assert.calledOnce(writeJSONStub);
-            sinon.assert.calledWith(writeJSONStub, args.file, {title: 'some title'});
+            sinon.assert.calledWith(writeJSONStub, args.file, JSON.stringify({title: 'some title'}, null, 4));
             sinon.assert.calledOnce(getInfoFromContractStub);
             sinon.assert.calledOnce(getMetadataStub);
 

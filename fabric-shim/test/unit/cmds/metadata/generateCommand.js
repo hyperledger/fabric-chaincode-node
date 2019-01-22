@@ -57,8 +57,6 @@ describe('GenerateCommand', () => {
             });
             sinon.assert.calledOnce(yargs.usage);
             sinon.assert.calledWith(yargs.usage, 'fabric-chaincode-node metadata generate --file "fileName"');
-            sinon.assert.calledOnce(yargs.strict);
-            sinon.assert.calledWith(yargs.strict, true);
         });
     });
 
