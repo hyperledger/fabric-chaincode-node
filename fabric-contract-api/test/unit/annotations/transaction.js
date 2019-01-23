@@ -16,10 +16,13 @@
 
 const sinon = require('sinon');
 const rewire = require('rewire');
+const chai = require('chai');
+const expect = chai.expect;
 
 const TransactionAnnotations = rewire('./../../../lib/annotations/transaction');
 const Transaction = TransactionAnnotations.Transaction;
 const Returns = TransactionAnnotations.Returns;
+const Param = TransactionAnnotations.Param;
 const utils = require('../../../lib/annotations/utils');
 const Context = require('../../../lib/context');
 require('reflect-metadata');
@@ -34,17 +37,21 @@ describe('Transaction.js', () => {
         }
     };
 
+    let sandbox;
 
+
+    let generateSchemaStub;
     let appendSpy;
     let defineMetadataStub;
     beforeEach(() => {
-        appendSpy = sinon.spy(utils, 'appendOrUpdate');
-        defineMetadataStub = sinon.stub(Reflect, 'defineMetadata');
+        sandbox = sinon.createSandbox();
+        generateSchemaStub = sandbox.stub(utils, 'generateSchema').returns('some new schema');
+        appendSpy = sandbox.spy(utils, 'appendOrUpdate');
+        defineMetadataStub = sandbox.stub(Reflect, 'defineMetadata');
     });
 
     afterEach(() => {
-        appendSpy.restore();
-        defineMetadataStub.restore();
+        sandbox.restore();
     });
 
     describe('Transaction', () => {
@@ -66,15 +73,14 @@ describe('Transaction.js', () => {
         it ('should handle existing transactions', () => {
             const mockFunc = function someFunc() {};
 
-            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').onFirstCall().returns([{
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').onFirstCall().returns([{
                 name: 'someTransaction',
-                tag: ['submitTx'],
-                parameters: []
+                tag: ['submitTx']
             }]).onSecondCall().returns([
                 MockContext,
-                mockFunc,
+                'some type',
                 MockContext,
-                'someType',
+                mockFunc,
                 MockContext,
             ]);
 
@@ -88,11 +94,13 @@ describe('Transaction.js', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:paramtypes', mockTarget, 'mockKey');
             sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledTwice(generateSchemaStub);
+            sinon.assert.calledWith(generateSchemaStub, 'some type');
+            sinon.assert.calledWith(generateSchemaStub, 'someFunc');
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'someTransaction',
                 tag: ['submitTx'],
-                parameters: []
             }, {
                 name: 'mockKey',
                 tag: ['submitTx'],
@@ -100,36 +108,46 @@ describe('Transaction.js', () => {
                     {
                         name: 'param1',
                         description: '',
-                        schema: {
-                            $ref: '#/components/schemas/someFunc'
-                        }
+                        schema: 'some new schema'
                     },
                     {
                         name: 'param2',
                         description: '',
-                        schema: {
-                            $ref: '#/components/schemas/someType'
-                        }
+                        schema: 'some new schema'
                     }
                 ]
             }], mockTarget);
-            getMetadataStub.restore();
         });
 
-        it ('should handle existing transactions with primitives', () => {
-            const mockFunc = function someFunc() {};
-
-            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').onFirstCall().returns([{
-                name: 'someTransaction',
+        it ('should handle existing transactions of which matches name and already has param metadata', () => {
+            const transactions = [{
+                name: 'mockKey',
                 tag: ['submitTx'],
-                parameters: []
-            }]).onSecondCall().returns([
-                MockContext,
-                mockFunc,
-                MockContext,
-                'string',
-                MockContext,
-            ]);
+                parameters: [{
+                    name: 'param1',
+                    schema: 'some special schema'
+                }]
+            }, {
+                name: 'someOtherTransaction',
+                tag: [],
+                parameters: [{
+                    name: 'param1',
+                    schema: 'some schema'
+                }]
+            }];
+
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata')
+                .onFirstCall().returns(transactions)
+                .onSecondCall().returns([
+                    MockContext,
+                    'some type',
+                    MockContext,
+                    'some other type',
+                    MockContext,
+                ]);
+
+            const findByValueStub = sandbox.stub(utils, 'findByValue')
+                .onFirstCall().returns(transactions[0]);
 
             TransactionAnnotations.__set__('getParams', () => {
                 return ['ctx', 'param1', 'ctx2', 'param2', 'ctx3'];
@@ -140,37 +158,39 @@ describe('Transaction.js', () => {
             sinon.assert.calledTwice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:paramtypes', mockTarget, 'mockKey');
+            sinon.assert.calledOnce(findByValueStub);
+            sinon.assert.calledWith(findByValueStub, transactions, 'name', 'mockKey');
             sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledTwice(generateSchemaStub);
+            sinon.assert.calledWith(generateSchemaStub, 'some type');
+            sinon.assert.calledWith(generateSchemaStub, 'some other type');
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
-                name: 'someTransaction',
-                tag: ['submitTx'],
-                parameters: []
-            }, {
                 name: 'mockKey',
                 tag: ['submitTx'],
                 parameters: [
                     {
                         name: 'param1',
-                        description: '',
-                        schema: {
-                            $ref: '#/components/schemas/someFunc'
-                        }
+                        schema: 'some special schema'
                     },
                     {
                         name: 'param2',
                         description: '',
-                        schema: {
-                            type:'string'
-                        }
+                        schema: 'some new schema'
                     }
                 ]
+            }, {
+                name: 'someOtherTransaction',
+                tag: [],
+                parameters: [{
+                    name: 'param1',
+                    schema: 'some schema'
+                }]
             }], mockTarget);
-            getMetadataStub.restore();
         });
 
         it ('should create new metadata for fabric:transactions if none exist and handle no params', () => {
-            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').returns(undefined);
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(undefined);
 
             TransactionAnnotations.__set__('getParams', () => {
                 return [];
@@ -182,19 +202,19 @@ describe('Transaction.js', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:paramtypes', mockTarget, 'mockKey');
             sinon.assert.calledOnce(appendSpy);
+            sinon.assert.notCalled(generateSchemaStub);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
                 tag: ['submitTx'],
                 parameters: []
             }], mockTarget);
-            getMetadataStub.restore();
         });
 
         it ('should not add a tag if commit is false', () => {
             transaction = Transaction(false);
 
-            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').returns(undefined);
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(undefined);
 
             TransactionAnnotations.__set__('getParams', () => {
                 return [];
@@ -206,14 +226,13 @@ describe('Transaction.js', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:paramtypes', mockTarget, 'mockKey');
             sinon.assert.calledOnce(appendSpy);
+            sinon.assert.notCalled(generateSchemaStub);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
                 tag: [],
                 parameters: []
             }], mockTarget);
-
-            getMetadataStub.restore();
         });
     });
 
@@ -225,7 +244,7 @@ describe('Transaction.js', () => {
         });
 
         it ('should handle existing transactions', () => {
-            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').returns([{
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns([{
                 name: 'someTransaction',
                 tag: ['submitTx'],
                 parameters: []
@@ -235,6 +254,8 @@ describe('Transaction.js', () => {
 
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledOnce(generateSchemaStub);
+            sinon.assert.calledWith(generateSchemaStub, 'someType');
             sinon.assert.calledOnce(appendSpy);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
@@ -245,59 +266,185 @@ describe('Transaction.js', () => {
                 name: 'mockKey',
                 returns: [{
                     name: 'success',
-                    schema: {
-                        $ref: '#/components/schemas/someType'
-                    }
+                    schema: 'some new schema'
                 }]
             }], mockTarget);
-
-            getMetadataStub.restore();
         });
 
-        it ('should handle when there are no', () => {
-            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').returns(undefined);
+        it ('should handle when there are no existing transactions', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(undefined);
 
             returns(mockTarget, 'mockKey');
 
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledOnce(generateSchemaStub);
+            sinon.assert.calledWith(generateSchemaStub, 'someType');
             sinon.assert.calledOnce(appendSpy);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
                 returns:[{
                     name: 'success',
-                    schema: {
-                        $ref: '#/components/schemas/someType'
-                    }
+                    schema: 'some new schema'
                 }]
             }], mockTarget);
+        });
+    });
 
-            getMetadataStub.restore();
+    describe('Param', () => {
+        let param;
+        beforeEach(() => {
+            param = Param('some param', 'some type');
         });
 
-        it ('should handle when it is a string', () => {
-            const getMetadataStub = sinon.stub(Reflect, 'getMetadata').returns(undefined);
+        it ('should overwrite when the transaction exists and param of name already in', () => {
+            const transactions = [{
+                name: 'transaction1',
+                parameters: [{
+                    name: 'some param',
+                    schema: 'some existing schema'
+                }, {
+                    name: 'some other param',
+                    schema: 'some existing schema'
+                }]
+            }, {
+                name: 'transaction2',
+                parameters: [{
+                    name: 'some param',
+                    schema: 'some existing schema'
+                }]
+            }];
 
-            returns = Returns('string');
-            returns(mockTarget, 'mockKey');
+            const expectedTransactions = JSON.parse(JSON.stringify(transactions));
+            expectedTransactions[0].parameters[0].schema = 'some new schema';
+
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(transactions);
+            const findByValueStub = sandbox.stub(utils, 'findByValue')
+                .onFirstCall().returns(transactions[0])
+                .onSecondCall().returns(transactions[0].parameters[0]);
+
+            param(mockTarget, 'mockKey');
 
             sinon.assert.calledOnce(getMetadataStub);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', mockTarget);
-            sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledWithExactly(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledTwice(findByValueStub);
+            sinon.assert.calledWithExactly(findByValueStub, transactions, 'name', 'mockKey');
+            sinon.assert.calledWithExactly(findByValueStub, transactions[0].parameters, 'name', 'some param');
+            sinon.assert.calledOnce(generateSchemaStub);
+            sinon.assert.calledWithExactly(generateSchemaStub, 'some type');
+            expect(transactions).to.deep.eq(expectedTransactions);
             sinon.assert.calledOnce(defineMetadataStub);
-            sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
-                name: 'mockKey',
-                returns:[{
-                    name: 'success',
-                    schema: {
-                        type: 'string'
-                    }
-                }]
-            }], mockTarget);
-
-            getMetadataStub.restore();
+            sinon.assert.calledWithExactly(defineMetadataStub, 'fabric:transactions', transactions, mockTarget);
         });
 
+        it ('should overwrite existing transaction but add new param when one with name does not exist', () => {
+            const transactions = [{
+                name: 'transaction1',
+                parameters: [{
+                    name: 'some other param',
+                    schema: 'some existing schema'
+                }]
+            }, {
+                name: 'transaction2',
+                parameters: [{
+                    name: 'some param',
+                    schema: 'some existing schema'
+                }]
+            }];
+
+            const expectedTransactions = JSON.parse(JSON.stringify(transactions));
+            expectedTransactions[0].parameters[1] = {
+                name: 'some param',
+                description: '',
+                schema: 'some new schema'
+            };
+
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(transactions);
+            const findByValueStub = sandbox.stub(utils, 'findByValue')
+                .onFirstCall().returns(transactions[0])
+                .onSecondCall().returns(null);
+
+            param(mockTarget, 'mockKey');
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWithExactly(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledTwice(findByValueStub);
+            sinon.assert.calledWithExactly(findByValueStub, transactions, 'name', 'mockKey');
+            sinon.assert.calledWithExactly(findByValueStub, transactions[0].parameters, 'name', 'some param');
+            sinon.assert.calledOnce(generateSchemaStub);
+            sinon.assert.calledWithExactly(generateSchemaStub, 'some type');
+            expect(transactions).to.deep.eq(expectedTransactions);
+            sinon.assert.calledOnce(defineMetadataStub);
+            sinon.assert.calledWithExactly(defineMetadataStub, 'fabric:transactions', transactions, mockTarget);
+        });
+
+        it ('should append to transaction a new parameters array when transaction exists but has not parameters field', () => {
+            const transactions = [{
+                name: 'mockKey'
+            }, {
+                name: 'transaction2',
+                parameters: [{
+                    name: 'some param',
+                    schema: 'some existing schema'
+                }]
+            }];
+
+            const expectedTransactions = JSON.parse(JSON.stringify(transactions));
+            expectedTransactions[0].parameters = [{
+                name: 'some param',
+                description: '',
+                schema: 'some new schema'
+            }];
+
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(transactions);
+            const findByValueStub = sandbox.stub(utils, 'findByValue')
+                .onFirstCall().returns(transactions[0]);
+
+            param(mockTarget, 'mockKey');
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWithExactly(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledOnce(findByValueStub);
+            sinon.assert.calledWithExactly(findByValueStub, transactions, 'name', 'mockKey');
+            sinon.assert.calledOnce(generateSchemaStub);
+            sinon.assert.calledWithExactly(generateSchemaStub, 'some type');
+            sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledWithExactly(appendSpy, transactions, 'name', 'mockKey', {
+                parameters: [{
+                    name: 'some param',
+                    description: '',
+                    schema: 'some new schema'
+                }]
+            });
+            expect(transactions).to.deep.eq(expectedTransactions);
+            sinon.assert.calledOnce(defineMetadataStub);
+            sinon.assert.calledWithExactly(defineMetadataStub, 'fabric:transactions', transactions, mockTarget);
+        });
+
+        it ('should handle when no transaction exists', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(undefined);
+            const findByValueStub = sandbox.stub(utils, 'findByValue')
+                .onFirstCall().returns(null);
+
+            param(mockTarget, 'mockKey');
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWithExactly(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledOnce(findByValueStub);
+            sinon.assert.calledWithExactly(findByValueStub, sinon.match.any, 'name', 'mockKey');
+            sinon.assert.calledOnce(generateSchemaStub);
+            sinon.assert.calledWithExactly(generateSchemaStub, 'some type');
+            sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledOnce(defineMetadataStub);
+            sinon.assert.calledWithExactly(defineMetadataStub, 'fabric:transactions', [{
+                name: 'mockKey',
+                parameters: [{
+                    name: 'some param',
+                    description: '',
+                    schema: 'some new schema'
+                }]
+            }], mockTarget);
+        });
     });
 });

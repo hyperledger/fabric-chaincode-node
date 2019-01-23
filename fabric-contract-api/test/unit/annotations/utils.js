@@ -67,4 +67,94 @@ describe('utils', () => {
             });
         });
     });
+
+    describe('findByValue', () => {
+        const testArray = [{
+            name: 'jim',
+            value: 100
+        }, {
+            name: 'bob',
+            value: 200
+        }];
+
+        it ('should return the element in the array with the passed value in the passed field', () => {
+            expect(utils.findByValue(testArray, 'name', 'jim')).to.deep.equal(testArray[0]);
+        });
+
+        it ('should return null if no element has the passed value for the passed field', () => {
+            expect(utils.findByValue(testArray, 'name', 'alan')).to.be.null;
+        });
+    });
+
+    describe('generateSchema', () => {
+
+        it ('should return a primitive type', () => {
+            expect(utils.generateSchema('string')).to.deep.equal({
+                type: 'string'
+            });
+
+            expect(utils.generateSchema('number')).to.deep.equal({
+                type: 'number'
+            });
+
+            expect(utils.generateSchema('boolean')).to.deep.equal({
+                type: 'boolean'
+            });
+        });
+
+        it ('should return a primitive type as lowercase', () => {
+            expect(utils.generateSchema('sTRiNg')).to.deep.equal({
+                type: 'string'
+            });
+        });
+
+        it ('should return a ref path for a non array and non primitive type', () => {
+            expect(utils.generateSchema('Duck')).to.deep.equal({
+                $ref: '#/components/schemas/Duck'
+            });
+        });
+
+        it ('should recurse for array types', () => {
+            expect(utils.generateSchema('Duck[]')).to.deep.equal({
+                type: 'array',
+                items: {
+                    $ref: '#/components/schemas/Duck'
+                }
+            });
+
+            expect(utils.generateSchema('Array<Duck>')).to.deep.equal({
+                type: 'array',
+                items: {
+                    $ref: '#/components/schemas/Duck'
+                }
+            });
+
+            expect(utils.generateSchema('Array<string>')).to.deep.equal({
+                type: 'array',
+                items: {
+                    type: 'string'
+                }
+            });
+
+            expect(utils.generateSchema('Array<string[]>')).to.deep.equal({
+                type: 'array',
+                items: {
+                    type: 'array',
+                    items: {
+                        type: 'string'
+                    }
+                }
+            });
+
+            expect(utils.generateSchema('Array<Array<string>>')).to.deep.equal({
+                type: 'array',
+                items: {
+                    type: 'array',
+                    items: {
+                        type: 'string'
+                    }
+                }
+            });
+        });
+    });
 });
