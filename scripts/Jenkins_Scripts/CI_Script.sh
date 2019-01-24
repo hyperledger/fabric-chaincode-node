@@ -232,8 +232,10 @@ publish_Nodeenv_Image() {
         docker login $DOCKER_REPOSITORY -u "$USER" -p "$PASS"
         # tag nodeenv latest tag to nexus3 repo
         docker tag hyperledger/fabric-nodeenv $DOCKER_REPOSITORY/hyperledger/fabric-nodeenv:$ARCH-latest
+        docker tag hyperledger/fabric-nodeenv $DOCKER_REPOSITORY/hyperledger/fabric-nodeenv:$ARCH-$VERSION-stable
         # Push nodeenv image to nexus3 docker.snapshot
         docker push $DOCKER_REPOSITORY/hyperledger/fabric-nodeenv:$ARCH-latest
+        docker push $DOCKER_REPOSITORY/hyperledger/fabric-nodeenv:$ARCH-$VERSION-stable
         docker images
 }
 
