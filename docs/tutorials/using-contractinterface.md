@@ -125,7 +125,7 @@ module.exports = UpdateValues;
 
 Note that ALL the functions defined in these modules will be called by the client SDK. 
 
-- There are 3 functions `setup` `setNewAssetValue` and `doubleAssetValue` that can be called by issuing the appropriate invoke client side
+- There are 3 functions `instantiate` `setNewAssetValue` and `doubleAssetValue` that can be called by issuing the appropriate invoke client side
 - The `ctx` in the function is a transaction context; each time a invoke is called this will be a new instance that can be used by the function implementation to access apis such as the world state of information on invoking identity.
 - The arguments are split out from the array passed on the invoke. 
 - The constructor contains a 'name' to help identify the sets of functions
