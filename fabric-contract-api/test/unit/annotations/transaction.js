@@ -125,7 +125,8 @@ describe('Transaction.js', () => {
                 tag: ['submitTx'],
                 parameters: [{
                     name: 'param1',
-                    schema: 'some special schema'
+                    schema: 'some special schema',
+                    description: 'a nice detailed description'
                 }]
             }, {
                 name: 'someOtherTransaction',
@@ -171,7 +172,8 @@ describe('Transaction.js', () => {
                 parameters: [
                     {
                         name: 'param1',
-                        schema: 'some special schema'
+                        schema: 'some special schema',
+                        description: 'a nice detailed description'
                     },
                     {
                         name: 'param2',
@@ -295,7 +297,7 @@ describe('Transaction.js', () => {
     describe('Param', () => {
         let param;
         beforeEach(() => {
-            param = Param('some param', 'some type');
+            param = Param('some param', 'some type', 'some description');
         });
 
         it ('should overwrite when the transaction exists and param of name already in', () => {
@@ -303,10 +305,12 @@ describe('Transaction.js', () => {
                 name: 'transaction1',
                 parameters: [{
                     name: 'some param',
-                    schema: 'some existing schema'
+                    schema: 'some existing schema',
+                    description: 'a nice description'
                 }, {
                     name: 'some other param',
-                    schema: 'some existing schema'
+                    schema: 'some existing schema',
+                    description: 'another nice description'
                 }]
             }, {
                 name: 'transaction2',
@@ -318,6 +322,7 @@ describe('Transaction.js', () => {
 
             const expectedTransactions = JSON.parse(JSON.stringify(transactions));
             expectedTransactions[0].parameters[0].schema = 'some new schema';
+            expectedTransactions[0].parameters[0].description = 'some description';
 
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(transactions);
             const findByValueStub = sandbox.stub(utils, 'findByValue')
@@ -356,7 +361,7 @@ describe('Transaction.js', () => {
             const expectedTransactions = JSON.parse(JSON.stringify(transactions));
             expectedTransactions[0].parameters[1] = {
                 name: 'some param',
-                description: '',
+                description: 'some description',
                 schema: 'some new schema'
             };
 
@@ -393,7 +398,7 @@ describe('Transaction.js', () => {
             const expectedTransactions = JSON.parse(JSON.stringify(transactions));
             expectedTransactions[0].parameters = [{
                 name: 'some param',
-                description: '',
+                description: 'some description',
                 schema: 'some new schema'
             }];
 
@@ -413,7 +418,7 @@ describe('Transaction.js', () => {
             sinon.assert.calledWithExactly(appendSpy, transactions, 'name', 'mockKey', {
                 parameters: [{
                     name: 'some param',
-                    description: '',
+                    description: 'some description',
                     schema: 'some new schema'
                 }]
             });
@@ -427,6 +432,32 @@ describe('Transaction.js', () => {
             const findByValueStub = sandbox.stub(utils, 'findByValue')
                 .onFirstCall().returns(null);
 
+            param(mockTarget, 'mockKey');
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWithExactly(getMetadataStub, 'fabric:transactions', mockTarget);
+            sinon.assert.calledOnce(findByValueStub);
+            sinon.assert.calledWithExactly(findByValueStub, sinon.match.any, 'name', 'mockKey');
+            sinon.assert.calledOnce(generateSchemaStub);
+            sinon.assert.calledWithExactly(generateSchemaStub, 'some type');
+            sinon.assert.calledOnce(appendSpy);
+            sinon.assert.calledOnce(defineMetadataStub);
+            sinon.assert.calledWithExactly(defineMetadataStub, 'fabric:transactions', [{
+                name: 'mockKey',
+                parameters: [{
+                    name: 'some param',
+                    description: 'some description',
+                    schema: 'some new schema'
+                }]
+            }], mockTarget);
+        });
+
+        it ('should handle when no description passed', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(undefined);
+            const findByValueStub = sandbox.stub(utils, 'findByValue')
+                .onFirstCall().returns(null);
+
+            param = Param('some param', 'some type');
             param(mockTarget, 'mockKey');
 
             sinon.assert.calledOnce(getMetadataStub);
