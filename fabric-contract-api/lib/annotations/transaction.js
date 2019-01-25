@@ -82,23 +82,25 @@ module.exports.Returns = function Returns(returnType) {
     };
 };
 
-module.exports.Param = function Param(paramName, paramType) {
+module.exports.Param = function Param(paramName, paramType, description) {
     return (target, propertyKey) => {
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
 
         const transaction = utils.findByValue(transactions, 'name', propertyKey);
 
         const paramSchema = utils.generateSchema(paramType);
+        const paramDesc = description || '';
 
         if (transaction && transaction.parameters) {
             const param = utils.findByValue(transaction.parameters, 'name', paramName);
 
             if (param) {
                 param.schema = paramSchema;
+                param.description = paramDesc;
             } else {
                 transaction.parameters.push({
                     name: paramName,
-                    description: '',
+                    description: paramDesc,
                     schema: paramSchema
                 });
             }
@@ -106,7 +108,7 @@ module.exports.Param = function Param(paramName, paramType) {
             utils.appendOrUpdate(transactions, 'name', propertyKey, {
                 parameters: [{
                     name: paramName,
-                    description: '',
+                    description: paramDesc,
                     schema: paramSchema
                 }]
             });
