@@ -42,7 +42,8 @@ class ChaincodeFromContract {
         }
 
         this.serializers = serializers;
-        logger.info('Using serializers', serializers);
+        logger.debug('Using serializers', serializers);
+
 
         this.title = title;
         this.version = version;
