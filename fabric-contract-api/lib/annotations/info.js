@@ -12,11 +12,18 @@
  * limitations under the License.
  */
 
+const Logger = require('../logger');
+const logger = Logger.getLogger('./lib/annotations/info.js');
 require('reflect-metadata');
 
 module.exports.Info = function Info (info = {}) {
     return (target) => {
+        logger.info('@Info args', target.name, info);
+
         const data = Reflect.getMetadata('fabric:info', global) || {};
+
+        logger.debug('Existing fabric:info', data);
+
         if (!info.name) {
             info.name = target.name;
         }
@@ -28,6 +35,8 @@ module.exports.Info = function Info (info = {}) {
         Object.assign(data[target.name], info);
 
         Reflect.defineMetadata('fabric:info', data, global);
+
+        logger.debug('Updated fabric:info', data);
     };
 };
 

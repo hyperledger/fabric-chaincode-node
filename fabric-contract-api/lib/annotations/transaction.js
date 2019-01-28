@@ -6,6 +6,8 @@
 'use strict';
 const getParams = require('get-params');
 const utils = require('./utils');
+const Logger = require('../logger');
+const logger = Logger.getLogger('./lib/annotations/object.js');
 require('reflect-metadata');
 
 // there appears to be confusions within the meta data handling
@@ -27,10 +29,21 @@ function isPrimitive(type) {
 
 module.exports.Transaction = function Transaction(commit = true) {
     return (target, propertyKey) => {
+        logger.info('@Transaction args', target, propertyKey, commit);
+
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
+
+        logger.debug('Existing fabric:transactions', transactions);
+
         const paramNames = getParams(target[propertyKey]);
+
+        logger.debug(`Transaction ${target} -> ${propertyKey} params`, paramNames);
+
         const description = '';
         const contextType = target.createContext().constructor;
+
+        logger.debug(`Transaction ${target} -> ${propertyKey} params`, paramNames);
+
         const paramTypes = Reflect.getMetadata('design:paramtypes', target, propertyKey) || [];
 
         let numRemoved = 0;
@@ -38,6 +51,7 @@ module.exports.Transaction = function Transaction(commit = true) {
             const filter = paramType === contextType;
 
             if (filter) {
+                logger.debug(`Transaction ${target} -> ${propertyKey} ignoring param as matched context type`, paramNames[paramIdx]);
                 paramNames.splice(paramIdx - numRemoved++, 1);
             }
 
@@ -79,12 +93,17 @@ module.exports.Transaction = function Transaction(commit = true) {
         });
 
         Reflect.defineMetadata('fabric:transactions', transactions, target);
+        logger.debug('Updated fabric:transactions', transactions);
     };
 };
 
 module.exports.Returns = function Returns(returnType) {
     return (target, propertyKey) => {
+        logger.info('@Returns args', target, propertyKey, returnType);
+
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
+
+        logger.debug('Existing fabric:transactions', transactions);
 
         const obj = {
             name: 'success',
@@ -105,5 +124,6 @@ module.exports.Returns = function Returns(returnType) {
         });
 
         Reflect.defineMetadata('fabric:transactions', transactions, target);
+        logger.debug('Updated fabric:transactions', transactions);
     };
 };

@@ -103,7 +103,7 @@ class Shim {
             throw new Error('The "chaincode" argument must implement the "Invoke()" method');
         }
 
-        logger.debug(opts);
+        logger.debug('Starting chaincode using options', opts);
 
         const optsCpy  = Object.assign({}, opts);
         const expectedOpts = StartCommand.validOptions;
@@ -118,6 +118,7 @@ class Shim {
 
         const url = parsePeerUrl(opts['peer.address']);
         if (isTLS()) {
+            logger.debug('TLS enabled');
             optsCpy.pem = fs.readFileSync(process.env.CORE_PEER_TLS_ROOTCERT_FILE).toString();
 
             // the peer enforces mutual TLS, so we must have the client key and cert to proceed
@@ -237,6 +238,7 @@ class ClientIdentity {
 	 * @param {ChaincodeStub} This is the stub object passed to Init() and Invoke() methods
 	 */
     constructor(stub) {
+        logger.debug('Generating client identity', stub);
         this.stub = stub;
         const signingId = stub.getCreator();
 
@@ -259,6 +261,7 @@ class ClientIdentity {
         const x = new jsrsasign.X509();
         x.readCertPEM(normalizedCert);
         this.id = `x509::${x.getSubjectString()}::${x.getIssuerString()}`;
+        logger.debug('Generated client identity', this.stub, this.mspId, this.cert, this.attrs, this.id);
     }
 
     /**
@@ -365,11 +368,14 @@ class ClientIdentity {
 
 function parsePeerUrl(url) {
     if (typeof url === 'undefined' || url === '') {
-        throw new Error('The "peer.address" program argument must be set to a legitimate value of <host>:<port>');
+        const errMsg = 'The "peer.address" program argument must be set to a legitimate value of <host>:<port>';
+        logger.error(errMsg);
+        throw new Error(errMsg);
     } else {
         if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
-            throw new Error('The "peer.address" program argument can not be set to an "http(s)" url, ' +
-    'use grpc(s) or omit the protocol');
+            const errMsg = 'The "peer.address" program argument can not be set to an "http(s)" url, use grpc(s) or omit the protocol';
+            logger.error(errMsg);
+            throw new Error(errMsg);
         } else {
             // if the url has grpc(s) prefix, use it, otherwise decide based on the TLS enablement
             if (url.indexOf('grpc://') !== 0 && url.indexOf('grpcs://') !== 0) {
@@ -382,6 +388,7 @@ function parsePeerUrl(url) {
         }
     }
 
+    logger.debug('Peer URL', url);
     return url;
 }
 

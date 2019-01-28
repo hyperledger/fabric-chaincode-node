@@ -6,6 +6,9 @@
 
 'use strict';
 
+const Logger = require('./logger');
+const logger = Logger.getLogger('./lib/jsontransactionserializer.js');
+
 /**
  * Uses the standard JSON serialization methods for converting to and from JSON strings
  * (and buffers).
@@ -31,10 +34,12 @@ module.exports = class JSONSerializer {
                 // ok so this is a basic primitive type, and for strings and numbers the wireprotocol is different
                 // double check the type of the result passed in
                 if (schema.type !== typeof result) {
+                    logger.error('toBuffer validation against schema failed on type', typeof result, schema.type);
                     throw new Error(`Returned value is ${typeof result} does not match schema type of ${schema.type}`);
                 }
                 return Buffer.from(result.toString());
             } else {
+                logger.info('toBuffer has no schema/lacks sufficient schema to validate against', schema);
                 const payload = JSON.stringify(result);
                 return Buffer.from(payload);
             }
@@ -56,12 +61,14 @@ module.exports = class JSONSerializer {
     fromBuffer(data, schema = {}) {
 
         if (!data) {
+            logger.error('fromBuffer no data supplied');
             throw new Error('Buffer needs to be supplied');
         }
         let value;
         let jsonForValidation;
         // check that schema to see exactly how we should de-marshall this
         if (schema.type && (schema.type === 'string' || schema.type === 'number')) {
+            logger.debug('fromBuffer handling data as string/number');
             // ok so this is a basic primitive type, and for strings and numbers the wireprotocol is different
             value = data.toString();
             jsonForValidation = JSON.stringify(value);
@@ -69,12 +76,15 @@ module.exports = class JSONSerializer {
 
             const json = JSON.parse(data.toString());
             if (json.type) {
+                logger.debug('fromBuffer handling data as buffer');
                 if (json.type === 'Buffer') {
                     value = Buffer.from(json.data);
                 } else {
+                    logger.error('fromBuffer could not convert data to useful type', data);
                     throw new Error(`Type of ${json.type} is not understood, can't recreate data`);
                 }
             } else {
+                logger.debug('fromBuffer handling data as json');
                 value = json;
             }
             // as JSON then this si the same

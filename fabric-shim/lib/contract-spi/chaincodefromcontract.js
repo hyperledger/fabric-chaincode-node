@@ -45,7 +45,7 @@ class ChaincodeFromContract {
         }
 
         this.serializers = serializers;
-        logger.info(serializers);
+        logger.debug('Using serializers', serializers);
 
 
 
@@ -144,6 +144,7 @@ class ChaincodeFromContract {
      *
      */
     _resolveContractImplementations(contractClasses) {
+        logger.debug('Supplied contract classes', contractClasses);
         const Contract = require('fabric-contract-api').Contract;
         const implementations = {};
 
@@ -190,6 +191,9 @@ class ChaincodeFromContract {
                 });
             }
         }
+
+        logger.debug('Transactions for contract ' + contract.name, transactions);
+
         return transactions;
     }
 
@@ -216,6 +220,7 @@ class ChaincodeFromContract {
     _augmentMetadataFromCode(metadata) {
 
         if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
+            logger.debug('_augmentMetadataFromCode - Contracts not supplied. Generating default');
             metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));
 
             for (const contractKey in metadata.contracts) {
@@ -231,6 +236,7 @@ class ChaincodeFromContract {
         // look for the general information representing all the contracts
         // add if nothing has been given by the application
         if (!metadata.info) {
+            logger.debug('_augmentMetadataFromCode - Info not supplied. Generating default');
             const opts = StartCommand.getArgs(yargs);
             const modPath = path.resolve(process.cwd(), opts['module-path']);
             const jsonPath = path.resolve(modPath, 'package.json');
@@ -243,6 +249,7 @@ class ChaincodeFromContract {
 
         // obtain the information relating to the complex objects
         if (!metadata.components) {
+            logger.debug('_augmentMetadataFromCode - Components not supplied. Generating default');
             metadata.components = {};
             metadata.components.schemas = Reflect.getMetadata('fabric:objects', global) || {};
         }

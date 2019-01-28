@@ -52,7 +52,7 @@ class Bootstrap {
         // let's find the package.json file
         const json = require(jsonPath);
         logger.debug('starting up and reading package.json at %s', jsonPath);
-        logger.debug(json);
+        logger.debug('read JSON', json);
         const JSONSerializer = require('fabric-contract-api').JSONSerializer;
         const defaultSerialization = {
             transaction: 'jsonSerializer',
@@ -106,7 +106,7 @@ class Bootstrap {
 
         if (pathCheck) {
             metadata = await Bootstrap.loadAndValidateMetadata(metadataPath);
-            logger.info('Meta data file has been located');
+            logger.info('Meta data file has been located', metadata);
         } else {
             logger.info('No metadata file supplied in contract, introspection will generate all the data');
         }

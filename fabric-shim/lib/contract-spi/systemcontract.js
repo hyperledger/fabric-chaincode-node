@@ -6,9 +6,6 @@
 'use strict';
 
 const Contract = require('fabric-contract-api').Contract;
-const Logger = require('../logger');
-const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
-const util = require('util');
 
 /**
  * This is a contract that determines functions that can be invoked to provide general information
@@ -28,7 +25,6 @@ class SystemContract extends Contract {
 	 */
     _setMetadata(metadata) {
         this.metadata = metadata;
-        logger.info('Metadata is : \n', util.inspect(this.metadata, {depth:8}));
     }
 
     /**
