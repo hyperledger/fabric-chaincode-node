@@ -9,7 +9,8 @@
     "url": "https://github.com/hyperledger/fabric-chaincode-node"
   },
   "scripts": {
-    "compile": "tsc --project test/typescript"
+    "compile": "tsc --project test/typescript",
+    "test": "nyc mocha --recursive 'test/unit/**/*.js'"
   },
   "keywords": [
     "fabric-shim",
@@ -27,5 +28,25 @@
     "winston": "^2.4.1"
   },
   "types": "./types/index.d.ts",
-  "devDependencies": {}
+  "devDependencies": {
+    "mocha": "5.2.0",
+    "nyc": "13.1.0",
+    "typescript": "3.0.1"
+  },
+  "nyc": {
+    "exclude": [
+      "coverage/**",
+      "test/**"
+    ],
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 90,
+    "branches": 90,
+    "functions": 90,
+    "lines": 90
+  }
 }

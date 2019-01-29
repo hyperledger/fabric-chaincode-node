@@ -198,9 +198,4 @@ describe('contract.js', () => {
 
         });
     });
-
-
-
-
-
 });

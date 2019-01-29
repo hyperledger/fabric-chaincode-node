@@ -13,7 +13,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "test": "gulp test-headless",
-    "schema:test": "ajv compile -s ./fabric-contract-api/schema/contract-schema.json && ajv validate -s ./fabric-contract-api/schema/contract-schema.json -d ./fabric-contract-api/schema/example-full.json"
+    "schema:test": "ajv compile -s ./fabric-contract-api/schema/contract-schema.json && ajv validate -s ./fabric-contract-api/schema/contract-schema.json -d ./fabric-contract-api/schema/example-full.json",
+    "postinstall": "npm --prefix fabric-contract-api install && npm --prefix fabric-shim install && npm --prefix fabric-shim-crypto install"
   },
   "dependencies": {
     "@types/node": "^8.9.4",

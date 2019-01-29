@@ -135,7 +135,7 @@ install_Npm() {
 
         npm install || err_Check "ERROR!!! npm install failed"
         npm config set prefix ~/npm && npm install -g gulp
-
+        echo "------> Done npm install"
     else
 
         echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
@@ -143,6 +143,8 @@ install_Npm() {
 
         npm install || err_Check "ERROR!!! npm install failed"
         npm install -g gulp
+
+        echo "------> Done npm install"
     fi
 }
 

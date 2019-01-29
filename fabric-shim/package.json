@@ -46,19 +46,26 @@
   },
   "devDependencies": {
     "mocha": "5.2.0",
-    "nyc": "13.1.0"
+    "nyc": "13.1.0",
+    "typescript": "3.0.1"
   },
   "nyc": {
     "include": [
       "lib/**/*.js"
     ],
-    "reporter": [
-      "lcov",
-      "json",
-      "text",
-      "text-summary",
-      "cobertura"
+    "exclude": [
+      "coverage/**",
+      "test/**"
     ],
-    "cache": true
+    "reporter": [
+      "text-summary",
+      "html"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 90,
+    "branches": 90,
+    "functions": 90,
+    "lines": 90
   }
 }
