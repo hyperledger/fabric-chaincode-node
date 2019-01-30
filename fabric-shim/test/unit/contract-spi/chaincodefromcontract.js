@@ -303,6 +303,12 @@ describe('chaincodefromcontract', () => {
     });
 
     describe('#_resolveContractImplementations', () => {
+
+        let processInfoStub;
+        beforeEach(() => {
+            processInfoStub = sandbox.stub(ChaincodeFromContract.prototype, '_processContractInfo');
+        });
+
         it('should handle a single class being passed as a contract', () => {
             const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
@@ -311,6 +317,8 @@ describe('chaincodefromcontract', () => {
             const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
             cc.defaultContractName.should.deep.equal('alpha');
+            sinon.assert.calledTwice(processInfoStub);
+            processInfoStub.getCall(0).args[0].default.should.be.true;
         });
         it('should handle a single class being passed that is not valid', () => {
 
@@ -331,6 +339,23 @@ describe('chaincodefromcontract', () => {
             const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
             cc.defaultContractName.should.deep.equal('beta');
+            sinon.assert.calledThrice(processInfoStub);
+            processInfoStub.getCall(0).args[0].default.should.be.true;
+            (typeof processInfoStub.getCall(1).args[0].default).should.be.equal('undefined');
+        });
+
+        it('should handle the default tag being used', () => {
+            sandbox.stub(Reflect, 'getMetadata').withArgs('fabric:default', global).returns('alpha');
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            mockery.registerMock('SCAlpha', SCAlpha);
+            const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+            cc.defaultContractName.should.deep.equal('alpha');
+            sinon.assert.calledThrice(processInfoStub);
+            (typeof processInfoStub.getCall(0).args[0].default).should.be.equal('undefined');
+            processInfoStub.getCall(1).args[0].default.should.be.true;
         });
     });
 

@@ -31,4 +31,5 @@ declare module 'fabric-contract-api' {
     export function Object(type?: string): (target: any) => void;
     export function Info(info?: object): (target: any) => void;
     export function Property(name?: string, type?: string): (target: any, propertyKey: string | symbol) => void;
+    export function Default(): (target: any) => void;
 }
