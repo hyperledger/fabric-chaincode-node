@@ -23,7 +23,8 @@
   "license": "Apache-2.0",
   "dependencies": {
     "get-params": "^0.1.2",
-    "reflect-metadata": "^0.1.12"
+    "reflect-metadata": "^0.1.12",
+    "winston": "^2.4.1"
   },
   "types": "./types/index.d.ts",
   "devDependencies": {}

@@ -6,6 +6,9 @@
 
 'use strict';
 
+const Logger = require('./logger');
+const logger = Logger.getLogger('./lib/contract.js');
+
 const Context = require('./context');
 
 /**
@@ -30,6 +33,8 @@ class Contract {
         } else {
             this.name = name.trim();
         }
+
+        logger.info('Creating new Contract', name);
     }
 
     /**
@@ -76,7 +81,10 @@ class Contract {
 	 * @param {Context} ctx the transactional context
 	 */
     async unknownTransaction(ctx) {
-        const {fcn} = ctx.stub.getFunctionAndParameters();
+        const {fcn, params} = ctx.stub.getFunctionAndParameters();
+
+        logger.error(`${this.name} contract-api.Contract unknown transaction`, fcn, params);
+
         throw new Error(`You've asked to invoke a function that does not exist: ${fcn}`);
     }
 

@@ -1,0 +1,747 @@
+
+> fabric-shim-test@2.0.0-snapshot test /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node
+> gulp test-headless
+
+
+####################################################
+# debug log: /var/folders/jy/h62n73_j4m16l0ty0pj4xcdw0000gn/T/fabric-shim/logs/test-debug.log
+####################################################
+
+
+####################################################
+BasicNetworkSamplePath: /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-samples/basic-network
+BasicNetworkTestDir: /var/folders/jy/h62n73_j4m16l0ty0pj4xcdw0000gn/T/fabric-shim/basic-network
+####################################################
+
+[14:16:21] Using gulpfile ~/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/gulpfile.js
+[14:16:21] Starting 'test-headless'...
+[14:16:21] Starting 'clean-up'...
+[14:16:21] Finished 'clean-up' after 32 ms
+[14:16:21] Starting 'lint'...
+[14:16:28] 
+/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-contract-api/test/unit/logger.js
+  21:13  warning  Unexpected console statement  no-console
+
+✖ 1 problem (0 errors, 1 warning)
+
+[14:16:28] Finished 'lint' after 6.07 s
+[14:16:28] Starting 'typescript_check'...
+[14:16:28] npm run compile --prefix fabric-contract-api
+
+> fabric-contract-api@2.0.0-snapshot compile /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-contract-api
+> tsc --project test/typescript
+
+[14:16:30] npm run compile --prefix fabric-shim
+
+> fabric-shim@2.0.0-snapshot compile /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim
+> tsc --project test/typescript
+
+[14:16:32] Finished 'typescript_check' after 4.44 s
+[14:16:32] Starting 'instrument'...
+[14:16:33] Finished 'instrument' after 903 ms
+[14:16:33] Starting 'protos'...
+[14:16:33] gulp-debug: ../fabric/protos/common/common.proto
+[14:16:33] gulp-debug: ../fabric/protos/common/policies.proto
+[14:16:33] gulp-debug: ../fabric/protos/msp/identities.proto
+[14:16:33] gulp-debug: ../fabric/protos/msp/msp_principal.proto
+[14:16:33] gulp-debug: ../fabric/protos/ledger/queryresult/kv_query_result.proto
+[14:16:33] gulp-debug: ../fabric/protos/peer/chaincode.proto
+[14:16:33] gulp-debug: ../fabric/protos/peer/chaincode_event.proto
+[14:16:33] gulp-debug: ../fabric/protos/peer/chaincode_shim.proto
+[14:16:33] gulp-debug: ../fabric/protos/peer/proposal.proto
+[14:16:33] gulp-debug: ../fabric/protos/peer/proposal_response.proto
+[14:16:33] gulp-debug: ../fabric/protos/token/transaction.proto
+[14:16:33] gulp-debug: ../fabric/protos/token/expectations.proto
+[14:16:33] gulp-debug: 12 items
+[14:16:33] Finished 'protos' after 18 ms
+[14:16:33] Starting 'test-schema'...
+
+> fabric-shim-test@2.0.0-snapshot schema:test /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node
+> ajv compile -s ./fabric-contract-api/schema/contract-schema.json && ajv validate -s ./fabric-contract-api/schema/contract-schema.json -d ./fabric-contract-api/schema/example-full.json
+
+schema ./fabric-contract-api/schema/contract-schema.json is valid
+./fabric-contract-api/schema/example-full.json valid
+
+
+[14:16:34] Finished 'test-schema' after 652 ms
+[14:16:34] Starting '<anonymous>'...
+
+    contract.js #constructor should create plain object ok:   ✓ contract.js #constructor should create plain object ok: 2ms
+    contract.js #constructor should have set* methods:   ✓ contract.js #constructor should have set* methods: 0ms
+    contract.js #constructor should create with default name: 2019-01-30T14:16:35.504Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract 
+2019-01-30T14:16:35.505Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract 
+2019-01-30T14:16:35.505Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract    
+  ✓ contract.js #constructor should create with default name: 2ms
+    contract.js #constructor should have default unknownTx fn: 2019-01-30T14:16:35.506Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract 
+  ✓ contract.js #constructor should have default unknownTx fn: 3ms
+    contract.js #constructor should create with the name specified: 2019-01-30T14:16:35.508Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract brain.size.planet.smart 
+2019-01-30T14:16:35.508Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract    somewhat.padded.out  
+2019-01-30T14:16:35.509Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract 
+  ✓ contract.js #constructor should create with the name specified: 1ms
+    contract.js #constructor should call the default before/after functions: 2019-01-30T14:16:35.509Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract 
+  ✓ contract.js #constructor should call the default before/after functions: 1ms
+    contract.js #constructor should call the default createContext functions: 2019-01-30T14:16:35.510Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract 
+  ✓ contract.js #constructor should call the default createContext functions: 0ms
+    contract.js #constructor should set the __isContract value: 2019-01-30T14:16:35.510Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract 
+  ✓ contract.js #constructor should set the __isContract value: 1ms
+    contract.js _isContract should return true when class is a contract: 2019-01-30T14:16:35.511Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract alpha.beta.delta 
+  ✓ contract.js _isContract should return true when class is a contract: 0ms
+    contract.js _isContract should return true when class is not a contract:   ✓ contract.js _isContract should return true when class is not a contract: 0ms
+    contract.js _isContract should return true when class is not instanceOf contract but does have __isContract true:   ✓ contract.js _isContract should return true when class is not instanceOf contract but does have __isContract true: 0ms
+    contract.js subclass specific functioning should set the correct name: 2019-01-30T14:16:35.513Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract alpha.beta.delta 
+  ✓ contract.js subclass specific functioning should set the correct name: 0ms
+    contract.js subclass specific functioning should call the correct subclassed fns: 2019-01-30T14:16:35.514Z [32mINFO[39m [32m[./lib/contract.js][39m Creating new Contract alpha.beta.delta 
+  ✓ contract.js subclass specific functioning should call the correct subclassed fns: 1ms
+    jsontransactionserializer.js #constructor should create plain object ok:   ✓ jsontransactionserializer.js #constructor should create plain object ok: 0ms
+    jsontransactionserializer.js #toBuffer should return undefined if nothing passed in (no schema) :   ✓ jsontransactionserializer.js #toBuffer should return undefined if nothing passed in (no schema) : 0ms
+    jsontransactionserializer.js #toBuffer should return stringifed result (no schema): 2019-01-30T14:16:35.516Z [32mINFO[39m [32m[./lib/jsontransactionserializer.js][39m toBuffer has no schema/lacks sufficient schema to validate against 
+2019-01-30T14:16:35.517Z [32mINFO[39m [32m[./lib/jsontransactionserializer.js][39m toBuffer has no schema/lacks sufficient schema to validate against 
+2019-01-30T14:16:35.517Z [32mINFO[39m [32m[./lib/jsontransactionserializer.js][39m toBuffer has no schema/lacks sufficient schema to validate against 
+2019-01-30T14:16:35.517Z [32mINFO[39m [32m[./lib/jsontransactionserializer.js][39m toBuffer has no schema/lacks sufficient schema to validate against 
+  ✓ jsontransactionserializer.js #toBuffer should return stringifed result (no schema): 1ms
+    jsontransactionserializer.js #toBuffer should return string from a string in result if schema given:   ✓ jsontransactionserializer.js #toBuffer should return string from a string in result if schema given: 0ms
+    jsontransactionserializer.js #toBuffer should return number from a number in result if schema given:   ✓ jsontransactionserializer.js #toBuffer should return number from a number in result if schema given: 0ms
+    jsontransactionserializer.js #toBuffer should throw an error if the type of data passed does not match schema given:   ✓ jsontransactionserializer.js #toBuffer should throw an error if the type of data passed does not match schema given: 0ms
+    jsontransactionserializer.js #fromBuffer should return throw an error if noting given:   ✓ jsontransactionserializer.js #fromBuffer should return throw an error if noting given: 0ms
+    jsontransactionserializer.js #fromBuffer should return inflated data from the buffer:   ✓ jsontransactionserializer.js #fromBuffer should return inflated data from the buffer: 0ms
+    jsontransactionserializer.js #fromBuffer should handle specific String case:   ✓ jsontransactionserializer.js #fromBuffer should handle specific String case: 0ms
+    jsontransactionserializer.js #fromBuffer should handle specific Number case:   ✓ jsontransactionserializer.js #fromBuffer should handle specific Number case: 0ms
+    jsontransactionserializer.js #fromBuffer should handle specific Number case:   ✓ jsontransactionserializer.js #fromBuffer should handle specific Number case: 1ms
+    jsontransactionserializer.js #fromBuffer should handle errors of unkown type:   ✓ jsontransactionserializer.js #fromBuffer should handle errors of unkown type: 1ms
+LOG LEVEL undefined
+    Logger getLogger should create a new logger name unknown:   ✓ Logger getLogger should create a new logger name unknown: 1ms
+    Logger getLogger should return existing logger if known name used:   ✓ Logger getLogger should return existing logger if known name used: 0ms
+    Logger getLogger should set the log level to fatal when env var set to CRITICAL:   ✓ Logger getLogger should set the log level to fatal when env var set to CRITICAL: 0ms
+    Logger getLogger should set the log level to error when env var set to ERROR:   ✓ Logger getLogger should set the log level to error when env var set to ERROR: 0ms
+    Logger getLogger should set the log level to warn when env var set to WARNING:   ✓ Logger getLogger should set the log level to warn when env var set to WARNING: 0ms
+    Logger getLogger should set the log level to debug when env var set to DEBUG:   ✓ Logger getLogger should set the log level to debug when env var set to DEBUG: 0ms
+    Logger formatter :   ✓ Logger formatter : 1ms
+    Logger formatter :   ✓ Logger formatter : 0ms
+    Default.js Default should add set value for default when none set: 2019-01-30T14:16:35.530Z [32mINFO[39m [32m[./lib/annotations/default.js][39m @Default args mockTarget 
+  ✓ Default.js Default should add set value for default when none set: 1ms
+    Default.js Default should error when default already set: 2019-01-30T14:16:35.531Z [32mINFO[39m [32m[./lib/annotations/default.js][39m @Default args mockTarget 
+  ✓ Default.js Default should error when default already set: 1ms
+    Info.js Info should add object as key when no objects exist for global yet: 2019-01-30T14:16:35.532Z [32mINFO[39m [32m[./lib/annotations/info.js][39m @Info args steve 
+  ✓ Info.js Info should add object as key when no objects exist for global yet: 1ms
+    Info.js Info should add object as key when objects exist for global: 2019-01-30T14:16:35.533Z [32mINFO[39m [32m[./lib/annotations/info.js][39m @Info args steve 
+  ✓ Info.js Info should add object as key when objects exist for global: 1ms
+    Info.js Info with data should add object as key when no objects exist for global yet: 2019-01-30T14:16:35.534Z [32mINFO[39m [32m[./lib/annotations/info.js][39m @Info args steve 
+	{"name":"bill","version":"1.0.1"}
+  ✓ Info.js Info with data should add object as key when no objects exist for global yet: 1ms
+    Info.js Info with data should add object as key when objects exist for global: 2019-01-30T14:16:35.535Z [32mINFO[39m [32m[./lib/annotations/info.js][39m @Info args steve 
+	{"name":"bill","version":"1.0.1"}
+  ✓ Info.js Info with data should add object as key when objects exist for global: 0ms
+    Object.js Object should add object as key when no objects exist for global yet: 2019-01-30T14:16:35.536Z [32mINFO[39m [32m[./lib/annotations/object.js][39m @Object args steve 
+  ✓ Object.js Object should add object as key when no objects exist for global yet: 0ms
+    Object.js Object should add object as key when objects exist for global: 2019-01-30T14:16:35.537Z [32mINFO[39m [32m[./lib/annotations/object.js][39m @Object args steve 
+  ✓ Object.js Object should add object as key when objects exist for global: 0ms
+    Object.js Property should use the type and name passed: 2019-01-30T14:16:35.538Z [32mINFO[39m [32m[./lib/annotations/object.js][39m @Property args { name: 'steve' } undefined some name SoMe tYPe 
+  ✓ Object.js Property should use the type and name passed: 1ms
+    Object.js Property should handle the reflected type being a function when type not passed: 2019-01-30T14:16:35.540Z [32mINFO[39m [32m[./lib/annotations/object.js][39m @Property args { name: 'steve' } some key some name 
+  ✓ Object.js Property should handle the reflected type being a function when type not passed: 0ms
+    Object.js Property should handle the reflected type being a function when type not passed: 2019-01-30T14:16:35.541Z [32mINFO[39m [32m[./lib/annotations/object.js][39m @Property args { name: 'steve' } some key undefined 
+  ✓ Object.js Property should handle the reflected type being a function when type not passed: 1ms
+    Transaction.js Transaction should handle existing transactions: 2019-01-30T14:16:35.543Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Transaction args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey true 
+  ✓ Transaction.js Transaction should handle existing transactions: 2ms
+    Transaction.js Transaction should handle existing transactions of which matches name and already has param metadata: 2019-01-30T14:16:35.545Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Transaction args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey true 
+  ✓ Transaction.js Transaction should handle existing transactions of which matches name and already has param metadata: 1ms
+    Transaction.js Transaction should create new metadata for fabric:transactions if none exist and handle no params: 2019-01-30T14:16:35.546Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Transaction args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey true 
+  ✓ Transaction.js Transaction should create new metadata for fabric:transactions if none exist and handle no params: 1ms
+    Transaction.js Transaction should not add a tag if commit is false: 2019-01-30T14:16:35.547Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Transaction args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey 
+  ✓ Transaction.js Transaction should not add a tag if commit is false: 1ms
+    Transaction.js Returns should handle existing transactions: 2019-01-30T14:16:35.549Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Returns args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey someType 
+  ✓ Transaction.js Returns should handle existing transactions: 1ms
+    Transaction.js Returns should handle when there are no existing transactions: 2019-01-30T14:16:35.550Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Returns args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey someType 
+  ✓ Transaction.js Returns should handle when there are no existing transactions: 1ms
+    Transaction.js Param should overwrite when the transaction exists and param of name already in: 2019-01-30T14:16:35.551Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Param args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey some param some type some description 
+  ✓ Transaction.js Param should overwrite when the transaction exists and param of name already in: 1ms
+    Transaction.js Param should overwrite existing transaction but add new param when one with name does not exist: 2019-01-30T14:16:35.552Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Param args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey some param some type some description 
+  ✓ Transaction.js Param should overwrite existing transaction but add new param when one with name does not exist: 1ms
+    Transaction.js Param should append to transaction a new parameters array when transaction exists but has not parameters field: 2019-01-30T14:16:35.553Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Param args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey some param some type some description 
+  ✓ Transaction.js Param should append to transaction a new parameters array when transaction exists but has not parameters field: 1ms
+    Transaction.js Param should handle when no transaction exists: 2019-01-30T14:16:35.555Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Param args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey some param some type some description 
+  ✓ Transaction.js Param should handle when no transaction exists: 1ms
+    Transaction.js Param should handle when no description passed: 2019-01-30T14:16:35.555Z [32mINFO[39m [32m[./lib/annotations/transaction.js][39m @Param args { mockKey: 'something',
+  createContext: [Function: createContext] } mockKey some param some type 
+  ✓ Transaction.js Param should handle when no description passed: 1ms
+    utils appendOrUpdate should push a new object into array made up of data passed if none existing with id:   ✓ utils appendOrUpdate should push a new object into array made up of data passed if none existing with id: 1ms
+    utils appendOrUpdate should update existing object with data if id exists:   ✓ utils appendOrUpdate should update existing object with data if id exists: 1ms
+    utils findByValue should return the element in the array with the passed value in the passed field:   ✓ utils findByValue should return the element in the array with the passed value in the passed field: 0ms
+    utils findByValue should return null if no element has the passed value for the passed field:   ✓ utils findByValue should return null if no element has the passed value for the passed field: 0ms
+    utils generateSchema should return a primitive type:   ✓ utils generateSchema should return a primitive type: 0ms
+    utils generateSchema should return a primitive type as lowercase:   ✓ utils generateSchema should return a primitive type as lowercase: 0ms
+    utils generateSchema should return a ref path for a non array and non primitive type:   ✓ utils generateSchema should return a ref path for a non array and non primitive type: 1ms
+    utils generateSchema should recurse for array types:   ✓ utils generateSchema should recurse for array types: 1ms
+    ECDSA Key should throw an error when missing key parameter:   ✓ ECDSA Key should throw an error when missing key parameter: 0ms
+    ECDSA Key should throw an error when key does not have type property:   ✓ ECDSA Key should throw an error when key does not have type property: 1ms
+    ECDSA Key should throw an error when key does not have type property value of EC:   ✓ ECDSA Key should throw an error when key does not have type property value of EC: 0ms
+    ECDSA Key should throw an error when prvKeyHex missing:   ✓ ECDSA Key should throw an error when prvKeyHex missing: 0ms
+    ECDSA Key should throw an error when pubKeyHex missing:   ✓ ECDSA Key should throw an error when pubKeyHex missing: 0ms
+    ECDSA Key should throw an error when pubKeyHex null:   ✓ ECDSA Key should throw an error when pubKeyHex null: 0ms
+    ECDSA Key should set the value of _key when valid key passed:   ✓ ECDSA Key should set the value of _key when valid key passed: 0ms
+    ECDSA Key isPrivate should return true when _key has prvKeyHex:   ✓ ECDSA Key isPrivate should return true when _key has prvKeyHex: 0ms
+    ECDSA Key isPrivate should return false when _key prvKeyHex is null:   ✓ ECDSA Key isPrivate should return false when _key prvKeyHex is null: 0ms
+    ECDSA Key getPublicKey should return the instance for public key:   ✓ ECDSA Key getPublicKey should return the instance for public key: 44ms
+    ECDSA Key getPublicKey should return a public key from ECDSA if using private key:   ✓ ECDSA Key getPublicKey should return a public key from ECDSA if using private key: 22ms
+    ECDSA Key toBytes should return private key:   ✓ ECDSA Key toBytes should return private key: 26ms
+    ECDSA Key toBytes should return public key:   ✓ ECDSA Key toBytes should return public key: 20ms
+    enc-sign ChaincodeCryptoLibrary should set no variables:   ✓ enc-sign ChaincodeCryptoLibrary should set no variables: 1ms
+    enc-sign ChaincodeCryptoLibrary should set key values when init vector in map:   ✓ enc-sign ChaincodeCryptoLibrary should set key values when init vector in map: 1ms
+    enc-sign ChaincodeCryptoLibrary should set key values when init vector not in map:   ✓ enc-sign ChaincodeCryptoLibrary should set key values when init vector not in map: 1ms
+    enc-sign ChaincodeCryptoLibrary should set sign key values:   ✓ enc-sign ChaincodeCryptoLibrary should set sign key values: 2ms
+    enc-sign ChaincodeCryptoLibrary encrypt should throw an error if cipher not set:   ✓ enc-sign ChaincodeCryptoLibrary encrypt should throw an error if cipher not set: 0ms
+    enc-sign ChaincodeCryptoLibrary encrypt should return a buffer of encrypted plaintext:   ✓ enc-sign ChaincodeCryptoLibrary encrypt should return a buffer of encrypted plaintext: 1ms
+    enc-sign ChaincodeCryptoLibrary decrypt should throw an error if cipher not set:   ✓ enc-sign ChaincodeCryptoLibrary decrypt should throw an error if cipher not set: 0ms
+    enc-sign ChaincodeCryptoLibrary decrypt should return a buffer of decrypted ciphertext:   ✓ enc-sign ChaincodeCryptoLibrary decrypt should return a buffer of decrypted ciphertext: 1ms
+    enc-sign ChaincodeCryptoLibrary decrypt should be able to decrypt an encrypted value:   ✓ enc-sign ChaincodeCryptoLibrary decrypt should be able to decrypt an encrypted value: 1ms
+    enc-sign ChaincodeCryptoLibrary sign should throw an error when signKey not set:   ✓ enc-sign ChaincodeCryptoLibrary sign should throw an error when signKey not set: 0ms
+    enc-sign ChaincodeCryptoLibrary sign should throw an error if signKey is null:   ✓ enc-sign ChaincodeCryptoLibrary sign should throw an error if signKey is null: 0ms
+    enc-sign ChaincodeCryptoLibrary sign should throw an error if the message is not passed:   ✓ enc-sign ChaincodeCryptoLibrary sign should throw an error if the message is not passed: 0ms
+    enc-sign ChaincodeCryptoLibrary sign should throw an error if the message is null:   ✓ enc-sign ChaincodeCryptoLibrary sign should throw an error if the message is null: 0ms
+    enc-sign ChaincodeCryptoLibrary sign should sign the message:   ✓ enc-sign ChaincodeCryptoLibrary sign should sign the message: 1ms
+    enc-sign ChaincodeCryptoLibrary verify should throw an error when signKey not set:   ✓ enc-sign ChaincodeCryptoLibrary verify should throw an error when signKey not set: 0ms
+    enc-sign ChaincodeCryptoLibrary verify should throw an error if signKey is null:   ✓ enc-sign ChaincodeCryptoLibrary verify should throw an error if signKey is null: 0ms
+    enc-sign ChaincodeCryptoLibrary verify should throw an error if the signature is not passed:   ✓ enc-sign ChaincodeCryptoLibrary verify should throw an error if the signature is not passed: 0ms
+    enc-sign ChaincodeCryptoLibrary verify should throw an error if the signature is null:   ✓ enc-sign ChaincodeCryptoLibrary verify should throw an error if the signature is null: 0ms
+    enc-sign ChaincodeCryptoLibrary verify should throw an error if the message is not passed:   ✓ enc-sign ChaincodeCryptoLibrary verify should throw an error if the message is not passed: 0ms
+    enc-sign ChaincodeCryptoLibrary verify should throw an error if the message is null:   ✓ enc-sign ChaincodeCryptoLibrary verify should throw an error if the message is null: 0ms
+    enc-sign ChaincodeCryptoLibrary verify should return an error if not malleable:   ✓ enc-sign ChaincodeCryptoLibrary verify should return an error if not malleable: 1ms
+    enc-sign ChaincodeCryptoLibrary verify should return ok true for verfied signed message:   ✓ enc-sign ChaincodeCryptoLibrary verify should return ok true for verfied signed message: 1ms
+    enc-sign ChaincodeCryptoLibrary verify should return ok false and an error unverified signed message:   ✓ enc-sign ChaincodeCryptoLibrary verify should return ok false and an error unverified signed message: 1ms
+    enc-sign hash should hash a message:   ✓ enc-sign hash should hash a message: 1ms
+    enc-sign importKey should throw an error if unable to parse PEM string:   ✓ enc-sign importKey should throw an error if unable to parse PEM string: 1ms
+    enc-sign importKey should throw an error if key does not have type:   ✓ enc-sign importKey should throw an error if key does not have type: 1ms
+    enc-sign importKey should throw an error if key type not EC:   ✓ enc-sign importKey should throw an error if key type not EC: 0ms
+    enc-sign importKey should return a new ECDSAKey:   ✓ enc-sign importKey should return a new ECDSAKey: 1ms
+    enc-sign makeRealPem should return null if pem not string:   ✓ enc-sign makeRealPem should return null if pem not string: 0ms
+    enc-sign makeRealPem should make a real PEM:   ✓ enc-sign makeRealPem should make a real PEM: 1ms
+    enc-sign _preventMalleability should throw an error if cannot find half order:   ✓ enc-sign _preventMalleability should throw an error if cannot find half order: 0ms
+    enc-sign _preventMalleability should return sig for a low s:   ✓ enc-sign _preventMalleability should return sig for a low s: 1ms
+    enc-sign _preventMalleability should handle s larger than half:   ✓ enc-sign _preventMalleability should handle s larger than half: 11ms
+    enc-sign _checkMalleability should throw an error if cannot find half order:   ✓ enc-sign _checkMalleability should throw an error if cannot find half order: 0ms
+    enc-sign _checkMalleability should throw an error if signature object fails to load correctly (no r):   ✓ enc-sign _checkMalleability should throw an error if signature object fails to load correctly (no r): 1ms
+    enc-sign _checkMalleability should throw an error if signature object fails to load correctly (no s):   ✓ enc-sign _checkMalleability should throw an error if signature object fails to load correctly (no s): 1ms
+    enc-sign _checkMalleability should return false when s is larger than half the order:   ✓ enc-sign _checkMalleability should return false when s is larger than half the order: 0ms
+    enc-sign _checkMalleability should return false when s is lower than half the order:   ✓ enc-sign _checkMalleability should return false when s is lower than half the order: 0ms
+    GenerateCommand #builder function should have the correct command and description:   ✓ GenerateCommand #builder function should have the correct command and description: 0ms
+    GenerateCommand #builder function should call yargs correctly:   ✓ GenerateCommand #builder function should call yargs correctly: 0ms
+    GenerateCommand #handler function should call the handler function correctly:   ✓ GenerateCommand #handler function should call the handler function correctly: 1ms
+    generate #handler should write the contract metadata to a json file when no file extension is specified:   ✓ generate #handler should write the contract metadata to a json file when no file extension is specified: 1ms
+    generate #handler should write the contract metadata to a json file when the .json file extension is specified:   ✓ generate #handler should write the contract metadata to a json file when the .json file extension is specified: 0ms
+    generate #handler should write the contract metadata to the specified file extension when a non .json extension is specified:   ✓ generate #handler should write the contract metadata to the specified file extension when a non .json extension is specified: 0ms
+    generate #handler should log out the contract metadata to when no file-name arg is passed :   ✓ generate #handler should log out the contract metadata to when no file-name arg is passed : 0ms
+    Chaincode Chaincode 'spi' interface should be able to call the init method:   ✓ Chaincode Chaincode 'spi' interface should be able to call the init method: 0ms
+    Chaincode Chaincode 'spi' interface should be able to call the init method:   ✓ Chaincode Chaincode 'spi' interface should be able to call the init method: 0ms
+    Chaincode Chaincode 'spi' interface should only have the Init and Invoke:   ✓ Chaincode Chaincode 'spi' interface should only have the Init and Invoke: 0ms
+    Chaincode Start() should throw an error if no arguments passed:   ✓ Chaincode Start() should throw an error if no arguments passed: 0ms
+    Chaincode Start() should throw an error if string argument passed:   ✓ Chaincode Start() should throw an error if string argument passed: 0ms
+    Chaincode Start() should throw an error if null argument passed:   ✓ Chaincode Start() should throw an error if null argument passed: 0ms
+    Chaincode Start() should throw an error if object missing init passed as argument:   ✓ Chaincode Start() should throw an error if object missing init passed as argument: 1ms
+    Chaincode Start() should throw an error if object missing invoke passed as argument:   ✓ Chaincode Start() should throw an error if object missing invoke passed as argument: 0ms
+    Chaincode Start() should start when passed init and invoke: 2019-01-30T14:16:36.040Z [32mINFO[39m [32m[lib/chaincode.js][39m Registering with peer localhost:7051 as chaincode "mycc" 
+  ✓ Chaincode Start() should start when passed init and invoke: 5ms
+    Chaincode Start() should delete unnecessary arguments passed to the CLI before passing on: 2019-01-30T14:16:36.065Z [32mINFO[39m [32m[lib/chaincode.js][39m Registering with peer localhost:7051 as chaincode "mycc" 
+  ✓ Chaincode Start() should delete unnecessary arguments passed to the CLI before passing on: 1ms
+    Chaincode Start() TLS handling should throw an error when CORE_TLS_CLIENT_KEY_PATH env var not set:   ✓ Chaincode Start() TLS handling should throw an error when CORE_TLS_CLIENT_KEY_PATH env var not set: 1ms
+    Chaincode Start() TLS handling should throw an error when CORE_TLS_CLIENT_KEY_PATH env var set but CORE_TLS_CLIENT_CERT_PATH env var not set:   ✓ Chaincode Start() TLS handling should throw an error when CORE_TLS_CLIENT_KEY_PATH env var set but CORE_TLS_CLIENT_CERT_PATH env var not set: 1ms
+    Chaincode Start() TLS handling should call handler.chat() with the correct object and output a message: 2019-01-30T14:16:36.227Z [32mINFO[39m [32m[lib/chaincode.js][39m Registering with peer localhost:7051 as chaincode "mycc" 
+  ✓ Chaincode Start() TLS handling should call handler.chat() with the correct object and output a message: 2ms
+    Chaincode Start() TLS handling should load the opts certificate attributes as JSON strings with the correct properties: 2019-01-30T14:16:36.279Z [32mINFO[39m [32m[lib/chaincode.js][39m Registering with peer localhost:7051 as chaincode "mycc" 
+  ✓ Chaincode Start() TLS handling should load the opts certificate attributes as JSON strings with the correct properties: 1ms
+    Chaincode parsePeerUrlFcn should throw an error if peer.address not set:   ✓ Chaincode parsePeerUrlFcn should throw an error if peer.address not set: 0ms
+    Chaincode parsePeerUrlFcn should throw an error if peer.address set to url:   ✓ Chaincode parsePeerUrlFcn should throw an error if peer.address set to url: 1ms
+    Chaincode parsePeerUrlFcn should use grpc when URL already has that prefix:   ✓ Chaincode parsePeerUrlFcn should use grpc when URL already has that prefix: 1ms
+    Chaincode parsePeerUrlFcn should use grpcs when URL already has that prefix:   ✓ Chaincode parsePeerUrlFcn should use grpcs when URL already has that prefix: 0ms
+    Chaincode parsePeerUrlFcn should use grpc when CORE_PEER_TLS_ENABLED env var is not set:   ✓ Chaincode parsePeerUrlFcn should use grpc when CORE_PEER_TLS_ENABLED env var is not set: 1ms
+    Chaincode parsePeerUrlFcn should use grpc when CORE_PEER_TLS_ENABLED env var is set to false:   ✓ Chaincode parsePeerUrlFcn should use grpc when CORE_PEER_TLS_ENABLED env var is set to false: 1ms
+    Chaincode parsePeerUrlFcn should use grpc when CORE_PEER_TLS_ENABLED env var is set to a string FALSE:   ✓ Chaincode parsePeerUrlFcn should use grpc when CORE_PEER_TLS_ENABLED env var is set to a string FALSE: 0ms
+    Chaincode parsePeerUrlFcn should use grpcs when CORE_PEER_TLS_ENABLED env var is set to true:   ✓ Chaincode parsePeerUrlFcn should use grpcs when CORE_PEER_TLS_ENABLED env var is set to true: 1ms
+    Chaincode parsePeerUrlFcn should use grpcs when CORE_PEER_TLS_ENABLED env var is set to a string TRUE:   ✓ Chaincode parsePeerUrlFcn should use grpcs when CORE_PEER_TLS_ENABLED env var is set to a string TRUE: 0ms
+    Chaincode response should let the code response an error:   ✓ Chaincode response should let the code response an error: 0ms
+    Chaincode response should handle an empty success:   ✓ Chaincode response should handle an empty success: 1ms
+    Chaincode response should handle a success with message:   ✓ Chaincode response should handle a success with message: 0ms
+    Chaincode newLogger() should use shim when calling getLogger and no name passed:   ✓ Chaincode newLogger() should use shim when calling getLogger and no name passed: 1ms
+    Chaincode newLogger() should use shim when calling getLogger and name passed:   ✓ Chaincode newLogger() should use shim when calling getLogger and name passed: 0ms
+    fabric-chaincode-node cli Main test should setup yargs correctly:   ✓ fabric-chaincode-node cli Main test should setup yargs correctly: 29ms
+    Client-Identity should throw an error when using a bad cert:   ✓ Client-Identity should throw an error when using a bad cert: 0ms
+    Client-Identity Certificate with values should have correct mspId:   ✓ Client-Identity Certificate with values should have correct mspId: 1ms
+    Client-Identity Certificate with values should return correct value on getID():   ✓ Client-Identity Certificate with values should return correct value on getID(): 0ms
+    Client-Identity Certificate with values should have correct attrs:   ✓ Client-Identity Certificate with values should have correct attrs: 0ms
+    Client-Identity Certificate with values should return correct value on getX509Certificate():   ✓ Client-Identity Certificate with values should return correct value on getX509Certificate(): 0ms
+    Client-Identity Certificate with values should return the value when getAttributeValue() called with known attribute:   ✓ Client-Identity Certificate with values should return the value when getAttributeValue() called with known attribute: 0ms
+    Client-Identity Certificate with values should return null when getAttributeValue() called with unknown attribute:   ✓ Client-Identity Certificate with values should return null when getAttributeValue() called with unknown attribute: 0ms
+    Client-Identity Certificate with values should return true when value provided matches known attribute in assertAttributeValue():   ✓ Client-Identity Certificate with values should return true when value provided matches known attribute in assertAttributeValue(): 0ms
+    Client-Identity Certificate with values should return false when value provided does not match known attribute in assertAttributeValue():   ✓ Client-Identity Certificate with values should return false when value provided does not match known attribute in assertAttributeValue(): 1ms
+    Client-Identity Certificate with values should return false when unknown attribute in assertAttributeValue():   ✓ Client-Identity Certificate with values should return false when unknown attribute in assertAttributeValue(): 0ms
+    Client-Identity Certificate without values should have correct mspId:   ✓ Client-Identity Certificate without values should have correct mspId: 0ms
+    Client-Identity Certificate without values should have not attributes:   ✓ Client-Identity Certificate without values should have not attributes: 0ms
+    Client-Identity Certificate with long DNs should return correct value on getID():   ✓ Client-Identity Certificate with long DNs should return correct value on getID(): 0ms
+    Handler QMsg should set its variables with values passed in the constructor:   ✓ Handler QMsg should set its variables with values passed in the constructor: 1ms
+    Handler QMsg getMsg should return the value of msg:   ✓ Handler QMsg getMsg should return the value of msg: 0ms
+    Handler QMsg getMsgTxContextId should return the value of msg.channel_id concatenated with msg.txid:   ✓ Handler QMsg getMsgTxContextId should return the value of msg.channel_id concatenated with msg.txid: 1ms
+    Handler QMsg getMethod should return the value of method:   ✓ Handler QMsg getMethod should return the value of method: 0ms
+    Handler QMsg success should call the resolve function:   ✓ Handler QMsg success should call the resolve function: 1ms
+    Handler QMsg fail should call the reject function:   ✓ Handler QMsg fail should call the reject function: 0ms
+    Handler MsgQueueHandler should setup its variables on construction:   ✓ Handler MsgQueueHandler should setup its variables on construction: 1ms
+    Handler MsgQueueHandler queueMsg should add message to the queue and call sendMsg and handle when txContentId not in txQueues:   ✓ Handler MsgQueueHandler queueMsg should add message to the queue and call sendMsg and handle when txContentId not in txQueues: 1ms
+    Handler MsgQueueHandler queueMsg should add message to the queue and not call call sendMsg when txContentId in txQueues and is empty array:   ✓ Handler MsgQueueHandler queueMsg should add message to the queue and not call call sendMsg when txContentId in txQueues and is empty array: 0ms
+    Handler MsgQueueHandler queueMsg should add message to the queue and not call call sendMsg when txContentId in txQueues and already has value in array:   ✓ Handler MsgQueueHandler queueMsg should add message to the queue and not call call sendMsg when txContentId in txQueues and already has value in array: 0ms
+    Handler MsgQueueHandler handleMsgResponse should do nothing if qMsg does not exist for txContextId:   ✓ Handler MsgQueueHandler handleMsgResponse should do nothing if qMsg does not exist for txContextId: 1ms
+    Handler MsgQueueHandler handleMsgResponse should call qMsg success when parseResponse does not throw an error _removeCurrentAndSendNextMsg:   ✓ Handler MsgQueueHandler handleMsgResponse should call qMsg success when parseResponse does not throw an error _removeCurrentAndSendNextMsg: 0ms
+    Handler MsgQueueHandler handleMsgResponse should call qMsg fail when parseResponse does throw an error _removeCurrentAndSendNextMsg:   ✓ Handler MsgQueueHandler handleMsgResponse should call qMsg fail when parseResponse does throw an error _removeCurrentAndSendNextMsg: 1ms
+    Handler MsgQueueHandler _getCurrentMsg should get the message at the top of the queue for a txContextId:   ✓ Handler MsgQueueHandler _getCurrentMsg should get the message at the top of the queue for a txContextId: 0ms
+    Handler MsgQueueHandler _getCurrentMsg should return undefined when queue is empty for a txContextId:   ✓ Handler MsgQueueHandler _getCurrentMsg should return undefined when queue is empty for a txContextId: 0ms
+    Handler MsgQueueHandler _getCurrentMsg should return undefined when queue does not exist for a txContextId:   ✓ Handler MsgQueueHandler _getCurrentMsg should return undefined when queue does not exist for a txContextId: 0ms
+    Handler MsgQueueHandler _removeCurrentAndSendNextMsg should delete the current message and send the next for a txContentId:   ✓ Handler MsgQueueHandler _removeCurrentAndSendNextMsg should delete the current message and send the next for a txContentId: 0ms
+    Handler MsgQueueHandler _removeCurrentAndSendNextMsg should delete the queue if no messages left after current is deleted for a txContentId:   ✓ Handler MsgQueueHandler _removeCurrentAndSendNextMsg should delete the queue if no messages left after current is deleted for a txContentId: 1ms
+    Handler MsgQueueHandler _removeCurrentAndSendNextMsg should do nothing if no queue is found for a txContentId:   ✓ Handler MsgQueueHandler _removeCurrentAndSendNextMsg should do nothing if no queue is found for a txContentId: 0ms
+    Handler MsgQueueHandler _sendMsg should do nothing if no QMsg found for a txContextId:   ✓ Handler MsgQueueHandler _sendMsg should do nothing if no QMsg found for a txContextId: 0ms
+    Handler MsgQueueHandler _sendMsg should write to the stream the current message:   ✓ Handler MsgQueueHandler _sendMsg should write to the stream the current message: 1ms
+    Handler MsgQueueHandler _sendMsg should call fail on the QMsg if stream write errors:   ✓ Handler MsgQueueHandler _sendMsg should call fail on the QMsg if stream write errors: 0ms
+    Handler ChaincodeSupportClient should throw an error when chaincode not passed:   ✓ Handler ChaincodeSupportClient should throw an error when chaincode not passed: 0ms
+    Handler ChaincodeSupportClient should throw an error if argument does not match chaincode format:   ✓ Handler ChaincodeSupportClient should throw an error if argument does not match chaincode format: 0ms
+    Handler ChaincodeSupportClient should throw an error if argument only part matches chaincode format:   ✓ Handler ChaincodeSupportClient should throw an error if argument only part matches chaincode format: 1ms
+    Handler ChaincodeSupportClient should throw an error if argument missing URL argument:   ✓ Handler ChaincodeSupportClient should throw an error if argument missing URL argument: 0ms
+    Handler ChaincodeSupportClient should throw an error if URL argument does not use grpc as protocol:   ✓ Handler ChaincodeSupportClient should throw an error if URL argument does not use grpc as protocol: 0ms
+    Handler ChaincodeSupportClient should set endpoint, client and default timeout:   ✓ Handler ChaincodeSupportClient should set endpoint, client and default timeout: 1ms
+    Handler ChaincodeSupportClient should override the default request timeout if value passed:   ✓ Handler ChaincodeSupportClient should override the default request timeout if value passed: 0ms
+    Handler ChaincodeSupportClient should store additional grpc options:   ✓ Handler ChaincodeSupportClient should store additional grpc options: 1ms
+    Handler ChaincodeSupportClient should preserve casing in handler addr:   ✓ Handler ChaincodeSupportClient should preserve casing in handler addr: 0ms
+    Handler ChaincodeSupportClient should throw an error if connection secure and certificate not passed:   ✓ Handler ChaincodeSupportClient should throw an error if connection secure and certificate not passed: 0ms
+    Handler ChaincodeSupportClient should throw an error if connection secure encoded private key not passed as opt:   ✓ Handler ChaincodeSupportClient should throw an error if connection secure encoded private key not passed as opt: 0ms
+    Handler ChaincodeSupportClient should throw an error if connection secure encoded private key not passed as opt:   ✓ Handler ChaincodeSupportClient should throw an error if connection secure encoded private key not passed as opt: 0ms
+    Handler ChaincodeSupportClient should set endpoint, client and default timeout for a secure connection:   ✓ Handler ChaincodeSupportClient should set endpoint, client and default timeout for a secure connection: 1ms
+    Handler ChaincodeSupportClient should set grpc ssl options when ssl-target-name-override passed:   ✓ Handler ChaincodeSupportClient should set grpc ssl options when ssl-target-name-override passed: 0ms
+    Handler ChaincodeSupportClient close should call end on the stream:   ✓ Handler ChaincodeSupportClient close should call end on the stream: 1ms
+    Handler ChaincodeSupportClient chat should create instance of MsgQueueHandler, register the client, setup listeners and write:   ✓ Handler ChaincodeSupportClient chat should create instance of MsgQueueHandler, register the client, setup listeners and write: 2ms
+    Handler ChaincodeSupportClient chat stream.on.data should throw error when in state created and MSG_TYPE not REGISTERED:   ✓ Handler ChaincodeSupportClient chat stream.on.data should throw error when in state created and MSG_TYPE not REGISTERED: 0ms
+    Handler ChaincodeSupportClient chat stream.on.data should throw error when in state established and MSG_TYPE not READY: 2019-01-30T14:16:36.836Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should throw error when in state established and MSG_TYPE not READY: 1ms
+    Handler ChaincodeSupportClient chat stream.on.data should do nothing when in state ready and MSG_TYPE equals REGISTERED: 2019-01-30T14:16:36.891Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+2019-01-30T14:16:36.891Z [32mINFO[39m [32m[lib/handler.js][39m Successfully established communication with peer node. State transferred to "ready" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should do nothing when in state ready and MSG_TYPE equals REGISTERED: 0ms
+    Handler ChaincodeSupportClient chat stream.on.data should do nothing when in state ready and MSG_TYPE equals READY: 2019-01-30T14:16:36.942Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+2019-01-30T14:16:36.943Z [32mINFO[39m [32m[lib/handler.js][39m Successfully established communication with peer node. State transferred to "ready" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should do nothing when in state ready and MSG_TYPE equals READY: 1ms
+    Handler ChaincodeSupportClient chat stream.on.data should call handleMsgResponse when in state ready and MSG_TYPE equals RESPONSE: 2019-01-30T14:16:37.011Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+2019-01-30T14:16:37.012Z [32mINFO[39m [32m[lib/handler.js][39m Successfully established communication with peer node. State transferred to "ready" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should call handleMsgResponse when in state ready and MSG_TYPE equals RESPONSE: 1ms
+    Handler ChaincodeSupportClient chat stream.on.data should call handleMsgResponse when in state ready and MSG_TYPE equals ERROR: 2019-01-30T14:16:37.131Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+2019-01-30T14:16:37.132Z [32mINFO[39m [32m[lib/handler.js][39m Successfully established communication with peer node. State transferred to "ready" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should call handleMsgResponse when in state ready and MSG_TYPE equals ERROR: 1ms
+    Handler ChaincodeSupportClient chat stream.on.data should call handleInit when in state ready and MSG_TYPE equals INIT: 2019-01-30T14:16:37.181Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+2019-01-30T14:16:37.181Z [32mINFO[39m [32m[lib/handler.js][39m Successfully established communication with peer node. State transferred to "ready" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should call handleInit when in state ready and MSG_TYPE equals INIT: 1ms
+    Handler ChaincodeSupportClient chat stream.on.data should call handleTransaction when in state ready and MSG_TYPE equals TRANSACTION: 2019-01-30T14:16:37.227Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+2019-01-30T14:16:37.227Z [32mINFO[39m [32m[lib/handler.js][39m Successfully established communication with peer node. State transferred to "ready" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should call handleTransaction when in state ready and MSG_TYPE equals TRANSACTION: 1ms
+    Handler ChaincodeSupportClient chat stream.on.data should end the process with value 1: 2019-01-30T14:16:37.286Z [32mINFO[39m [32m[lib/handler.js][39m Successfully registered with peer node. State transferred to "established" 
+2019-01-30T14:16:37.286Z [32mINFO[39m [32m[lib/handler.js][39m Successfully established communication with peer node. State transferred to "ready" 
+  ✓ Handler ChaincodeSupportClient chat stream.on.data should end the process with value 1: 1ms
+    Handler ChaincodeSupportClient chat stream.on.end should cancel the stream:   ✓ Handler ChaincodeSupportClient chat stream.on.end should cancel the stream: 1ms
+    Handler ChaincodeSupportClient chat stream.on.error should end the stream:   ✓ Handler ChaincodeSupportClient chat stream.on.error should end the stream: 1ms
+    Handler ChaincodeSupportClient chat stream.on.error should end the  with error:   ✓ Handler ChaincodeSupportClient chat stream.on.error should end the  with error: 1ms
+    Handler ChaincodeSupportClient handleInit should call handleMessage:   ✓ Handler ChaincodeSupportClient handleInit should call handleMessage: 1ms
+    Handler ChaincodeSupportClient handleTransaction should call handleMessage:   ✓ Handler ChaincodeSupportClient handleTransaction should call handleMessage: 1ms
+    Handler ChaincodeSupportClient handleGetState should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetState should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleGetState should reject when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetState should reject when _askPeerAndListen resolves: 2ms
+    Handler ChaincodeSupportClient handlePutState should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handlePutState should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handlePutState should reject when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handlePutState should reject when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleDeleteState should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleDeleteState should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleDeleteState should reject when _askPeerAndListen rejects:   ✓ Handler ChaincodeSupportClient handleDeleteState should reject when _askPeerAndListen rejects: 0ms
+    Handler ChaincodeSupportClient handlePutStateMetadata should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handlePutStateMetadata should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handlePutStateMetadata should reject when _askPeerAndListen rejects:   ✓ Handler ChaincodeSupportClient handlePutStateMetadata should reject when _askPeerAndListen rejects: 0ms
+    Handler ChaincodeSupportClient handleGetStateMetadata should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetStateMetadata should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleGetStateMetadata should reject when _askPeerAndListen rejects:   ✓ Handler ChaincodeSupportClient handleGetStateMetadata should reject when _askPeerAndListen rejects: 1ms
+    Handler ChaincodeSupportClient handleGetStateByRange should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetStateByRange should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleGetStateByRange should reject when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetStateByRange should reject when _askPeerAndListen resolves: 0ms
+    Handler ChaincodeSupportClient handleGetStateByRange should resolve with metadata when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetStateByRange should resolve with metadata when _askPeerAndListen resolves: 0ms
+    Handler ChaincodeSupportClient handleQueryStateNext should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleQueryStateNext should resolve when _askPeerAndListen resolves: 15ms
+    Handler ChaincodeSupportClient handleQueryStateNext should reject when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleQueryStateNext should reject when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleQueryStateClose should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleQueryStateClose should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleQueryStateClose should reject when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleQueryStateClose should reject when _askPeerAndListen resolves: 0ms
+    Handler ChaincodeSupportClient handleGetQueryResult should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetQueryResult should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleGetQueryResult should reject when _askPeerAndListen rejects:   ✓ Handler ChaincodeSupportClient handleGetQueryResult should reject when _askPeerAndListen rejects: 1ms
+    Handler ChaincodeSupportClient handleGetQueryResult handleGetQueryResult with metadata should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetQueryResult handleGetQueryResult with metadata should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleGetHistoryForKey should resolve when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetHistoryForKey should resolve when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleGetHistoryForKey should reject when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleGetHistoryForKey should reject when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleInvokeChaincode should return decoded response when chaincode message type COMPLETED:   ✓ Handler ChaincodeSupportClient handleInvokeChaincode should return decoded response when chaincode message type COMPLETED: 13ms
+    Handler ChaincodeSupportClient handleInvokeChaincode should throw an error when _askPeerAndListen resolves with an error:   ✓ Handler ChaincodeSupportClient handleInvokeChaincode should throw an error when _askPeerAndListen resolves with an error: 1ms
+    Handler ChaincodeSupportClient handleInvokeChaincode should reject when _askPeerAndListen resolves:   ✓ Handler ChaincodeSupportClient handleInvokeChaincode should reject when _askPeerAndListen resolves: 1ms
+    Handler ChaincodeSupportClient handleInvokeChaincode should return nothing chaincode message type not COMPLETED or ERROR:   ✓ Handler ChaincodeSupportClient handleInvokeChaincode should return nothing chaincode message type not COMPLETED or ERROR: 1ms
+    Handler ChaincodeSupportClient _askPeerAndListen should return a new promise with value of queueMsg result:   ✓ Handler ChaincodeSupportClient _askPeerAndListen should return a new promise with value of queueMsg result: 2ms
+    Handler ChaincodeSupportClient toString should return ChaincodeSupportClient object as a string with the URL:   ✓ Handler ChaincodeSupportClient toString should return ChaincodeSupportClient object as a string with the URL: 0ms
+    Handler handleMessage Error should handle an error decoding the payload:   ✓ Handler handleMessage Error should handle an error decoding the payload: 1ms
+    Handler handleMessage Error should handle error creating a chaincode stub:   ✓ Handler handleMessage Error should handle error creating a chaincode stub: 1ms
+    Handler handleMessage Error should handle chaincode.Init returning nothing:   ✓ Handler handleMessage Error should handle chaincode.Init returning nothing: 2ms
+    Handler handleMessage Error should handle chaincode.Invoke returning nothing:   ✓ Handler handleMessage Error should handle chaincode.Invoke returning nothing: 11ms
+    Handler handleMessage Error should handle chaincode.Init returning no status:   ✓ Handler handleMessage Error should handle chaincode.Init returning no status: 1ms
+    Handler handleMessage Error should handle chaincode.Invoke returning no status:   ✓ Handler handleMessage Error should handle chaincode.Invoke returning no status: 2ms
+    Handler handleMessage Complete should write a COMPLETE message when successful init: 2019-01-30T14:16:39.042Z [32mINFO[39m [32m[lib/handler.js][39m [theChannelID-a short txId]Calling chaincode Init() succeeded. Sending COMPLETED message back to peer 
+  ✓ Handler handleMessage Complete should write a COMPLETE message when successful init: 1ms
+    Handler handleMessage Complete should write a COMPLETE message when successful invoke: 2019-01-30T14:16:39.043Z [32mINFO[39m [32m[lib/handler.js][39m [theChannelID-a short txId]Calling chaincode Invoke() succeeded. Sending COMPLETED message back to peer 
+  ✓ Handler handleMessage Complete should write a COMPLETE message when successful invoke: 1ms
+    Handler createStub should return a new instance of Stub:   ✓ Handler createStub should return a new instance of Stub: 2ms
+    Handler newErrorMsg should return an object for the error message:   ✓ Handler newErrorMsg should return an object for the error message: 0ms
+    Handler shortTxid should shorten txids over 8 letters:   ✓ Handler shortTxid should shorten txids over 8 letters: 0ms
+    Handler shortTxid should leave txids shorter than 8 as was:   ✓ Handler shortTxid should leave txids shorter than 8 as was: 0ms
+    Handler shortTxid should leave txids exactly 8 letters as was:   ✓ Handler shortTxid should leave txids exactly 8 letters as was: 0ms
+    Handler handleGetStateMetadata should success:   ✓ Handler handleGetStateMetadata should success: 1ms
+    Handler parseResponse should throw an error when type not MSG_TYPE RESPONSE or ERROR:   ✓ Handler parseResponse should throw an error when type not MSG_TYPE RESPONSE or ERROR: 0ms
+    Handler parseResponse should throw an error when type MSG_TYPE ERROR:   ✓ Handler parseResponse should throw an error when type MSG_TYPE ERROR: 0ms
+    Handler parseResponse should return the payload when using an unknown method:   ✓ Handler parseResponse should return the payload when using an unknown method: 0ms
+    Handler parseResponse should return the payload when using GetState for method:   ✓ Handler parseResponse should return the payload when using GetState for method: 0ms
+    Handler parseResponse should return the payload when using PutState for method:   ✓ Handler parseResponse should return the payload when using PutState for method: 1ms
+    Handler parseResponse should return QueryResponse.decoded payload for QueryStateClose:   ✓ Handler parseResponse should return QueryResponse.decoded payload for QueryStateClose: 8ms
+    Handler parseResponse should return QueryResponse.decoded payload for QueryStateNext:   ✓ Handler parseResponse should return QueryResponse.decoded payload for QueryStateNext: 0ms
+    Handler parseResponse should return ChaincodeMessage.decoded payload for InvokeChaincode:   ✓ Handler parseResponse should return ChaincodeMessage.decoded payload for InvokeChaincode: 0ms
+    Handler parseResponse should return a StateQueryIterator for GetStateByRange:   ✓ Handler parseResponse should return a StateQueryIterator for GetStateByRange: 2ms
+    Handler parseResponse should decode metadata:   ✓ Handler parseResponse should decode metadata: 2ms
+    Handler parseResponse should return a StateQueryIterator for GetQueryResult:   ✓ Handler parseResponse should return a StateQueryIterator for GetQueryResult: 1ms
+    Handler parseResponse should return a HistoryQueryIterator for GetHistoryForKey:   ✓ Handler parseResponse should return a HistoryQueryIterator for GetHistoryForKey: 1ms
+    Handler parseResponse shold decode state metadata for GetStateMetadata:   ✓ Handler parseResponse shold decode state metadata for GetStateMetadata: 0ms
+    Iterator CommonIterator should set the variables using the arguments in the constructor:   ✓ Iterator CommonIterator should set the variables using the arguments in the constructor: 0ms
+    Iterator CommonIterator close should return handler.handleQueryStateClose:   ✓ Iterator CommonIterator close should return handler.handleQueryStateClose: 1ms
+    Iterator CommonIterator _getResultFromBytes should return KV decode on resultbytes for a QUERY type:   ✓ Iterator CommonIterator _getResultFromBytes should return KV decode on resultbytes for a QUERY type: 0ms
+    Iterator CommonIterator _getResultFromBytes should return KeyModification decode on resultbytes for a HISTORY type:   ✓ Iterator CommonIterator _getResultFromBytes should return KeyModification decode on resultbytes for a HISTORY type: 0ms
+    Iterator CommonIterator _getResultFromBytes should throw an error for unknown types:   ✓ Iterator CommonIterator _getResultFromBytes should throw an error for unknown types: 0ms
+    Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done true when has_more false and results has no more elements after currentLoc:   ✓ Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done true when has_more false and results has no more elements after currentLoc: 0ms
+    Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done true when has_more true and results has no more elements after currentLoc:   ✓ Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done true when has_more true and results has no more elements after currentLoc: 1ms
+    Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done false when has_more false and results has elements after currentLoc:   ✓ Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done false when has_more false and results has elements after currentLoc: 0ms
+    Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done false when has_more true and results has elements after currentLoc:   ✓ Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done false when has_more true and results has elements after currentLoc: 0ms
+    Iterator CommonIterator _createAndEmitResult should return as expected with non-zero currentLoc:   ✓ Iterator CommonIterator _createAndEmitResult should return as expected with non-zero currentLoc: 0ms
+    Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done false and emit:   ✓ Iterator CommonIterator _createAndEmitResult should return value of first element of results converted from bytes and done false and emit: 1ms
+    Iterator CommonIterator next should return _createAndEmitResult when there are elements left in the result set:   ✓ Iterator CommonIterator next should return _createAndEmitResult when there are elements left in the result set: 0ms
+    Iterator CommonIterator next should return _createAndEmitResult when response has_more and no error occurs:   ✓ Iterator CommonIterator next should return _createAndEmitResult when response has_more and no error occurs: 1ms
+    Iterator CommonIterator next should emit an error if error occurs when has_more and listenerCount for data > 0:   ✓ Iterator CommonIterator next should emit an error if error occurs when has_more and listenerCount for data > 0: 0ms
+    Iterator CommonIterator next should throw an error if error occurs when has_more and listenerCount for data = 0:   ✓ Iterator CommonIterator next should throw an error if error occurs when has_more and listenerCount for data = 0: 1ms
+    Iterator CommonIterator next should return done and emit end if response does not has_more and listenerCount for end > 0:   ✓ Iterator CommonIterator next should return done and emit end if response does not has_more and listenerCount for end > 0: 1ms
+    Iterator CommonIterator next should return done and not emit end if response does not has_more and listenerCount for end = 0:   ✓ Iterator CommonIterator next should return done and not emit end if response does not has_more and listenerCount for end = 0: 9ms
+    Iterator StateQueryIterator should extend CommonIterator using QUERY for type:   ✓ Iterator StateQueryIterator should extend CommonIterator using QUERY for type: 0ms
+    Iterator HistoryQueryIterator should extend CommonIterator using HISTORY for type:   ✓ Iterator HistoryQueryIterator should extend CommonIterator using HISTORY for type: 1ms
+    Logger getLogger should create a new logger name unknown:   1) Logger getLogger should create a new logger name unknown
+    Logger getLogger should return existing logger if known name used:   ✓ Logger getLogger should return existing logger if known name used: 0ms
+    Logger getLogger should set the log level to fatal when env var set to CRITICAL:   ✓ Logger getLogger should set the log level to fatal when env var set to CRITICAL: 0ms
+    Logger getLogger should set the log level to error when env var set to ERROR:   ✓ Logger getLogger should set the log level to error when env var set to ERROR: 0ms
+    Logger getLogger should set the log level to warn when env var set to WARNING:   ✓ Logger getLogger should set the log level to warn when env var set to WARNING: 0ms
+    Logger getLogger should set the log level to debug when env var set to DEBUG:   ✓ Logger getLogger should set the log level to debug when env var set to DEBUG: 0ms
+    Logger formatter :   ✓ Logger formatter : 0ms
+    Logger formatter :   ✓ Logger formatter : 0ms
+    Exports should export the start function:   ✓ Exports should export the start function: 0ms
+    Exports should export the success function:   ✓ Exports should export the success function: 0ms
+    Exports should export the error function:   ✓ Exports should export the error function: 0ms
+    Exports should export the Shim class:   ✓ Exports should export the Shim class: 0ms
+    Exports should export the Stub class:   ✓ Exports should export the Stub class: 0ms
+    Exports should export the ChaincodeInterface class:   ✓ Exports should export the ChaincodeInterface class: 0ms
+    Exports should export the ClientIdentity class:   ✓ Exports should export the ClientIdentity class: 0ms
+    Exports should export the Iterators.HistoryQueryIterator class:   ✓ Exports should export the Iterators.HistoryQueryIterator class: 0ms
+    Exports should export the HistoryQueryIterator class:   ✓ Exports should export the HistoryQueryIterator class: 0ms
+    Exports should export the Iterators.StateQueryIterator class:   ✓ Exports should export the Iterators.StateQueryIterator class: 0ms
+    Exports should export the StateQueryIterator class:   ✓ Exports should export the StateQueryIterator class: 0ms
+    Stub validateCompositeKeyAttribute should throw an error if no attribute passed:   ✓ Stub validateCompositeKeyAttribute should throw an error if no attribute passed: 1ms
+    Stub validateCompositeKeyAttribute should throw an error if attribute not string:   ✓ Stub validateCompositeKeyAttribute should throw an error if attribute not string: 0ms
+    Stub validateCompositeKeyAttribute should throw an error if attribute empty string:   ✓ Stub validateCompositeKeyAttribute should throw an error if attribute empty string: 0ms
+    Stub computeProposalBinding should return hash of decodedSP:   ✓ Stub computeProposalBinding should return hash of decodedSP: 1ms
+    Stub ChaincodeStub should set up the vars and do nothing more with no signed proposal:   ✓ Stub ChaincodeStub should set up the vars and do nothing more with no signed proposal: 0ms
+    Stub ChaincodeStub should throw an error for an invalid proposal:   ✓ Stub ChaincodeStub should throw an error for an invalid proposal: 0ms
+    Stub ChaincodeStub should throw an error for a proposal with an empty header:   ✓ Stub ChaincodeStub should throw an error for a proposal with an empty header: 0ms
+    Stub ChaincodeStub should throw an error for a proposal with an empty payload:   ✓ Stub ChaincodeStub should throw an error for a proposal with an empty payload: 0ms
+    Stub ChaincodeStub should throw an error for a proposal with an invalid header:   ✓ Stub ChaincodeStub should throw an error for a proposal with an invalid header: 1ms
+    Stub ChaincodeStub should throw an error for a proposal with an invalid signature header:   ✓ Stub ChaincodeStub should throw an error for a proposal with an invalid signature header: 1ms
+    Stub ChaincodeStub should throw an error for a proposal with an invalid creator:   ✓ Stub ChaincodeStub should throw an error for a proposal with an invalid creator: 1ms
+    Stub ChaincodeStub should throw an error for a proposal with an invalid channelHeader:   ✓ Stub ChaincodeStub should throw an error for a proposal with an invalid channelHeader: 0ms
+    Stub ChaincodeStub should throw an error for a proposal with an invalid payload:   ✓ Stub ChaincodeStub should throw an error for a proposal with an invalid payload: 0ms
+    Stub ChaincodeStub should set all the env vars with a valid signed proposal:   ✓ Stub ChaincodeStub should set all the env vars with a valid signed proposal: 2ms
+    Stub ChaincodeStub getArgs should return the args:   ✓ Stub ChaincodeStub getArgs should return the args: 0ms
+    Stub ChaincodeStub getStringArgs should return the args:   ✓ Stub ChaincodeStub getStringArgs should return the args: 0ms
+    Stub ChaincodeStub getBufferArgs should return the args:   ✓ Stub ChaincodeStub getBufferArgs should return the args: 0ms
+    Stub ChaincodeStub getFunctionAndParameters should return the function name parameters:   ✓ Stub ChaincodeStub getFunctionAndParameters should return the function name parameters: 0ms
+    Stub ChaincodeStub getFunctionAndParameters should return string for function and empty array as param if only one arg:   ✓ Stub ChaincodeStub getFunctionAndParameters should return string for function and empty array as param if only one arg: 1ms
+    Stub ChaincodeStub getFunctionAndParameters should return empty string for function and empty array for params if no args:   ✓ Stub ChaincodeStub getFunctionAndParameters should return empty string for function and empty array for params if no args: 0ms
+    Stub ChaincodeStub getTxID should return txId:   ✓ Stub ChaincodeStub getTxID should return txId: 0ms
+    Stub ChaincodeStub getChannelID should return channel_id:   ✓ Stub ChaincodeStub getChannelID should return channel_id: 0ms
+    Stub ChaincodeStub getCreator should return creator:   ✓ Stub ChaincodeStub getCreator should return creator: 1ms
+    Stub ChaincodeStub getTransient should return transient map:   ✓ Stub ChaincodeStub getTransient should return transient map: 0ms
+    Stub ChaincodeStub getSignedProposal should return signed proposal:   ✓ Stub ChaincodeStub getSignedProposal should return signed proposal: 0ms
+    Stub ChaincodeStub getTxTimestamp should return transaction timestamp:   ✓ Stub ChaincodeStub getTxTimestamp should return transaction timestamp: 0ms
+    Stub ChaincodeStub getBinding should return binding:   ✓ Stub ChaincodeStub getBinding should return binding: 1ms
+    Stub ChaincodeStub getState should return handler.handleGetState:   ✓ Stub ChaincodeStub getState should return handler.handleGetState: 1ms
+    Stub ChaincodeStub putState should return handler.handlePutState:   ✓ Stub ChaincodeStub putState should return handler.handlePutState: 0ms
+    Stub ChaincodeStub putState should return handler.handlePutState:   ✓ Stub ChaincodeStub putState should return handler.handlePutState: 0ms
+    Stub ChaincodeStub deleteState should return handler.handleDeleteState:   ✓ Stub ChaincodeStub deleteState should return handler.handleDeleteState: 0ms
+    Stub ChaincodeStub setStateValidationParameter should return handler.handlePutStateMetadata:   ✓ Stub ChaincodeStub setStateValidationParameter should return handler.handlePutStateMetadata: 0ms
+    Stub ChaincodeStub getStateValidationParameter should return handler.handleGetStateMetadata:   ✓ Stub ChaincodeStub getStateValidationParameter should return handler.handleGetStateMetadata: 0ms
+    Stub ChaincodeStub getStateByRange should return handler.handleGetStateByRange:   ✓ Stub ChaincodeStub getStateByRange should return handler.handleGetStateByRange: 1ms
+    Stub ChaincodeStub getStateByRange should return handler.handleGetStateByRange using empty key substitute:   ✓ Stub ChaincodeStub getStateByRange should return handler.handleGetStateByRange using empty key substitute: 1ms
+    Stub ChaincodeStub getStateByRange should throw error if using compositekey:   ✓ Stub ChaincodeStub getStateByRange should throw error if using compositekey: 1ms
+    Stub ChaincodeStub getStateByRangeWithPagination should throw error if using compositekey:   ✓ Stub ChaincodeStub getStateByRangeWithPagination should throw error if using compositekey: 1ms
+    Stub ChaincodeStub getStateByRangeWithPagination should have default startKey eqls EMPTY_KEY_SUBSTITUTE:   ✓ Stub ChaincodeStub getStateByRangeWithPagination should have default startKey eqls EMPTY_KEY_SUBSTITUTE: 1ms
+    Stub ChaincodeStub getStateByRangeWithPagination should have default bookmark eqls an empty string:   ✓ Stub ChaincodeStub getStateByRangeWithPagination should have default bookmark eqls an empty string: 0ms
+    Stub ChaincodeStub getStateByRangeWithPagination should have default bookmark eqls an empty string:   ✓ Stub ChaincodeStub getStateByRangeWithPagination should have default bookmark eqls an empty string: 0ms
+    Stub ChaincodeStub getQueryResult should return handler.handleGetQueryResult:   ✓ Stub ChaincodeStub getQueryResult should return handler.handleGetQueryResult: 0ms
+    Stub ChaincodeStub getQueryResultWithPagination should have default bookmark equals an empty string:   ✓ Stub ChaincodeStub getQueryResultWithPagination should have default bookmark equals an empty string: 1ms
+    Stub ChaincodeStub getQueryResultWithPagination should have default bookmark equals an empty string:   ✓ Stub ChaincodeStub getQueryResultWithPagination should have default bookmark equals an empty string: 1ms
+    Stub ChaincodeStub getHistoryForKey should return handler.handleGetHistoryForKey:   ✓ Stub ChaincodeStub getHistoryForKey should return handler.handleGetHistoryForKey: 1ms
+    Stub ChaincodeStub invokeChaincode should return handler.handleInvokeChaincode:   ✓ Stub ChaincodeStub invokeChaincode should return handler.handleInvokeChaincode: 0ms
+    Stub ChaincodeStub invokeChaincode should return handler.handleInvokeChaincode handling no channel passed:   ✓ Stub ChaincodeStub invokeChaincode should return handler.handleInvokeChaincode handling no channel passed: 0ms
+    Stub ChaincodeStub setEvent should throw an error when name is not a string:   ✓ Stub ChaincodeStub setEvent should throw an error when name is not a string: 0ms
+    Stub ChaincodeStub setEvent should throw an error when name is empty string:   ✓ Stub ChaincodeStub setEvent should throw an error when name is empty string: 0ms
+    Stub ChaincodeStub setEvent should set an event:   ✓ Stub ChaincodeStub setEvent should set an event: 1ms
+    Stub ChaincodeStub createCompositeKey should throw an error if attributes is not an array:   ✓ Stub ChaincodeStub createCompositeKey should throw an error if attributes is not an array: 6ms
+    Stub ChaincodeStub createCompositeKey should return a composite key:   ✓ Stub ChaincodeStub createCompositeKey should return a composite key: 0ms
+    Stub ChaincodeStub splitCompositeKey should return object with empty values when no composite key:   ✓ Stub ChaincodeStub splitCompositeKey should return object with empty values when no composite key: 0ms
+    Stub ChaincodeStub splitCompositeKey should return object with empty values when composite key only has one character:   ✓ Stub ChaincodeStub splitCompositeKey should return object with empty values when composite key only has one character: 1ms
+    Stub ChaincodeStub splitCompositeKey should return object with empty values when composite key does not have first character as COMPOSITEKEY_NS:   ✓ Stub ChaincodeStub splitCompositeKey should return object with empty values when composite key does not have first character as COMPOSITEKEY_NS: 0ms
+    Stub ChaincodeStub splitCompositeKey should return object with objectType set but no attributes:   ✓ Stub ChaincodeStub splitCompositeKey should return object with objectType set but no attributes: 0ms
+    Stub ChaincodeStub splitCompositeKey should return object with objectType set and array of attributes:   ✓ Stub ChaincodeStub splitCompositeKey should return object with objectType set and array of attributes: 0ms
+    Stub ChaincodeStub getStateByPartialCompositeKey should return handler.handleGetStateByRange using composite key:   ✓ Stub ChaincodeStub getStateByPartialCompositeKey should return handler.handleGetStateByRange using composite key: 1ms
+    Stub ChaincodeStub getStateByPartialCompositeKeyWithPagination the default bookmark should equal an empty string:   ✓ Stub ChaincodeStub getStateByPartialCompositeKeyWithPagination the default bookmark should equal an empty string: 0ms
+    Stub ChaincodeStub getStateByPartialCompositeKeyWithPagination should return getStateByRangeWithPagination with bookmark and pageSize:   ✓ Stub ChaincodeStub getStateByPartialCompositeKeyWithPagination should return getStateByRangeWithPagination with bookmark and pageSize: 0ms
+    Stub ChaincodeStub getPrivateData should throw an error if no arguments supplied:   ✓ Stub ChaincodeStub getPrivateData should throw an error if no arguments supplied: 1ms
+    Stub ChaincodeStub getPrivateData should throw an error if one argument supplied:   ✓ Stub ChaincodeStub getPrivateData should throw an error if one argument supplied: 1ms
+    Stub ChaincodeStub getPrivateData should throw an error if collection null:   ✓ Stub ChaincodeStub getPrivateData should throw an error if collection null: 1ms
+    Stub ChaincodeStub getPrivateData should return handler.handleGetState:   ✓ Stub ChaincodeStub getPrivateData should return handler.handleGetState: 1ms
+    Stub ChaincodeStub putPrivateData should throw an error if no arguments supplied:   ✓ Stub ChaincodeStub putPrivateData should throw an error if no arguments supplied: 0ms
+    Stub ChaincodeStub putPrivateData should throw an error if one argument supplied:   ✓ Stub ChaincodeStub putPrivateData should throw an error if one argument supplied: 0ms
+    Stub ChaincodeStub putPrivateData should throw an error if two arguments supplied:   ✓ Stub ChaincodeStub putPrivateData should throw an error if two arguments supplied: 0ms
+    Stub ChaincodeStub putPrivateData should throw an error if collection null:   ✓ Stub ChaincodeStub putPrivateData should throw an error if collection null: 1ms
+    Stub ChaincodeStub putPrivateData should throw an error if key null:   ✓ Stub ChaincodeStub putPrivateData should throw an error if key null: 1ms
+    Stub ChaincodeStub putPrivateData should return handler.handlePutState with string:   ✓ Stub ChaincodeStub putPrivateData should return handler.handlePutState with string: 3ms
+    Stub ChaincodeStub putPrivateData should return handler.handlePutState with object:   ✓ Stub ChaincodeStub putPrivateData should return handler.handlePutState with object: 1ms
+    Stub ChaincodeStub deletePrivateData should throw an error if no arguments supplied:   ✓ Stub ChaincodeStub deletePrivateData should throw an error if no arguments supplied: 0ms
+    Stub ChaincodeStub deletePrivateData should throw an error if one argument supplied:   ✓ Stub ChaincodeStub deletePrivateData should throw an error if one argument supplied: 0ms
+    Stub ChaincodeStub deletePrivateData should throw an error if collection null:   ✓ Stub ChaincodeStub deletePrivateData should throw an error if collection null: 0ms
+    Stub ChaincodeStub deletePrivateData should return handler.handleDeleteState:   ✓ Stub ChaincodeStub deletePrivateData should return handler.handleDeleteState: 0ms
+    Stub ChaincodeStub setPrivateDataValidationParameter should return handler.handlePutStateMetadata:   ✓ Stub ChaincodeStub setPrivateDataValidationParameter should return handler.handlePutStateMetadata: 0ms
+    Stub ChaincodeStub getPrivateDataValidationParameter should return handler.handleGetStateMetadata:   ✓ Stub ChaincodeStub getPrivateDataValidationParameter should return handler.handleGetStateMetadata: 0ms
+    Stub ChaincodeStub getPrivateDataByRange should throw an error if no arguments supplied:   ✓ Stub ChaincodeStub getPrivateDataByRange should throw an error if no arguments supplied: 0ms
+    Stub ChaincodeStub getPrivateDataByRange should throw an error if one argument supplied:   ✓ Stub ChaincodeStub getPrivateDataByRange should throw an error if one argument supplied: 0ms
+    Stub ChaincodeStub getPrivateDataByRange should throw an error if two arguments supplied:   ✓ Stub ChaincodeStub getPrivateDataByRange should throw an error if two arguments supplied: 0ms
+    Stub ChaincodeStub getPrivateDataByRange should throw an error if collection null:   ✓ Stub ChaincodeStub getPrivateDataByRange should throw an error if collection null: 0ms
+    Stub ChaincodeStub getPrivateDataByRange should use a substitute start key if none provided:   ✓ Stub ChaincodeStub getPrivateDataByRange should use a substitute start key if none provided: 3ms
+    Stub ChaincodeStub getPrivateDataByRange should return handler.handleGetStateByRange:   ✓ Stub ChaincodeStub getPrivateDataByRange should return handler.handleGetStateByRange: 1ms
+    Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if no arguments supplied:   ✓ Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if no arguments supplied: 0ms
+    Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if one argument supplied:   ✓ Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if one argument supplied: 0ms
+    Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if two arguments supplied:   ✓ Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if two arguments supplied: 0ms
+    Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if collection null:   ✓ Stub ChaincodeStub getPrivateDataByPartialCompositeKey should throw an error if collection null: 0ms
+    Stub ChaincodeStub getPrivateDataByPartialCompositeKey should return stub.getPrivateDataByRange:   ✓ Stub ChaincodeStub getPrivateDataByPartialCompositeKey should return stub.getPrivateDataByRange: 1ms
+    Stub ChaincodeStub getPrivateDataQueryResult should throw an error if no arguments supplied:   ✓ Stub ChaincodeStub getPrivateDataQueryResult should throw an error if no arguments supplied: 1ms
+    Stub ChaincodeStub getPrivateDataQueryResult should throw an error if one argument supplied:   ✓ Stub ChaincodeStub getPrivateDataQueryResult should throw an error if one argument supplied: 0ms
+    Stub ChaincodeStub getPrivateDataQueryResult should throw an error if collection null:   ✓ Stub ChaincodeStub getPrivateDataQueryResult should throw an error if collection null: 1ms
+    Stub ChaincodeStub getPrivateDataQueryResult should return handler.handleGetQueryResult:   ✓ Stub ChaincodeStub getPrivateDataQueryResult should return handler.handleGetQueryResult: 6ms
+    chaincode cmd should configure the builder function: `sandbox.create()` is deprecated. Use default sandbox at `sinon.sandbox` or create new sandboxes with `sinon.createSandbox()`
+  ✓ chaincode cmd should configure the builder function: 1ms
+    chaincode cmd should handle correctly: `sandbox.create()` is deprecated. Use default sandbox at `sinon.sandbox` or create new sandboxes with `sinon.createSandbox()`
+  ✓ chaincode cmd should handle correctly: 0ms
+    chaincode cmd #getArgs should return yargs when called via cli name: `sandbox.create()` is deprecated. Use default sandbox at `sinon.sandbox` or create new sandboxes with `sinon.createSandbox()`
+  ✓ chaincode cmd #getArgs should return yargs when called via cli name: 0ms
+    chaincode cmd #getArgs should use yargs parser on process.argv when not called with cli name: `sandbox.create()` is deprecated. Use default sandbox at `sinon.sandbox` or create new sandboxes with `sinon.createSandbox()`
+  ✓ chaincode cmd #getArgs should use yargs parser on process.argv when not called with cli name: 1ms
+    chaincode cmd #getArgs should throw an error if a required field is missing: `sandbox.create()` is deprecated. Use default sandbox at `sinon.sandbox` or create new sandboxes with `sinon.createSandbox()`
+  ✓ chaincode cmd #getArgs should throw an error if a required field is missing: 0ms
+    fabric-chaincode-node metadata cmd launcher cmd method tests should have the correct command and description:   ✓ fabric-chaincode-node metadata cmd launcher cmd method tests should have the correct command and description: 0ms
+    fabric-chaincode-node metadata cmd launcher cmd method tests should call yargs correctly:   ✓ fabric-chaincode-node metadata cmd launcher cmd method tests should call yargs correctly: 1ms
+    bootstrap.js #register should pass on the register to the shim:   ✓ bootstrap.js #register should pass on the register to the shim: 0ms
+    bootstrap.js #bootstrap should correctly call the register method:   ✓ bootstrap.js #bootstrap should correctly call the register method: 1ms
+    bootstrap.js #getInfoFromContract should use the main class defined in the package.json:   ✓ bootstrap.js #getInfoFromContract should use the main class defined in the package.json: 2ms
+    bootstrap.js #getInfoFromContract should use the main class defined in the package.json with a single element:   ✓ bootstrap.js #getInfoFromContract should use the main class defined in the package.json with a single element: 1ms
+    bootstrap.js #getInfoFromContract should throw an error if there is no json.main:   ✓ bootstrap.js #getInfoFromContract should throw an error if there is no json.main: 1ms
+    bootstrap.js #getInfoFromContract should use the main class defined with contracts exported, and custom serialization:   ✓ bootstrap.js #getInfoFromContract should use the main class defined with contracts exported, and custom serialization: 1ms
+    bootstrap.js #getInfoFromContract should throw an error if there is no transaction property:   ✓ bootstrap.js #getInfoFromContract should throw an error if there is no transaction property: 1ms
+    bootstrap.js #getMetadata should handle when there are files available: 2019-01-30T14:16:39.637Z [32mINFO[39m [32m[contracts-spi/bootstrap.js][39m Metadata file has been located 
+  ✓ bootstrap.js #getMetadata should handle when there are files available: 1ms
+    bootstrap.js #getMetadata should handle when files not available: 2019-01-30T14:16:39.677Z [32mINFO[39m [32m[contracts-spi/bootstrap.js][39m No metadata file supplied in contract, introspection will generate all the data 
+  ✓ bootstrap.js #getMetadata should handle when files not available: 1ms
+    bootstrap.js #loadAndValidateMetadata validate and return the metadata: 2019-01-30T14:16:39.761Z [32mINFO[39m [32m[contracts-spi/bootstrap.js][39m Metadata validated against schema correctly 
+  ✓ bootstrap.js #loadAndValidateMetadata validate and return the metadata: 37ms
+    bootstrap.js #loadAndValidateMetadata fail to validate and throw an error:   ✓ bootstrap.js #loadAndValidateMetadata fail to validate and throw an error: 1ms
+    bootstrap.js #loadAndValidateMetadata Correct schema path is pointed to in the validate method:   ✓ bootstrap.js #loadAndValidateMetadata Correct schema path is pointed to in the validate method: 0ms
+    bootstrap.js #loadAndValidateMetadata Should correct validate a schema: 2019-01-30T14:16:39.900Z [32mINFO[39m [32m[contracts-spi/bootstrap.js][39m Metadata validated against schema correctly 
+  ✓ bootstrap.js #loadAndValidateMetadata Should correct validate a schema: 11ms
+    chaincodefromcontract #constructor should handle no classes being passed in:   ✓ chaincodefromcontract #constructor should handle no classes being passed in: 0ms
+    chaincodefromcontract #constructor should handle missing serialization information:   ✓ chaincodefromcontract #constructor should handle missing serialization information: 0ms
+    chaincodefromcontract #constructor should handle a single class being passed as a contract: 2019-01-30T14:16:39.905Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #constructor should handle a single class being passed as a contract: 1ms
+    chaincodefromcontract #constructor should handle a case where the metadata is incompatible with code: 2019-01-30T14:16:39.907Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #constructor should handle a case where the metadata is incompatible with code: 1ms
+    chaincodefromcontract #_compileSchemas should handle no complex objects being available: 2019-01-30T14:16:39.908Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_compileSchemas should handle no complex objects being available: 0ms
+    chaincodefromcontract #_compileSchemas should handle complex objects being available: 2019-01-30T14:16:39.918Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_compileSchemas should handle complex objects being available: 1ms
+    chaincodefromcontract #_resolveContractImplementations should handle a single class being passed as a contract: 2019-01-30T14:16:39.920Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_resolveContractImplementations should handle a single class being passed as a contract: 2ms
+    chaincodefromcontract #_resolveContractImplementations should handle a single class being passed that is not valid: 2019-01-30T14:16:39.922Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_resolveContractImplementations should handle a single class being passed that is not valid: 1ms
+    chaincodefromcontract #_resolveContractImplementations should handle a two classes being passed as a contract: 2019-01-30T14:16:39.923Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_resolveContractImplementations should handle a two classes being passed as a contract: 1ms
+    chaincodefromcontract #_resolveContractImplementations should handle the default tag being used: 2019-01-30T14:16:39.925Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_resolveContractImplementations should handle the default tag being used: 1ms
+    chaincodefromcontract #init should handle a single class being passed as a contract: 2019-01-30T14:16:39.928Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #init should handle a single class being passed as a contract: 1ms
+    chaincodefromcontract #init should handle a single class being passed as a contract: 2019-01-30T14:16:39.930Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #init should handle a single class being passed as a contract: 0ms
+    chaincodefromcontract #invoke should handle a single class being passed as a contract: 2019-01-30T14:16:39.931Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #invoke should handle a single class being passed as a contract: 1ms
+    chaincodefromcontract #_splitFunctionName should handle the usual case of ns:fn: 2019-01-30T14:16:39.933Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_splitFunctionName should handle the usual case of ns:fn: 0ms
+    chaincodefromcontract #_splitFunctionName should handle the case of no contractName explicit: 2019-01-30T14:16:39.934Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_splitFunctionName should handle the case of no contractName explicit: 0ms
+    chaincodefromcontract #_splitFunctionName should handle the case of no contractName implict: 2019-01-30T14:16:39.935Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_splitFunctionName should handle the case of no contractName implict: 0ms
+    chaincodefromcontract #_splitFunctionName should handle the case of no input: 2019-01-30T14:16:39.936Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_splitFunctionName should handle the case of no input: 1ms
+    chaincodefromcontract #_splitFunctionName should handle the case of multiple :: 2019-01-30T14:16:39.937Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_splitFunctionName should handle the case of multiple :: 0ms
+    chaincodefromcontract #invokeFunctionality should handle missing function: 2019-01-30T14:16:39.939Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+Error: Contract name is not known :name:
+    at ChaincodeFromContract.invokeFunctionality (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/lib/contract-spi/chaincodefromcontract.js:1:28155)
+    at Context.it (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/test/unit/contract-spi/chaincodefromcontract.js:513:16)
+    at callFn (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runnable.js:348:21)
+    at Test.Runnable.run (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runnable.js:340:7)
+    at Runner.runTest (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:443:10)
+    at /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:549:12
+    at next (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:361:14)
+    at /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:371:7
+    at next (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:295:14)
+    at /Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:334:7
+    at done (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runnable.js:295:5)
+    at callFn (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runnable.js:366:7)
+    at Hook.Runnable.run (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runnable.js:340:7)
+    at next (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:309:10)
+    at Immediate.<anonymous> (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/mocha/lib/runner.js:339:5)
+    at runCallback (timers.js:789:20)
+  ✓ chaincodefromcontract #invokeFunctionality should handle missing function: 3ms
+    chaincodefromcontract #invokeFunctionality should handle valid contract name, but missing function: 2019-01-30T14:16:39.942Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #invokeFunctionality should handle valid contract name, but missing function: 28ms
+Error: Unknown function `${fn}
+    at ChaincodeFromContract.invokeFunctionality (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/lib/contract-spi/chaincodefromcontract.js:1:29797)
+    at <anonymous>
+    at process._tickDomainCallback (internal/process/next_tick.js:228:7)
+    chaincodefromcontract #invokeFunctionality should handle valid contract name, with valid function: 2019-01-30T14:16:39.972Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #invokeFunctionality should handle valid contract name, with valid function: 34ms
+{ AssertError
+    at Object.fail (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/assert.js:104:21)
+    at Function.sinon.fake (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/test/unit/contract-spi/chaincodefromcontract.js:485:30)
+    at Function.fakeInstance (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/fake.js:48:23)
+    at Function.invoke (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/spy.js:213:51)
+    at Function.proxy (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/spy.js:99:22)
+    at ChaincodeFromContract.invokeFunctionality (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/lib/contract-spi/chaincodefromcontract.js:1:29589)
+    at <anonymous>
+    at process._tickDomainCallback (internal/process/next_tick.js:228:7) name: 'AssertError' }
+    chaincodefromcontract #invokeFunctionality should handle functions with returned values: 2019-01-30T14:16:40.008Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #invokeFunctionality should handle functions with returned values: 30ms
+{ AssertError
+    at Object.fail (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/assert.js:104:21)
+    at Function.sinon.fake (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/test/unit/contract-spi/chaincodefromcontract.js:485:30)
+    at Function.fakeInstance (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/fake.js:48:23)
+    at Function.invoke (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/spy.js:213:51)
+    at Function.proxy (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/spy.js:99:22)
+    at ChaincodeFromContract.invokeFunctionality (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/lib/contract-spi/chaincodefromcontract.js:1:29589)
+    at <anonymous>
+    at process._tickDomainCallback (internal/process/next_tick.js:228:7) name: 'AssertError' }
+    chaincodefromcontract #invokeFunctionality should handle functions with returned values: 2019-01-30T14:16:40.039Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #invokeFunctionality should handle functions with returned values: 59ms
+{ AssertError
+    at Object.fail (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/assert.js:104:21)
+    at Function.sinon.fake (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/test/unit/contract-spi/chaincodefromcontract.js:485:30)
+    at Function.fakeInstance (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/fake.js:48:23)
+    at Function.invoke (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/spy.js:213:51)
+    at Function.proxy (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/node_modules/sinon/lib/sinon/spy.js:99:22)
+    at ChaincodeFromContract.invokeFunctionality (/Users/user/Documents/Fabric-Dev/src/github.com/hyperledger/fabric-chaincode-node/fabric-shim/lib/contract-spi/chaincodefromcontract.js:1:29589)
+    at <anonymous>
+    at process._tickDomainCallback (internal/process/next_tick.js:228:7) name: 'AssertError' }
+    chaincodefromcontract #_processContractInfo should be able to handle no annotations suppled: 2019-01-30T14:16:40.102Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_processContractInfo should be able to handle no annotations suppled: 0ms
+    chaincodefromcontract #_processContractInfo should be able to handle no annotations suppled: 2019-01-30T14:16:40.103Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_processContractInfo should be able to handle no annotations suppled: 1ms
+    chaincodefromcontract #_processContractTransactions should handle a single class being passed as a contract that has no functions: 2019-01-30T14:16:40.105Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_processContractTransactions should handle a single class being passed as a contract that has no functions: 1ms
+    chaincodefromcontract #_processContractTransactions should handle a single class being passed as a contract that has no functions: 2019-01-30T14:16:40.106Z [32mINFO[39m [32m[contracts-spi/chaincodefromcontract.js][39m Using serializers 
+	{"transaction":"jsonSerializer","serializers":{}}
+  ✓ chaincodefromcontract #_processContractTransactions should handle a single class being passed as a contract that has no functions: 1ms
+    chaincodefromcontract #_augmentMetadataFromCode should not add extra detail for metadata, info and components when metadata supplied with those fields:   ✓ chaincodefromcontract #_augmentMetadataFromCode should not add extra detail for metadata, info and components when metadata supplied with those fields: 0ms
+    chaincodefromcontract #_augmentMetadataFromCode should add extra detail if the contracts element is left blank meaning that just info is being added:   ✓ chaincodefromcontract #_augmentMetadataFromCode should add extra detail if the contracts element is left blank meaning that just info is being added: 0ms
+    chaincodefromcontract #_augmentMetadataFromCode should handle contracts and remove underscore lead properties of contractInstance:   ✓ chaincodefromcontract #_augmentMetadataFromCode should handle contracts and remove underscore lead properties of contractInstance: 0ms
+    chaincodefromcontract #_augmentMetadataFromCode should correctly retrieve info with the constructor title and version data:   ✓ chaincodefromcontract #_augmentMetadataFromCode should correctly retrieve info with the constructor title and version data: 0ms
+    chaincodefromcontract #_augmentMetadataFromCode should fill in info when there is no constructor title and version data:   ✓ chaincodefromcontract #_augmentMetadataFromCode should fill in info when there is no constructor title and version data: 1ms
+    chaincodefromcontract #_augmentMetadataFromCode should fill in components field when not set:   ✓ chaincodefromcontract #_augmentMetadataFromCode should fill in components field when not set: 1ms
+    chaincodefromcontract #_augmentMetadataFromCode should fill in components field when not set and reflect fails:   ✓ chaincodefromcontract #_augmentMetadataFromCode should fill in components field when not set and reflect fails: 1ms
+    chaincodefromcontract #helper constructors should create the DataMarshall:   ✓ chaincodefromcontract #helper constructors should create the DataMarshall: 0ms
+    datamarshall.js #constructor should create plain object ok:   ✓ datamarshall.js #constructor should create plain object ok: 11ms
+    datamarshall.js #constructor should create plain object ok:   ✓ datamarshall.js #constructor should create plain object ok: 1ms
+    datamarshall.js #toWireBuffer should return undefined if nothing passed in : 2019-01-30T14:16:40.133Z [32mINFO[39m [32m[./lib/jsontransactionserializer.js][39m toBuffer has no schema/lacks sufficient schema to validate against 
+  ✓ datamarshall.js #toWireBuffer should return undefined if nothing passed in : 1ms
+    datamarshall.js #toWireBuffer should return undefined if nothing passed in :   ✓ datamarshall.js #toWireBuffer should return undefined if nothing passed in : 7ms
+    datamarshall.js #handleParameters should handle empty list:   ✓ datamarshall.js #handleParameters should handle empty list: 1ms
+    datamarshall.js #handleParameters should handle different length lists:   ✓ datamarshall.js #handleParameters should handle different length lists: 0ms
+    datamarshall.js #handleParameters should handle the case where types have come from JS Introspection:   ✓ datamarshall.js #handleParameters should handle the case where types have come from JS Introspection: 0ms
+    datamarshall.js #handleParameters should handle different primitive types:   ✓ datamarshall.js #handleParameters should handle different primitive types: 16ms
+    datamarshall.js #handleParameters should handle types that are incorrecly specified:   ✓ datamarshall.js #handleParameters should handle types that are incorrecly specified: 0ms
+    datamarshall.js #handleParameters should handle different primitive types: invalid:   ✓ datamarshall.js #handleParameters should handle different primitive types: invalid: 1ms
+    datamarshall.js #handleParameters should handle different complex types:   ✓ datamarshall.js #handleParameters should handle different complex types: 1ms
+    datamarshall.js #handleParameters should handle different complex types: invalid data:   ✓ datamarshall.js #handleParameters should handle different complex types: invalid data: 1ms
+    SystemContract #constructor should create correctly:   ✓ SystemContract #constructor should create correctly: 0ms
+    SystemContract #GetMetadata should get the buffer:   ✓ SystemContract #GetMetadata should get the buffer: 0ms
+    KeyEndorsementPolicy #constructor should success for no policy:   ✓ KeyEndorsementPolicy #constructor should success for no policy: 0ms
+    KeyEndorsementPolicy #constructor should decode policy:   ✓ KeyEndorsementPolicy #constructor should decode policy: 1ms
+    KeyEndorsementPolicy #addOrgs should throw error if role is not supported:   ✓ KeyEndorsementPolicy #addOrgs should throw error if role is not supported: 0ms
+    KeyEndorsementPolicy #addOrgs should throw error if role is missing:   ✓ KeyEndorsementPolicy #addOrgs should throw error if role is missing: 1ms
+    KeyEndorsementPolicy #addOrgs should success add multiple orgs:   ✓ KeyEndorsementPolicy #addOrgs should success add multiple orgs: 0ms
+    KeyEndorsementPolicy #addOrgs should success add one org:   ✓ KeyEndorsementPolicy #addOrgs should success add one org: 1ms
+    KeyEndorsementPolicy #addOrgs should success add one peer org:   ✓ KeyEndorsementPolicy #addOrgs should success add one peer org: 0ms
+    KeyEndorsementPolicy #addOrgs should not throw error if no orgs:   ✓ KeyEndorsementPolicy #addOrgs should not throw error if no orgs: 0ms
+    KeyEndorsementPolicy #_getPolicyFromMspId should successfully get policy from mspIds:   ✓ KeyEndorsementPolicy #_getPolicyFromMspId should successfully get policy from mspIds: 2ms
+    KeyEndorsementPolicy #_setMspIdsFromSPE should successfully set mspIds from spe:   ✓ KeyEndorsementPolicy #_setMspIdsFromSPE should successfully set mspIds from spe: 1ms
+    KeyEndorsementPolicy #delOrgs should successfully delete one org:   ✓ KeyEndorsementPolicy #delOrgs should successfully delete one org: 0ms
+    KeyEndorsementPolicy #delOrgs should successfully delete multiple orgs:   ✓ KeyEndorsementPolicy #delOrgs should successfully delete multiple orgs: 0ms
+    KeyEndorsementPolicy #getPolicy should successfully get policy:   ✓ KeyEndorsementPolicy #getPolicy should successfully get policy: 1ms
+
+  480 passing (5s)
+  1 failing
+
+  1) Logger getLogger should create a new logger name unknown:
+
+      AssertionError: expected 'debug' to deeply equal 'info'
+      + expected - actual
+
+      -debug
+      +info
+      
+      at Context.it (fabric-shim/test/unit/logger.js:22:39)
+
+
+

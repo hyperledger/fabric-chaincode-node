@@ -25,6 +25,7 @@ module.exports = class DataMarshall {
      * @param {Object} serializers mapping of names to the implementation of the serializers
      */
     constructor(requestedSerializer, serializers, schemas) {
+        logger.debug('New DataMarshaller', requestedSerializer, serializers, schemas);
         let cnstr = serializers[requestedSerializer];
         if (typeof cnstr === 'string') {
             cnstr = require(cnstr);
@@ -91,7 +92,9 @@ module.exports = class DataMarshall {
         }
 
         if (expectedParams.length !== parameters.length) {
-            throw new Error(`Expected ${expectedParams.length} parameters, but ${parameters.length} have been supplied`);
+            const errMsg = `Expected ${expectedParams.length} parameters, but ${parameters.length} have been supplied`;
+            logger.error(errMsg);
+            throw new Error(errMsg);
         }
 
         const returnParams = [];
@@ -100,8 +103,8 @@ module.exports = class DataMarshall {
         for (let i = 0; i < fn.parameters.length; i++) {
             const supplied = parameters[i];
             const expected = expectedParams[i];
-            logger.debug(expected);
-            logger.debug(supplied);
+            logger.debug('Expected parameter', expected);
+            logger.debug('Supplied parameter', supplied);
             // check the type
             const schema = expected.schema;
 
@@ -135,7 +138,7 @@ module.exports = class DataMarshall {
                 throw new Error(`Incorrect type information ${JSON.stringify(schema)}`);
             }
         }
-        logger.debug(returnParams);
+        logger.debug('Processed params', returnParams);
         return returnParams;
     }
 };

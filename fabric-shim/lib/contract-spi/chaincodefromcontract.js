@@ -41,7 +41,7 @@ class ChaincodeFromContract {
         }
 
         this.serializers = serializers;
-        logger.info(serializers);
+        logger.info('Using serializers', serializers);
 
         this.title = title;
         this.version = version;
@@ -141,6 +141,7 @@ class ChaincodeFromContract {
      *
      */
     _resolveContractImplementations(contractClasses) {
+        logger.debug('Supplied contract classes', contractClasses);
         this.defaultContractName = Reflect.getMetadata('fabric:default', global);
 
         const Contract = require('fabric-contract-api').Contract;
@@ -188,6 +189,9 @@ class ChaincodeFromContract {
                 });
             }
         }
+
+        logger.debug('Transactions for contract ' + contract.name, transactions);
+
         return transactions;
     }
 
@@ -214,6 +218,7 @@ class ChaincodeFromContract {
     _augmentMetadataFromCode(metadata) {
 
         if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
+            logger.debug('_augmentMetadataFromCode - Contracts not supplied. Generating default');
             metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));
 
             for (const contractKey in metadata.contracts) {
@@ -229,6 +234,7 @@ class ChaincodeFromContract {
         // look for the general information representing all the contracts
         // add if nothing has been given by the application
         if (!metadata.info) {
+            logger.debug('_augmentMetadataFromCode - Info not supplied. Generating default');
             metadata.info = {};
             metadata.info.version = this.version ? this.version : '';
             metadata.info.title = this.title ? this.title : '';
@@ -236,6 +242,7 @@ class ChaincodeFromContract {
 
         // obtain the information relating to the complex objects
         if (!metadata.components) {
+            logger.debug('_augmentMetadataFromCode - Components not supplied. Generating default');
             metadata.components = {};
             metadata.components.schemas = Reflect.getMetadata('fabric:objects', global) || {};
         }
