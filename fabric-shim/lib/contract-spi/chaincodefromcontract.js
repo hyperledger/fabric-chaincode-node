@@ -344,9 +344,13 @@ class ChaincodeFromContract {
                 // return the data value, if any to the shim. Including converting the result to the wire format
                 return shim.success(dataMarshall.toWireBuffer(result, returnSchema.schema));
             } else {
+                try {
                 // if we've never heard of this function, then call the unknown tx function
-                await contractInstance.unknownTransaction(ctx);
-                return shim.error(new Error('Unknown function `${fn}'));
+                    await contractInstance.unknownTransaction(ctx);
+                    return shim.success();
+                } catch (error) {
+                    return shim.error(error);
+                }
             }
 
         } catch (error) {

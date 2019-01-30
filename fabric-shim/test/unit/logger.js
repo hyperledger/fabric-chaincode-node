@@ -16,6 +16,7 @@ const Logger = rewire('../../../fabric-shim/lib/logger.js');
 describe('Logger', () => {
     describe('getLogger', () => {
         it ('should create a new logger name unknown', () => {
+            process.env.CORE_CHAINCODE_LOGGING_SHIM = '';
             const log = Logger.getLogger('unknown name');
 
             expect(log instanceof winston.Logger).to.be.ok;

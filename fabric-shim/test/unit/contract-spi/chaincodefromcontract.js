@@ -24,7 +24,6 @@ const sinon = require('sinon');
 
 const mockery = require('mockery');
 
-
 // standard utility fns
 const path = require('path');
 
@@ -468,7 +467,7 @@ describe('chaincodefromcontract', () => {
 
         beforeEach(() => {
             fakeSuccess = sinon.fake((e) => {
-                sinon.assert.fail(e);
+                log(e);
             });
 
             fakeError = sinon.fake((e) => {
@@ -479,7 +478,7 @@ describe('chaincodefromcontract', () => {
             sandbox.replace(shim, 'error', fakeError);
         });
 
-        it('should handle missing function', () => {
+        it('should handle missing function', async () => {
             const systemContract = new SystemContract();
             sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
                 .returns({
@@ -496,13 +495,14 @@ describe('chaincodefromcontract', () => {
 
 
             const mockStub = {getBufferArgs: sandbox.stub().returns([])};
-            cc.invokeFunctionality(mockStub, 'name:missing', [Buffer.from('args2')]);
+            await cc.invokeFunctionality(mockStub, 'name:missing', [Buffer.from('args2')]);
 
             sinon.assert.called(fakeError);
+            sinon.assert.notCalled(fakeSuccess);
 
         });
 
-        it('should handle valid contract name, but missing function', () => {
+        it('should handle valid contract name, but missing function', async () => {
 
             const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
                 'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
@@ -564,10 +564,81 @@ describe('chaincodefromcontract', () => {
                 transactions: []
 
             };
-            cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            sinon.assert.called(fakeSuccess);
+            sinon.assert.notCalled(fakeError);
 
         });
-        it('should handle valid contract name, with valid function', () => {
+
+        it('should handle valid contract name, but missing function and throws error', async () => {
+
+            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
+                'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
+                'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+                'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
+                'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
+                'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
+                'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
+                'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
+                'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
+                '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
+                'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
+                'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
+                'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
+                'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
+                '-----END CERTIFICATE-----';
+
+            const idBytes = {
+                toBuffer: () => {
+                    return new Buffer(certWithoutAttrs);
+                }
+            };
+
+
+            const systemContract = new SystemContract();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({
+                    'org.hyperledger.fabric': {
+                        contractInstance: systemContract
+                    }
+                });
+            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
+            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
+            sinon.assert.calledOnce(_checkSuppliedStub);
+
+            const mockSigningId = {
+                getMspid: sinon.stub(),
+                getIdBytes: sinon.stub().returns(idBytes)
+            };
+
+            const ctx = {
+                setChaincodeStub: sandbox.stub(),
+                setClientIdentity: sandbox.stub()
+            };
+
+            const mockStub = {
+                getBufferArgs: sandbox.stub().returns([]),
+                getCreator: sandbox.stub().returns(mockSigningId)
+            };
+            cc.contractImplementations.name = {
+                contractInstance: {
+                    createContext: sandbox.stub().returns(ctx),
+                    unknownTransaction: sandbox.stub().throws('error')
+                },
+                dataMarhsall: {},
+                transactions: []
+
+            };
+            await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            sinon.assert.called(fakeError);
+            sinon.assert.notCalled(fakeSuccess);
+
+        });
+
+        it('should handle valid contract name, with valid function', async () => {
 
             const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
                 'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
@@ -637,11 +708,12 @@ describe('chaincodefromcontract', () => {
                 ]
 
             };
-            cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
-
+            await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            sinon.assert.called(fakeSuccess);
+            sinon.assert.notCalled(fakeError);
         });
 
-        it('should handle functions with returned values', () => {
+        it('should handle functions with returned values', async () => {
 
             const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
                 'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
@@ -717,11 +789,13 @@ describe('chaincodefromcontract', () => {
                 ]
 
             };
-            cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            sinon.assert.called(fakeSuccess);
+            sinon.assert.notCalled(fakeError);
 
         });
 
-        it('should handle functions with returned values', () => {
+        it('should handle functions with returned values', async () => {
 
             const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
                 'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
@@ -797,7 +871,9 @@ describe('chaincodefromcontract', () => {
                 ]
 
             };
-            cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            sinon.assert.called(fakeSuccess);
+            sinon.assert.notCalled(fakeError);
 
         });
 
