@@ -101,6 +101,9 @@
                 "transactions"
             ],
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
                 "info": {
                     "$ref": "#/definitions/info"
                 },

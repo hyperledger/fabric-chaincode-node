@@ -13,4 +13,4 @@
  */
 
 'use strict';
-Object.assign(module.exports, require('./transaction'), require('./object'), require('./info'));
+Object.assign(module.exports, require('./transaction'), require('./object'), require('./info'), require('./default'));
