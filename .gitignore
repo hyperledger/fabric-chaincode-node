@@ -3,6 +3,7 @@ docs/gen
 node_modules/*
 fabric-contract-api/node_modules/*
 fabric-shim/node_modules/*
+fabric-shim-crypto/node_modules/*
 fabric-shim/lib/protos/common/*
 fabric-shim/lib/protos/msp/*
 fabric-shim/lib/protos/peer/*
