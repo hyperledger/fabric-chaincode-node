@@ -59,7 +59,6 @@ module.exports = class JSONSerializer {
      *
      */
     fromBuffer(data, schema = {}) {
-
         if (!data) {
             logger.error('fromBuffer no data supplied');
             throw new Error('Buffer needs to be supplied');
@@ -68,13 +67,29 @@ module.exports = class JSONSerializer {
         let jsonForValidation;
         // check that schema to see exactly how we should de-marshall this
         if (schema.type && (schema.type === 'string' || schema.type === 'number')) {
-            logger.debug('fromBuffer handling data as string/number');
-            // ok so this is a basic primitive type, and for strings and numbers the wireprotocol is different
-            value = data.toString();
-            jsonForValidation = JSON.stringify(value);
-        } else {
+            if (schema.type === 'string') {
+                logger.debug('fromBuffer handling data as string/number');
+                // ok so this is a basic primitive type, and for strings and numbers the wireprotocol is different
+                value = data.toString();
+                jsonForValidation = JSON.stringify(value);
+            } else {
+                value = Number(data.toString());
+                jsonForValidation = value;
 
-            const json = JSON.parse(data.toString());
+                if (isNaN(jsonForValidation)) {
+                    throw new Error('fromBuffer could not convert data to number', data);
+                }
+            }
+        } else {
+            let json;
+            try {
+                json = JSON.parse(data.toString());
+            } catch (err) {
+                if (schema.type === 'boolean') {
+                    throw new Error('fromBuffer could not convert data to boolean', data);
+                }
+                throw new Error('fromBuffer could not parse data as JSON to allow it to be converted to type: ' + JSON.stringify(schema.type), data, err);
+            }
             if (json.type) {
                 logger.debug('fromBuffer handling data as buffer');
                 if (json.type === 'Buffer') {

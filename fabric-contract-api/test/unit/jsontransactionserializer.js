@@ -106,11 +106,32 @@ describe('jsontransactionserializer.js', () => {
 
     describe('#fromBuffer', () => {
 
-        it ('should return throw an error if noting given', () => {
+        it ('should throw an error if nothing given', () => {
             const sc0 = new JSONSerializer();
             (() => {
                 sc0.fromBuffer();
             }).should.throw(/Buffer needs to be supplied/);
+        });
+
+        it ('should throw an error if not a number', () => {
+            const sc0 = new JSONSerializer();
+            (() => {
+                sc0.fromBuffer(Buffer.from('102345679a'), {type:'number'});
+            }).should.throw(/fromBuffer could not convert data to number/);
+        });
+
+        it ('should throw an error if bad boolean given', () => {
+            const sc0 = new JSONSerializer();
+            (() => {
+                sc0.fromBuffer(Buffer.from('trie'), {type:'boolean'});
+            }).should.throw(/fromBuffer could not convert data to boolean/);
+        });
+
+        it ('should throw an error if bad JSON used for non string or number type', () => {
+            const sc0 = new JSONSerializer();
+            (() => {
+                sc0.fromBuffer(Buffer.from('trie'), {type:'some type'});
+            }).should.throw(/fromBuffer could not parse data as JSON to allow it to be converted to type: "some type"/);
         });
 
         it ('should return inflated data from the buffer', () => {
@@ -129,7 +150,13 @@ describe('jsontransactionserializer.js', () => {
         it('should handle specific Number case', () => {
             const sc0 = new JSONSerializer();
             const v = sc0.fromBuffer(Buffer.from('102345679'), {type:'number'});
-            v.should.deep.equal({value:'102345679', jsonForValidation:JSON.stringify('102345679')});
+            v.should.deep.equal({value:102345679, jsonForValidation:102345679});
+        });
+
+        it ('should handle specific Boolean case', () => {
+            const sc0 = new JSONSerializer();
+            const v = sc0.fromBuffer(Buffer.from('true'), {type:'boolean'});
+            v.should.deep.equal({value:true, jsonForValidation:true});
         });
 
         it('should handle specific Number case', () => {
