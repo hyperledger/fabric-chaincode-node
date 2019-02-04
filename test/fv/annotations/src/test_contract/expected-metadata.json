@@ -16,6 +16,12 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "value",
+                        "schema": {
+                            "type": "number"
+                        }
                     }
                 ],
                 "type": "object"
@@ -49,6 +55,13 @@
                             "name": "name",
                             "schema": {
                                 "type": "string"
+                            }
+                        },
+                        {
+                            "description": "",
+                            "name": "value",
+                            "schema": {
+                                "type": "number"
                             }
                         }
                     ],
