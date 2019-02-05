@@ -157,7 +157,10 @@ class ChaincodeFromContract {
             if (!this.defaultContractName) {
                 this.defaultContractName = name;
                 contract.default = true;
+            } else if (this.defaultContractName === contract.getName()) {
+                contract.default = true;
             }
+
             const transactions = this._processContractTransactions(contract);
             const info = this._processContractInfo(contract);
 
