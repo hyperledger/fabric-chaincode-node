@@ -191,9 +191,15 @@ class ChaincodeFromContract {
                     continue;
                 }
 
-                transactions.push({
+                const transaction = {
                     name: propName
-                });
+                };
+
+                if (contract.getName() !== 'org.hyperledger.fabric') {
+                    transaction.tags = ['submitTx'];
+                }
+
+                transactions.push(transaction);
             }
         }
 
