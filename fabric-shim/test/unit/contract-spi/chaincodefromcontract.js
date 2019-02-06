@@ -963,6 +963,7 @@ describe('chaincodefromcontract', () => {
 
     describe('#_augmentMetadataFromCode', () => {
         const exampleMetadata = {
+            $schema: 'my schema link',
             contracts: {
                 contractImplementations: {
                     name: 'someContract'
@@ -1013,7 +1014,8 @@ describe('chaincodefromcontract', () => {
             };
             const metadata = fakeCcfc._augmentMetadataFromCode(partialMetadata);
 
-            const correctData =       {
+            const correctData = {
+                '$schema': 'https://fabric-shim.github.io/master/contract-schema.json',
                 'components': {
                     'schemas': {}
                 },
@@ -1126,6 +1128,20 @@ describe('chaincodefromcontract', () => {
             metadata.components.should.deep.equal({schemas: {}});
             sinon.assert.calledOnce(reflectStub);
             sinon.assert.calledWith(reflectStub, 'fabric:objects', global);
+        });
+
+        it ('should fill in schema when not set', () => {
+            const metadataToSend = {
+                components: exampleMetadata.components,
+                contracts: exampleMetadata.contracts,
+                info: exampleMetadata.info
+            };
+
+            const metadata = ChaincodeFromContract.prototype._augmentMetadataFromCode(metadataToSend);
+            metadata.components.should.deep.equal(metadataToSend.components);
+            metadata.contracts.should.deep.equal(metadataToSend.contracts);
+            metadata.info.should.deep.equal(metadataToSend.info);
+            metadata.$schema.should.deep.equal('https://fabric-shim.github.io/master/contract-schema.json');
         });
     });
 

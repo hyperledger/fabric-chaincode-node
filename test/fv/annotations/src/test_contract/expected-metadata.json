@@ -1,4 +1,5 @@
 {
+    "$schema": "https://fabric-shim.github.io/master/contract-schema.json",
     "components": {
         "schemas": {
             "Asset": {
