@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 const version = 'v' + require('./package.json').version;
+const Logger = require('./lib/logger');
+
+const logger = Logger.getLogger('fabric-shim/cli');
 
 const results = require('yargs')
     .commandDir('./lib/cmds')
@@ -14,9 +17,9 @@ const results = require('yargs')
 
 if (typeof(results.thePromise) !== 'undefined') {
     results.thePromise.then(() => {
-        console.log('\nCommand succeeded\n');
+        logger.info('\nCommand succeeded\n');
     }).catch((error) => {
-        console.log(error + '\nCommand failed\n');
+        logger.info(error + '\nCommand failed\n');
         process.exit(1);
     });
 } else {
