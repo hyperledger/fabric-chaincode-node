@@ -10,15 +10,20 @@ class Asset {
     @Property()
     public name: string;
 
-    constructor(id: string, name: string) {
+    @Property()
+    public value: number;
+
+    constructor(id: string, name: string, value: number) {
         this.id = id;
         this.name = name;
+        this.value = value;
     }
 
     serialize():string {
         return JSON.stringify({
             id: this.id,
-            name: this.name
+            name: this.name,
+            value: this.value
         });
     }
 
@@ -29,7 +34,7 @@ class Asset {
             throw new Error('Was not JSON formatted asset');
         }
 
-        return new Asset(json.id, json.name);
+        return new Asset(json.id, json.name, json.value);
     }
 }
 
@@ -39,8 +44,8 @@ export default class TestContract extends Contract {
     }
 
     @Transaction()
-    public async createAsset(ctx: Context, id: string, name: string) {
-        const asset = new Asset(id, name);
+    public async createAsset(ctx: Context, id: string, name: string, value: number) {
+        const asset = new Asset(id, name, value);
 
         await ctx.stub.putState(ctx.stub.createCompositeKey(Asset.stateIdentifier, [asset.id]), Buffer.from(asset.serialize()))
     }

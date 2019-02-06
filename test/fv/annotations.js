@@ -18,9 +18,9 @@ describe('Typescript chaincode', () => {
     describe('Scenario', () => {
         it('should write an asset', async function () {
             this.timeout(SHORT_INC);
-            await utils.invoke(suite, 'TestContract:createAsset', ['GLD', 'GOLD_BAR']);
+            await utils.invoke(suite, 'TestContract:createAsset', ['GLD', 'GOLD_BAR', '100']);
             const payload = JSON.parse(await utils.query(suite, 'TestContract:getAsset', ['GLD']));
-            expect(payload).to.eql({id: 'GLD', name: 'GOLD_BAR'});
+            expect(payload).to.eql({id: 'GLD', name: 'GOLD_BAR', value: 100});
         });
 
         it('should handle the getMetadata', async function () {

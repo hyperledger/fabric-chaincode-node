@@ -11,6 +11,7 @@ const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
 const shell = require('gulp-shell');
+const execSync = require('child_process').execSync;
 const replace = require('gulp-replace');
 const merge = require('merge-stream');
 
@@ -151,13 +152,18 @@ gulp.task('fv-copy', gulp.series('fv-copy-depts', () => {
         .pipe(gulp.dest(testDir));
 }));
 
-gulp.task('fv-pack', () => {
-    return gulp.src('*.js')
-        .pipe(shell([
-            'npm pack ./fabric-contract-api',
-            'npm pack ./fabric-shim',
-            'npm pack ./fabric-shim-crypto',
-        ]));
+gulp.task('fv-pack', (done) => {
+    const contractAPI = execSync('npm pack ./fabric-contract-api');
+    const tempFabShim = constants.tempdir + '/fabric-shim';
+
+    execSync(`cp -a fabric-shim/. ${tempFabShim}/`);
+    const shimPackageJSON = JSON.parse(fs.readFileSync(tempFabShim + '/package.json'));
+    shimPackageJSON.dependencies['fabric-contract-api'] = 'file:' + contractAPI.toString().trim();
+    fs.writeFileSync(tempFabShim + '/package.json', JSON.stringify(shimPackageJSON));
+
+    execSync('npm pack ' + constants.tempdir + '/fabric-shim; npm pack ./fabric-shim-crypto');
+
+    done();
 });
 
 gulp.task('fv-clean', () => {
