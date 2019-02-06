@@ -224,6 +224,10 @@ class ChaincodeFromContract {
      */
     _augmentMetadataFromCode(metadata) {
 
+        if (!metadata.$schema) {
+            metadata.$schema = 'https://fabric-shim.github.io/release-1.4/contract-schema.json';
+        }
+
         if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
             logger.debug('_augmentMetadataFromCode - Contracts not supplied. Generating default');
             metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));
