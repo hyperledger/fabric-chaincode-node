@@ -140,6 +140,7 @@ describe('chaincodefromcontract', () => {
     }
 
     let sandbox;
+    let isContractStub;
 
     beforeEach('Sandbox creation', () => {
         mockery.enable({
@@ -148,12 +149,14 @@ describe('chaincodefromcontract', () => {
             useCleanCache: false
         });
         sandbox = sinon.createSandbox();
+
         beforeFnStubA = sandbox.stub().named('beforeFnStubA');
         afterFnStubA = sandbox.stub().named('afterFnStubA');
         alphaStub = sandbox.stub().named('alphaStub');
         betaStub = sandbox.stub().named('betaStub');
         getSchemaMock = sandbox.stub();
         mockAjv.getSchema = getSchemaMock;
+        isContractStub = sandbox.stub(Contract, '_isContract').returns(true);
 
         mockery.registerMock('./systemcontract', SystemContract);
         mockery.registerMock('ajv', mockAjv);
@@ -302,12 +305,6 @@ describe('chaincodefromcontract', () => {
     });
 
     describe('#_resolveContractImplementations', () => {
-
-        let processInfoStub;
-        beforeEach(() => {
-            processInfoStub = sandbox.stub(ChaincodeFromContract.prototype, '_processContractInfo');
-        });
-
         it('should handle a single class being passed as a contract', () => {
             const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
@@ -316,11 +313,9 @@ describe('chaincodefromcontract', () => {
             const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
             cc.defaultContractName.should.deep.equal('alpha');
-            sinon.assert.calledTwice(processInfoStub);
-            processInfoStub.getCall(0).args[0].default.should.be.true;
         });
         it('should handle a single class being passed that is not valid', () => {
-
+            isContractStub.returns(false);
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
             sandbox.stub(ChaincodeFromContract.prototype, '_dataMarshall').returns(MockDataMarhsall);
@@ -338,9 +333,6 @@ describe('chaincodefromcontract', () => {
             const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
             cc.defaultContractName.should.deep.equal('beta');
-            sinon.assert.calledThrice(processInfoStub);
-            processInfoStub.getCall(0).args[0].default.should.be.true;
-            (typeof processInfoStub.getCall(1).args[0].default).should.be.equal('undefined');
         });
 
         it('should handle the default tag being used', () => {
@@ -352,9 +344,6 @@ describe('chaincodefromcontract', () => {
             const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
             cc.defaultContractName.should.deep.equal('alpha');
-            sinon.assert.calledThrice(processInfoStub);
-            (typeof processInfoStub.getCall(0).args[0].default).should.be.equal('undefined');
-            processInfoStub.getCall(1).args[0].default.should.be.true;
         });
     });
 
@@ -1077,31 +1066,29 @@ describe('chaincodefromcontract', () => {
             metadata.info.should.deep.equal(metadataToSend.info);
             metadata.components.should.deep.equal(metadataToSend.components);
         });
-
-        it ('should fill in info field when not set with package.json data', () => {
+        it('should correctly retrieve info with the constructor title and version data', () => {
             const metadataToSend = {
                 contracts: exampleMetadata.contracts,
-                components: exampleMetadata.components
+                components: exampleMetadata.components,
             };
-
+            ChaincodeFromContract.prototype.title = 'some title';
+            ChaincodeFromContract.prototype.version = '0.1.1';
             const metadata = ChaincodeFromContract.prototype._augmentMetadataFromCode(metadataToSend);
             metadata.contracts.should.deep.equal(metadataToSend.contracts);
             metadata.info.should.deep.equal({
-                version: '1.0.1',
-                title: 'some package'
+                version: '0.1.1',
+                title: 'some title'
             });
             metadata.components.should.deep.equal(metadataToSend.components);
         });
 
-        it ('should fill in info field when not set and package.json missing data', () => {
+        it('should fill in info when there is no constructor title and version data', () => {
             const metadataToSend = {
                 contracts: exampleMetadata.contracts,
-                components: exampleMetadata.components
+                components: exampleMetadata.components,
             };
-
-            mockery.deregisterMock('packagejson');
-            mockery.registerMock('packagejson', {});
-
+            ChaincodeFromContract.prototype.title = undefined;
+            ChaincodeFromContract.prototype.version = undefined;
             const metadata = ChaincodeFromContract.prototype._augmentMetadataFromCode(metadataToSend);
             metadata.contracts.should.deep.equal(metadataToSend.contracts);
             metadata.info.should.deep.equal({
