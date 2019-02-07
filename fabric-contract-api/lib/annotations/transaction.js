@@ -84,14 +84,8 @@ module.exports.Returns = function Returns(returnType) {
 
         logger.debug('Existing fabric:transactions', transactions);
 
-        const obj = {
-            name: 'success'
-        };
-
-        obj.schema = utils.generateSchema(returnType);
-
         utils.appendOrUpdate(transactions, 'name', propertyKey, {
-            returns: [obj]
+            returns: utils.generateSchema(returnType)
         });
 
         Reflect.defineMetadata('fabric:transactions', transactions, target);

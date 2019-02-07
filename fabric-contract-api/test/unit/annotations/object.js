@@ -37,7 +37,7 @@ describe ('Object.js', () => {
         defineMetadataStub.restore();
     });
 
-    describe('Object', () => {
+    describe('#Object', () => {
 
         let object;
 
@@ -48,7 +48,7 @@ describe ('Object.js', () => {
         it ('should add object as key when no objects exist for global yet', () => {
             getMetadataStub
                 .onFirstCall().returns(undefined)
-                .onSecondCall().returns(['some', 'properties']);
+                .onSecondCall().returns({'some': 'properties'});
 
             object(mockTarget);
 
@@ -60,7 +60,7 @@ describe ('Object.js', () => {
                 'steve':  {
                     $id: 'steve',
                     additionalProperties: false,
-                    properties: ['some', 'properties'],
+                    properties: {'some': 'properties'},
                     type: 'object'
                 }
             });
@@ -82,27 +82,27 @@ describe ('Object.js', () => {
                 'steve':  {
                     $id: 'steve',
                     additionalProperties: false,
-                    properties: [],
+                    properties: {},
                     type: 'object'
                 }
             });
         });
     });
 
-    describe('Property', () => {
+    describe('#Property', () => {
         it ('should use the type and name passed', () => {
-            getMetadataStub.onFirstCall().returns(['some', 'properties']);
+            getMetadataStub.onFirstCall().returns({'some': 'properties'});
 
             Property('some name', 'SoMe tYPe')(mockTarget);
 
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
-            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', ['some', 'properties', {
-                name: 'some name',
-                schema: {
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
+                'some': 'properties',
+                'some name': {
                     type: 'some type'
                 }
-            }]);
+            });
         });
 
         it ('should handle the reflected type being a function when type not passed', () => {
@@ -116,12 +116,11 @@ describe ('Object.js', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
 
-            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', [{
-                name: 'some key',
-                schema: {
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
+                'some key': {
                     type: 'fred'
                 }
-            }]);
+            });
         });
 
         it ('should handle the reflected type being a function when type not passed', () => {
@@ -135,12 +134,11 @@ describe ('Object.js', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
 
-            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', [{
-                name: 'some key',
-                schema: {
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
+                'some key': {
                     type: 'some type'
                 }
-            }]);
+            });
         });
     });
 });

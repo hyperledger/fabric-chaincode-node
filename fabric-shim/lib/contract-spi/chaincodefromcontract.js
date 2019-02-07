@@ -85,12 +85,7 @@ class ChaincodeFromContract {
         const schemaList = [];
         for (const name in  this.metadata.components.schemas) {
             const s =  this.metadata.components.schemas[name];
-            const props = {};
-            s.properties.forEach((e) => {
-                props[e.name] = e;
-            });
 
-            s.properties = props;
             schemaList.push(s);
         }
 

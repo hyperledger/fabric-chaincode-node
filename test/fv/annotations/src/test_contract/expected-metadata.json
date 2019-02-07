@@ -5,26 +5,17 @@
             "Asset": {
                 "$id": "Asset",
                 "additionalProperties": false,
-                "properties": [
-                    {
-                        "name": "id",
-                        "schema": {
-                            "type": "string"
-                        }
+                "properties": {
+                    "id": {
+                        "type": "string"
                     },
-                    {
-                        "name": "name",
-                        "schema": {
-                            "type": "string"
-                        }
+                    "name": {
+                        "type": "string"
                     },
-                    {
-                        "name": "value",
-                        "schema": {
-                            "type": "number"
-                        }
+                    "value": {
+                        "type": "number"
                     }
-                ],
+                },
                 "type": "object"
             }
         }
@@ -33,7 +24,7 @@
         "TestContract": {
             "contractInstance": {
                 "name": "TestContract",
-                "default":true
+                "default": true
             },
             "info": {
                 "title": "",
@@ -81,14 +72,9 @@
                             }
                         }
                     ],
-                    "returns": [
-                        {
-                            "name": "success",
-                            "schema": {
-                                "type": "string"
-                            }
-                        }
-                    ],
+                    "returns": {
+                        "type": "string"
+                    },
                     "tag": [
                         "submitTx"
                     ]

@@ -101,9 +101,6 @@
                 "transactions"
             ],
             "properties": {
-                "default": {
-                    "type": "boolean"
-                },
                 "info": {
                     "$ref": "#/definitions/info"
                 },
@@ -131,7 +128,9 @@
                     "type": "string"
                 },
                 "properties": {
-                    "$ref": "#/definitions/parametersList"
+                    "^.*$": {
+                        "$ref": "#/definitions/schema"
+                    }
                 },
                 "required": {
                     "$ref": "http://json-schema.org/draft-04/schema#/definitions/stringArray"
@@ -176,14 +175,7 @@
                     "$ref": "#/definitions/parametersList"
                 },
                 "returns": {
-                    "oneOf": [
-                        {
-                            "$ref": "#/definitions/parameter"
-                        },
-                        {
-                            "$ref": "#/definitions/parametersList"
-                        }
-                    ]
+                    "$ref": "#/definitions/schema"
                 }
             }
         },
