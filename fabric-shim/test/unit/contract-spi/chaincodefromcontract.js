@@ -934,30 +934,61 @@ describe('chaincodefromcontract', () => {
 
     describe('#_processContractTransactions', () => {
 
-
-        it('should handle a single class being passed as a contract that has no functions', () => {
-            mockery.registerMock('SCDelta', SCDelta);
+        let cc;
+        beforeEach(() => {
+            mockery.registerMock('SCAlpha', SCDelta);
             SCDelta.prototype.foo = 'foo';
-            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
+            sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
-            new ChaincodeFromContract([SCDelta], defaultSerialization);
-
-            sinon.assert.calledOnce(_checkSuppliedStub);
+            cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
         });
 
-        it('should handle a single class being passed as a contract that has no functions', () => {
-            mockery.registerMock('SCDelta', SCDelta);
-            SCDelta.prototype.foo = 'foo';
-            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
-            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
-            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+        it ('should handle no transaction annotations used', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(null);
 
-            sandbox.stub(Reflect, 'getMetadata').returns(['info']);
+            const ci = cc.contractImplementations.alpha.contractInstance;
+            Object.getPrototypeOf(ci).property = 'value';
 
-            new ChaincodeFromContract([SCDelta], defaultSerialization);
+            const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci);
 
-            sinon.assert.calledOnce(_checkSuppliedStub);
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
+            transactions.should.deep.equal([{
+                name: 'alpha',
+                tags: ['submitTx']
+            }]);
+        });
+
+        it ('should not add submitTx to the system contract functions', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(null);
+
+            const ci = cc.contractImplementations.alpha.contractInstance;
+            ci.getName = () => {
+                return 'org.hyperledger.fabric';
+            };
+
+            const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci);
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
+            transactions.should.deep.equal([{
+                name: 'alpha'
+            }]);
+        });
+
+        it ('should handle transaction annotations being used', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns([{some: 'transaction'}]);
+
+            const ci = cc.contractImplementations.alpha.contractInstance;
+
+            const transactions = ChaincodeFromContract.prototype._processContractTransactions(cc.contractImplementations.alpha.contractInstance);
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
+            transactions.should.deep.equal([{
+                some: 'transaction'
+            }]);
         });
     });
 
