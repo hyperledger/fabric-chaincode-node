@@ -14,6 +14,7 @@
 
 const Logger = require('../logger');
 const logger = Logger.getLogger('./lib/annotations/object.js');
+const utils = require('./utils');
 require('reflect-metadata');
 
 module.exports.Object = function Object () {
@@ -49,18 +50,14 @@ module.exports.Property = function Property (name, type) {
 
         logger.debug('Existing fabric:object-properties for target', properties);
 
-        if (name && type) {
-            type = type.toLowerCase();
-        } else {
+        if (!name || !type) {
             name = propertyKey;
 
             const metaType = Reflect.getMetadata('design:type', target, propertyKey);
-            type = typeof metaType === 'function' ? metaType.name.toLowerCase() : metaType.toString().toLowerCase();
+            type = typeof metaType === 'function' ? metaType.name : metaType.toString();
         }
 
-        properties[name] = {
-            type
-        };
+        properties[name] = utils.generateSchema(type);
 
         Reflect.defineMetadata('fabric:object-properties', properties, target);
 
