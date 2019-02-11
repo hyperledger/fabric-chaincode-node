@@ -305,8 +305,18 @@ describe('chaincodefromcontract', () => {
     });
 
     describe('#_resolveContractImplementations', () => {
+
+        let processContractTransactionsStub;
         let processInfoStub;
+
+        const skipNames = Object.getOwnPropertyNames(Contract.prototype);
+
+        const isContract = (value) => {
+            return Contract._isContract(value);
+        };
+
         beforeEach(() => {
+            processContractTransactionsStub = sandbox.stub(ChaincodeFromContract.prototype, '_processContractTransactions');
             processInfoStub = sandbox.stub(ChaincodeFromContract.prototype, '_processContractInfo');
         });
 
@@ -317,6 +327,8 @@ describe('chaincodefromcontract', () => {
             mockery.registerMock('SCAlpha', SCAlpha);
             const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
+            sinon.assert.calledTwice(processContractTransactionsStub);
+            sinon.assert.calledWith(processContractTransactionsStub, sinon.match(isContract), skipNames);
             cc.defaultContractName.should.deep.equal('alpha');
             sinon.assert.calledTwice(processInfoStub);
             processInfoStub.getCall(0).args[0].default.should.be.true;
@@ -330,7 +342,7 @@ describe('chaincodefromcontract', () => {
             (() => {
                 new ChaincodeFromContract([String], defaultSerialization);
             }).should.throw(/invalid contract instance/);
-
+            sinon.assert.notCalled(processContractTransactionsStub);
         });
         it('should handle a two classes being passed as a contract', () => {
             const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
@@ -339,6 +351,8 @@ describe('chaincodefromcontract', () => {
             mockery.registerMock('SCAlpha', SCAlpha);
             const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
+            sinon.assert.calledThrice(processContractTransactionsStub);
+            sinon.assert.calledWith(processContractTransactionsStub, sinon.match(isContract), skipNames);
             cc.defaultContractName.should.deep.equal('beta');
             sinon.assert.calledThrice(processInfoStub);
             processInfoStub.getCall(0).args[0].default.should.be.true;
@@ -353,6 +367,8 @@ describe('chaincodefromcontract', () => {
             mockery.registerMock('SCAlpha', SCAlpha);
             const cc = new ChaincodeFromContract([SCBeta, SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(_checkSuppliedStub);
+            sinon.assert.calledThrice(processContractTransactionsStub);
+            sinon.assert.calledWith(processContractTransactionsStub, sinon.match(isContract), skipNames);
             cc.defaultContractName.should.deep.equal('alpha');
             sinon.assert.calledThrice(processInfoStub);
             (typeof processInfoStub.getCall(0).args[0].default).should.be.equal('undefined');
@@ -957,13 +973,14 @@ describe('chaincodefromcontract', () => {
             cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
         });
 
-        it ('should handle no transaction annotations used', () => {
+        it ('should handle no transaction annotations used, ignoring functions that match in name to ignore array', () => {
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(null);
 
             const ci = cc.contractImplementations.alpha.contractInstance;
             Object.getPrototypeOf(ci).property = 'value';
+            Object.getPrototypeOf(ci).ignoreMe = () => {};
 
-            const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci);
+            const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci, ['ignoreMe']);
 
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
@@ -971,6 +988,9 @@ describe('chaincodefromcontract', () => {
                 name: 'alpha',
                 tags: ['submitTx']
             }]);
+
+            delete Object.getPrototypeOf(ci).property;
+            delete Object.getPrototypeOf(ci).ignoreMe;
         });
 
         it ('should not add submitTx to the system contract functions', () => {
@@ -981,7 +1001,7 @@ describe('chaincodefromcontract', () => {
                 return 'org.hyperledger.fabric';
             };
 
-            const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci);
+            const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci, []);
 
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);

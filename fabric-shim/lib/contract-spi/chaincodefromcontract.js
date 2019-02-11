@@ -140,6 +140,8 @@ class ChaincodeFromContract {
         this.defaultContractName = Reflect.getMetadata('fabric:default', global);
 
         const Contract = require('fabric-contract-api').Contract;
+        const skipNames = Object.getOwnPropertyNames(Contract.prototype);
+
         const implementations = {};
 
         for (const contractClass of contractClasses) {
@@ -156,7 +158,7 @@ class ChaincodeFromContract {
                 contract.default = true;
             }
 
-            const transactions = this._processContractTransactions(contract);
+            const transactions = this._processContractTransactions(contract, skipNames);
             const info = this._processContractInfo(contract);
 
             implementations[name] = {name, contractInstance : contract, transactions, info};
@@ -166,7 +168,7 @@ class ChaincodeFromContract {
     }
 
     /** read the code and create the internal structure representing the code */
-    _processContractTransactions(contract) {
+    _processContractTransactions(contract, ignore) {
         let transactions = [];
         transactions = Reflect.getMetadata('fabric:transactions', contract) || [];
         if (transactions.length === 0) {
@@ -179,6 +181,8 @@ class ChaincodeFromContract {
                 } else if (propName === 'constructor') {
                     continue;
                 } else if (propName.startsWith('_')) {
+                    continue;
+                } else if (ignore.includes(propName)) {
                     continue;
                 }
 
