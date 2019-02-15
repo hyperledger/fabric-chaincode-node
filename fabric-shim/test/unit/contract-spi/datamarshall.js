@@ -29,6 +29,7 @@ const Ajv = require('ajv');
 const pathToRoot = '../../../..';
 
 const JSONSerializer = require(path.join(pathToRoot, 'fabric-contract-api/lib/jsontransactionserializer.js'));
+
 const DataMarshall = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/datamarshall.js'));
 
 const defaultSerialization = {
@@ -75,58 +76,165 @@ describe('datamarshall.js', () => {
     });
 
     describe('#toWireBuffer', () => {
-
-        it ('should return undefined if nothing passed in ', () => {
+        it ('should jsonSerialized buffering', () => {
             const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            const wireBuffer = dm.toWireBuffer('penfold');
 
-            const {value, validateData} = dm.fromWireBuffer(wireBuffer);
-            value.should.equal('penfold');
-            validateData.should.equal('penfold');
+            dm.serializer.toBuffer = sinon.stub().returns('some buffer');
+
+            const wireBuffer = dm.toWireBuffer('penfold', {some: 'schema'}, 'log data');
+
+            expect(wireBuffer).to.deep.equal('some buffer');
+            sinon.assert.calledWith(dm.serializer.toBuffer, 'penfold', {some: 'schema'}, 'log data');
         });
 
-
-        it ('should return undefined if nothing passed in ', () => {
+        it ('should handle no schema passed', () => {
             const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            dm.serializer = {fromBuffer : () => {
-                return {
-                    value:'penfold', validateData:'colonelk'};
-            }};
 
-            const {value, validateData} = dm.fromWireBuffer(Buffer.from('hello'));
-            value.should.equal('penfold');
-            validateData.should.equal('colonelk');
+            dm.serializer.toBuffer = sinon.stub().returns('some buffer');
+
+            const wireBuffer = dm.toWireBuffer('penfold');
+
+            expect(wireBuffer).to.deep.equal('some buffer');
+            sinon.assert.calledWith(dm.serializer.toBuffer, 'penfold', {}, undefined);
+        });
+    });
+
+    describe('#fromWireBuffer', () => {
+        it ('should return the same data as the serializer from buffer', () => {
+            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
+
+            dm.serializer.fromBuffer = sinon.stub().returns({value: 'a value', validateData: 'some validation thing'});
+
+            const {value, validateData} = dm.fromWireBuffer('some buffer', 'some schema', 'some prefix');
+
+            sinon.assert.calledWith(dm.serializer.fromBuffer, 'some buffer', 'some schema', 'some prefix');
+            expect(value).to.deep.equal('a value');
+            expect(validateData).to.deep.equal('some validation thing');
+        });
+
+        it ('should handle no validationData', () => {
+            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
+
+            dm.serializer.fromBuffer = sinon.stub().returns({value: 'a value', validateData: null});
+
+            const {value, validateData} = dm.fromWireBuffer('some buffer', 'some schema', 'some prefix');
+
+            sinon.assert.calledWith(dm.serializer.fromBuffer, 'some buffer', 'some schema', 'some prefix');
+            expect(value).to.deep.equal('a value');
+            expect(validateData).to.deep.equal('a value');
+        });
+
+        it ('should handle no schema', () => {
+            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
+
+            dm.serializer.fromBuffer = sinon.stub().returns({value: 'a value', validateData: null});
+
+            const {value, validateData} = dm.fromWireBuffer('some buffer');
+
+            sinon.assert.calledWith(dm.serializer.fromBuffer, 'some buffer', {}, undefined);
+            expect(value).to.deep.equal('a value');
+            expect(validateData).to.deep.equal('a value');
         });
     });
 
     describe('#handleParameters', () => {
 
-        it('should handle empty list', () => {
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
+        let dm;
+
+        beforeEach(() => {
+            dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
+
+            dm.fromWireBuffer = sinon.stub()
+                .onFirstCall().returns({value: 'some value', validateData: 'some validate data'})
+                .onSecondCall().returns({value: 'some other value', validateData: 'some other validate data'});
+        });
+
+        it('should handle function with no parameters and none passed', () => {
             const fn = {name:'dullfn'};
-            dm.handleParameters(fn, []);
+
+            const returned = dm.handleParameters(fn, []);
+
+            expect(returned).to.deep.equal([]);
+        });
+
+        it('should handle function with no parameters but some passed', () => {
+            const fn = {name:'dullfn'};
+
+            const returned = dm.handleParameters(fn, ['oof', 'some', 'params', 'exist', 123]);
+
+            expect(returned).to.deep.equal(['oof', 'some', 'params', 'exist', '123']);
         });
 
         it('should handle different length lists', () => {
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
             const fn = {name:'dullfn', parameters:['wibble']};
             (() => {
                 dm.handleParameters(fn, []);
             }).should.throw(/Expected .* parameters/);
         });
 
-        it('should handle the case where types have come from JS Introspection', () => {
-            // i.e. there are the names of then fns but no info on parameters
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            const fn = {name:'dullfn'};
+        it ('should handle error when schema has not useful fields', () => {
+            const fn = {name:'sillyfn', parameters:[
+                {
+                    name:'one',
+                    schema:{
+                        useless: 'field'
+                    }
+                }
+            ]};
 
-            dm.handleParameters(fn, ['"one"', '"two"']);
-
+            (() => {
+                dm.handleParameters(fn, ['"one"']);
+            }).should.throw(/Incorrect type information .*/);
         });
 
-        it('should handle different primitive types', () => {
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            const fn = {name:'dullfn', parameters:[
+        it ('should handle error when type invalid', () => {
+            const fn = {name:'lessdullfn', parameters:[
+                {
+                    name:'one',
+                    schema:{
+                        type:'string'
+                    }
+                }
+            ]};
+
+            const validateStub = sinon.stub().returns(false);
+            validateStub.errors = ['list', 'of', 'reasons', 'why', 'params', 'were', 'wrong'];
+            dm.ajv.compile = sinon.stub().returns(validateStub);
+
+            expect(() => {
+                dm.handleParameters(fn, ['"one"'], 'logging prefix');
+            }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors)}`);
+            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {type: 'string'}, 'logging prefix');
+            sinon.assert.calledWith(dm.ajv.compile, {type:'string'});
+            sinon.assert.calledWith(validateStub, 'some validate data');
+        });
+
+        it ('should handle when type invalid for $ref', () => {
+            const fn = {name:'lessdullfn', parameters:[
+                {
+                    name:'one',
+                    schema:{
+                        $ref:'#components/someComponent'
+                    }
+                }
+            ]};
+
+            const validateStub = sinon.stub().returns(false);
+            validateStub.errors = ['list', 'of', 'reasons', 'why', 'params', 'were', 'wrong'];
+
+            dm.schemas = {};
+            dm.schemas.someComponent = {};
+            dm.schemas.someComponent.validator = validateStub;
+
+            expect(() => {
+                dm.handleParameters(fn, ['"one"'], 'logging prefix');
+            }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors)}`);
+            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {$ref:'#components/someComponent'}, 'logging prefix');
+            sinon.assert.calledWith(validateStub, 'some validate data');
+        });
+
+        it ('should push valid values to returned array for primitve types', () => {
+            const fn = {name:'lessdullfn', parameters:[
                 {
                     name:'one',
                     schema:{
@@ -136,109 +244,34 @@ describe('datamarshall.js', () => {
                 {
                     name:'two',
                     schema:{
-                        type:'string'
+                        $ref: '#components/someComponent'
                     }
                 }
             ]};
 
-            dm.handleParameters(fn, ['"one"', '"two"']);
+            const validateStub = sinon.stub().returns(true);
 
+            dm.ajv.compile = sinon.stub().returns(validateStub);
+
+            dm.schemas = {};
+            dm.schemas.someComponent = {};
+            dm.schemas.someComponent.validator = validateStub;
+
+            const returned = dm.handleParameters(fn, ['"one"', '"two"'], 'logging prefix');
+
+            sinon.assert.calledTwice(dm.fromWireBuffer);
+            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {type: 'string'}, 'logging prefix');
+            sinon.assert.calledWith(dm.fromWireBuffer, '"two"', {$ref: '#components/someComponent'}, 'logging prefix');
+
+            sinon.assert.calledOnce(dm.ajv.compile);
+            sinon.assert.calledWith(dm.ajv.compile, {type:'string'});
+
+            sinon.assert.calledTwice(validateStub);
+            sinon.assert.calledWith(validateStub, 'some validate data');
+            sinon.assert.calledWith(validateStub, 'some other validate data');
+
+            expect(returned).to.deep.equal(['some value', 'some other value']);
         });
-
-        it('should handle types that are incorrecly specified', () => {
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            const fn = {name:'dullfn', parameters:[
-                {
-                    name:'one',
-                    schema:{
-                        wibble:'string'
-                    }
-                }
-            ]};
-
-            (() => {
-                dm.handleParameters(fn, ['"one"']);
-            }).should.throw(/Incorrect type information/);
-
-
-        });
-
-        it('should handle different primitive types: invalid', () => {
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            // dm.fromWireBuffer = sandbox.stub().returns({'value':'value', 'data':'data'});
-            const validator = sandbox.stub().returns(false);
-            dm.ajv = {
-                compile: () => {
-                    return validator;
-                }
-            };
-            const fn = {name:'dullfn', parameters:[
-                {
-                    name:'one',
-                    schema:{
-                        type:'string'
-                    }
-                },
-                {
-                    name:'two',
-                    schema:{
-                        type:'string'
-                    }
-                }
-            ]};
-
-            (() => {
-                dm.handleParameters(fn, ['"io"', '"two"']);
-            }).should.throw(/Unable to validate/);
-
-        });
-
-        it('should handle different complex types', () => {
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            // dm.fromWireBuffer = sandbox.stub().returns({'value':'value', 'data':'data'});
-            dm.schemas = {
-                Asset :
-                    {
-                        validator: sandbox.stub().returns(true)
-                    }
-            };
-            const fn = {name:'dullfn', parameters:[
-                {
-                    name:'one',
-                    schema:{
-                        '$ref':'#/components/schemas/Asset'
-                    }
-                }
-            ]};
-
-            dm.handleParameters(fn, ['"one"']);
-
-        });
-
-        it('should handle different complex types: invalid data', () => {
-            const dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
-            // dm.fromWireBuffer = sandbox.stub().returns({'value':'value', 'data':'data'});
-            dm.schemas = {
-                Asset :
-                    {
-                        validator: sandbox.stub().returns(false)
-                    }
-            };
-            const fn = {name:'dullfn', parameters:[
-                {
-                    name:'one',
-                    schema:{
-                        '$ref':'#/components/schemas/Asset'
-                    }
-                }
-            ]};
-
-            (() => {
-                dm.handleParameters(fn, ['"one"']);
-            }).should.throw(/Unable to validate/);
-
-        });
-
     });
 
 });

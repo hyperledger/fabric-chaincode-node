@@ -569,12 +569,9 @@ describe('Handler', () => {
                         return mock;
                     });
 
-                    const shortTxidStub = sandbox.stub().returns('a short txId');
-
                     mockNewErrorMsg = sinon.stub().returns('some error');
 
                     Handler.__set__('MsgQueueHandler', mockMsgQueueHandler);
-                    Handler.__set__('shortTxid', shortTxidStub);
                     Handler.__set__('newErrorMsg', mockNewErrorMsg);
 
                     mockStream = {write: (sinon.stub()), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
@@ -646,7 +643,9 @@ describe('Handler', () => {
                     eventReg.data(establishedMsg);
 
                     const readyMsg = {
-                        type: MSG_TYPE.RESPONSE
+                        type: MSG_TYPE.RESPONSE,
+                        channel_id: 'some channel',
+                        txid: 'some tx id'
                     };
 
                     eventReg.data(readyMsg);
@@ -664,7 +663,9 @@ describe('Handler', () => {
                     eventReg.data(establishedMsg);
 
                     const readyMsg = {
-                        type: MSG_TYPE.ERROR
+                        type: MSG_TYPE.ERROR,
+                        channel_id: 'some channel',
+                        txid: 'some tx id'
                     };
 
                     eventReg.data(readyMsg);
@@ -682,7 +683,9 @@ describe('Handler', () => {
                     eventReg.data(establishedMsg);
 
                     const readyMsg = {
-                        type: MSG_TYPE.INIT
+                        type: MSG_TYPE.INIT,
+                        channel_id: 'some channel',
+                        txid: 'some tx id'
                     };
 
                     eventReg.data(readyMsg);
@@ -699,7 +702,9 @@ describe('Handler', () => {
                     eventReg.data(establishedMsg);
 
                     const readyMsg = {
-                        type: MSG_TYPE.TRANSACTION
+                        type: MSG_TYPE.TRANSACTION,
+                        channel_id: 'some channel',
+                        txid: 'some tx id'
                     };
 
                     eventReg.data(readyMsg);
@@ -718,7 +723,9 @@ describe('Handler', () => {
                     eventReg.data(establishedMsg);
 
                     const readyMsg = {
-                        type: 'something else'
+                        type: 'something else',
+                        channel_id: 'some channel',
+                        txid: 'some tx id'
                     };
 
                     eventReg.data(readyMsg);
@@ -1535,11 +1542,9 @@ describe('Handler', () => {
         mockStub.chaincodeEvent = 'some event';
 
         let saveCreateStub;
-        let saveShortTxid;
 
         before(() => {
             saveCreateStub = Handler.__get__('createStub');
-            saveShortTxid = Handler.__get__('shortTxid');
         });
 
         beforeEach(() => {
@@ -1553,15 +1558,10 @@ describe('Handler', () => {
 
             const createStubStub = sandbox.stub().returns(mockStub);
             Handler.__set__('createStub', createStubStub);
-
-            const shortTxidStub = sandbox.stub().returns('a short txId');
-            Handler.__set__('shortTxid', shortTxidStub);
-
         });
 
         afterEach(() => {
             Handler.__set__('createStub', saveCreateStub);
-            Handler.__set__('shortTxid', saveShortTxid);
             sandbox.restore();
         });
 
@@ -1612,7 +1612,7 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
 
-                const text = '[theChannelID-a short txId]Calling chaincode Init() has not called success or error.';
+                const text = '[theChannelID-aTX] Calling chaincode Init() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
                 expect(mockHandler._stream.write.calledOnce).to.be.ok;
                 expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
@@ -1627,7 +1627,7 @@ describe('Handler', () => {
                 expect(decodeStub.calledOnce).to.be.ok;
                 expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
-                const text = '[theChannelID-a short txId]Calling chaincode Invoke() has not called success or error.';
+                const text = '[theChannelID-aTX] Calling chaincode Invoke() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
                 expect(mockHandler._stream.write.calledOnce).to.be.ok;
 
@@ -1643,7 +1643,7 @@ describe('Handler', () => {
                 expect(decodeStub.calledOnce).to.be.ok;
                 expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
-                const text = '[theChannelID-a short txId]Calling chaincode Init() has not called success or error.';
+                const text = '[theChannelID-aTX] Calling chaincode Init() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
 
                 expect(mockHandler._stream.write.calledOnce).to.be.ok;
@@ -1660,7 +1660,7 @@ describe('Handler', () => {
                 expect(decodeStub.calledOnce).to.be.ok;
                 expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
-                const text = '[theChannelID-a short txId]Calling chaincode Invoke() has not called success or error.';
+                const text = '[theChannelID-aTX] Calling chaincode Invoke() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
 
                 expect(mockHandler._stream.write.calledOnce).to.be.ok;
@@ -1752,28 +1752,12 @@ describe('Handler', () => {
 
             const expectedResponse = {
                 type: 'ERROR',
-                payload: Buffer.from(`[${msg.channel_id}-${msg.txid}]Chaincode handler FSM cannot handle message (${msg.type}) with payload size (8) while in state: ${state}`),
+                payload: Buffer.from(`[${msg.channel_id}-${msg.txid}] Chaincode handler FSM cannot handle message (${msg.type}) with payload size (8) while in state: ${state}`),
                 channel_id: 'theChannelID',
                 txid: 'aTX'
             };
 
             expect(result).to.deep.equal(expectedResponse);
-        });
-    });
-
-    describe('shortTxid', () => {
-        const shortTxid = Handler.__get__('shortTxid');
-
-        it ('should shorten txids over 8 letters', () => {
-            expect(shortTxid('123456789')).to.deep.equal('12345678');
-        });
-
-        it ('should leave txids shorter than 8 as was', () => {
-            expect(shortTxid('1234567')).to.deep.equal('1234567');
-        });
-
-        it ('should leave txids exactly 8 letters as was', () => {
-            expect(shortTxid('12345678')).to.deep.equal('12345678');
         });
     });
 
@@ -1864,7 +1848,7 @@ describe('Handler', () => {
 
             expect(() => {
                 parseResponse(handler, res, 'some method');
-            }).to.throw(/\[theChannelID-aTx\]Received incorrect chaincode in response to the some method\(\) call: type=\"some bad type\", expecting \"RESPONSE\"/);
+            }).to.throw(/\[theChannelID-aTx\] Received incorrect chaincode in response to the some method\(\) call: type=\"some bad type\", expecting \"RESPONSE\"/);
         });
 
         it ('should throw an error when type MSG_TYPE ERROR', () => {

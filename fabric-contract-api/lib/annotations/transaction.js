@@ -12,7 +12,7 @@ require('reflect-metadata');
 
 module.exports.Transaction = function Transaction(commit = true) {
     return (target, propertyKey) => {
-        logger.info('@Transaction args', target, propertyKey, commit);
+        logger.info('@Transaction args:', `Property Key -> ${propertyKey}, Commit -> ${commit},`, 'Target ->', target.constructor.name);
 
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
 
@@ -21,7 +21,7 @@ module.exports.Transaction = function Transaction(commit = true) {
         const transaction = utils.findByValue(transactions, 'name', propertyKey);
         const paramNames = getParams(target[propertyKey]);
 
-        logger.debug(`Transaction ${target} -> ${propertyKey} params`, paramNames);
+        logger.debug('@Transaction params:', `Property Key -> ${propertyKey}, Param Names ->  ${JSON.stringify(paramNames)},`, 'Target ->', target.constructor.name);
 
         const description = '';
         const contextType = target.createContext().constructor;
@@ -32,7 +32,7 @@ module.exports.Transaction = function Transaction(commit = true) {
             const filter = paramType === contextType;
 
             if (filter) {
-                logger.debug(`Transaction ${target} -> ${propertyKey} ignoring param as matched context type`, paramNames[paramIdx]);
+                logger.debug('@Transaction ignoring param as matched context type', `Property Key -> ${propertyKey}, Param Name ->, ${paramNames[paramIdx]},`, 'Target ->', target.constructor.name);
                 paramNames.splice(paramIdx - numRemoved++, 1);
             }
 
@@ -78,7 +78,7 @@ module.exports.Transaction = function Transaction(commit = true) {
 
 module.exports.Returns = function Returns(returnType) {
     return (target, propertyKey) => {
-        logger.info('@Returns args', target, propertyKey, returnType);
+        logger.info('@Returns args:', `, Property Key -> ${propertyKey}, Return Type -> ${returnType},`, 'Target ->', target.constructor.name);
 
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
 
@@ -95,7 +95,7 @@ module.exports.Returns = function Returns(returnType) {
 
 module.exports.Param = function Param(paramName, paramType, description) {
     return (target, propertyKey) => {
-        logger.info('@Param args', target, propertyKey, paramName, paramType, description);
+        logger.info('@Param args:', `Property Key -> ${propertyKey}, Param Name -> ${paramName}, Param Type -> ${paramType}, Description -> ${description},`, 'Target ->', target.constructor.name);
 
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
 

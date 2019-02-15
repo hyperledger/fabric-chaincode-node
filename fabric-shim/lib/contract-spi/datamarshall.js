@@ -52,8 +52,8 @@ module.exports = class DataMarshall {
      * @param {Object} schema Fragment of JSON schema that defines this type
      * @return {Buffer} byte buffer to send
      */
-    toWireBuffer(result, schema = {}) {
-        return this.serializer.toBuffer(result, schema);
+    toWireBuffer(result, schema = {}, loggerPrefix) {
+        return this.serializer.toBuffer(result, schema, loggerPrefix);
     }
 
     /**
@@ -65,8 +65,8 @@ module.exports = class DataMarshall {
      * @return {Object} value is the object to pass to the tx function, and validateData is the data that should be
      *                  validated for correctness
      */
-    fromWireBuffer(result, schema = {}) {
-        const {value, validateData} =  this.serializer.fromBuffer(result, schema);
+    fromWireBuffer(result, schema = {}, loggerPrefix) {
+        const {value, validateData} =  this.serializer.fromBuffer(result, schema, loggerPrefix);
 
         return {value, validateData:(validateData ? validateData : value)};
     }
@@ -78,7 +78,7 @@ module.exports = class DataMarshall {
      * @param {array} parameters Parameters as passed from the shim
      * @return {array} of parameters that can be passed to the actual tx function
      */
-    handleParameters(fn, parameters) {
+    handleParameters(fn, parameters, loggerPrefix) {
         const expectedParams = fn.parameters;
         if (!expectedParams) {
             if (parameters.length > 0) {   // this is from a pure javascript inferred contract
@@ -88,12 +88,11 @@ module.exports = class DataMarshall {
             } else {
                 return [];
             }
-
         }
 
         if (expectedParams.length !== parameters.length) {
             const errMsg = `Expected ${expectedParams.length} parameters, but ${parameters.length} have been supplied`;
-            logger.error(errMsg);
+            logger.error(`${loggerPrefix} ${errMsg}`);
             throw new Error(errMsg);
         }
 
@@ -103,42 +102,35 @@ module.exports = class DataMarshall {
         for (let i = 0; i < fn.parameters.length; i++) {
             const supplied = parameters[i];
             const expected = expectedParams[i];
-            logger.debug('Expected parameter', expected);
-            logger.debug('Supplied parameter', supplied);
+            logger.debug(`${loggerPrefix} Expected parameter ${expected}`);
+            logger.debug(`${loggerPrefix} Supplied parameter ${supplied}`);
             // check the type
             const schema = expected.schema;
 
-            // const name = expected.name;
+            let validator;
+
             if (schema.type) {
-
-                const {value, validateData} = this.fromWireBuffer(supplied, expected.schema);
-                const validator = this.ajv.compile(schema);
-                const valid = validator(validateData);
-                logger.debug(`Argument is ${valid}`);
-                if (!valid) {
-                    const errors = JSON.stringify(validator.errors);
-                    logger.debug(errors);
-                    throw new Error(`Unable to validate parameter due to ${errors}`);
-                }
-
-                returnParams.push(value);
+                validator = this.ajv.compile(schema);
             } else if (schema.$ref) {
                 const n = schema.$ref.lastIndexOf('/');
                 const typeName = schema.$ref.substring(n + 1);
-                const {value, validateData} = this.fromWireBuffer(supplied, expected.schema);
-                const valid = this.schemas[typeName].validator(validateData);
-                logger.debug(`${validateData.toString()} is ${valid}`);
-                if (!valid) {
-                    const errors = JSON.stringify(this.schemas[typeName].validator.errors);
-                    logger.debug(errors);
-                    throw new Error(`Unable to validate parameter due to ${errors}`);
-                }
-                returnParams.push(value);
+                validator = this.schemas[typeName].validator;
             } else {
                 throw new Error(`Incorrect type information ${JSON.stringify(schema)}`);
             }
+
+            const {value, validateData} = this.fromWireBuffer(supplied, expected.schema, loggerPrefix);
+            const valid = validator(validateData);
+
+            if (!valid) {
+                const errors = JSON.stringify(validator.errors);
+                logger.debug(`${loggerPrefix} ${errors}`);
+                throw new Error(`Unable to validate parameter due to ${errors}`);
+            }
+
+            returnParams.push(value);
         }
-        logger.debug('Processed params', returnParams);
+        logger.debug(`${loggerPrefix} Processed params ${returnParams}`);
         return returnParams;
     }
 };

@@ -7,6 +7,7 @@
 
 const shim = require('../chaincode');
 
+const utils = require('../utils/utils');
 const Logger = require('../logger');
 const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
 const DataMarshall = require('./datamarshall.js');
@@ -293,13 +294,16 @@ class ChaincodeFromContract {
 	 * @param {Object} fAndP Function and Paramters obtained from the smart contract argument
      */
     async invokeFunctionality(stub, fAndP, bufferArgs) {
+        const txID = stub.getTxID();
+        const channelID = stub.getChannelID();
+        const loggerPrefix = utils.generateLoggingPrefix(channelID, txID);
         try {
             const {contractName:cn, function:fn} = this._splitFunctionName(fAndP);
-            logger.debug(`Invoking ${cn} ${fn}`);
+            logger.debug(`${loggerPrefix} Invoking ${cn} ${fn}`);
 
             const contractData = this.contractImplementations[cn];
             if (!contractData) {
-                throw new Error(`Contract name is not known :${cn}:`);
+                throw new Error(`Contract name is not known: ${cn}`);
             }
 
             const contractInstance = contractData.contractInstance;
@@ -320,7 +324,7 @@ class ChaincodeFromContract {
 
                 // marhsall the parameters into the correct types for hanlding by
                 // the tx function
-                const parameters = dataMarshall.handleParameters(functionExists, bufferArgs);
+                const parameters = dataMarshall.handleParameters(functionExists, bufferArgs, loggerPrefix);
 
                 // before tx
                 await contractInstance.beforeTransaction(ctx);
@@ -335,15 +339,12 @@ class ChaincodeFromContract {
                 let returnSchema = {};
                 // javascript/typescript so there will only be one type
                 if (functionExists.returns) {
-                    if (Array.isArray(functionExists.returns)) {
-                        returnSchema = functionExists.returns[0];
-                    } else {
-                        returnSchema = functionExists.returns;
-                    }
+                    returnSchema = functionExists.returns;
                 }
+
                 // returnSchema can be undefined if there is no return value - the datamarshall can handle that
                 // return the data value, if any to the shim. Including converting the result to the wire format
-                return shim.success(dataMarshall.toWireBuffer(result, returnSchema.schema));
+                return shim.success(dataMarshall.toWireBuffer(result, returnSchema.schema, loggerPrefix));
             } else {
                 try {
                 // if we've never heard of this function, then call the unknown tx function
@@ -356,7 +357,7 @@ class ChaincodeFromContract {
 
         } catch (error) {
             // log the error and then fail the transaction
-            logger.error(error);
+            logger.error(`${loggerPrefix} ${error.toString()}`);
             return shim.error(error);
         }
     }

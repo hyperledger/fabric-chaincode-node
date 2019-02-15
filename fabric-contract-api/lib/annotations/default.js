@@ -19,7 +19,7 @@ require('reflect-metadata');
 module.exports.Default = function Default () {
 
     return (target) => {
-        logger.info('@Default args', target.name);
+        logger.info('@Default args:', 'Target ->', target.name);
 
         let dflt = Reflect.getMetadata('fabric:default', global);
 
