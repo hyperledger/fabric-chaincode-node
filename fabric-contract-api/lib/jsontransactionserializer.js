@@ -24,7 +24,7 @@ module.exports = class JSONSerializer {
      * @param {Object} result to be converted
      * @return {Buffer} container the encoded data
     */
-    toBuffer(result, schema = {}) {
+    toBuffer(result, schema = {}, loggerPrefix) {
 
         // relay on the default algorithms, including for Buffers. Just retunring the buffer
         // is not helpful on inflation; is this a buffer in and of itself, or a buffer to inflated to JSON?
@@ -34,12 +34,12 @@ module.exports = class JSONSerializer {
                 // ok so this is a basic primitive type, and for strings and numbers the wireprotocol is different
                 // double check the type of the result passed in
                 if (schema.type !== typeof result) {
-                    logger.error('toBuffer validation against schema failed on type', typeof result, schema.type);
+                    logger.error(`${loggerPrefix} toBuffer validation against schema failed on type`, typeof result, schema.type);
                     throw new Error(`Returned value is ${typeof result} does not match schema type of ${schema.type}`);
                 }
                 return Buffer.from(result.toString());
             } else {
-                logger.info('toBuffer has no schema/lacks sufficient schema to validate against', schema);
+                logger.info(`${loggerPrefix} toBuffer has no schema/lacks sufficient schema to validate against`, schema);
                 const payload = JSON.stringify(result);
                 return Buffer.from(payload);
             }
@@ -58,9 +58,10 @@ module.exports = class JSONSerializer {
      * @return {Object} the resulting type
      *
      */
-    fromBuffer(data, schema = {}) {
+    fromBuffer(data, schema = {}, loggerPrefix) {
+
         if (!data) {
-            logger.error('fromBuffer no data supplied');
+            logger.error(`${loggerPrefix} fromBuffer no data supplied`);
             throw new Error('Buffer needs to be supplied');
         }
         let value;
@@ -68,11 +69,12 @@ module.exports = class JSONSerializer {
         // check that schema to see exactly how we should de-marshall this
         if (schema.type && (schema.type === 'string' || schema.type === 'number')) {
             if (schema.type === 'string') {
-                logger.debug('fromBuffer handling data as string/number');
+                logger.debug(`${loggerPrefix} fromBuffer handling data as string`);
                 // ok so this is a basic primitive type, and for strings and numbers the wireprotocol is different
                 value = data.toString();
                 jsonForValidation = JSON.stringify(value);
             } else {
+                logger.debug(`${loggerPrefix} fromBuffer handling data as number`);
                 value = Number(data.toString());
                 jsonForValidation = value;
 
@@ -91,15 +93,15 @@ module.exports = class JSONSerializer {
                 throw new Error('fromBuffer could not parse data as JSON to allow it to be converted to type: ' + JSON.stringify(schema.type), data, err);
             }
             if (json.type) {
-                logger.debug('fromBuffer handling data as buffer');
+                logger.debug(`${loggerPrefix} fromBuffer handling data as buffer`);
                 if (json.type === 'Buffer') {
                     value = Buffer.from(json.data);
                 } else {
                     logger.error('fromBuffer could not convert data to useful type', data);
-                    throw new Error(`Type of ${json.type} is not understood, can't recreate data`);
+                    throw new Error(`${loggerPrefix} Type of ${json.type} is not understood, can't recreate data`);
                 }
             } else {
-                logger.debug('fromBuffer handling data as json');
+                logger.debug(`${loggerPrefix} fromBuffer handling data as json`);
                 value = json;
             }
             // as JSON then this si the same

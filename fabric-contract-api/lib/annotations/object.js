@@ -19,7 +19,7 @@ require('reflect-metadata');
 
 module.exports.Object = function Object () {
     return (target) => {
-        logger.info('@Object args', target.name);
+        logger.info('@Object args:', 'Target ->', target.name);
 
         const objects = Reflect.getMetadata('fabric:objects', global) || {};
 
@@ -43,7 +43,7 @@ module.exports.Object = function Object () {
 
 module.exports.Property = function Property (name, type) {
     return (target, propertyKey) => {
-        logger.info('@Property args', target, propertyKey, name, type);
+        logger.info('@Property args:', `Property Key -> ${propertyKey}, Name -> ${name}, Type -> ${type},`, 'Target ->', target.constructor.name);
 
         const properties = Reflect.getMetadata('fabric:object-properties', target) || [];
 

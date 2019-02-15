@@ -13,6 +13,8 @@ const X509 = require('@ampretia/x509');
 const jsrsasign = require('jsrsasign');
 const Logger = require('./logger');
 
+const utils = require('./utils/utils');
+
 const logger = Logger.getLogger('lib/chaincode.js');
 const Handler = require('./handler');
 const Iterators = require('./iterators');
@@ -238,14 +240,16 @@ class ClientIdentity {
 	 * @param {ChaincodeStub} This is the stub object passed to Init() and Invoke() methods
 	 */
     constructor(stub) {
-        logger.debug('Generating client identity', stub);
+        const loggerPrefix = utils.generateLoggingPrefix(stub.getChannelID(), stub.getTxID());
+
+        logger.debug(`${loggerPrefix} Generating client identity`);
         this.stub = stub;
         const signingId = stub.getCreator();
 
         this.mspId = signingId.getMspid();
 
         const idBytes = signingId.getIdBytes().toBuffer();
-        const normalizedCert = normalizeX509(idBytes.toString());
+        const normalizedCert = normalizeX509(idBytes.toString(), loggerPrefix);
         const cert = X509.parseCert(normalizedCert);
         this.cert = cert;
 
@@ -261,7 +265,7 @@ class ClientIdentity {
         const x = new jsrsasign.X509();
         x.readCertPEM(normalizedCert);
         this.id = `x509::${x.getSubjectString()}::${x.getIssuerString()}`;
-        logger.debug('Generated client identity', this.stub, this.mspId, this.cert, this.attrs, this.id);
+        logger.debug(`${loggerPrefix} Generated client identity`, this.mspId, this.attrs, this.id);
     }
 
     /**
@@ -402,8 +406,8 @@ function isTLS() {
  * and end line with '-----END CERTIFICATE-----', so as to be compliant
  * with x509 parsers
  */
-function normalizeX509(raw) {
-    logger.debug(`[normalizeX509]raw cert: ${raw}`);
+function normalizeX509(raw, loggerPrefix) {
+    logger.debug(`${loggerPrefix} [normalizeX509] raw cert: ${raw}`);
     const regex = /(\-\-\-\-\-\s*BEGIN ?[^-]+?\-\-\-\-\-)([\s\S]*)(\-\-\-\-\-\s*END ?[^-]+?\-\-\-\-\-)/;
     let matches = raw.match(regex);
     if (!matches || matches.length !== 4) {

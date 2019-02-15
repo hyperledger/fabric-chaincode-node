@@ -147,6 +147,12 @@ function mockStub(cert) {
                     return buf;
                 }
             };
+        },
+        getTxID: function() {
+            return 'dummy Tx ID';
+        },
+        getChannelID: function() {
+            return 'dummy channel ID';
         }
     };
 }
