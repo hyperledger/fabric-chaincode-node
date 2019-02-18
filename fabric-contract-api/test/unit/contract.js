@@ -101,8 +101,15 @@ describe('contract.js', () => {
             const sc0 = new Contract();
             const ctx = {
                 stub : {
-                    getFunctionAndParameters: 'fn'
+                    getFunctionAndParameters: 'fn',
+                    getTxID: () => {
+                        return 'some id';
+                    }
                 }
+            };
+
+            ctx.getStub = () => {
+                return ctx.stub;
             };
 
             ctx.stub.getFunctionAndParameters = sandbox.stub().returns({fcn:'wibble'});

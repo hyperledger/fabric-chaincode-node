@@ -38,6 +38,8 @@ const StartCommand = require(path.join(pathToRoot, 'fabric-shim/lib/cmds/startCo
 const ChaincodeFromContract = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/chaincodefromcontract'));
 const shim = require(path.join(pathToRoot, 'fabric-shim/lib/chaincode'));
 
+const utils = require('../../../lib/utils/utils');
+
 const defaultSerialization = {
     transaction: 'jsonSerializer',
     serializers: {
@@ -508,6 +510,22 @@ describe('chaincodefromcontract', () => {
         let fakeSuccess;
         let fakeError;
 
+        const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
+        'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
+        'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+        'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
+        'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
+        'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
+        'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
+        'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
+        'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
+        '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
+        'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
+        'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
+        'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
+        'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
+        '-----END CERTIFICATE-----';
+
         beforeEach(() => {
             fakeSuccess = sinon.fake((e) => {
                 log(e);
@@ -519,6 +537,7 @@ describe('chaincodefromcontract', () => {
 
             sandbox.replace(shim, 'success', fakeSuccess);
             sandbox.replace(shim, 'error', fakeError);
+            sandbox.stub(utils, 'generateLoggingPrefix').returns('a logging prefix');
         });
 
         it('should handle missing function', async () => {
@@ -537,7 +556,15 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
 
 
-            const mockStub = {getBufferArgs: sandbox.stub().returns([])};
+            const mockStub = {
+                getBufferArgs: sandbox.stub().returns([]),
+                getTxID: () => {
+                    return 'a tx id';
+                },
+                getChannelID: () => {
+                    return 'a channel id';
+                }
+            };
             await cc.invokeFunctionality(mockStub, 'name:missing', [Buffer.from('args2')]);
 
             sinon.assert.called(fakeError);
@@ -546,22 +573,6 @@ describe('chaincodefromcontract', () => {
         });
 
         it('should handle valid contract name, but missing function', async () => {
-
-            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-                'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-                'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-                'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-                'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-                'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-                'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-                'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-                'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-                '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-                'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-                'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-                'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-                'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-                '-----END CERTIFICATE-----';
 
             const idBytes = {
                 toBuffer: () => {
@@ -596,14 +607,20 @@ describe('chaincodefromcontract', () => {
 
             const mockStub = {
                 getBufferArgs: sandbox.stub().returns([]),
-                getCreator: sandbox.stub().returns(mockSigningId)
+                getCreator: sandbox.stub().returns(mockSigningId),
+                getTxID: () => {
+                    return 'a tx id';
+                },
+                getChannelID: () => {
+                    return 'a channel id';
+                }
             };
             cc.contractImplementations.name = {
                 contractInstance: {
                     createContext: sandbox.stub().returns(ctx),
                     unknownTransaction: sandbox.stub()
                 },
-                dataMarhsall: {},
+                dataMarshall: {},
                 transactions: []
 
             };
@@ -614,23 +631,6 @@ describe('chaincodefromcontract', () => {
         });
 
         it('should handle valid contract name, but missing function and throws error', async () => {
-
-            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-                'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-                'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-                'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-                'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-                'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-                'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-                'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-                'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-                '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-                'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-                'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-                'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-                'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-                '-----END CERTIFICATE-----';
-
             const idBytes = {
                 toBuffer: () => {
                     return new Buffer(certWithoutAttrs);
@@ -664,14 +664,20 @@ describe('chaincodefromcontract', () => {
 
             const mockStub = {
                 getBufferArgs: sandbox.stub().returns([]),
-                getCreator: sandbox.stub().returns(mockSigningId)
+                getCreator: sandbox.stub().returns(mockSigningId),
+                getTxID: () => {
+                    return 'a tx id';
+                },
+                getChannelID: () => {
+                    return 'a channel id';
+                }
             };
             cc.contractImplementations.name = {
                 contractInstance: {
                     createContext: sandbox.stub().returns(ctx),
                     unknownTransaction: sandbox.stub().throws('error')
                 },
-                dataMarhsall: {},
+                dataMarshall: {},
                 transactions: []
 
             };
@@ -683,22 +689,6 @@ describe('chaincodefromcontract', () => {
 
         it('should handle valid contract name, with valid function', async () => {
 
-            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-                'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-                'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-                'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-                'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-                'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-                'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-                'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-                'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-                '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-                'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-                'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-                'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-                'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-                '-----END CERTIFICATE-----';
-
             const idBytes = {
                 toBuffer: () => {
                     return new Buffer(certWithoutAttrs);
@@ -732,15 +722,22 @@ describe('chaincodefromcontract', () => {
 
             const mockStub = {
                 getBufferArgs: sandbox.stub().returns([]),
-                getCreator: sandbox.stub().returns(mockSigningId)
+                getCreator: sandbox.stub().returns(mockSigningId),
+                getTxID: () => {
+                    return 'a tx id';
+                },
+                getChannelID: () => {
+                    return 'a channel id';
+                }
             };
+
             cc.contractImplementations.name = {
                 contractInstance: {
                     createContext: sandbox.stub().returns(ctx),
                     unknownTransaction: sandbox.stub(),
                     beforeTransaction: sandbox.stub(),
                     afterTransaction: sandbox.stub(),
-                    fn: sandbox.stub().resolves()
+                    fn: sandbox.stub().resolves('hello world')
                 },
                 dataMarshall: {
                     handleParameters: sandbox.stub().returns(['args2']),
@@ -752,27 +749,13 @@ describe('chaincodefromcontract', () => {
 
             };
             await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            sinon.assert.calledWith(cc.contractImplementations.name.dataMarshall.handleParameters, {name: 'fn'}, [Buffer.from('args2')], 'a logging prefix');
+            sinon.assert.calledWith(cc.contractImplementations.name.dataMarshall.toWireBuffer, 'hello world', undefined, 'a logging prefix');
             sinon.assert.called(fakeSuccess);
             sinon.assert.notCalled(fakeError);
         });
 
-        it('should handle functions with returned values', async () => {
-
-            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-                'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-                'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-                'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-                'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-                'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-                'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-                'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-                'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-                '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-                'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-                'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-                'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-                'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-                '-----END CERTIFICATE-----';
+        it('should handle functions with returned values schema', async () => {
 
             const idBytes = {
                 toBuffer: () => {
@@ -805,97 +788,21 @@ describe('chaincodefromcontract', () => {
 
             const mockStub = {
                 getBufferArgs: sandbox.stub().returns([]),
-                getCreator: sandbox.stub().returns(mockSigningId)
-            };
-            cc.contractImplementations.name = {
-                contractInstance: {
-                    createContext: sandbox.stub().returns(ctx),
-                    unknownTransaction: sandbox.stub(),
-                    beforeTransaction: sandbox.stub(),
-                    afterTransaction: sandbox.stub(),
-                    fn: sandbox.stub().resolves()
+                getCreator: sandbox.stub().returns(mockSigningId),
+                getTxID: () => {
+                    return 'a tx id';
                 },
-                dataMarshall: {
-                    handleParameters: sandbox.stub().returns(['args2']),
-                    toWireBuffer: sandbox.stub()
-                },
-                transactions: [
-
-                    {
-                        returns: [{name: 'success', schema: {type: 'string'}}],
-                        name: 'fn',
-                        tag: ['submitTx'],
-                        parameters: []
-                    },
-
-
-                ]
-
-            };
-            await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
-            sinon.assert.called(fakeSuccess);
-            sinon.assert.notCalled(fakeError);
-
-        });
-
-        it('should handle functions with returned values', async () => {
-
-            const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-                'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-                'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-                'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-                'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-                'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-                'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-                'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-                'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-                '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-                'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-                'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-                'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-                'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-                '-----END CERTIFICATE-----';
-
-            const idBytes = {
-                toBuffer: () => {
-                    return new Buffer(certWithoutAttrs);
+                getChannelID: () => {
+                    return 'a channel id';
                 }
             };
-            const systemContract = new SystemContract();
-            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
-                .returns({
-                    'org.hyperledger.fabric': {
-                        contractInstance: systemContract
-                    }
-                });
-            const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata');
-            sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
-            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
-            const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
-            sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
-            sinon.assert.calledOnce(_checkSuppliedStub);
-
-            const mockSigningId = {
-                getMspid: sinon.stub(),
-                getIdBytes: sinon.stub().returns(idBytes)
-            };
-
-            const ctx = {
-                setChaincodeStub: sandbox.stub(),
-                setClientIdentity: sandbox.stub()
-            };
-
-            const mockStub = {
-                getBufferArgs: sandbox.stub().returns([]),
-                getCreator: sandbox.stub().returns(mockSigningId)
-            };
             cc.contractImplementations.name = {
                 contractInstance: {
                     createContext: sandbox.stub().returns(ctx),
                     unknownTransaction: sandbox.stub(),
                     beforeTransaction: sandbox.stub(),
                     afterTransaction: sandbox.stub(),
-                    fn: sandbox.stub().resolves()
+                    fn: sandbox.stub().resolves('hello world')
                 },
                 dataMarshall: {
                     handleParameters: sandbox.stub().returns(['args2']),
@@ -915,11 +822,12 @@ describe('chaincodefromcontract', () => {
 
             };
             await cc.invokeFunctionality(mockStub, 'name:fn', [Buffer.from('args2')]);
+            sinon.assert.calledWith(cc.contractImplementations.name.dataMarshall.handleParameters, cc.contractImplementations.name.transactions[0], [Buffer.from('args2')], 'a logging prefix');
+            sinon.assert.calledWith(cc.contractImplementations.name.dataMarshall.toWireBuffer, 'hello world', {type: 'string'}, 'a logging prefix');
             sinon.assert.called(fakeSuccess);
             sinon.assert.notCalled(fakeError);
 
         });
-
     });
 
     describe('#_processContractInfo', () => {
