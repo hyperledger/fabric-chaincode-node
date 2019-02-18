@@ -58,7 +58,7 @@ const MAX_UNICODE_RUNE_VALUE = '\u{10ffff}';
 const COMPOSITEKEY_NS = '\x00';
 const EMPTY_KEY_SUBSTITUTE = '\x01';
 
-function validateCompositeKeyAttribute(attr) {
+function validateCompositeKeyAttribute (attr) {
     if (!attr || typeof attr !== 'string' || attr.length === 0) {
         throw new Error('object type or attribute not a non-zero length string');
     }
@@ -68,15 +68,17 @@ function validateCompositeKeyAttribute(attr) {
 // we validate simplekey to check whether the key starts with 0x00 (which
 // is the namespace for compositeKey). This helps in avoding simple/composite
 // key collisions.
-function validateSimpleKeys(...keys) {
-    keys.forEach((key) => {
-        if (key && typeof key === 'string' && key.charAt(0) === COMPOSITEKEY_NS) {
-            throw new Error(`first character of the key [${key}] contains a null character which is not allowed`);
+function validateIdenticialTypedKeys (keyA, keyB) {
+    if (keyA && typeof keyA === 'string' && keyB && typeof keyB === 'string') {
+        const keyA_CNS = (keyA.charAt(0) === COMPOSITEKEY_NS);
+        const keyB_CNS = (keyB.charAt(0) === COMPOSITEKEY_NS);
+        if (keyA_CNS !== keyB_CNS) {
+            throw new Error(`Keys are not of the same type (composite or simple) [${keyA}] [${keyB}]`);
         }
-    });
+    }
 }
 
-function computeProposalBinding(decodedSP) {
+function computeProposalBinding (decodedSP) {
     const nonce = decodedSP.proposal.header.signature_header.nonce;
     const creator = decodedSP.proposal.header.signature_header.creator.toBuffer();
     const epoch = decodedSP.proposal.header.channel_header.epoch;
@@ -98,7 +100,7 @@ function computeProposalBinding(decodedSP) {
 }
 
 // Construct the QueryMetadata with a page size and a bookmark needed for pagination
-function createQueryMetadata(pageSize, bookmark) {
+function createQueryMetadata (pageSize, bookmark) {
     const metadata = new _serviceProto.QueryMetadata();
     metadata.setPageSize(pageSize);
     metadata.setBookmark(bookmark);
@@ -213,7 +215,7 @@ class ChaincodeStub {
 	 * Equivalent to [getStringArgs()]{@link ChaincodeStub#getStringArgs}
 	 * @returns {string[]}
 	 */
-    getArgs() {
+    getArgs () {
         return this.args;
     }
 
@@ -221,11 +223,11 @@ class ChaincodeStub {
 	 * Returns the arguments as array of strings from the chaincode invocation request
 	 * @returns {string[]}
 	 */
-    getStringArgs() {
+    getStringArgs () {
         return this.args;
     }
 
-    getBufferArgs() {
+    getBufferArgs () {
         return this.bufferArgs;
     }
 
@@ -243,7 +245,7 @@ class ChaincodeStub {
 	 * of arguments to pass to the target function
 	 * @returns {FunctionAndParameters}
 	 */
-    getFunctionAndParameters() {
+    getFunctionAndParameters () {
         const values = this.getStringArgs();
         if (values.length >= 1) {
             return {
@@ -262,7 +264,7 @@ class ChaincodeStub {
 	 * Returns the transaction ID for the current chaincode invocation request. The transaction
 	 * ID uniquely identifies the transaction within the scope of the channel.
 	 */
-    getTxID() {
+    getTxID () {
         return this.txId;
     }
 
@@ -272,7 +274,7 @@ class ChaincodeStub {
 	 * in protos/common/common.proto) except where the chaincode is calling another on
 	 * a different channel.
 	 */
-    getChannelID() {
+    getChannelID () {
         return this.channel_id;
     }
 
@@ -290,7 +292,7 @@ class ChaincodeStub {
 	 * Returns the identity object of the chaincode invocation's submitter
 	 * @returns {ProposalCreator}
 	 */
-    getCreator() {
+    getCreator () {
         return this.creator;
     }
 
@@ -299,7 +301,7 @@ class ChaincodeStub {
 	 * saved in the ledger, such as cryptographic information for encryption and decryption
 	 * @returns {Map<string:Buffer>}
 	 */
-    getTransient() {
+    getTransient () {
         return this.transientMap;
     }
 
@@ -381,7 +383,7 @@ class ChaincodeStub {
 	 * Returns a fully decoded object of the signed transaction proposal
 	 * @returns {SignedProposal}
 	 */
-    getSignedProposal() {
+    getSignedProposal () {
         return this.signedProposal;
     }
 
@@ -390,7 +392,7 @@ class ChaincodeStub {
 	 * is taken from the transaction {@link ChannelHeader}, therefore it will indicate the
 	 * client's timestamp, and will have the same value across all endorsers.
 	 */
-    getTxTimestamp() {
+    getTxTimestamp () {
         return this.txTimestamp;
     }
 
@@ -422,7 +424,7 @@ class ChaincodeStub {
 	 *
 	 * @returns {string} A HEX-encoded string of SHA256 hash of the transaction's nonce, creator and epoch concatenated
 	 */
-    getBinding() {
+    getBinding () {
         return this.binding;
     }
 
@@ -432,7 +434,7 @@ class ChaincodeStub {
 	 * @param {string} key State variable key to retrieve from the state store
 	 * @returns {Promise<byte[]>} Promise for the current value of the state variable
 	 */
-    async getState(key) {
+    async getState (key) {
         logger.debug('getState called with key:%s', key);
         // Access public data by setting the collection to empty string
         const collection = '';
@@ -449,7 +451,7 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state update request
 	 * or rejected if any errors
 	 */
-    async putState(key, value) {
+    async putState (key, value) {
         // Access public data by setting the collection to empty string
         const collection = '';
         if (typeof value === 'string') {
@@ -465,7 +467,7 @@ class ChaincodeStub {
 	 * @returns {Promise} Promise will be resolved when the peer has successfully handled the state delete request
 	 * or rejected if any errors
 	 */
-    async deleteState(key) {
+    async deleteState (key) {
         // Access public data by setting the collection to empty string
         const collection = '';
         return await this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
@@ -478,7 +480,7 @@ class ChaincodeStub {
 	 * @param {string} key State variable key to set endorsement policy
 	 * @param {Buffer} ep endorsement policy
 	 */
-    async setStateValidationParameter(key, ep) {
+    async setStateValidationParameter (key, ep) {
         // Access public data by setting the collection to empty string
         const collection = '';
         return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
@@ -493,7 +495,7 @@ class ChaincodeStub {
 	 * @param {string} key State variable key to set endorsement policy
 	 * @returns {Buffer} returns the endorsement policy for this key
 	 */
-    async getStateValidationParameter(key) {
+    async getStateValidationParameter (key) {
         // Access public data by setting the collection to empty string
         const collection = '';
         const res = await this.handler.handleGetStateMetadata(collection, key, this.channel_id, this.txId);
@@ -520,11 +522,11 @@ class ChaincodeStub {
 	 * @param {string} endKey State variable key as the end of the key range (exclusive)
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
-    async getStateByRange(startKey, endKey) {
+    async getStateByRange (startKey, endKey) {
         if (!startKey) {
             startKey = EMPTY_KEY_SUBSTITUTE;
         }
-        validateSimpleKeys(startKey, endKey);
+        validateIdenticialTypedKeys(startKey, endKey);
         // Access public data by setting the collection to empty string
         const collection = '';
         const {iterator} = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
@@ -554,14 +556,14 @@ class ChaincodeStub {
 	 * @param {int} pageSize
 	 * @param {string} bookmark
 	 */
-    async getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark) {
+    async getStateByRangeWithPagination (startKey, endKey, pageSize, bookmark) {
         if (!startKey) {
             startKey = EMPTY_KEY_SUBSTITUTE;
         }
         if (!bookmark) {
             bookmark = '';
         }
-        validateSimpleKeys(startKey, endKey);
+        validateIdenticialTypedKeys(startKey, endKey);
         const collection = '';
         const metadata = createQueryMetadata(pageSize, bookmark);
         return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
@@ -589,10 +591,10 @@ class ChaincodeStub {
 	 * @param {string} query Query string native to the underlying state database
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
-    async getQueryResult(query) {
+    async getQueryResult (query) {
         // Access public data by setting the collection to empty string
         const collection = '';
-        const {iterator} =  await this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
+        const {iterator} = await this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
         return iterator;
     }
 
@@ -615,7 +617,7 @@ class ChaincodeStub {
 	 * @param {int} pageSize
 	 * @param {string} bookmark
 	 */
-    async getQueryResultWithPagination(query, pageSize, bookmark) {
+    async getQueryResultWithPagination (query, pageSize, bookmark) {
         if (!bookmark) {
             bookmark = '';
         }
@@ -641,7 +643,7 @@ class ChaincodeStub {
 	 * @param {string} key The state variable key
 	 * @returns {Promise} Promise for a {@link HistoryQueryIterator} object
 	 */
-    async getHistoryForKey(key) {
+    async getHistoryForKey (key) {
         return await this.handler.handleGetHistoryForKey(key, this.channel_id, this.txId);
     }
 
@@ -676,7 +678,7 @@ class ChaincodeStub {
 	 * @param {string} channel Name of the channel where the target chaincode is active
 	 * @returns {Promise} Promise for a {@link Response} object returned by the called chaincode
 	 */
-    async invokeChaincode(chaincodeName, args, channel) {
+    async invokeChaincode (chaincodeName, args, channel) {
         if (channel && channel.length > 0) {
             chaincodeName = chaincodeName + '/' + channel;
         }
@@ -694,7 +696,7 @@ class ChaincodeStub {
 	 * @param {string} name Name of the event
 	 * @param {byte[]} payload A payload can be used to include data about the event
 	 */
-    setEvent(name, payload) {
+    setEvent (name, payload) {
         if (typeof name !== 'string' || name === '') {
             throw new Error('Event name must be a non-empty string');
         }
@@ -724,7 +726,7 @@ class ChaincodeStub {
 	 * @return {string} A composite key with the <code>objectType</code> and the array of <code>attributes</code>
 	 * joined together with special delimiters that will not be confused with values of the attributes
 	 */
-    createCompositeKey(objectType, attributes) {
+    createCompositeKey (objectType, attributes) {
         validateCompositeKeyAttribute(objectType);
         if (!Array.isArray(attributes)) {
             throw new Error('attributes must be an array');
@@ -747,7 +749,7 @@ class ChaincodeStub {
 	 * @return {Object} An object which has properties of 'objectType' (string) and
 	 * 'attributes' (string[])
 	 */
-    splitCompositeKey(compositeKey) {
+    splitCompositeKey (compositeKey) {
         const result = {objectType: null, attributes: []};
         if (compositeKey && compositeKey.length > 1 && compositeKey.charAt(0) === COMPOSITEKEY_NS) {
             const splitKey = compositeKey.substring(1).split(MIN_UNICODE_RUNE_VALUE);
@@ -783,7 +785,7 @@ class ChaincodeStub {
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
 	 * @return {Promise} A promise that resolves with a {@link StateQueryIterator}, rejects if an error occurs
 	 */
-    async getStateByPartialCompositeKey(objectType, attributes) {
+    async getStateByPartialCompositeKey (objectType, attributes) {
         const partialCompositeKey = this.createCompositeKey(objectType, attributes);
         const startKey = partialCompositeKey;
         const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
@@ -817,7 +819,7 @@ class ChaincodeStub {
 	 * @param {int} pageSize
 	 * @param {string} bookmark
 	 */
-    async getStateByPartialCompositeKeyWithPagination(objectType, attributes, pageSize, bookmark) {
+    async getStateByPartialCompositeKeyWithPagination (objectType, attributes, pageSize, bookmark) {
         if (!bookmark) {
             bookmark = '';
         }
@@ -840,7 +842,7 @@ class ChaincodeStub {
 	 * @param {string} key Private data variable key to retrieve from the state store
 	 * @returns {Promise<byte[]>} Promise for the private value from the state store
 	 */
-    async getPrivateData(collection, key) {
+    async getPrivateData (collection, key) {
         logger.debug('getPrivateData called with collection:%s, key:%s', collection, key);
         if (!collection || typeof collection !== 'string') {
             throw new Error('collection must be a valid string');
@@ -867,7 +869,7 @@ class ChaincodeStub {
 	 * @param {string} key Private data variable key to set the value for
 	 * @param {string|byte[]} value Private data variable value
 	 */
-    async putPrivateData(collection, key, value) {
+    async putPrivateData (collection, key, value) {
         logger.debug('putPrivateData called with collection:%s, key:%s', collection, key);
         if (!collection || typeof collection !== 'string') {
             throw new Error('collection must be a valid string');
@@ -896,7 +898,7 @@ class ChaincodeStub {
 	 * @param {string} collection The collection name
 	 * @param {string} key Private data variable key to delete from the state store
 	 */
-    async deletePrivateData(collection, key) {
+    async deletePrivateData (collection, key) {
         logger.debug('deletePrivateData called with collection:%s, key:%s', collection, key);
         if (!collection || typeof collection !== 'string') {
             throw new Error('collection must be a valid string');
@@ -916,7 +918,7 @@ class ChaincodeStub {
 	 * @param {string} key Private data variable key to set endorsement policy
 	 * @param {Buffer} ep endorsement policy
 	 */
-    async setPrivateDataValidationParameter(collection, key, ep) {
+    async setPrivateDataValidationParameter (collection, key, ep) {
         return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
     }
 
@@ -930,7 +932,7 @@ class ChaincodeStub {
 	 * @param {string} key Private data variable key by which to retrieve endorsement policy
 	 * @returns {Buffer} endorsement policy for this key
 	 */
-    async getPrivateDataValidationParameter(collection, key) {
+    async getPrivateDataValidationParameter (collection, key) {
         const res = await this.handler.handleGetStateMetadata(collection, key, this.channel_id, this.txId);
         return res[this.validationParameterMetakey];
     }
@@ -950,7 +952,7 @@ class ChaincodeStub {
 	 * @param {string} startKey Private data variable key as the start of the key range (inclusive)
 	 * @param {string} endKey Private data variable key as the end of the key range (exclusive)
 	 */
-    async getPrivateDataByRange(collection, startKey, endKey) {
+    async getPrivateDataByRange (collection, startKey, endKey) {
         logger.debug('getPrivateDataByRange called with collection:%s, startKey:%s, endKey:%s', collection, startKey, endKey);
         if (arguments.length !== 3) {
             throw new Error('getPrivateDataByRange requires three arguments, collection, startKey and endKey');
@@ -981,7 +983,7 @@ class ChaincodeStub {
 	 * @param {string} objectType A string used as the prefix of the resulting key
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
 	 */
-    async getPrivateDataByPartialCompositeKey(collection, objectType, attributes) {
+    async getPrivateDataByPartialCompositeKey (collection, objectType, attributes) {
         logger.debug('getPrivateDataByRange called with collection:%s, objectType:%s, attributes:%j', collection, objectType, attributes);
         if (arguments.length !== 3) {
             throw new Error('getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
@@ -1011,7 +1013,7 @@ class ChaincodeStub {
 	 * @param {string} query The query to be performed
 	 * @returns {Promise} Promise for a {@link PrivateQueryIterator} object
 	 */
-    async getPrivateDataQueryResult(collection, query) {
+    async getPrivateDataQueryResult (collection, query) {
         logger.debug('getPrivateDataQueryResult called with collection:%s, query:%j', collection, query);
         if (arguments.length !== 2) {
             throw new Error('getPrivateDataQueryResult requires two arguments, collection and query');

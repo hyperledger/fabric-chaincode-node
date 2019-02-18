@@ -599,7 +599,7 @@ describe('Stub', () => {
                 expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', EMPTY_KEY_SUBSTITUTE, 'end key', 'dummyChannelId', 'dummyTxid']);
             });
 
-            it('should throw error if using compositekey', async () => {
+            it('should reject using mismatch compositekey & simple key', () => {
                 const handleGetStateByRangeStub = sinon.stub().resolves({iterator: 'some state'});
 
                 const stub = new Stub({
@@ -609,16 +609,46 @@ describe('Stub', () => {
                 });
 
                 const compositeStartKey = stub.createCompositeKey('obj', ['attr1']);
-                expect(stub.getStateByRange(compositeStartKey, 'end key'))
+                return expect(stub.getStateByRange(compositeStartKey, 'end key'))
                     .eventually
                     .be
-                // eslint-disable-next-line no-control-regex
-                    .rejectedWith(/first character of the key \[\u0000obj\u0000attr1\u0000] contains a null character which is not allowed/);
+                    .rejectedWith(/Keys are not of the same type/);
             });
+
+            it('should reject using mismatch compositekey & simple key', () => {
+                // but the other way around
+                const handleGetStateByRangeStub = sinon.stub().resolves({iterator: 'some state'});
+
+                const stub = new Stub({
+                    handleGetStateByRange: handleGetStateByRangeStub
+                }, 'dummyChannelId', 'dummyTxid', {
+                    args: []
+                });
+
+                const compositeEndKey = stub.createCompositeKey('obj', ['attr1']);
+                return expect(stub.getStateByRange('start key', compositeEndKey))
+                    .eventually
+                    .be
+                    .rejectedWith(/Keys are not of the same type/);
+            });
+
+            it('should reject using wrong keys key', async () => {
+                // but the other way around
+                const handleGetStateByRangeStub = sinon.stub().resolves({iterator: 'some state'});
+
+                const stub = new Stub({
+                    handleGetStateByRange: handleGetStateByRangeStub
+                }, 'dummyChannelId', 'dummyTxid', {
+                    args: []
+                });
+                const result = await  stub.getStateByRange(null, null);
+                expect(result).to.deep.equal('some state');
+            });
+
         });
 
         describe('getStateByRangeWithPagination', () => {
-            it('should throw error if using compositekey', async () => {
+            it('should throw error if using compositekey', () => {
                 const handleGetStateByRangeStub = sinon.stub().resolves({iterator: 'some state'});
 
                 const stub = new Stub({
@@ -628,11 +658,10 @@ describe('Stub', () => {
                 });
 
                 const compositeStartKey = stub.createCompositeKey('obj', ['attr1']);
-                expect(stub.getStateByRangeWithPagination(compositeStartKey, 'end key', 3, ''))
+                return expect(stub.getStateByRangeWithPagination(compositeStartKey, 'end key', 3, ''))
                     .eventually
                     .be
-                // eslint-disable-next-line no-control-regex
-                    .rejectedWith(/first character of the key \[\u0000obj\u0000attr1\u0000] contains a null character which is not allowed/);
+                    .rejectedWith(/Keys are not of the same type/);
             });
 
             it('should have default startKey eqls EMPTY_KEY_SUBSTITUTE', async () => {
