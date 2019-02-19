@@ -156,5 +156,31 @@ describe('utils', () => {
                 }
             });
         });
+
+        it ('should recurse for map types', () => {
+            expect(utils.generateSchema('Map<string, Duck>')).to.deep.equal({
+                type: 'object',
+                additionalProperties: {
+                    $ref: '#/components/schemas/Duck'
+                }
+            });
+
+            expect(utils.generateSchema('Map<string, number>')).to.deep.equal({
+                type: 'object',
+                additionalProperties: {
+                    type: 'number'
+                }
+            });
+
+            expect(utils.generateSchema('Map<string, Map<string, number>>')).to.deep.equal({
+                type: 'object',
+                additionalProperties: {
+                    type: 'object',
+                    additionalProperties: {
+                        type: 'number'
+                    }
+                }
+            });
+        });
     });
 });
