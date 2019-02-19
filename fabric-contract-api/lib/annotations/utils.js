@@ -51,6 +51,13 @@ const generateSchema = (type) => {
             type: 'array',
             items: generateSchema(subType)
         };
+    } else if (isMap(type)) {
+        const subType = getSubMap(type);
+
+        return {
+            type: 'object',
+            additionalProperties: generateSchema(subType)
+        };
     }
 
     return {
@@ -97,4 +104,12 @@ function getSubArray(type) {
     }
 
     return type.replace('[]', '');
+}
+
+function isMap(type) {
+    return /^Map<[A-z].*,\s?[A-z].*>$/.test(type);
+}
+
+function getSubMap(type) {
+    return type.replace(/^Map<[A-z].*?,\s?/, '').replace('>', '');
 }
