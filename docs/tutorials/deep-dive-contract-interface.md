@@ -15,7 +15,7 @@ Each Smart Contract package is, from a node perspective, a NPM module.
 - index.js
     - It is mandatory to have a `contracts` element exported that is a array of classes. 
     - Each of these classes must extend the `Contract` class from the `fabric-contract-api` module
-    - Optionally, a custom `serializer` may be defined to control how data is converted for transmission between chaincode, peer and ultimately client applications. (in future this could also include serialization to the ledger state)
+    - Optionally, a custom `serializer` may be defined to control how data is converted for transmission between chaincode, peer and ultimately client applications.
 
 *JavaScript example index.js*
 
@@ -96,17 +96,17 @@ Before is called immediately before the transaction function, and after immediat
 
 If the transaction function throws an Error then the whole transaction fails, likewise if the before or after throws an Error then the transaction fails. (note that if say before throws an error the transaction function is never called, nor the after. Similarly if transaction function throws an Error, after is not called. )
 
-The unknown function is called if the requested function is not known; the default implementation is throw an error. `You've asked to invoke a function that does not exist: {requested function}` 
-
-Typical usecases of these functions would be
+Typical use cases of these functions would be
 
 - logging of the functions called
 - checks of the identity of the caller
 
+The unknown function is called if the requested function is not known; the default implementation is to throw an error. `You've asked to invoke a function that does not exist: {requested function}` 
+However you can implement an `unkownTransition` function - this can return a successful or throw an error as you wish. 
 
 ```javascript
     async unknownTransaction(ctx) {
-        // throws an error 
+        // throw an error here or return succesfully if you wish
     }
 ```
 
@@ -117,7 +117,7 @@ A correctly specified metadata file, at the top level has this structure
 
 ```json
 {
-    "$schema" : "",
+    "$schema" : "https://fabric-shim.github.io/release-1.4/contract-schema.json",
     "info" : {
 
     },
@@ -131,4 +131,3 @@ A correctly specified metadata file, at the top level has this structure
 ```
 
 The metadata file that the user specifies has precedence over the information generated from the code, on a per section basis. If the user has not specified any of the above sections, then the 'gap' will be filled with auto generated values. 
-

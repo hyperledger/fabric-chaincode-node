@@ -6,11 +6,9 @@ This outlines the theory of the how the new node module works; with the fabric s
 
 ### 1: Chaincode is created as an npm module.
 
-An initial `package.json` is as follows - the only runtime dependency as far as anything blockchain is concerned is the `fabric-chaincode-api`.  This provides the API definition that can be used for development, and also unit test.
+An initial `package.json` is as follows;
 
-For development an implementation of the `fabric-shim` and specifically the CLI that accompanies it is required
-
-**NOTE: for Fabric 1.4, this will need to be made a development dependency of the node module, and the `npm start` will need to call a defined app to start**
+The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required. 
 
 ```
 {
@@ -30,24 +28,20 @@ For development an implementation of the `fabric-shim` and specifically the CLI 
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fabric-chaincode-api: "^1.3.0"
+    "fabric-chaincode-api": "^1.4.0",
+    "fabric-shim": "^1.4.0"
   }
 }
 
 ```
-Remember to add in any additional business logic, and testing libraries needed. 
+Remember to add in any additional business logic, and testing libraries needed 
 
-Please also add in `fabric-shim` as a dependency, and `fabric-chaincode-node` as the script to run for `npm start`. Therefore this would include
+Adding `fabric-shim` as a dependency, gives a command `fabric-chaincode-node` that is the script to run for `npm start`.
 
 ```
   "scripts": {
     "start": "fabric-chaincode-node start",
     "test": "nyc mocha test",
-    ....
-  },
-  "dependencies": {
-    "fabric-contract-api": "^1.4.0-snapshot.1",
-    "fabric-shim": "^1.4.0-snapshot.1",
     ....
   },
 ```
@@ -58,11 +52,14 @@ Please also add in `fabric-shim` as a dependency, and `fabric-chaincode-node` as
 Chaincode is deployed by the peer in response to issuing a number of (usually CLI) commands. For node.js chaincode the location of the chaincode npm project is required (the directory that the package.json is in). This does not need to be an installed project, but has to have all the code, and the package.json.
 
 A docker image is built for this chaincode, the package.json and code copied in. and `npm install` run.
-> It is important to make sure that you have a `package-lock.json` to ensure the correct packages are imported.
 
 After the install there is a 'bootstrap' process that starts the chaincode up (more details later). The constructors of the exported Contracts will be run at this point; these constructors are for setting the name and optional setup of the 'error/monitoring functions', (again more later). This instance of the contract will existing whilst this chaincode docker image is up.
 
-When chaincode is instantiated or updated, the `init()` function is the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialization or migration that might be needed.  These two functions have been abstracted away to focus on specific function implementations.
+When chaincode is instantiated or updated, the `init()` function is the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialisation or migration that might be needed.  These two functions have been abstracted away to focus on specific function implementations.
+
+It is strongly recommended to use the npm shrinkwrap mechanism so the versions of the modules that are used are fixed.
+
+Within the class you can defined as many or functions as you wish. These transaction functions will form the basis of the business logic you contract needs to execute. These are `async` functions, and can take parameters and return values. There is a single mandatory parameter of the 'transaction context'; this represents the currently executing transaction and is the way functions can access the world state, and other APIs.
 
 ### 3: What needs to be exported?
 
@@ -77,7 +74,7 @@ In this example we have a single value that can be queried and updated. This has
 const UpdateValues = require('./updatevalues')
 const RemoveValues = require('./removevalues')
 
-module.exports.contracts = ['UpdateValues','RemoveValues'];
+module.exports.contracts = [UpdateValues,RemoveValues];
 ```
 
 This exports two classes that together form the Contract. There can be other code that within the model that is used in a support role. 
@@ -123,34 +120,19 @@ class UpdateValues extends Contract
 module.exports = UpdateValues;
 ```
 
-Note that ALL the functions defined in these modules will be called by the client SDK. 
+Note that ALL the functions defined in these modules will be called by the client SDK.
 
 - There are 3 functions `setup` `setNewAssetValue` and `doubleAssetValue` that can be called by issuing the appropriate invoke client side
 - The `ctx` in the function is a transaction context; each time a invoke is called this will be a new instance that can be used by the function implementation to access apis such as the world state of information on invoking identity.
 - The arguments are split out from the array passed on the invoke. 
 - The constructor contains a 'name' to help identify the sets of functions
 
-
-### 5: Alternative ways of specifying the contracts
-
-*package.json*
-
-Instead of providing the Smart Contracts as exports, you can add details to the package.json. Using the above functions add this to the package.json
-
-```
-  "contracts":{
-    "classes": ["removevalues.js","updatevalues.js"]
-  }
-```
-
-If present this takes precedence over the exports.
-
 ## Running chaincode in development mode
 
 This is quite easy - as you need to run the startChaincode command.
 
 ```
-$ $(npm bin)/fabric-chaincode-node --peer.address localhost:7052
+$ $(npm bin)/fabric-chaincode-node --peer.address localhost:7052 --chaincode-id-name papernet:1
 ```
 
 (this is actually what the peer does; this does mean that any chaincode that is written using the existing chaincode interface will continue to work as is.)
@@ -217,7 +199,7 @@ For example
 
 ### Structure of the Transaction Context
 
-In Fabric 1.2, there is a *stub* api that provides chaincode with functionality. 
+In Fabric, there is a *stub* api that provides chaincode with functionality. 
 No functionality has been removed, but a new approach to providing abstractions on this to facilitate programming.
 
 *user additions*:  additional properties can be added to the object to support for example common handling of the data serialization.
