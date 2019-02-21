@@ -18,6 +18,8 @@ const HistoryQueryIterator = require('./iterators').HistoryQueryIterator;
 const logger = require('./logger').getLogger('lib/handler.js');
 const Stub = require('./stub.js');
 
+const utils = require('./utils/utils');
+
 const _serviceProto = grpc.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/chaincode_shim.proto'
@@ -285,14 +287,16 @@ class ChaincodeSupportClient {
 
                 if (type !== MSG_TYPE.REGISTERED && type !== MSG_TYPE.READY) {
 
+                    const loggerPrefix = utils.generateLoggingPrefix(msg.channel_id, msg.txid);
+
                     if (type === MSG_TYPE.RESPONSE || type === MSG_TYPE.ERROR) {
-                        logger.debug('[%s-%s]Received %s,  handling good or error response', msg.channel_id, shortTxid(msg.txid), msg.type);
+                        logger.debug('%s Received %s,  handling good or error response', loggerPrefix, msg.type);
                         self.msgQueueHandler.handleMsgResponse(msg);
                     } else if (type === MSG_TYPE.INIT) {
-                        logger.debug('[%s-%s]Received %s, initializing chaincode', msg.channel_id, shortTxid(msg.txid), msg.type);
+                        logger.debug('%s Received %s, initializing chaincode', loggerPrefix, msg.type);
                         self.handleInit(msg);
                     } else if (type === MSG_TYPE.TRANSACTION) {
-                        logger.debug('[%s-%s]Received %s, invoking transaction on chaincode(state:%s)', msg.channel_id, shortTxid(msg.txid), msg.type, state);
+                        logger.debug('%s Received %s, invoking transaction on chaincode(state:%s)', loggerPrefix, msg.type, state);
                         self.handleTransaction(msg);
                     } else {
                         logger.error('Received unknown message from the peer. Exiting.');
@@ -577,11 +581,13 @@ class ChaincodeSupportClient {
 }
 
 async function handleMessage(msg, client, action) {
+    const loggerPrefix = utils.generateLoggingPrefix(msg.channel_id, msg.txid);
+
     let nextStateMsg, input;
     try {
         input = _chaincodeProto.ChaincodeInput.decode(msg.payload);
     } catch (err) {
-        logger.error('[%s-%s]Incorrect payload format. Sending ERROR message back to peer', msg.channel_id, shortTxid(msg.txid));
+        logger.error('%s Incorrect payload format. Sending ERROR message back to peer', loggerPrefix);
         nextStateMsg = {
             type: _serviceProto.ChaincodeMessage.Type.ERROR,
             payload: msg.payload,
@@ -616,8 +622,8 @@ async function handleMessage(msg, client, action) {
             }
             // check that a response object has been returned otherwise assume an error.
             if (!resp || !resp.status) {
-                const errMsg = util.format('[%s-%s]Calling chaincode %s() has not called success or error.',
-                    msg.channel_id, shortTxid(msg.txid), method);
+                const errMsg = util.format('%s Calling chaincode %s() has not called success or error.',
+                    loggerPrefix, method);
                 logger.error(errMsg);
 
                 resp =  new _responseProto.Response();
@@ -626,14 +632,14 @@ async function handleMessage(msg, client, action) {
             }
 
             logger.debug(util.format(
-                '[%s-%s]Calling chaincode %s(), response status: %s',
-                msg.channel_id, shortTxid(msg.txid),
+                '%s Calling chaincode %s(), response status: %s',
+                loggerPrefix,
                 method,
                 resp.status));
 
             if (resp.status >= Stub.RESPONSE_CODE.ERROR) {
-                const errMsg = util.format('[%s-%s]Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
-                    msg.channel_id, shortTxid(msg.txid), method, resp.message);
+                const errMsg = util.format('%s Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
+                    loggerPrefix, method, resp.message);
                 logger.error(errMsg);
 
                 nextStateMsg = {
@@ -643,8 +649,8 @@ async function handleMessage(msg, client, action) {
                     channel_id: msg.channel_id
                 };
             } else {
-                logger.info(util.format('[%s-%s]Calling chaincode %s() succeeded. Sending COMPLETED message back to peer',
-                    msg.channel_id, shortTxid(msg.txid), method));
+                logger.info(util.format('%s Calling chaincode %s() succeeded. Sending COMPLETED message back to peer',
+                    loggerPrefix, method));
 
                 nextStateMsg = {
                     type: _serviceProto.ChaincodeMessage.Type.COMPLETED,
@@ -677,7 +683,7 @@ function createStub(client, channel_id, txid, input, proposal) {
 }
 
 function newErrorMsg(msg, state) {
-    const errStr = util.format('[%s-%s]Chaincode handler FSM cannot handle message (%s) with payload size (%d) while in state: %s',
+    const errStr = util.format('[%s-%s] Chaincode handler FSM cannot handle message (%s) with payload size (%d) while in state: %s',
         msg.channel_id, msg.txid, msg.type, msg.payload.length, state);
 
     return {
@@ -686,10 +692,6 @@ function newErrorMsg(msg, state) {
         txid: msg.txid,
         channel_id: msg.channel_id
     };
-}
-
-function shortTxid(txId) {
-    return txId.substring(0, 8);
 }
 
 function handleGetQueryResult(handler, res, method) {
@@ -725,8 +727,10 @@ function handleGetStateMetadata(payload) {
 }
 
 function parseResponse(handler, res, method) {
+    const loggerPrefix = utils.generateLoggingPrefix(res.channel_id, res.txid);
+
     if (res.type === MSG_TYPE.RESPONSE) {
-        logger.debug(util.format('[%s-%s]Received %s() successful response', res.channel_id, shortTxid(res.txid), method));
+        logger.debug(util.format('%s Received %s() successful response', loggerPrefix, method));
 
         // some methods have complex responses, decode the protobuf structure
         // before returning to the client code
@@ -747,12 +751,12 @@ function parseResponse(handler, res, method) {
 
         return res.payload;
     } else if (res.type === MSG_TYPE.ERROR) {
-        logger.debug(util.format('[%s-%s]Received %s() error response', res.channel_id, shortTxid(res.txid), method));
+        logger.debug(util.format('%s Received %s() error response', loggerPrefix, method));
         throw new Error(res.payload.toString());
     } else {
         const errMsg = util.format(
-            '[%s-%s]Received incorrect chaincode in response to the %s() call: type="%s", expecting "RESPONSE"',
-            res.channel_id, shortTxid(res.txid), method, res.type);
+            '%s Received incorrect chaincode in response to the %s() call: type="%s", expecting "RESPONSE"',
+            loggerPrefix, method, res.type);
         logger.debug(errMsg);
         throw new Error(errMsg);
     }

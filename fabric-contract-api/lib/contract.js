@@ -83,7 +83,7 @@ class Contract {
     async unknownTransaction(ctx) {
         const {fcn, params} = ctx.stub.getFunctionAndParameters();
 
-        logger.error(`${this.name} contract-api.Contract unknown transaction`, fcn, params);
+        logger.error(`[${ctx.getStub().getTxID()}] ${this.name} contract-api.Contract unknown transaction`, fcn, params);
 
         throw new Error(`You've asked to invoke a function that does not exist: ${fcn}`);
     }

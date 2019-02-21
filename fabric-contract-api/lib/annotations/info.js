@@ -18,7 +18,7 @@ require('reflect-metadata');
 
 module.exports.Info = function Info (info = {}) {
     return (target) => {
-        logger.info('@Info args', target.name, info);
+        logger.info('@Info args:', `Info -> ${info},`, 'Target ->', target.name);
 
         const data = Reflect.getMetadata('fabric:info', global) || {};
 
