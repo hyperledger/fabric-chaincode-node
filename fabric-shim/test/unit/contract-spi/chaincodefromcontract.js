@@ -23,6 +23,8 @@ chai.use(require('chai-things'));
 const sinon = require('sinon');
 
 const mockery = require('mockery');
+const Logger = require('../../../lib/logger.js');
+
 
 // standard utility fns
 const path = require('path');
@@ -60,6 +62,22 @@ function log(...e) {
     // eslint-disable-next-line
     console.log(...e);
 }
+
+const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
+'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
+'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
+'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
+'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
+'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
+'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
+'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
+'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
+'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
+'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
+'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
+'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
+'-----END CERTIFICATE-----';
 
 describe('chaincodefromcontract', () => {
 
@@ -375,11 +393,11 @@ describe('chaincodefromcontract', () => {
 
         beforeEach(() => {
             fakeSuccess = sinon.fake((e) => {
-                sinon.assert.fail(e);
+                log(e);
             });
 
             fakeError = sinon.fake((e) => {
-                log(e);
+                sinon.assert.fail(e);
             });
 
             sandbox.replace(shim, 'success', fakeSuccess);
@@ -403,7 +421,7 @@ describe('chaincodefromcontract', () => {
 
             const mockStub = {getBufferArgs: sandbox.stub().returns([])};
             cc.invokeFunctionality = sandbox.stub();
-            cc.Init(mockStub);
+            return cc.Init(mockStub);
 
         });
         it('should handle a single class being passed as a contract', () => {
@@ -424,7 +442,7 @@ describe('chaincodefromcontract', () => {
 
             const mockStub = {getBufferArgs: sandbox.stub().returns([Buffer.from('Hello')])};
             cc.invokeFunctionality = sandbox.stub();
-            cc.Init(mockStub);
+            return cc.Init(mockStub);
 
         });
     });
@@ -446,9 +464,88 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
 
 
-            const mockStub = {getBufferArgs: sandbox.stub().returns([Buffer.from('arg1'), Buffer.from('args2')])};
+            const mockStub = {getBufferArgs: sandbox.stub().returns([Buffer.from('arg1'), Buffer.from('args2')]),
+                getTxID: sandbox.stub().returns(12345)};
             cc.invokeFunctionality = sandbox.stub();
-            cc.Invoke(mockStub);
+            return cc.Invoke(mockStub);
+
+        });
+
+        it('should pass the logging object to contracts', async () => {
+            const idBytes = {
+                toBuffer: () => {
+                    return new Buffer(certWithoutAttrs);
+                }
+            };
+            const tempClass =  class  extends Contract {
+                constructor() {
+                    super('logging');
+                }
+                /**
+                    * @param {object} api api
+                    * @param {String} arg1 arg1
+                    * @param {String} arg2 arg2
+                    */
+                async alpha(ctx, arg1, arg2) {
+                    return alphaStub(ctx, arg1, arg2);
+                }
+            };
+            const systemContract = new SystemContract();
+            const appClass = new tempClass();
+            sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
+                .returns({
+                    'org.hyperledger.fabric': {
+                        contractInstance: systemContract
+                    },
+                    'logging':{
+                        contractInstance: appClass,
+                        transactions: [
+                            {
+                                name:'alpha'
+                            }
+                        ],
+                        dataMarshall:{
+                            handleParameters: sandbox.stub().returns([]),
+                            toWireBuffer: sandbox.stub()
+                        }
+                    }
+                });
+            sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata').returns(null);
+            sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
+
+            const mockSigningId = {
+                getMspid: sinon.stub(),
+                getIdBytes: sinon.stub().returns(idBytes)
+            };
+            const cc = new ChaincodeFromContract([tempClass], defaultSerialization);
+            const mockStub = {getBufferArgs: sandbox.stub().returns(['logging:alpha']),
+                getTxID: sandbox.stub().returns('12345897asd7a7a77v7b77'),
+                getChannelID: sandbox.stub().returns('channel-id-fake'),
+                getCreator: sandbox.stub().returns(mockSigningId)
+            };
+            //
+            const levelSpy = sinon.spy(Logger, 'setLevel');
+            await cc.Invoke(mockStub);
+            const ctx = alphaStub.getCall(0).args[0];
+            ctx.logging.setLevel('DEBUG');
+            sinon.assert.called(levelSpy);
+            sinon.assert.calledWith(levelSpy, 'DEBUG');
+            const cclogger = ctx.logging.getLogger();
+            const logger = Logger.getLogger('logging');
+            const infospy = sinon.spy(logger, 'info');
+            cclogger.info('info');
+            sinon.assert.calledWith(infospy, 'info');
+
+            ctx.logging.setLevel('INFO');
+            sinon.assert.called(levelSpy);
+            sinon.assert.calledWith(levelSpy, 'INFO');
+
+
+            const ccloggerNamed = ctx.logging.getLogger('wibble');
+            const debugSpy = sinon.spy(Logger.getLogger('logging:wibble'), 'debug');
+            ccloggerNamed.debug('Named logger');
+            sinon.assert.calledWith(debugSpy, 'Named logger');
+
 
         });
     });
@@ -500,21 +597,7 @@ describe('chaincodefromcontract', () => {
         let fakeSuccess;
         let fakeError;
 
-        const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-        'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-        'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-        'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-        'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-        'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-        'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-        'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-        'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-        '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-        'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-        'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-        'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-        'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-        '-----END CERTIFICATE-----';
+
 
         beforeEach(() => {
             fakeSuccess = sinon.fake((e) => {
