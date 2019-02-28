@@ -4,14 +4,20 @@
  SPDX-License-Identifier: Apache-2.0
 
 */
-declare module 'fabric-contract-api' {
 
+declare module 'fabric-contract-api' {
+    import { LoggerInstance } from 'winston';
     import { ChaincodeStub, ClientIdentity } from 'fabric-shim';
+    
     export class Context {
         stub: ChaincodeStub;
         clientIdentity: ClientIdentity;
+        logger: {
+            setLevel: (level: string) => void,
+            getLogger: (name?: string) => LoggerInstance
+        }
     }
-
+    
     export class Contract {
         constructor(name?: string);
 

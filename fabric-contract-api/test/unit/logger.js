@@ -18,15 +18,15 @@ describe('Logger', () => {
 
         let logLevel;
         before(() => {
-            logLevel = process.env.CORE_CHAINCODE_LOGGING_SHIM;
+            logLevel = process.env.CORE_CHAINCODE_LOGGING_LEVEL;
         });
 
         after(() => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = logLevel;
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = logLevel;
         });
 
         it ('should create a new logger name unknown', () => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = null;
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = null;
 
             const log = Logger.getLogger('unknown name');
 
@@ -50,7 +50,7 @@ describe('Logger', () => {
         });
 
         it ('should set the log level to fatal when env var set to CRITICAL', () => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'CRITICAL';
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = 'CRITICAL';
 
             const log = Logger.getLogger();
 
@@ -59,7 +59,7 @@ describe('Logger', () => {
         });
 
         it ('should set the log level to error when env var set to ERROR', () => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'ERROR';
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = 'ERROR';
 
             const log = Logger.getLogger();
 
@@ -68,7 +68,7 @@ describe('Logger', () => {
         });
 
         it ('should set the log level to warn when env var set to WARNING', () => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'WARNING';
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = 'WARNING';
 
             const log = Logger.getLogger();
 
@@ -77,7 +77,7 @@ describe('Logger', () => {
         });
 
         it ('should set the log level to debug when env var set to DEBUG', () => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = 'DEBUG';
 
             const log = Logger.getLogger();
 
@@ -88,7 +88,7 @@ describe('Logger', () => {
 
     describe('formatter', () => {
         it ('', () => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = 'DEBUG';
 
             const log = Logger.getLogger();
             log.debug();
@@ -98,7 +98,7 @@ describe('Logger', () => {
         });
 
         it ('', () => {
-            process.env.CORE_CHAINCODE_LOGGING_SHIM = 'DEBUG';
+            process.env.CORE_CHAINCODE_LOGGING_LEVEL = 'DEBUG';
 
             const log = Logger.getLogger('fred');
             log.debug('hello', 'fred');

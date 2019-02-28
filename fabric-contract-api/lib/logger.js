@@ -36,7 +36,7 @@ function createLogger(level, name) {
 module.exports.getLogger = function (name = '') {
     // set the logging level based on the environment variable
     // configured by the peer
-    const level = process.env.CORE_CHAINCODE_LOGGING_SHIM;
+    const level = process.env.CORE_CHAINCODE_LOGGING_LEVEL;
     let loglevel = 'info';
     if (typeof level === 'string') {
         switch (level.toUpperCase()) {

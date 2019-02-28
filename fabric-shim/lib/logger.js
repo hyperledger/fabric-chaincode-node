@@ -33,10 +33,7 @@ function createLogger(level, name) {
     return logger;
 }
 
-module.exports.getLogger = function (name = '') {
-    // set the logging level based on the environment variable
-    // configured by the peer
-    const level = process.env.CORE_CHAINCODE_LOGGING_SHIM;
+const levelMapping = (level) => {
     let loglevel = 'info';
     if (typeof level === 'string') {
         switch (level.toUpperCase()) {
@@ -51,10 +48,20 @@ module.exports.getLogger = function (name = '') {
                 break;
             case 'DEBUG':
                 loglevel = 'debug';
+                break;
+            case 'INFO':
+                loglevel = 'info';
         }
     }
+    return loglevel;
+};
 
+module.exports.getLogger = function (name = '') {
+    // set the logging level based on the environment variable
+    // configured by the peer
+    const loglevel = levelMapping(process.env.CORE_CHAINCODE_LOGGING_LEVEL);
     let logger;
+
     if (loggers[name]) {
         logger = loggers[name];
         logger.level = loglevel;
@@ -65,3 +72,14 @@ module.exports.getLogger = function (name = '') {
 
     return logger;
 };
+
+module.exports.setLevel = (level) => {
+    // set the level of all the loggers currently active
+    const loglevel = levelMapping(level);
+    process.env.CORE_CHAINCODE_LOGGING_LEVEL = loglevel;
+
+    Object.keys(loggers).forEach((name) => {
+        loggers[name].level = loglevel;
+    });
+};
+

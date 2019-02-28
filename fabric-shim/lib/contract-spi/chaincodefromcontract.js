@@ -316,6 +316,12 @@ class ChaincodeFromContract {
             const ctx = contractInstance.createContext();
             ctx.setChaincodeStub(stub);
             ctx.setClientIdentity(new ClientIdentity(stub));
+            ctx.logging = {
+                setLevel : Logger.setLevel,
+                getLogger : (name) => {
+                    return Logger.getLogger(name ? `${cn}:${name}` : cn);
+                }
+            };
 
             // get the specific information for this tx function
             const functionExists = transactionDescriptor.transactions.find((transaction) => {

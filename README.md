@@ -117,7 +117,7 @@ FABRIC_CFG_PATH=./sampleconfig .build/bin/configtxgen -outputCreateChannelTx sam
 
 Then you can launch a peer node with the following commands:
 ```
-FABRIC_CFG_PATH=./sampleconfig CORE_CHAINCODE_LOGGING_SHIM=debug FABRIC_LOGGING_SPEC=debug CORE_PEER_ADDRESSAUTODETECT=true .build/bin/peer node start --peer-chaincodedev
+FABRIC_CFG_PATH=./sampleconfig CORE_CHAINCODE_LOGGING_LEVEL=debug FABRIC_LOGGING_SPEC=debug CORE_PEER_ADDRESSAUTODETECT=true .build/bin/peer node start --peer-chaincodedev
 ```
 
 Then you can launch an orderer node with the following commands:
@@ -353,7 +353,7 @@ rm -r /var/hyperledger/production
 
 When launching a peer node, eliminate the `--peer-chaincodev` program argument to start the peer process in network mode.
 ```
-FABRIC_CFG_PATH=./sampleconfig CORE_CHAINCODE_LOGGING_SHIM=debug FABRIC_LOGGING_SPEC=debug CORE_PEER_ADDRESSAUTODETECT=true .build/bin/peer node start
+FABRIC_CFG_PATH=./sampleconfig CORE_CHAINCODE_LOGGING_LEVEL=debug FABRIC_LOGGING_SPEC=debug CORE_PEER_ADDRESSAUTODETECT=true .build/bin/peer node start
 ```
 
 Install and instantiate the chaincode with the following commands.
