@@ -1,3 +1,9 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
+
 import { Contract, Context, Transaction, Returns, Object, Property } from 'fabric-contract-api';
 
 @Object()
@@ -107,4 +113,5 @@ export default class TestContract extends Contract {
     public async ignoreMe(ctx: Context, id: string) {
         // DO NOTHING
     }
+
 }

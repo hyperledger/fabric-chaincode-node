@@ -1,3 +1,8 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
 'use strict';
 
 const {Contract} = require('fabric-contract-api');
@@ -24,6 +29,7 @@ async function getAllResults(iterator, getKeys) {
 }
 
 class QueryChaincode extends Contract {
+
     async unknownTransaction({stub}) {
         throw new Error(`Could not find chaincode function: ${stub.getFunctionAndParameters()}`);
     }
@@ -54,7 +60,6 @@ class QueryChaincode extends Contract {
         const results = await getAllResults(iterator);
         return JSON.stringify(results);
     }
+
 }
-
-
 module.exports = QueryChaincode;

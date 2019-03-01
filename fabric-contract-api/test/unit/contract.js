@@ -108,10 +108,6 @@ describe('contract.js', () => {
                 }
             };
 
-            ctx.getStub = () => {
-                return ctx.stub;
-            };
-
             ctx.stub.getFunctionAndParameters = sandbox.stub().returns({fcn:'wibble'});
 
             return sc0.unknownTransaction(ctx).should.eventually.be.rejectedWith(/^You've asked to invoke a function that does not exist: wibble$/);
@@ -205,9 +201,5 @@ describe('contract.js', () => {
 
         });
     });
-
-
-
-
 
 });

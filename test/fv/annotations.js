@@ -1,3 +1,10 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
+'use-strict';
+
 const fs = require('fs');
 const path = require('path');
 const Ajv = require('ajv');
@@ -9,13 +16,16 @@ const {SHORT_STEP, LONG_STEP} = utils.TIMEOUTS;
 
 describe('Typescript chaincode', () => {
     const suite = 'annotations';
-    before(async function() {
+
+    before(async function () {
         this.timeout(LONG_STEP);
+
         return utils.installAndInstantiate(suite);
     });
 
 
     describe('Scenario', () => {
+
         it('should write an asset', async function () {
             this.timeout(LONG_STEP);
             await utils.invoke(suite, 'TestContract:createAsset', ['GLD', 'GOLD_BAR', '100', 'EXTRA_ID', '50']);
@@ -46,5 +56,7 @@ describe('Typescript chaincode', () => {
             const expectedMetadata = fs.readFileSync(path.join(__dirname, './annotations/src/test_contract/expected-metadata.json'));
             expect(payload).to.eql(JSON.parse(expectedMetadata));
         });
+
     });
+
 });

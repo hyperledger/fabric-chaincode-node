@@ -1,4 +1,9 @@
-'use scrict';
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
+'use strict';
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -9,14 +14,10 @@ const {SHORT_STEP, LONG_STEP} = utils.TIMEOUTS;
 
 describe('Chaincode query', () => {
     const suite = 'query';
-    before(async function() {
-        this.timeout(LONG_STEP);
-        // await utils.packPackages(suite);
-        return utils.installAndInstantiate(suite, 'org.mynamespace.query:instantiate');
-    });
 
-    after(async () => {
-        // await utils.deletePackages(suite);
+    before(async function () {
+        this.timeout(LONG_STEP);
+        return utils.installAndInstantiate(suite, 'org.mynamespace.query:instantiate');
     });
 
     it('should perform an equals query', async function () {
@@ -49,4 +50,5 @@ describe('Chaincode query', () => {
             JSON.stringify({value: 'value2'})
         ]);
     });
+
 });

@@ -18,3 +18,9 @@ gulp.task('default', gulp.series('lint'));
 // Setup the e2e tests and sequence tests to run in sequence;
 // when the control of the tests is in the scripts in this repo we could remove this.
 gulp.task('test-e2e', gulp.series(['test-fv-shim', 'test-scenario']));
+
+// FAB-13462 - disabled this test temporarily pending rewrite for Fabric v2.0 changes.
+// gulp.task('test-invctrl-cli', (done) => {
+//     const tasks = ['test-invctrl'];
+//     runSequence(...tasks, done);
+// });

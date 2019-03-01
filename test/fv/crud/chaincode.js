@@ -1,3 +1,8 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
 'use strict';
 
 const {Contract} = require('fabric-contract-api');
@@ -44,7 +49,7 @@ class CrudChaincode extends Contract {
         }
         for (let i = 0; i < 5; i++) {
             await stub.putState(`key${i}`, Buffer.from(`value${i}`));
-            await stub.putState(`jsonkey${i}`, Buffer.from(JSON.stringify({value: `value${i}`})));
+            await stub.putState(`jsonkey${i}`, Buffer.from(JSON.stringify({key: `k${i}`, value: `value${i}`})));
         }
     }
 
@@ -52,6 +57,28 @@ class CrudChaincode extends Contract {
         const {params} = stub.getFunctionAndParameters();
         const key = params[0];
         return (await stub.getState(key)).toString();
+    }
+
+    async getKeysConcurrently({stub}) {
+        const p1 = stub.getState('key1')
+            .then((res) => {
+                return res.toString('utf8');
+            });
+
+        const p2 = stub.getState('key2')
+            .then((res) => {
+                return res.toString('utf8');
+            });
+
+        const p3 = stub.getState('key3')
+            .then((res) => {
+                return res.toString('utf8');
+            });
+
+        return Promise.all([p1, p2, p3])
+            .then((resArray) => {
+                return resArray;
+            });
     }
 
     async getCompositeKey({stub}) {
@@ -70,6 +97,35 @@ class CrudChaincode extends Contract {
         const {params} = stub.getFunctionAndParameters();
         const result = await stub.getStateByRange(params[0], params[1]);
         return (await getAllResults(result)).toString().split(',');
+    }
+
+    async getHistoryForKey({stub}) {
+        const {params} = stub.getFunctionAndParameters();
+        const iterator = await stub.getHistoryForKey(params[0]);
+        return (await getAllResults(iterator)).toString().split(',');
+    }
+
+    async getQueryResultWithPagination({stub}) {
+        const query = {
+            selector: {
+                key: {
+                    $regex: 'k[0-4]'
+                }
+            }
+        };
+
+        let response = await stub.getQueryResultWithPagination(JSON.stringify(query), 2);
+        const {iterator, metadata} = response;
+
+        let results = await getAllResults(iterator, true /* get keys instead of values */);
+        const results1 = results;
+        const metadata1 = metadata;
+
+        response = await stub.getQueryResultWithPagination(JSON.stringify(query), 1, metadata.bookmark);
+        results = await getAllResults(response.iterator, true /* get keys instead of values */);
+        const results2 = results;
+        const metadata2 = response.metadata;
+        return {results1, metadata1, results2, metadata2};
     }
 
     async getStateByRangeWithPagination({stub}) {
@@ -97,6 +153,22 @@ class CrudChaincode extends Contract {
         return await getAllResults(iterator);
     }
 
+    /*
+    * This chaincode is to be implemented when the new basic network has been created,
+    * as key level endorsement is not enabled with this current basic_network
+    */
+
+    // async getStateValidationParameter({stub}) {
+    //     const {params} = stub.getFunctionAndParameters();
+    //     // should exists validation parameter ['Org1MSP'] for key1
+    //     const epBuffer = await stub.getStateValidationParameter(params[0]);
+    //     const ep = new KeyEndorsementPolicy(epBuffer);
+
+    //     // should not exists validation parameter for key2
+    //     const epBuffer2 = await stub.getStateValidationParameter(params[1]);
+    //     return {ep, epBuffer2};
+    // }
+
     async putKey({stub}) {
         const {params} = stub.getFunctionAndParameters();
         await stub.putState(...params);
@@ -107,6 +179,7 @@ class CrudChaincode extends Contract {
         const compositeKey = stub.createCompositeKey('name~color', [params[0], params[1]]);
         await stub.putState(compositeKey, params[2]);
     }
+
     async deleteKey({stub}) {
         const {params} = stub.getFunctionAndParameters();
         await stub.deleteState(params[0]);
@@ -117,7 +190,30 @@ class CrudChaincode extends Contract {
         const compositeKey = stub.createCompositeKey('name~color', params);
         await stub.deleteState(compositeKey);
     }
+
+    /*
+    * This chaincode is to be implemented when the new basic network has been created,
+    * as key level endorsement is not enabled with this current basic_network
+    */
+
+    // async setStateValidationParameter({stub}) {
+    //     const {params} = stub.getFunctionAndParameters();
+    //     const ep = new KeyEndorsementPolicy();
+    //     ep.addOrgs('MEMBER', 'Org1MSP');
+    //     await stub.setStateValidationParameter(params[0], ep.getPolicy());
+    // }
+
+    async splitCompositeKey({stub}) {
+        const {params} = stub.getFunctionAndParameters();
+
+        const iterator = await stub.getStateByPartialCompositeKey('name~color', [params[0]]);
+        const results = await getAllResults(iterator, true /* get keys instead of values */);
+
+        const key1 = stub.splitCompositeKey(results[0]);
+        const key2 = stub.splitCompositeKey(results[1]);
+        const key3 = stub.splitCompositeKey(results[2]);
+        return {results, key1, key2, key3};
+    }
+
 }
-
-
 module.exports = CrudChaincode;
