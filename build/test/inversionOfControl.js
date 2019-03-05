@@ -15,29 +15,24 @@
 /* eslint-disable no-console */
 
 const gulp = require('gulp');
-const shell = require('gulp-shell');
 
 const util = require('util');
 
 const childProcess = require('child_process');
 const exec = childProcess.exec;
 
-gulp.task('npm-install-chaincode', () => {
-    return gulp.src('*.js', {read: false})
-        .pipe(shell([
-            util.format('docker exec cli bash -c "cd %s; npm install"',
-                '/etc/hyperledger/config/scenario/src/mysmartcontract.v0')
+const peerAddress = require('../../test/constants').peerAddress;
 
-        ]));
-});
+require('./scenario');
 
 gulp.task('inv-startup-chaincode', async (done) => {
-    const script = util.format('docker exec cli bash -c "cd %s; npm install; npm rebuild; npm start -- --peer.address peer0.org1.example.com:7052 --chaincode-id-name %s --module-path %s"',
+    const script = util.format('docker exec org1_cli bash -c "cd %s; npm start -- --peer.address %s --chaincode-id-name %s --module-path %s"',
     // the /etc/hyperledger/config has been mapped to the
     // basic-network folder in the test setup for the CLI docker
-        '/etc/hyperledger/config/scenario/src/fabric-shim',
+        '/opt/gopath/src/github.com/chaincode/scenario/node_modules/fabric-shim',
+        peerAddress,
         'mysmartcontract:v0',
-        '/etc/hyperledger/config/scenario/src/mysmartcontract.v0');
+        '/opt/gopath/src/github.com/chaincode/scenario');
 
     try {
         await new Promise((resolve, reject) => {
@@ -65,3 +60,39 @@ gulp.task('inv-startup-chaincode', async (done) => {
         done(err);
     }
 });
+
+/**
+ * Invoke all the smart contract functions - steals some commands from scenario as uses same contract
+ */
+
+gulp.task('invokeAllFnsInvCtrl', gulp.series(
+    [
+        'cli-install-chaincode',
+
+        // Start chaincode
+        'inv-startup-chaincode',
+
+        // install
+        'st-install_chaincode',
+
+        // instantiate
+        'st-instantiate_chaincode',
+        'delay',
+
+        // Check it didnt make docker images
+        'check-docker',
+
+        // invoke all functions
+        'invoke_functions',
+
+        // query the functions
+        'query_functions',
+
+        // stop chaincode
+        'stop-cli-running-chaincode',
+
+        'dm-clean-up-chaincode'
+    ]
+));
+
+gulp.task('test-scenario-invctrl', gulp.series('invokeAllFnsInvCtrl'));

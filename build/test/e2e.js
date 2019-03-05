@@ -18,6 +18,7 @@ const wait = require('gulp-wait');
 const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
+const getTLSArgs = require('./utils').getTLSArgs;
 
 const constants = require('../../test/constants.js');
 
@@ -35,20 +36,13 @@ const packageJson = '{' +
     '    "chai-as-promised": "^7.1.1"' +
     '  }' +
     '}';
-const tls = process.env.TLS ? process.env.TLS : 'false';
+
 const CC_NAME = 'mycc';
 const CC2_NAME = 'mycc2';
 const CHANNEL_NAME = 'mychannel';
 let srcPath;
 let destPath;
-function getTLSArgs() {
-    let args = '';
-    if (tls === 'true') {
-        args = util.format('--tls %s --cafile %s', tls,
-            '/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem');
-    }
-    return args;
-}
+
 gulp.task('copy-shim', gulp.series('protos', () => {
     // first ensure the chaincode folder has the latest shim code
     srcPath = path.join(__dirname, '../../fabric-shim/**');

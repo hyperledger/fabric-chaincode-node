@@ -3,9 +3,9 @@
 const util = require('util');
 const childProcess = require('child_process');
 const exec = util.promisify(childProcess.exec);
-const execFile = util.promisify(childProcess.execFile);
 const fs = require('fs');
 const path = require('path');
+const getTLSArgs = require('../../build/test/utils').getTLSArgs;
 
 function getPackageVersion() {
     const packageJsonPath = path.join(__dirname, './../../package.json');
@@ -41,13 +41,14 @@ async function deletePackages(ccName) {
 
 async function install(ccName) {
     // const folderName = '/opt/gopath/src/github.com/fv/' + ccName;
-    const folderName = '/etc/hyperledger/config/fv/' + ccName;
-    const cmd = `docker exec cli peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName}`;
-    await exec(cmd);
+    const folderName = '/opt/gopath/src/github.com/chaincode/fv/' + ccName;
+    const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName}`;
+    await exec(util.format(cmd, 'org1_cli'));
+    await exec(util.format(cmd, 'org2_cli'));
 }
 
 async function instantiate(ccName, func, args) {
-    const cmd = `docker exec cli peer chaincode instantiate ${getTLSArgs()} -o orderer.example.com:7050 -l node -C mychannel -n ${ccName} -v v0 -c '${printArgs(func, args)}' -P 'OR ("Org1MSP.member")'`;
+    const cmd = `docker exec org1_cli peer chaincode instantiate ${getTLSArgs()} -o orderer.example.com:7050 -l node -C mychannel -n ${ccName} -v v0 -c '${printArgs(func, args)}' -P 'OR ("Org1MSP.member")'`;
     const res = await exec(cmd);
     await new Promise(resolve => setTimeout(resolve, 5000));
     return res;
@@ -69,7 +70,8 @@ function printArgs(func, args) {
 }
 
 async function invoke(ccName, func, args) {
-    const cmd = `docker exec cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent 2>&1`;
+    const cmd = `docker exec org1_cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent 2>&1`;
+
     const {stderr} = await exec(cmd);
     if (stderr) {
         throw new Error(stderr);
@@ -77,17 +79,11 @@ async function invoke(ccName, func, args) {
 }
 
 async function query(ccName, func, args) {
-    const options = {};
-    const script = 'docker';
-    const execArgs = util.format('exec cli peer chaincode query %s -C %s -n %s -c %s',
-        getTLSArgs(),
-        'mychannel',
-        ccName,
-        printArgs(func, args)).split(' ');
+    const cmd = `docker exec org2_cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}'`;
 
-    const {error, stdout, stderr} = await execFile(script, execArgs, options);
-    if (error) {
-        throw new Error(error, stderr);
+    const {stdout, stderr} = await exec(cmd);
+    if (stderr) {
+        throw new Error(stderr);
     }
 
     return stdout.trim().replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"'); // remove surrounding quotes and unescape
@@ -96,16 +92,6 @@ async function query(ccName, func, args) {
 async function installAndInstantiate(ccName, instantiateFunc, instantiateArgs) {
     await install(ccName);
     return instantiate(ccName, instantiateFunc, instantiateArgs);
-}
-
-function getTLSArgs() {
-    let args = '';
-    const tls = process.env.TLS ? process.env.TLS : 'false';
-    if (tls === 'true') {
-        args = util.format('--tls %s --cafile %s', tls,
-            '/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem');
-    }
-    return args;
 }
 
 const TIMEOUTS = {

@@ -4,7 +4,7 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const utils = require('./utils');
-const {MED_INC, LONG_STEP} = utils.TIMEOUTS;
+const {SHORT_STEP, LONG_STEP} = utils.TIMEOUTS;
 
 
 describe('Chaincode query', () => {
@@ -20,7 +20,7 @@ describe('Chaincode query', () => {
     });
 
     it('should perform an equals query', async function () {
-        this.timeout(MED_INC);
+        this.timeout(LONG_STEP);
         const query = JSON.stringify({
             selector: {
                 value: 'value0'
@@ -33,7 +33,7 @@ describe('Chaincode query', () => {
     });
 
     it('should perform an regex query', async function () {
-        this.timeout(MED_INC);
+        this.timeout(SHORT_STEP);
         const query = JSON.stringify({
             selector: {
                 value: {

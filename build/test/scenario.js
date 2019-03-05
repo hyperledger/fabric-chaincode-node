@@ -7,45 +7,27 @@
 
 const gulp = require('gulp');
 const shell = require('gulp-shell');
-const using = require('gulp-using');
-const filter = require('gulp-filter');
-const jsonTransform = require('gulp-json-transform');
 
 const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
-const log = require('fancy-log');
-const test = require('../../test/constants.js');
 
-const os = require('os');
+const getTLSArgs = require('./utils').getTLSArgs;
+
 const Ajv = require('ajv');
 
 const execFile = util.promisify(require('child_process').execFile);
 const CHANNEL_NAME = 'mychannel';
-const tls = process.env.TLS ? process.env.TLS : 'false';
-const delay = require('delay');
+
+require('./setup'); // ensure cleanup task defined
 
 /* eslint-disable no-console */
-
-gulp.task('delay', () => {
-    log('waiting for 3seconds...');
-    return delay(3000);
-});
-
-function getTLSArgs() {
-    let args = '';
-    if (tls === 'true') {
-        args = util.format('--tls %s --cafile %s', tls,
-            '/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem');
-    }
-    return args;
-}
 
 gulp.task('invoke_functions', async (done) => {
 
     const options = {};
     const script = 'docker';
-    const args = util.format('exec cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
+    const args = util.format('exec org1_cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
         getTLSArgs(),
         CHANNEL_NAME,
         'mysmartcontract',
@@ -69,7 +51,7 @@ gulp.task('query_functions', async (done) => {
 
     const options = {};
     const script = 'docker';
-    const args = util.format('exec cli peer chaincode query %s -C %s -n %s -c %s',
+    const args = util.format('exec org2_cli peer chaincode query %s -C %s -n %s -c %s',
         getTLSArgs(),
         CHANNEL_NAME,
         'mysmartcontract',
@@ -102,95 +84,10 @@ gulp.task('query_functions', async (done) => {
     }
 });
 
-gulp.task('st-copy-shim', gulp.series('protos', () => {
-    // first ensure the chaincode folder has the latest shim code
-    const srcPath = path.join(__dirname, '../../fabric-shim/**');
-    const destPath = path.join(test.BasicNetworkTestDir, 'scenario/src/fabric-shim');
-    fs.ensureDirSync(destPath);
-
-    const f = filter(['**/package.json'], {restore: true});
-
-    return gulp.src(srcPath)
-        .pipe(f)
-        .pipe(using())
-        .pipe(jsonTransform((data, file) => {
-            data.version = data.version + '-test';
-            return data;
-        }))
-        .pipe(f.restore)
-        .pipe(gulp.dest(destPath));
-}));
-
-gulp.task('st-copy-api', gulp.series('st-copy-shim', () => {
-    // first ensure the chaincode folder has the latest shim code
-    const srcPath = path.join(__dirname, '../../fabric-contract-api/**');
-    const destPath = path.join(test.BasicNetworkTestDir, 'scenario/src/fabric-contract-api');
-    fs.ensureDirSync(destPath);
-
-    const f = filter(['**/package.json'], {restore: true});
-
-    return gulp.src(srcPath)
-        .pipe(f)
-        .pipe(using())
-        .pipe(jsonTransform((data, file) => {
-            data.version = data.version + '-test';
-            return data;
-        }))
-        .pipe(f.restore)
-        .pipe(gulp.dest(destPath));
-}));
-
-gulp.task('st-copy-shim-crypto', gulp.series('st-copy-api', () => {
-    // first ensure the chaincode folder has the latest shim code
-    const srcPath = path.join(__dirname, '../../fabric-shim-crypto/**');
-    const destPath = path.join(test.BasicNetworkTestDir, 'scenario/src/fabric-shim-crypto');
-    fs.ensureDirSync(destPath);
-
-    const f = filter(['**/package.json'], {restore: true});
-
-    return gulp.src(srcPath)
-        .pipe(f)
-        .pipe(using())
-        .pipe(jsonTransform((data, file) => {
-            data.version = data.version + '-test';
-            return data;
-        }))
-        .pipe(f.restore)
-        .pipe(gulp.dest(destPath));
-}));
-
-gulp.task('localpublish', () => {
-    return gulp.src('*.js', {read: false})
-        .pipe(shell([util.format('%s/local-npm.sh %s', __dirname, os.tmpdir())]));
-});
-
-gulp.task('st-copy-chaincode', gulp.series('localpublish', () => {
-
-    // copy the test.js to chaincode folder
-    const srcPath = path.join(__dirname, '../../test/scenario/*');
-    const moduleArchivePath = path.join(test.BasicNetworkTestDir, 'scenario/src/*.tgz');
-    const destPath = path.join(test.BasicNetworkTestDir, 'scenario/src/mysmartcontract.v0');
-    return gulp.src([srcPath, moduleArchivePath])
-        .pipe(gulp.dest(destPath));
-}));
-
-// make sure `gulp channel-init` is run first
-gulp.task('st-install_chaincode', () => {
-    return gulp.src('*.js', {read: false})
-        .pipe(shell([
-            util.format('docker exec cli peer chaincode install -l node -n %s -v v0 -p %s',
-                'mysmartcontract',
-                // the /etc/hyperledger/config has been mapped to the
-                // basic-network folder in the test setup for the CLI docker
-                '/etc/hyperledger/config/scenario/src/mysmartcontract.v0')
-
-        ]));
-});
-
 gulp.task('st-instantiate_chaincode', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
-            util.format('docker exec cli peer chaincode instantiate -o %s %s -l node -C %s -n %s -v v0 -c %s -P %s',
+            util.format('docker exec org1_cli peer chaincode instantiate -o %s %s -l node -C %s -n %s -v v0 -c %s -P %s',
                 'orderer.example.com:7050',
                 getTLSArgs(),
                 CHANNEL_NAME,
@@ -200,18 +97,36 @@ gulp.task('st-instantiate_chaincode', () => {
         ]));
 });
 
+// make sure `gulp channel-init` is run first
+gulp.task('st-install_chaincode', () => {
+    const peerInstall = util.format(
+        'peer chaincode install -l node -n %s -v v0 -p %s',
+        'mysmartcontract',
+        // the test folder containing scenario is mapped to /opt/gopath/src/github.com/chaincode
+        '/opt/gopath/src/github.com/chaincode/scenario'
+    );
+
+    return gulp.src('*.js', {read: false})
+        .pipe(shell([
+            util.format(
+                'docker exec %s %s',
+                'org1_cli',
+                peerInstall
+            ),
+            util.format(
+                'docker exec %s %s',
+                'org2_cli',
+                peerInstall
+            ),
+        ]));
+});
+
 /**
  * Invoke all the smart contract functions
  */
 
 gulp.task('invokeAllFns', gulp.series(
     [
-        // ensure that the fabric shim in it's entirity is copied over and verdaccioed
-        'st-copy-shim-crypto',
-
-        // ensure that the fabric is setup and the chaincode has been constructed
-        'st-copy-chaincode',
-
         // install
         'st-install_chaincode',
 
@@ -222,7 +137,9 @@ gulp.task('invokeAllFns', gulp.series(
         'invoke_functions',
 
         // query the functions
-        'query_functions'
+        'query_functions',
+
+        'clean-up-chaincode'
     ]
 ));
 
