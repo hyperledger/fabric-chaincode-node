@@ -9,6 +9,7 @@
 process.env.GRPC_SSL_CIPHER_SUITES = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384';
 
 const grpc = require('grpc');
+const ProtoLoader = require('./protoloader');
 const {URL} = require('url');
 const path = require('path');
 const util = require('util');
@@ -20,17 +21,17 @@ const Stub = require('./stub.js');
 
 const utils = require('./utils/utils');
 
-const _serviceProto = grpc.load({
+const _serviceProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/chaincode_shim.proto'
 }).protos;
 
-const _chaincodeProto = grpc.load({
+const _chaincodeProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/chaincode.proto'
 }).protos;
 
-const _responseProto = grpc.load({
+const _responseProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/proposal_response.proto'
 }).protos;
