@@ -1011,7 +1011,7 @@ class ChaincodeStub {
 	 *
 	 * @param {string} collection The collection name
 	 * @param {string} query The query to be performed
-	 * @returns {Promise} Promise for a {@link PrivateQueryIterator} object
+	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
     async getPrivateDataQueryResult (collection, query) {
         logger.debug('getPrivateDataQueryResult called with collection:%s, query:%j', collection, query);
