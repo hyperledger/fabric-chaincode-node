@@ -6,7 +6,7 @@
 /* eslint-disable no-useless-escape */
 'use strict';
 
-const grpc = require('grpc');
+const ProtoLoader = require('./protoloader');
 const path = require('path');
 const util = require('util');
 const X509 = require('@ampretia/x509');
@@ -26,17 +26,17 @@ const StartCommand = require('./cmds/startCommand.js');
 
 const yargs = require('yargs');
 
-const _chaincodeProto = grpc.load({
+const _chaincodeProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/chaincode.proto'
 }).protos;
 
-const _serviceProto = grpc.load({
+const _serviceProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/chaincode_shim.proto'
 }).protos;
 
-const _responseProto = grpc.load({
+const _responseProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/proposal_response.proto'
 }).protos;

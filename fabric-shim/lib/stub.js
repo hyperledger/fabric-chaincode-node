@@ -7,32 +7,32 @@
 // TODO: Need to add parameter validation to all calls.
 'use strict';
 
-const grpc = require('grpc');
+const ProtoLoader = require('./protoloader');
 const path = require('path');
 const util = require('util');
 const crypto = require('crypto');
 
-const _commonProto = grpc.load({
+const _commonProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'common/common.proto'
 }).common;
 
-const _proposalProto = grpc.load({
+const _proposalProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/proposal.proto'
 }).protos;
 
-const _eventProto = grpc.load({
+const _eventProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/chaincode_event.proto'
 }).protos;
 
-const _idProto = grpc.load({
+const _idProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'msp/identities.proto'
 }).msp;
 
-const _serviceProto = grpc.load({
+const _serviceProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'peer/chaincode_shim.proto'
 }).protos;

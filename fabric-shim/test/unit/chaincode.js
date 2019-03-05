@@ -10,16 +10,16 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 const rewire = require('rewire');
-const grpc = require('grpc');
+const ProtoLoader = require('../../lib/protoloader');
 const path = require('path');
 
-const Logger = require('../../../fabric-shim/lib/logger');
+const Logger = require('../../lib/logger');
 
-const chaincodePath = '../../../fabric-shim/lib/chaincode.js';
+const chaincodePath = '../../lib/chaincode.js';
 const StartCommand = require('../../lib/cmds/startCommand.js');
 
-const _serviceProto = grpc.load({
-    root: path.join(__dirname, '../../../fabric-shim/lib/protos'),
+const _serviceProto = ProtoLoader.load({
+    root: path.join(__dirname, '../../lib/protos'),
     file: 'peer/chaincode_shim.proto'
 }).protos;
 

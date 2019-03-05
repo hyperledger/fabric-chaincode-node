@@ -1,9 +1,9 @@
 'use strict';
-const grpc = require('grpc');
+const ProtoLoader = require('./protoloader');
 const path = require('path');
 const EventEmitter = require('events');
 
-const _queryresultProto = grpc.load({
+const _queryresultProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
     file: 'ledger/queryresult/kv_query_result.proto'
 }).queryresult;

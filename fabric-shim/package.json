@@ -42,7 +42,8 @@
     "reflect-metadata": "^0.1.12",
     "winston": "^2.4.1",
     "yargs": "^10.0.2",
-    "yargs-parser": "^11.0.0"
+    "yargs-parser": "^11.0.0",
+    "protobufjs": "5.0.3"
   },
   "devDependencies": {
     "mocha": "5.2.0",
