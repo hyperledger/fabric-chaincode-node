@@ -1,9 +1,131 @@
 {
     "$schema": "https://fabric-shim.github.io/master/contract-schema.json",
+    "contracts": {
+        "TestContract": {
+            "name": "TestContract",
+            "contractInstance": {
+                "name": "TestContract",
+                "default": true
+            },
+            "transactions": [
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "name",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "value",
+                            "description": "",
+                            "schema": {
+                                "type": "number"
+                            }
+                        },
+                        {
+                            "name": "extraID",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "extraValue",
+                            "description": "",
+                            "schema": {
+                                "type": "number"
+                            }
+                        }
+                    ],
+                    "name": "createAsset"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "asset",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Asset"
+                            }
+                        }
+                    ],
+                    "name": "updateAsset"
+                },
+                {
+                    "returns": {
+                        "$ref": "#/components/schemas/Asset"
+                    },
+                    "name": "getAsset",
+                    "tag": [],
+                    "parameters": [
+                        {
+                            "name": "id",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "info": {
+                "title": "",
+                "version": ""
+            }
+        },
+        "org.hyperledger.fabric": {
+            "name": "org.hyperledger.fabric",
+            "contractInstance": {
+                "name": "org.hyperledger.fabric"
+            },
+            "transactions": [
+                {
+                    "name": "GetMetadata"
+                }
+            ],
+            "info": {
+                "title": "",
+                "version": ""
+            }
+        }
+    },
+    "info": {
+        "version": "1.0.0",
+        "title": "ts_chaincode"
+    },
     "components": {
         "schemas": {
+            "SomethingThatCouldBeAProperty": {
+                "$id": "SomethingThatCouldBeAProperty",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "number"
+                    }
+                }
+            },
             "Asset": {
                 "$id": "Asset",
+                "type": "object",
                 "additionalProperties": false,
                 "properties": {
                     "id": {
@@ -14,91 +136,12 @@
                     },
                     "value": {
                         "type": "number"
+                    },
+                    "extra": {
+                        "$ref": "SomethingThatCouldBeAProperty"
                     }
-                },
-                "type": "object"
+                }
             }
         }
-    },
-    "contracts": {
-        "TestContract": {
-            "contractInstance": {
-                "name": "TestContract",
-                "default": true
-            },
-            "info": {
-                "title": "",
-                "version": ""
-            },
-            "name": "TestContract",
-            "transactions": [
-                {
-                    "name": "createAsset",
-                    "parameters": [
-                        {
-                            "description": "",
-                            "name": "id",
-                            "schema": {
-                                "type": "string"
-                            }
-                        },
-                        {
-                            "description": "",
-                            "name": "name",
-                            "schema": {
-                                "type": "string"
-                            }
-                        },
-                        {
-                            "description": "",
-                            "name": "value",
-                            "schema": {
-                                "type": "number"
-                            }
-                        }
-                    ],
-                    "tag": [
-                        "submitTx"
-                    ]
-                },
-                {
-                    "name": "getAsset",
-                    "parameters": [
-                        {
-                            "description": "",
-                            "name": "id",
-                            "schema": {
-                                "type": "string"
-                            }
-                        }
-                    ],
-                    "returns": {
-                        "type": "string"
-                    },
-                    "tag": [
-                        "submitTx"
-                    ]
-                }
-            ]
-        },
-        "org.hyperledger.fabric": {
-            "contractInstance": {
-                "name": "org.hyperledger.fabric"
-            },
-            "info": {
-                "title": "",
-                "version": ""
-            },
-            "name": "org.hyperledger.fabric",
-            "transactions": [
-                {
-                    "name": "GetMetadata"
-                }
-            ]
-        }
-    },
-    "info": {
-        "title": "ts_chaincode",
-        "version": "1.0.0"
     }
 }

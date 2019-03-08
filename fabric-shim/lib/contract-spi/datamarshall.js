@@ -24,8 +24,8 @@ module.exports = class DataMarshall {
      * @param {String} requestedSerializer name of the requested serializer
      * @param {Object} serializers mapping of names to the implementation of the serializers
      */
-    constructor(requestedSerializer, serializers, schemas) {
-        logger.debug('New DataMarshaller', requestedSerializer, serializers, schemas);
+    constructor(requestedSerializer, serializers, components) {
+        logger.debug('New DataMarshaller', requestedSerializer, serializers, components);
         let cnstr = serializers[requestedSerializer];
         if (typeof cnstr === 'string') {
             cnstr = require(cnstr);
@@ -40,8 +40,7 @@ module.exports = class DataMarshall {
             allErrors: true
         });
 
-        // the complex type schemas from the metadata
-        this.schemas = schemas;
+        this.components = components;
     }
 
     /**
@@ -105,25 +104,28 @@ module.exports = class DataMarshall {
             logger.debug(`${loggerPrefix} Expected parameter ${expected}`);
             logger.debug(`${loggerPrefix} Supplied parameter ${supplied}`);
             // check the type
-            const schema = expected.schema;
+            const schema = {
+                properties: {
+                    prop: expected.schema
+                },
+                components: {
+                    schemas: this.components
+                }
+            };
 
-            let validator;
-
-            if (schema.type) {
-                validator = this.ajv.compile(schema);
-            } else if (schema.$ref) {
-                const n = schema.$ref.lastIndexOf('/');
-                const typeName = schema.$ref.substring(n + 1);
-                validator = this.schemas[typeName].validator;
-            } else {
-                throw new Error(`Incorrect type information ${JSON.stringify(schema)}`);
+            if (!expected.schema.type && !expected.schema.$ref) {
+                throw new Error(`Incorrect type information ${JSON.stringify(expected.schema)}`);
             }
+
+            const validator = this.ajv.compile(schema);
 
             const {value, validateData} = this.fromWireBuffer(supplied, expected.schema, loggerPrefix);
             const valid = validator(validateData);
 
             if (!valid) {
-                const errors = JSON.stringify(validator.errors);
+                const errors = JSON.stringify(validator.errors.map((err) => {
+                    return err.message;
+                }));
                 logger.debug(`${loggerPrefix} ${errors}`);
                 throw new Error(`Unable to validate parameter due to ${errors}`);
             }

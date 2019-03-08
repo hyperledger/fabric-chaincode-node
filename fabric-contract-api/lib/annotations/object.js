@@ -57,7 +57,7 @@ module.exports.Property = function Property (name, type) {
             type = typeof metaType === 'function' ? metaType.name : metaType.toString();
         }
 
-        properties[name] = utils.generateSchema(type);
+        properties[name] = utils.generateSchema(type, false);
 
         Reflect.defineMetadata('fabric:object-properties', properties, target);
 
