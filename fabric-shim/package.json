@@ -22,8 +22,8 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": "^8.9.0",
-    "npm": "^5.5.1"
+    "node": "10.15.2",
+    "npm": "^6.4.1"
   },
   "yargs": {
     "dot-notation": false
@@ -37,7 +37,7 @@
     "ajv": "^6.5.5",
     "fabric-contract-api": "unstable",
     "fs-extra": "^7.0.1",
-    "grpc": "1.17.0-pre1",
+    "grpc": "1.19.0",
     "jsrsasign": "^8.0.4",
     "reflect-metadata": "^0.1.12",
     "winston": "^2.4.1",
