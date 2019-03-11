@@ -13,6 +13,9 @@
 	},
 	"using-typescript-decorators":{
 		"title":"Using TypeScript Decorators"
+	},
+	"data-types-and-contracts":{
+		"title":"Details of type handling"
 	}
 
 }
