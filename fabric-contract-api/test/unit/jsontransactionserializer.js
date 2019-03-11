@@ -102,6 +102,12 @@ describe('jsontransactionserializer.js', () => {
 
             }).should.throw(/Returned value is .* does not match schema type of .*/);
         });
+
+        it('should handle booleans', () => {
+            const sc0 = new JSONSerializer();
+            expect(sc0.toBuffer(false)).to.deep.equal(Buffer.from('false'));
+            expect(sc0.toBuffer(true)).to.deep.equal(Buffer.from('true'));
+        });
     });
 
     describe('#fromBuffer', () => {
@@ -165,6 +171,11 @@ describe('jsontransactionserializer.js', () => {
             v.should.deep.equal({value:{'wibble':'wobble'}, jsonForValidation:{'wibble':'wobble'}});
         });
 
+        it('should handle booleans', () => {
+            const sc0 = new JSONSerializer();
+            const v = sc0.fromBuffer(Buffer.from(JSON.stringify({'wibble':true, 'wobble':false})), {type:'whatever'});
+            v.should.deep.equal({value:{'wibble':true, 'wobble':false}, jsonForValidation:{'wibble':true, 'wobble':false}});
+        });
 
         it ('should handle errors of unkown type', () => {
             const sc0 = new JSONSerializer();
