@@ -5,7 +5,7 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const utils = require('./utils');
-const {SHORT_INC, LONG_STEP} = utils.TIMEOUTS;
+const {SHORT_INC, SHORT_STEP, LONG_STEP} = utils.TIMEOUTS;
 
 describe('Typescript chaincode', () => {
     const suite = 'annotations';
@@ -18,10 +18,17 @@ describe('Typescript chaincode', () => {
     describe('Scenario', () => {
         it('should write an asset', async function () {
             this.timeout(SHORT_INC);
-            await utils.invoke(suite, 'TestContract:createAsset', ['GLD', 'GOLD_BAR', '100']);
+            await utils.invoke(suite, 'TestContract:createAsset', ['GLD', 'GOLD_BAR', '100', 'EXTRA_ID', '50']);
             const payload = JSON.parse(await utils.query(suite, 'TestContract:getAsset', ['GLD']));
 
-            expect(payload).to.eql({id: 'GLD', name: 'GOLD_BAR', value: 100});
+            expect(payload).to.eql({id: 'GLD', name: 'GOLD_BAR', value: 100, extra: {id: 'EXTRA_ID', value: 50}});
+        });
+
+        it ('should update an asset', async function() {
+            this.timeout(SHORT_STEP);
+            await utils.invoke(suite, 'TestContract:updateAsset', [JSON.stringify({id: 'GLD', name: 'GOLD_BAR', value: 200, extra: {id: 'EXTRA_ID', value: 100}})]);
+            const payload = JSON.parse(await utils.query(suite, 'TestContract:getAsset', ['GLD']));
+            expect(payload).to.eql({id: 'GLD', name: 'GOLD_BAR', value: 200, extra: {id: 'EXTRA_ID', value: 100}});
         });
 
         it('should handle the getMetadata', async function () {

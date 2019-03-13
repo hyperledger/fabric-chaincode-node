@@ -39,29 +39,29 @@ module.exports.findByValue = function findByValue(arr, primaryField, id) {
     return null;
 };
 
-const generateSchema = (type) => {
+const generateSchema = (type, fullPath = true) => {
     if (isPrimitive(type)) {
         return {
             type: type.toLowerCase()
         };
     } else if (isArray(type)) {
-        const subType = getSubArray(type);
+        const subType = getSubArray(type, fullPath);
 
         return  {
             type: 'array',
-            items: generateSchema(subType)
+            items: generateSchema(subType, fullPath)
         };
     } else if (isMap(type)) {
         const subType = getSubMap(type);
 
         return {
             type: 'object',
-            additionalProperties: generateSchema(subType)
+            additionalProperties: generateSchema(subType, fullPath)
         };
     }
 
     return {
-        $ref: refPath + type
+        $ref: (fullPath ? refPath : '') + type
     };
 };
 module.exports.generateSchema = generateSchema;

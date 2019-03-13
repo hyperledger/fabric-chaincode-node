@@ -58,7 +58,7 @@ module.exports.Property = function Property (name, type) {
 
         properties.push({
             name,
-            schema: utils.generateSchema(type)
+            schema: utils.generateSchema(type, false)
         });
 
         Reflect.defineMetadata('fabric:object-properties', properties, target);

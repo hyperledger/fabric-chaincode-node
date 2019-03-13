@@ -142,7 +142,7 @@ describe('datamarshall.js', () => {
         let dm;
 
         beforeEach(() => {
-            dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers);
+            dm = new DataMarshall('jsonSerializer', defaultSerialization.serializers, {});
 
             dm.fromWireBuffer = sinon.stub()
                 .onFirstCall().returns({value: 'some value', validateData: 'some validate data'})
@@ -198,14 +198,14 @@ describe('datamarshall.js', () => {
             ]};
 
             const validateStub = sinon.stub().returns(false);
-            validateStub.errors = ['list', 'of', 'reasons', 'why', 'params', 'were', 'wrong'];
+            validateStub.errors = [{message: 'list'}, {message: 'of'}, {message: 'reasons'}, {message: 'why'}, {message: 'params'}, {message: 'were'}, {message: 'wrong'}];
             dm.ajv.compile = sinon.stub().returns(validateStub);
 
             expect(() => {
                 dm.handleParameters(fn, ['"one"'], 'logging prefix');
-            }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors)}`);
+            }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors.map((err) => { return err.message; }))}`); // eslint-disable-line
             sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {type: 'string'}, 'logging prefix');
-            sinon.assert.calledWith(dm.ajv.compile, {type:'string'});
+            sinon.assert.calledWith(dm.ajv.compile, {components: {schemas: {}}, properties: {prop: {type: 'string'}}});
             sinon.assert.calledWith(validateStub, 'some validate data');
         });
 
@@ -214,22 +214,31 @@ describe('datamarshall.js', () => {
                 {
                     name:'one',
                     schema:{
-                        $ref:'#components/someComponent'
+                        $ref:'#/components/schemas/someComponent'
                     }
                 }
             ]};
 
             const validateStub = sinon.stub().returns(false);
-            validateStub.errors = ['list', 'of', 'reasons', 'why', 'params', 'were', 'wrong'];
+            validateStub.errors = [{message: 'list'}, {message: 'of'}, {message: 'reasons'}, {message: 'why'}, {message: 'params'}, {message: 'were'}, {message: 'wrong'}];
+            dm.ajv.compile = sinon.stub().returns(validateStub);
 
-            dm.schemas = {};
-            dm.schemas.someComponent = {};
-            dm.schemas.someComponent.validator = validateStub;
+            dm.components = {
+                someComponent: {
+                    $id: 'someComponent',
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string'
+                        }
+                    }
+                }
+            };
 
             expect(() => {
                 dm.handleParameters(fn, ['"one"'], 'logging prefix');
-            }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors)}`);
-            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {$ref:'#components/someComponent'}, 'logging prefix');
+            }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors.map((err) => { return err.message; }))}`); // eslint-disable-line
+            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {$ref:'#/components/schemas/someComponent'}, 'logging prefix');
             sinon.assert.calledWith(validateStub, 'some validate data');
         });
 
@@ -244,7 +253,7 @@ describe('datamarshall.js', () => {
                 {
                     name:'two',
                     schema:{
-                        $ref: '#components/someComponent'
+                        $ref: '#/components/schemas/someComponent'
                     }
                 }
             ]};
@@ -253,18 +262,27 @@ describe('datamarshall.js', () => {
 
             dm.ajv.compile = sinon.stub().returns(validateStub);
 
-            dm.schemas = {};
-            dm.schemas.someComponent = {};
-            dm.schemas.someComponent.validator = validateStub;
+            dm.components = {
+                someComponent: {
+                    $id: 'someComponent',
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string'
+                        }
+                    }
+                }
+            };
 
             const returned = dm.handleParameters(fn, ['"one"', '"two"'], 'logging prefix');
 
             sinon.assert.calledTwice(dm.fromWireBuffer);
             sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {type: 'string'}, 'logging prefix');
-            sinon.assert.calledWith(dm.fromWireBuffer, '"two"', {$ref: '#components/someComponent'}, 'logging prefix');
+            sinon.assert.calledWith(dm.fromWireBuffer, '"two"', {$ref: '#/components/schemas/someComponent'}, 'logging prefix');
 
-            sinon.assert.calledOnce(dm.ajv.compile);
-            sinon.assert.calledWith(dm.ajv.compile, {type:'string'});
+            sinon.assert.calledTwice(dm.ajv.compile);
+            sinon.assert.calledWith(dm.ajv.compile, {components: {schemas: dm.components}, properties: {prop: {type: 'string'}}});
+            sinon.assert.calledWith(dm.ajv.compile, {components: {schemas: dm.components}, properties: {prop: {$ref: '#/components/schemas/someComponent'}}});
 
             sinon.assert.calledTwice(validateStub);
             sinon.assert.calledWith(validateStub, 'some validate data');

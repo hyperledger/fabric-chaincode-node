@@ -114,6 +114,12 @@ describe('utils', () => {
             });
         });
 
+        it ('should return a ref path for a non array and non primitive type and not use full path', () => {
+            expect(utils.generateSchema('Duck', false)).to.deep.equal({
+                $ref: 'Duck'
+            });
+        });
+
         it ('should recurse for array types', () => {
             expect(utils.generateSchema('Duck[]')).to.deep.equal({
                 type: 'array',
@@ -126,6 +132,13 @@ describe('utils', () => {
                 type: 'array',
                 items: {
                     $ref: '#/components/schemas/Duck'
+                }
+            });
+
+            expect(utils.generateSchema('Array<Duck>', false)).to.deep.equal({
+                type: 'array',
+                items: {
+                    $ref: 'Duck'
                 }
             });
 
