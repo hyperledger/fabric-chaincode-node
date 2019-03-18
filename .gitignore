@@ -10,7 +10,6 @@ fabric-shim/lib/protos/peer/*
 fabric-shim/lib/protos/ledger/*
 fabric-shim/lib/protos/token/*
 npm-shrinkwrap.json
-package-lock.json
 npm-debug.log
 .DS_Store
 fabric-shim/.DS_Store

@@ -54,8 +54,7 @@ gulp.task('clean-up-chaincode', () => {
     return gulp.src('*.js', {read: false})
         .pipe(shell([
             'find . -name "fabric*.tgz" -depth -exec rm {} \\;',
-            'find test -name "node_modules" -depth -exec rm -r {} \\;',
-            'find . -name "package-lock.json" -depth -exec rm {} \\;'
+            'find test -name "node_modules" -depth -exec rm -r {} \\;'
         ]));
 });
 
