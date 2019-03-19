@@ -4,15 +4,15 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-const grpc = require('grpc');
+const ProtoLoader = require('../protoloader');
 const path = require('path');
 
-const _policiesProto = grpc.load({
+const _policiesProto = ProtoLoader.load({
     root: path.join(__dirname, '../protos'),
     file: 'common/policies.proto'
 }).common;
 
-const _principalProto = grpc.load({
+const _principalProto = ProtoLoader.load({
     root: path.join(__dirname, '../protos'),
     file: 'msp/msp_principal.proto'
 }).common;
