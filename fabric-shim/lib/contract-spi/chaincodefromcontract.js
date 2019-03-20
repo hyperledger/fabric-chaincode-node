@@ -59,7 +59,7 @@ class ChaincodeFromContract {
 
         // validate the supplied metadata against what code we have (just in case)
         const errors = this._checkAgainstSuppliedMetadata(metadata);
-        if (errors) {
+        if (errors.length > 0) {
             throw new Error(JSON.stringify(errors));
         }
 
@@ -94,21 +94,33 @@ class ChaincodeFromContract {
     }
     /* istanbul ignore next */
     _dataMarshall(requestedSerializer) {
-        return new DataMarshall(requestedSerializer, this.serializers.serializers,  this.metadata.components.schemas);
+        return new DataMarshall(requestedSerializer, this.serializers.serializers, this.metadata.components.schemas);
     }
     /* istanbul ignore next */
     _ajv(schemaList) {
-        return new Ajv({useDefaults: true,
+        return new Ajv({
+            useDefaults: true,
             coerceTypes: false,
             allErrors: true,
-            schemas: schemaList});
+            schemas: schemaList
+        });
     }
 
     /**
      * TODO: Review the supplied metadata and check that the functions that have been given are the same ones as have been supplied
      */
-    _checkAgainstSuppliedMetadata() {
-        let errors;
+    _checkAgainstSuppliedMetadata(metadata) {
+        const errors = [];
+
+        if (metadata.contracts) {
+            const contracts = JSON.parse(JSON.stringify(this.contractImplementations));
+            for (const contractKey in contracts) {
+                if (!metadata.contracts[contractKey]) {
+                    errors.push(`Missing contract ${contractKey} in metadata`);
+                }
+            }
+        }
+
         return errors;
     }
 
@@ -120,13 +132,11 @@ class ChaincodeFromContract {
 
         logger.debug('Supplied contract classes', contractClasses);
         const Contract = require('fabric-contract-api').Contract;
-        const skipNames = Object.getOwnPropertyNames(Contract.prototype);
 
         const implementations = {};
 
         for (const contractClass of contractClasses) {
-
-            const contract = new(contractClass);
+            const contract = new (contractClass);
             if (!(Contract._isContract(contract))) {
                 throw new Error(`invalid contract instance ${JSON.stringify(contract)}`);
             }
@@ -139,13 +149,62 @@ class ChaincodeFromContract {
                 contract.default = true;
             }
 
-            const transactions = this._processContractTransactions(contract, skipNames);
-            const info = this._processContractInfo(contract);
-
-            implementations[name] = {name, contractInstance : contract, transactions, info};
+            implementations[name] = {name, contractInstance: contract};
 
         }
         return implementations;
+    }
+
+    /** Create the standard method from the code that has been loaded
+     * This can use introspection and, if applicable, typescript annotations
+     */
+    _augmentMetadataFromCode(metadata) {
+
+        if (!metadata.$schema) {
+            metadata.$schema = 'https://fabric-shim.github.io/release-1.4/contract-schema.json';
+        }
+
+        if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
+            logger.debug('_augmentMetadataFromCode - Contracts not supplied. Generating default');
+
+            const Contract = require('fabric-contract-api').Contract;
+            const skipNames = Object.getOwnPropertyNames(Contract.prototype);
+
+            metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));
+
+            for (const contractKey in metadata.contracts) {
+                const contract = metadata.contracts[contractKey];
+
+                for (const instanceKey in contract.contractInstance) {
+                    if (instanceKey.startsWith('_')) {
+                        delete contract.contractInstance[instanceKey];
+                    }
+                }
+
+                const impl = this.contractImplementations[contractKey].contractInstance;
+
+                contract.transactions = this._processContractTransactions(impl, skipNames);
+                contract.info = this._processContractInfo(impl);
+            }
+        }
+
+        // look for the general information representing all the contracts
+        // add if nothing has been given by the application
+        if (!metadata.info) {
+            logger.debug('_augmentMetadataFromCode - Info not supplied. Generating default');
+            metadata.info = {};
+            metadata.info.version = this.version ? this.version : '';
+            metadata.info.title = this.title ? this.title : '';
+        }
+
+        // obtain the information relating to the complex objects
+        if (!metadata.components) {
+            logger.debug('_augmentMetadataFromCode - Components not supplied. Generating default');
+            metadata.components = {};
+            metadata.components.schemas = Reflect.getMetadata('fabric:objects', global) || {};
+        }
+
+        return metadata;
     }
 
     /** read the code and create the internal structure representing the code */
@@ -195,52 +254,10 @@ class ChaincodeFromContract {
             return info[contract.constructor.name];
         } else {
             return {
-                title:'',
-                version:''
+                title: '',
+                version: ''
             };
         }
-    }
-
-    /** Create the standard method from the code that has been loaded
-     * This can use introspection and, if applicable, typescript annotations
-     */
-    _augmentMetadataFromCode(metadata) {
-
-        if (!metadata.$schema) {
-            metadata.$schema = 'https://fabric-shim.github.io/release-1.4/contract-schema.json';
-        }
-
-        if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
-            logger.debug('_augmentMetadataFromCode - Contracts not supplied. Generating default');
-            metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));
-
-            for (const contractKey in metadata.contracts) {
-                const contract = metadata.contracts[contractKey];
-                for (const instanceKey in contract.contractInstance) {
-                    if (instanceKey.startsWith('_')) {
-                        delete contract.contractInstance[instanceKey];
-                    }
-                }
-            }
-        }
-
-        // look for the general information representing all the contracts
-        // add if nothing has been given by the application
-        if (!metadata.info) {
-            logger.debug('_augmentMetadataFromCode - Info not supplied. Generating default');
-            metadata.info = {};
-            metadata.info.version = this.version ? this.version : '';
-            metadata.info.title = this.title ? this.title : '';
-        }
-
-        // obtain the information relating to the complex objects
-        if (!metadata.components) {
-            logger.debug('_augmentMetadataFromCode - Components not supplied. Generating default');
-            metadata.components = {};
-            metadata.components.schemas = Reflect.getMetadata('fabric:objects', global) || {};
-        }
-
-        return metadata;
     }
 
     /**
@@ -282,13 +299,15 @@ class ChaincodeFromContract {
         const channelID = stub.getChannelID();
         const loggerPrefix = utils.generateLoggingPrefix(channelID, txID);
         try {
-            const {contractName:cn, function:fn} = this._splitFunctionName(fAndP);
+            const {contractName: cn, function: fn} = this._splitFunctionName(fAndP);
             logger.debug(`${loggerPrefix} Invoking ${cn} ${fn}`);
 
             const contractData = this.contractImplementations[cn];
             if (!contractData) {
                 throw new Error(`Contract name is not known: ${cn}`);
             }
+
+            const transactionDescriptor = this.metadata.contracts[cn];
 
             const contractInstance = contractData.contractInstance;
             const dataMarshall = contractData.dataMarshall;
@@ -305,7 +324,7 @@ class ChaincodeFromContract {
             };
 
             // get the specific information for this tx function
-            const functionExists = contractData.transactions.find((transaction) => {
+            const functionExists = transactionDescriptor.transactions.find((transaction) => {
                 return transaction.name === fn;
             });
 
@@ -337,7 +356,7 @@ class ChaincodeFromContract {
                 return shim.success(dataMarshall.toWireBuffer(result, returnSchema.schema, loggerPrefix));
             } else {
                 try {
-                // if we've never heard of this function, then call the unknown tx function
+                    // if we've never heard of this function, then call the unknown tx function
                     await contractInstance.unknownTransaction(ctx);
                     return shim.success();
                 } catch (error) {
@@ -368,7 +387,7 @@ class ChaincodeFromContract {
         // https://regex101.com/ is very useful for understanding
 
         const regex = /([^:]*)(?::|^)(.*)/g;
-        const result = {contractName:'', function:''};
+        const result = {contractName: '', function: ''};
 
         const m = regex.exec(fcn);
         result.contractName = m[1];
