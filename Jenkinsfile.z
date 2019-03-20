@@ -11,7 +11,7 @@ node('hyp-z') {
      env.PROJECT = "fabric-chaincode-node"
      env.GOPATH = "$WORKSPACE/gopath"
      env.VERSION = sh(returnStdout: true, script: 'curl -O https://raw.githubusercontent.com/hyperledger/fabric/master/Makefile && cat Makefile | grep "BASE_VERSION =" | cut -d "=" -f2').trim()
-     env.NODE_VER = "8.11.3"
+     env.NODE_VER = "10.15.2"
      env.ARCH = "s390x"
      env.IMAGE_TAG = "${ARCH}-${VERSION}-stable" // fabric latest stable version from nexus
      env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v{NODE_VER}/bin:$PATH"
