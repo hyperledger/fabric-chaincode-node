@@ -6,8 +6,8 @@
   "testFabricThirdParty": "0.4.14",
   "docsLatestVersion": "release-1.4",
   "engines": {
-    "node": "10.15.2",
-    "npm": "^6.4.1"
+    "node": "^8.9.0",
+    "npm": "^5.5.1"
   },
   "engineStrict": true,
   "license": "Apache-2.0",

@@ -15,7 +15,7 @@ const shell = require('gulp-shell');
 const util = require('util');
 
 const version = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'))).version;
-const node_version = process.env.NODE_VERSION || '10.15.2';
+const node_version = process.env.NODE_VERSION || '8';
 const build_dir = path.join(__dirname, '..', 'fabric-nodeenv');
 const tag = version + '-' + git.short();
 
