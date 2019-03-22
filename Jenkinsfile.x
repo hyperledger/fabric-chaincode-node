@@ -11,7 +11,7 @@ node ('hyp-x') { // trigger build on x86_64 node
      env.PROJECT = "fabric-chaincode-node"
      env.GOPATH = "$WORKSPACE/gopath"
      env.ARCH = "amd64"
-     def nodeHome = tool 'nodejs-8.11.3'
+     def nodeHome = tool 'nodejs-10.15.2'
      env.VERSION = sh(returnStdout: true, script: 'curl -O https://raw.githubusercontent.com/hyperledger/fabric/master/Makefile && cat Makefile | grep "BASE_VERSION =" | cut -d "=" -f2').trim()
      env.IMAGE_TAG = "${ARCH}-latest" // fabric latest stable version from nexus
      env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
