@@ -1033,6 +1033,43 @@ describe('Stub', () => {
             });
         });
 
+        describe('getPrivateDataHash', () => {
+            let handleGetPrivateDataHashStub;
+            let stub;
+
+            beforeEach(() => {
+                handleGetPrivateDataHashStub = sinon.stub().resolves('some state');
+                stub = new Stub({
+                    handleGetPrivateDataHash: handleGetPrivateDataHashStub
+                }, 'dummyChannelId', 'dummyTxid', {
+                    args: []
+                });
+            });
+
+            it ('should throw an error if no arguments supplied', async () => {
+                const result = stub.getPrivateDataHash();
+                await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+            });
+
+            it ('should throw an error if one argument supplied', async () => {
+                const result = stub.getPrivateDataHash('some arg');
+                await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
+            });
+
+            it ('should throw an error if collection null', async () => {
+                const result = stub.getPrivateDataHash(null, 'some key');
+                await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+            });
+
+            it ('should return handler.handleGetPrivateDataHash', async () => {
+                const result = await stub.getPrivateDataHash('some collection', 'some key');
+
+                expect(result).to.deep.equal('some state');
+                expect(handleGetPrivateDataHashStub.calledOnce).to.be.ok;
+                expect(handleGetPrivateDataHashStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'dummyChannelId', 'dummyTxid']);
+            });
+        });
+
         describe('putPrivateData', () => {
             let handlePutStateStub;
             let stub;

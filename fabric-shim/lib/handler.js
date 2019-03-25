@@ -428,6 +428,21 @@ class ChaincodeSupportClient {
         return this._askPeerAndListen(msg, 'PutStateMetadata');
     }
 
+    async handleGetPrivateDataHash(collection, key, channel_id, txId) {
+        const payload = new _serviceProto.GetState();
+        payload.setKey(key);
+        payload.setCollection(collection);
+
+        const msg = {
+            type: _serviceProto.ChaincodeMessage.Type.GET_PRIVATE_DATA_HASH,
+            payload: payload.toBuffer(),
+            txid: txId,
+            channel_id: channel_id
+        };
+
+        return await this._askPeerAndListen(msg, 'GetPrivateDataHash');
+    }
+
     async handleGetStateMetadata(collection, key, channel_id, txId) {
         // construct payload for GetStateMetadata
         const payload = new _serviceProto.GetStateMetadata();

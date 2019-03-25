@@ -1044,6 +1044,56 @@ describe('Handler', () => {
             });
         });
 
+        describe('handleGetPrivateDataHash', () => {
+            const key = 'theKey';
+            const collection = '';
+
+            let expectedMsg;
+            before(() => {
+                const serviceProto = Handler.__get__('_serviceProto');
+
+                const payload = new serviceProto.GetState();
+                payload.setKey(key);
+                payload.setCollection(collection);
+
+                expectedMsg = {
+                    type: serviceProto.ChaincodeMessage.Type.GET_PRIVATE_DATA_HASH,
+                    payload: payload.toBuffer(),
+                    channel_id: 'theChannelID',
+                    txid: 'theTxID'
+                };
+            });
+
+            afterEach(() => {
+                Handler = rewire('../../../fabric-shim/lib/handler.js');
+                sandbox.restore();
+            });
+
+            it ('should resolve when _askPeerAndListen resolves', async () => {
+                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+                const result = await handler.handleGetPrivateDataHash(collection, key, 'theChannelID', 'theTxID');
+
+                expect(result).to.deep.equal('some response');
+                expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+                expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+                expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetPrivateDataHash');
+            });
+
+            it ('should reject when _askPeerAndListen rejects', async () => {
+                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+                const result = handler.handleGetPrivateDataHash(collection, key, 'theChannelID', 'theTxID');
+
+                await expect(result).to.eventually.be.rejected;
+                expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+                expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+                expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('GetPrivateDataHash');
+            });
+        });
+
         describe('handleGetStateMetadata', () => {
             const key = 'theKey';
             const collection = '';
