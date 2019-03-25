@@ -21,7 +21,6 @@
     "fabric-contract-api": "file:./fabric-contract-api",
     "fabric-shim": "file:./fabric-shim",
     "fabric-shim-crypto": "file:./fabric-shim-crypto",
-    "fs-extra": "^7.0.1",
     "jsrsasign": "^8.0.4"
   },
   "devDependencies": {

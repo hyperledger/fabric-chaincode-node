@@ -57,7 +57,11 @@ export default class TestContractOne extends Contract {
         const clientIdentity: ClientIdentity = ctx.clientIdentity;
 
 		// test that the name returns a string
-        const ns: string = this.getName();
+		const ns: string = this.getName();
+		
+		// add in some logging
+		ctx.logging.setLevel('DEBUG');
+		ctx.logging.getLogger().info('Output from the test');
     }
 }
 

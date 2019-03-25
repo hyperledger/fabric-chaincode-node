@@ -6,7 +6,6 @@
 /* global describe it */
 'use strict';
 
-const winston = require('winston');
 const chai = require('chai');
 const expect = chai.expect;
 
@@ -18,7 +17,7 @@ describe('Logger', () => {
         it ('should create a new logger name unknown', () => {
             const log = Logger.getLogger('unknown name');
 
-            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log).to.be.ok;
             expect(log.level).to.deep.equal('info');
         });
 
@@ -42,7 +41,7 @@ describe('Logger', () => {
 
             const log = Logger.getLogger();
 
-            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log).to.be.ok;
             expect(log.level).to.deep.equal('fatal');
         });
 
@@ -51,7 +50,7 @@ describe('Logger', () => {
 
             const log = Logger.getLogger();
 
-            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log).to.be.ok;
             expect(log.level).to.deep.equal('error');
         });
 
@@ -60,7 +59,7 @@ describe('Logger', () => {
 
             const log = Logger.getLogger();
 
-            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log).to.be.ok;
             expect(log.level).to.deep.equal('warn');
         });
 
@@ -69,7 +68,7 @@ describe('Logger', () => {
 
             const log = Logger.getLogger();
 
-            expect(log instanceof winston.Logger).to.be.ok;
+            expect(log).to.be.ok;
             expect(log.level).to.deep.equal('debug');
         });
     });

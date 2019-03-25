@@ -6,15 +6,15 @@
 */
 
 declare module 'fabric-contract-api' {
-    import { LoggerInstance } from 'winston';
+    import { Logger } from 'winston';
     import { ChaincodeStub, ClientIdentity } from 'fabric-shim';
     
     export class Context {
         stub: ChaincodeStub;
         clientIdentity: ClientIdentity;
-        logger: {
+        logging: {
             setLevel: (level: string) => void,
-            getLogger: (name?: string) => LoggerInstance
+            getLogger: (name?: string) => Logger
         }
     }
     

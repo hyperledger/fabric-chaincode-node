@@ -8,24 +8,25 @@
 const winston = require('winston');
 const loggers = {};
 
-function createLogger(level, name) {
+function createLogger(loglevel, name) {
     // a singleton and default logger
-    const {
-        config
-    } = winston;
-    const logger = new winston.Logger({
-        level,
+    const logger = new winston.createLogger({
+        level:loglevel,
+        format: winston.format.combine(
+            winston.format.splat(),
+            winston.format.colorize(),
+            winston.format.timestamp(),
+            winston.format.align(),
+            winston.format.simple(),
+            winston.format.printf((info) => {
+                const {timestamp, level, message} = info;
+                return `${timestamp} ${level} [${name}] ${message}`;
+            }
+            )
+        ),
         transports: [
             new winston.transports.Console({
-                timestamp: () => new Date().toISOString(),
                 handleExceptions: true,
-                formatter: (options) => {
-                    return `${options.timestamp()} ${
-                        config.colorize(options.level, options.level.toUpperCase())} ${
-                        name ? config.colorize(options.level, `[${name}]`) : ''
-                    } ${options.message ? options.message : ''} ${
-                        options.meta && Object.keys(options.meta).length ? `\n\t${JSON.stringify(options.meta)}` : ''}`;
-                }
             })
         ],
         exitOnError: false
