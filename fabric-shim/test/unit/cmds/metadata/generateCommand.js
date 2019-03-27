@@ -52,7 +52,7 @@ describe('GenerateCommand', () => {
             GenerateCommand.builder(yargs);
             sinon.assert.calledOnce(yargs.options);
             sinon.assert.calledWith(yargs.options, {
-                'file': {alias: 'f', required: false, describe: 'The file name/path to save the generated metadata file, if no file is specified, it will print to stdout', type: 'string'},
+                'file': {alias: 'f', required: true, describe: 'The file name/path to save the generated metadata file', type: 'string'},
                 'module-path': {alias: 'p', required: false, describe: 'The path to the directory of your smart contract project which contains your chaincode, default is your current working directory', type: 'string', default: process.cwd()}
             });
             sinon.assert.calledOnce(yargs.usage);

@@ -78,7 +78,7 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/tls/server.key
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/tls/server.crt
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/tls/ca.crt
-      - CORE_CHAINCODE_LOGGING_SHIM=debug
+      - CORE_CHAINCODE_LOGGING_LEVEL=debug
       - GRPC_TRACE=all=true
       - GRPC_VERBOSITY=debug
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric

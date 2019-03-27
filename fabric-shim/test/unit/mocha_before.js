@@ -16,6 +16,11 @@ const sinon = require('sinon');
 
 before(() => {
     process.on('unhandledRejection', (e) => {
-        sinon.assert.fail(`You forgot to return a Promise! Check your tests! ${e.message}`);
+        if (!/__PERMITTED__/.test(e.message)) {
+            sinon.assert.fail(`You forgot to return a Promise! Check your tests! ${e.message}`);
+        } else {
+            // permitted unhandled rection
+            console.log('Ignoring unhandled rejection as it is marked as __PERMITTED__ ');
+        }
     });
 });

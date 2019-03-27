@@ -34,7 +34,7 @@ class Contract {
             this.name = name.trim();
         }
 
-        logger.info('Creating new Contract', name);
+        logger.debug('Creating new Contract', name);
     }
 
     /**
@@ -83,7 +83,7 @@ class Contract {
     async unknownTransaction(ctx) {
         const {fcn, params} = ctx.stub.getFunctionAndParameters();
 
-        logger.error(`[${ctx.getStub().getTxID()}] ${this.name} contract-api.Contract unknown transaction`, fcn, params);
+        logger.error(`[${ctx.stub.getTxID()}] ${this.name} contract-api.Contract unknown transaction`, fcn, params);
 
         throw new Error(`You've asked to invoke a function that does not exist: ${fcn}`);
     }

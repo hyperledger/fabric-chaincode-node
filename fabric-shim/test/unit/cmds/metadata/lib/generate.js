@@ -58,7 +58,7 @@ describe('generate', () => {
     let sandbox;
     let getInfoFromContractStub;
     let getMetadataStub;
-    let infoStub;
+
     let writeFileStub;
     let mkdirpSyncStub;
 
@@ -74,7 +74,7 @@ describe('generate', () => {
     });
 
     describe ('#handler', () => {
-        let args = {'module-path': process.cwd(), file : path.resolve(process.cwd(), 'file')};
+        const args = {'module-path': process.cwd(), file : path.resolve(process.cwd(), 'file')};
 
         beforeEach('Sandbox creation', () => {
             const FakeLogger = {
@@ -83,7 +83,7 @@ describe('generate', () => {
 
             getMetadataStub = sandbox.stub(Bootstrap, 'getMetadata');
             getInfoFromContractStub = sandbox.stub(Bootstrap, 'getInfoFromContract');
-            infoStub = sandbox.stub(FakeLogger, 'info');
+
 
             Generate.__set__('logger', FakeLogger);
         });
@@ -211,47 +211,6 @@ describe('generate', () => {
                 }, null, 4));
             sinon.assert.calledOnce(getInfoFromContractStub);
             sinon.assert.calledOnce(getMetadataStub);
-
-            Generate.__set__('ChaincodeFromContract', originalChaincodeFromContract);
-            Generate.__set__('fs', originalFS);
-        });
-
-        it ('should log out the contract metadata to when no file-name arg is passed ', async () => {
-            args = {'module-path': process.cwd()};
-            getMetadataStub.resolves(
-                {
-                    info: {
-                        title: 'some title',
-                        version: '0.1.1'
-                    }
-                }
-            );
-            getInfoFromContractStub.returns(
-                {
-                    contracts: [sc],
-                    serializers : {},
-                    title: 'some title',
-                    version: 'some version'
-                }
-            );
-            const originalFS = Generate.__get__('fs');
-            Generate.__set__('fs', {writeFile: writeFileStub});
-            const originalChaincodeFromContract = Generate.__get__('ChaincodeFromContract');
-            Generate.__set__('ChaincodeFromContract', MockChaincodeFromContract);
-
-            await Generate.handler(args);
-
-            sinon.assert.notCalled(writeFileStub);
-            sinon.assert.calledOnce(getInfoFromContractStub);
-            sinon.assert.calledOnce(getMetadataStub);
-            sinon.assert.calledOnce(infoStub);
-            infoStub.getCall(0).args.should.deep.equal([JSON.stringify(
-                {
-                    info: {
-                        title: 'some title',
-                        version: '0.1.1'
-                    }
-                }, null, 4)]);
 
             Generate.__set__('ChaincodeFromContract', originalChaincodeFromContract);
             Generate.__set__('fs', originalFS);

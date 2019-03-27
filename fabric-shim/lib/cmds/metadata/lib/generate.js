@@ -26,18 +26,16 @@ class Generate {
         const fileMetadata = await Bootstrap.getMetadata(opts['module-path']);
         const {contracts, serializers, title, version} = Bootstrap.getInfoFromContract(opts['module-path']);
         const chaincode = new ChaincodeFromContract(contracts, serializers, fileMetadata, title, version);
-        if (opts.file) {
-            const fileName = path.extname(opts.file) === '' ? opts.file + '.json' : opts.file;
-            const filePath = path.resolve(fileName);
-            // create the directory if needed
-            fs.mkdirpSync(path.dirname(filePath));
 
-            // resolve so the path is consistent based on if it is relative or if it is absolute
-            await fs.writeFile(filePath, JSON.stringify(chaincode.metadata, null, 4));
-            logger.info(`File containing metadata has been saved to ${filePath}`);
-        } else {
-            logger.info(JSON.stringify(chaincode.metadata, null, 4));
-        }
+        const fileName = path.extname(opts.file) === '' ? opts.file + '.json' : opts.file;
+        const filePath = path.resolve(fileName);
+        // create the directory if needed
+        fs.mkdirpSync(path.dirname(filePath));
+
+        // resolve so the path is consistent based on if it is relative or if it is absolute
+        await fs.writeFile(filePath, JSON.stringify(chaincode.metadata, null, 4));
+        logger.info(`File containing metadata has been saved to ${filePath}`);
+
     }
 }
 module.exports = Generate;

@@ -115,7 +115,7 @@ Use the configtxgen tool to generate a genesis block and a channel config:
 
 Then you can launch a peer node and an orderer node with the following commands:
 ```
-CORE_CHAINCODE_LOGGING_SHIM=debug CORE_LOGGING_PEER=debug CORE_PEER_ADDRESSAUTODETECT=true ./build/bin/peer node start --peer-chaincodedev
+CORE_CHAINCODE_LOGGING_LEVEL=debug CORE_LOGGING_PEER=debug CORE_PEER_ADDRESSAUTODETECT=true ./build/bin/peer node start --peer-chaincodedev
 ORDERER_GENERAL_LISTENADDRESS=0.0.0.0 ORDERER_GENERAL_GENESISMETHOD=file ORDERER_GENERAL_GENESISFILE=./test.genesis.block ./build/bin/orderer
 ```
 

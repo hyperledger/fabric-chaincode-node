@@ -22,7 +22,7 @@ const Info = InfoAnnotations.Info;
 describe ('Info.js', () => {
 
     const mockTarget = {
-        name: 'steve'
+        name: 'steve', title: 'steve'
     };
 
     let defineMetadataStub;
@@ -55,7 +55,7 @@ describe ('Info.js', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:info', global);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:info',
-                {steve: {name: 'steve', version: ''}}
+                {steve: {title: 'steve', version: ''}}
             );
         });
 
@@ -70,7 +70,7 @@ describe ('Info.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:info', {
                 'object1': {},
-                'steve': {name: 'steve', version: ''}
+                'steve': {title: 'steve', version: ''}
             });
         });
     });
@@ -79,7 +79,7 @@ describe ('Info.js', () => {
         let info;
 
         beforeEach(() => {
-            info = Info({name: 'bill', version: '1.0.1'});
+            info = Info({title: 'bill', version: '1.0.1'});
         });
 
         it ('should add object as key when no objects exist for global yet', () => {
@@ -92,7 +92,7 @@ describe ('Info.js', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:info', global);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:info',
-                {steve:  {name: 'bill', version: '1.0.1'}}
+                {steve:  {title: 'bill', version: '1.0.1'}}
             );
         });
 
@@ -107,7 +107,7 @@ describe ('Info.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:info', {
                 'object1': {},
-                'steve': {name: 'bill', version: '1.0.1'}
+                'steve': {title: 'bill', version: '1.0.1'}
             });
         });
     });

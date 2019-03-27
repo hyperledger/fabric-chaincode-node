@@ -18,14 +18,14 @@ require('reflect-metadata');
 
 module.exports.Info = function Info (info = {}) {
     return (target) => {
-        logger.info('@Info args:', `Info -> ${info},`, 'Target ->', target.name);
+        logger.debug('@Info args:', `Info -> ${info},`, 'Target ->', target.name);
 
         const data = Reflect.getMetadata('fabric:info', global) || {};
 
         logger.debug('Existing fabric:info', data);
 
-        if (!info.name) {
-            info.name = target.name;
+        if (!info.title) {
+            info.title = target.title;
         }
         if (!info.version) {
             info.version = '';

@@ -12,7 +12,7 @@ require('reflect-metadata');
 
 module.exports.Transaction = function Transaction(commit = true) {
     return (target, propertyKey) => {
-        logger.info('@Transaction args:', `Property Key -> ${propertyKey}, Commit -> ${commit},`, 'Target ->', target.constructor.name);
+        logger.debug('@Transaction args:', `Property Key -> ${propertyKey}, Commit -> ${commit},`, 'Target ->', target.constructor.name);
 
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
         const transaction = utils.findByValue(transactions, 'name', propertyKey);
@@ -78,7 +78,7 @@ module.exports.Transaction = function Transaction(commit = true) {
 
 module.exports.Returns = function Returns(returnType) {
     return (target, propertyKey) => {
-        logger.info('@Returns args:', `, Property Key -> ${propertyKey}, Return Type -> ${returnType},`, 'Target ->', target.constructor.name);
+        logger.debug('@Returns args:', `, Property Key -> ${propertyKey}, Return Type -> ${returnType},`, 'Target ->', target.constructor.name);
 
         const transactions = Reflect.getMetadata('fabric:transactions', target) || [];
 
