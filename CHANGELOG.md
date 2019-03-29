@@ -1,3 +1,70 @@
+## v1.4.1
+Fri  5 Apr 12:34:34 BST 2019
+
+* [5c22fd5](https://github.com/hyperledger/fabric/commit/5c22fd5) [FAB-14974](https://jira.hyperledger.org/browse/FAB-14974) Release 1.4.1
+* [18c5c7a](https://github.com/hyperledger/fabric/commit/18c5c7a) [FAB-15027](https://jira.hyperledger.org/browse/FAB-15027) Validation fix
+* [8418072](https://github.com/hyperledger/fabric/commit/8418072) [FAB-14726](https://jira.hyperledger.org/browse/FAB-14726) CLI fixes
+* [64b42f7](https://github.com/hyperledger/fabric/commit/64b42f7) [FAB-14722](https://jira.hyperledger.org/browse/FAB-14722) send metadata when handling params
+* [94df609](https://github.com/hyperledger/fabric/commit/94df609) [FAB-14736](https://jira.hyperledger.org/browse/FAB-14736) Update Logging
+* [c406864](https://github.com/hyperledger/fabric/commit/c406864) [FAB-14537](https://jira.hyperledger.org/browse/FAB-14537) components ref components
+* [c655d22](https://github.com/hyperledger/fabric/commit/c655d22) [FAB-14440](https://jira.hyperledger.org/browse/FAB-14440) Port of gRPC loader fix
+* [7f38644](https://github.com/hyperledger/fabric/commit/7f38644) [FAB-14490](https://jira.hyperledger.org/browse/FAB-14490) Logging from chaincode
+* [b21ee79](https://github.com/hyperledger/fabric/commit/b21ee79) [FAB-14442](https://jira.hyperledger.org/browse/FAB-14442) Boolean return values
+* [46cf51a](https://github.com/hyperledger/fabric/commit/46cf51a) [FAB-14303](https://jira.hyperledger.org/browse/FAB-14303) Update minor docs mistakes
+* [23c5687](https://github.com/hyperledger/fabric/commit/23c5687) [FAB-14283](https://jira.hyperledger.org/browse/FAB-14283) generateSchema for maps
+* [7491c7d](https://github.com/hyperledger/fabric/commit/7491c7d) [FAB-14260](https://jira.hyperledger.org/browse/FAB-14260) Update jsdoc
+* [bc28e8a](https://github.com/hyperledger/fabric/commit/bc28e8a) [FAB-13048](https://jira.hyperledger.org/browse/FAB-13048) Addition tx logging
+* [167aeaa](https://github.com/hyperledger/fabric/commit/167aeaa) [FAB-13615](https://jira.hyperledger.org/browse/FAB-13615) Tactical solution for 1.4 only
+* [c6066a4](https://github.com/hyperledger/fabric/commit/c6066a4) [FAB-14095](https://jira.hyperledger.org/browse/FAB-14095) metadata ignore contract fcns
+* [89e06c9](https://github.com/hyperledger/fabric/commit/89e06c9) [FAB-14133](https://jira.hyperledger.org/browse/FAB-14133) updated property tag to handle array type
+* [5b42afb](https://github.com/hyperledger/fabric/commit/5b42afb) [FAB-13692](https://jira.hyperledger.org/browse/FAB-13692) add submitTx by default to txns
+* [6f9d1bc](https://github.com/hyperledger/fabric/commit/6f9d1bc) [FAB-14072](https://jira.hyperledger.org/browse/FAB-14072) Backport Generate Metadata
+* [3b81e93](https://github.com/hyperledger/fabric/commit/3b81e93) [FAB-14071](https://jira.hyperledger.org/browse/FAB-14071) add schema ref
+* [c255afa](https://github.com/hyperledger/fabric/commit/c255afa) [FAB-13925](https://jira.hyperledger.org/browse/FAB-13925) Updated to handle numeric type conversion
+* [423ea96](https://github.com/hyperledger/fabric/commit/423ea96) [FAB-13319](https://jira.hyperledger.org/browse/FAB-13319) adding default annotation
+* [f9ce139](https://github.com/hyperledger/fabric/commit/f9ce139) [FAB-13909](https://jira.hyperledger.org/browse/FAB-13909) fix for unknown transaction shim.error
+* [9970bb0](https://github.com/hyperledger/fabric/commit/9970bb0) [FAB-13954](https://jira.hyperledger.org/browse/FAB-13954) Correct build failures
+* [6265522](https://github.com/hyperledger/fabric/commit/6265522) [FAB-12846](https://jira.hyperledger.org/browse/FAB-12846) added ability to specify arrays
+* [7f9f97b](https://github.com/hyperledger/fabric/commit/7f9f97b) [FAB-13890](https://jira.hyperledger.org/browse/FAB-13890) Additional Reference info
+* [33b5ef7](https://github.com/hyperledger/fabric/commit/33b5ef7) [FAB-12864](https://jira.hyperledger.org/browse/FAB-12864) adding additional logging
+* [19e36a2](https://github.com/hyperledger/fabric/commit/19e36a2) [FAB-13806](https://jira.hyperledger.org/browse/FAB-13806) Update CI script to remove nvm installation
+* [5945e20](https://github.com/hyperledger/fabric/commit/5945e20) [FAB-13250](https://jira.hyperledger.org/browse/FAB-13250) Publish npm modules to npm registry
+* [694f257](https://github.com/hyperledger/fabric/commit/694f257) [FAB-13075](https://jira.hyperledger.org/browse/FAB-13075) Move to updated x509
+* [faa9e18](https://github.com/hyperledger/fabric/commit/faa9e18) [FAB-13658](https://jira.hyperledger.org/browse/FAB-13658) Update CI script
+* [2bf74ac](https://github.com/hyperledger/fabric/commit/2bf74ac) [FAB-13563](https://jira.hyperledger.org/browse/FAB-13563) Prepare next release 141
+
+## v1.4.1-rc1
+Fri 29 Mar 12:03:07 GMT 2019
+
+* [64b42f7](https://github.com/hyperledger/fabric/commit/64b42f7) [FAB-14722](https://jira.hyperledger.org/browse/FAB-14722) send metadata when handling params
+* [94df609](https://github.com/hyperledger/fabric/commit/94df609) [FAB-14736](https://jira.hyperledger.org/browse/FAB-14736) Update Logging
+* [c406864](https://github.com/hyperledger/fabric/commit/c406864) [FAB-14537](https://jira.hyperledger.org/browse/FAB-14537) components ref components
+* [c655d22](https://github.com/hyperledger/fabric/commit/c655d22) [FAB-14440](https://jira.hyperledger.org/browse/FAB-14440) Port of gRPC loader fix
+* [7f38644](https://github.com/hyperledger/fabric/commit/7f38644) [FAB-14490](https://jira.hyperledger.org/browse/FAB-14490) Logging from chaincode
+* [b21ee79](https://github.com/hyperledger/fabric/commit/b21ee79) [FAB-14442](https://jira.hyperledger.org/browse/FAB-14442) Boolean return values
+* [46cf51a](https://github.com/hyperledger/fabric/commit/46cf51a) [FAB-14303](https://jira.hyperledger.org/browse/FAB-14303) Update minor docs mistakes
+* [23c5687](https://github.com/hyperledger/fabric/commit/23c5687) [FAB-14283](https://jira.hyperledger.org/browse/FAB-14283) generateSchema for maps
+* [7491c7d](https://github.com/hyperledger/fabric/commit/7491c7d) [FAB-14260](https://jira.hyperledger.org/browse/FAB-14260) Update jsdoc
+* [bc28e8a](https://github.com/hyperledger/fabric/commit/bc28e8a) [FAB-13048](https://jira.hyperledger.org/browse/FAB-13048) Addition tx logging
+* [167aeaa](https://github.com/hyperledger/fabric/commit/167aeaa) [FAB-13615](https://jira.hyperledger.org/browse/FAB-13615) Tactical solution for 1.4 only
+* [c6066a4](https://github.com/hyperledger/fabric/commit/c6066a4) [FAB-14095](https://jira.hyperledger.org/browse/FAB-14095) metadata ignore contract fcns
+* [89e06c9](https://github.com/hyperledger/fabric/commit/89e06c9) [FAB-14133](https://jira.hyperledger.org/browse/FAB-14133) updated property tag to handle array type
+* [5b42afb](https://github.com/hyperledger/fabric/commit/5b42afb) [FAB-13692](https://jira.hyperledger.org/browse/FAB-13692) add submitTx by default to txns
+* [6f9d1bc](https://github.com/hyperledger/fabric/commit/6f9d1bc) [FAB-14072](https://jira.hyperledger.org/browse/FAB-14072) Backport Generate Metadata
+* [3b81e93](https://github.com/hyperledger/fabric/commit/3b81e93) [FAB-14071](https://jira.hyperledger.org/browse/FAB-14071) add schema ref
+* [c255afa](https://github.com/hyperledger/fabric/commit/c255afa) [FAB-13925](https://jira.hyperledger.org/browse/FAB-13925) Updated to handle numeric type conversion
+* [423ea96](https://github.com/hyperledger/fabric/commit/423ea96) [FAB-13319](https://jira.hyperledger.org/browse/FAB-13319) adding default annotation
+* [f9ce139](https://github.com/hyperledger/fabric/commit/f9ce139) [FAB-13909](https://jira.hyperledger.org/browse/FAB-13909) fix for unknown transaction shim.error
+* [9970bb0](https://github.com/hyperledger/fabric/commit/9970bb0) [FAB-13954](https://jira.hyperledger.org/browse/FAB-13954) Correct build failures
+* [6265522](https://github.com/hyperledger/fabric/commit/6265522) [FAB-12846](https://jira.hyperledger.org/browse/FAB-12846) added ability to specify arrays
+* [7f9f97b](https://github.com/hyperledger/fabric/commit/7f9f97b) [FAB-13890](https://jira.hyperledger.org/browse/FAB-13890) Additional Reference info
+* [33b5ef7](https://github.com/hyperledger/fabric/commit/33b5ef7) [FAB-12864](https://jira.hyperledger.org/browse/FAB-12864) adding additional logging
+* [19e36a2](https://github.com/hyperledger/fabric/commit/19e36a2) [FAB-13806](https://jira.hyperledger.org/browse/FAB-13806) Update CI script to remove nvm installation
+* [5945e20](https://github.com/hyperledger/fabric/commit/5945e20) [FAB-13250](https://jira.hyperledger.org/browse/FAB-13250) Publish npm modules to npm registry
+* [694f257](https://github.com/hyperledger/fabric/commit/694f257) [FAB-13075](https://jira.hyperledger.org/browse/FAB-13075) Move to updated x509
+* [faa9e18](https://github.com/hyperledger/fabric/commit/faa9e18) [FAB-13658](https://jira.hyperledger.org/browse/FAB-13658) Update CI script
+* [2bf74ac](https://github.com/hyperledger/fabric/commit/2bf74ac) [FAB-13563](https://jira.hyperledger.org/browse/FAB-13563) Prepare next release 141
+
 ## v1.4.0
 Tue  8 Jan 16:15:05 GMT 2019
 

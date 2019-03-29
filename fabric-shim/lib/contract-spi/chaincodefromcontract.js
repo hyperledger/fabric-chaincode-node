@@ -70,7 +70,6 @@ class ChaincodeFromContract {
         // really do not like this method of duplicating an object
         // But it works and is quick (allegedly)
         const systemContract = this.contractImplementations['org.hyperledger.fabric'].contractInstance;
-
         systemContract._setMetadata(JSON.parse(JSON.stringify(this.metadata)));
 
         // compile the schemas, and in addition sets upt eh data marhsalls with this information
