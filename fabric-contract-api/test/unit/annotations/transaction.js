@@ -266,10 +266,7 @@ describe('Transaction.js', () => {
                 parameters: []
             },  {
                 name: 'mockKey',
-                returns: [{
-                    name: 'success',
-                    schema: 'some new schema'
-                }]
+                returns: 'some new schema'
             }], mockTarget);
         });
 
@@ -286,10 +283,7 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
-                returns:[{
-                    name: 'success',
-                    schema: 'some new schema'
-                }]
+                returns: 'some new schema'
             }], mockTarget);
         });
     });

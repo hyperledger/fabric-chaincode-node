@@ -19,8 +19,6 @@ const ObjectAnnotations = rewire('./../../../lib/annotations/object');
 const Object = ObjectAnnotations.Object;
 const Property = ObjectAnnotations.Property;
 
-const utils = require('../../../lib/annotations/utils');
-
 describe ('Object.js', () => {
 
     const mockTarget = {
@@ -40,7 +38,7 @@ describe ('Object.js', () => {
         sandbox.restore();
     });
 
-    describe('Object', () => {
+    describe('#Object', () => {
 
         let object;
 
@@ -51,7 +49,7 @@ describe ('Object.js', () => {
         it ('should add object as key when no objects exist for global yet', () => {
             getMetadataStub
                 .onFirstCall().returns(undefined)
-                .onSecondCall().returns(['some', 'properties']);
+                .onSecondCall().returns({'some': 'properties'});
 
             object(mockTarget);
 
@@ -63,7 +61,7 @@ describe ('Object.js', () => {
                 'steve':  {
                     $id: 'steve',
                     additionalProperties: false,
-                    properties: ['some', 'properties'],
+                    properties: {'some': 'properties'},
                     type: 'object'
                 }
             });
@@ -85,33 +83,28 @@ describe ('Object.js', () => {
                 'steve':  {
                     $id: 'steve',
                     additionalProperties: false,
-                    properties: [],
+                    properties: {},
                     type: 'object'
                 }
             });
         });
     });
 
-    describe('Property', () => {
-        let generateSchemaStub;
-
-        beforeEach(() => {
-            generateSchemaStub = sandbox.stub(utils, 'generateSchema').returns('some new schema');
-        });
+    describe('#Property', () => {
 
         it ('should use the type and name passed', () => {
-            getMetadataStub.onFirstCall().returns(['some', 'properties']);
+            getMetadataStub.onFirstCall().returns({'some': 'properties'});
 
             Property('some name', 'SoMe tYPe')(mockTarget);
 
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
-            sinon.assert.calledOnce(generateSchemaStub);
-            sinon.assert.calledWith(generateSchemaStub, 'SoMe tYPe');
-            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', ['some', 'properties', {
-                name: 'some name',
-                schema: 'some new schema'
-            }]);
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
+                'some': 'properties',
+                'some name': {
+                    '$ref': 'SoMe tYPe'
+                }
+            }, mockTarget);
         });
 
         it ('should handle the reflected type being a function when type not passed', () => {
@@ -124,12 +117,12 @@ describe ('Object.js', () => {
             sinon.assert.calledTwice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
-            sinon.assert.calledOnce(generateSchemaStub);
-            sinon.assert.calledWith(generateSchemaStub, 'Fred');
-            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', [{
-                name: 'some key',
-                schema: 'some new schema'
-            }]);
+
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
+                'some key': {
+                    $ref: 'Fred'
+                }
+            }, mockTarget);
         });
 
         it ('should handle the reflected type being a function when type not passed', () => {
@@ -142,12 +135,13 @@ describe ('Object.js', () => {
             sinon.assert.calledTwice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
-            sinon.assert.calledOnce(generateSchemaStub);
-            sinon.assert.calledWith(generateSchemaStub, 'soMe TyPe');
-            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', [{
-                name: 'some key',
-                schema: 'some new schema'
-            }]);
+
+            sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
+                'some key': {
+                    '$ref': 'soMe TyPe'
+                }
+            }, mockTarget
+            );
         });
     });
 });

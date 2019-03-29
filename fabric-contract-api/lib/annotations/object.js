@@ -25,7 +25,7 @@ module.exports.Object = function Object () {
 
         logger.debug('Existing fabric:objects', objects);
 
-        const properties = Reflect.getMetadata('fabric:object-properties', target.prototype) || [];
+        const properties = Reflect.getMetadata('fabric:object-properties', target.prototype) || {};
 
         logger.debug('Existing fabric:object-properties for target', properties);
 
@@ -45,7 +45,7 @@ module.exports.Property = function Property (name, type) {
     return (target, propertyKey) => {
         logger.debug('@Property args:', `Property Key -> ${propertyKey}, Name -> ${name}, Type -> ${type},`, 'Target ->', target.constructor.name);
 
-        const properties = Reflect.getMetadata('fabric:object-properties', target) || [];
+        const properties = Reflect.getMetadata('fabric:object-properties', target) || {};
 
         logger.debug('Existing fabric:object-properties for target', properties);
 
@@ -56,10 +56,7 @@ module.exports.Property = function Property (name, type) {
             type = typeof metaType === 'function' ? metaType.name : metaType.toString();
         }
 
-        properties.push({
-            name,
-            schema: utils.generateSchema(type, false)
-        });
+        properties[name] = utils.generateSchema(type, false);
 
         Reflect.defineMetadata('fabric:object-properties', properties, target);
         logger.debug('Updated fabric:object-properties for target', properties);

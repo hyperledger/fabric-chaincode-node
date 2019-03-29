@@ -44,7 +44,7 @@ describe('Typescript chaincode', () => {
             }
 
             const expectedMetadata = fs.readFileSync(path.join(__dirname, './annotations/src/test_contract/expected-metadata.json'));
-            expect(payload).to.eql(JSON.parse(expectedMetadata));
+            expect(payload).to.deep.equal(JSON.parse(expectedMetadata));
         });
     });
 });

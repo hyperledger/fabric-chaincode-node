@@ -67,14 +67,9 @@
                     "name": "updateAsset"
                 },
                 {
-                    "returns": [
-                        {
-                            "name": "success",
-                            "schema": {
-                                "$ref": "#/components/schemas/Asset"
-                            }
-                        }
-                    ],
+                    "returns": {
+                        "$ref": "#/components/schemas/Asset"
+                    },
                     "name": "getAsset",
                     "tag": [],
                     "parameters": [
@@ -119,51 +114,33 @@
                 "$id": "SomethingThatCouldBeAProperty",
                 "type": "object",
                 "additionalProperties": false,
-                "properties": [
-                    {
-                        "name": "id",
-                        "schema": {
-                            "type": "string"
-                        }
+                "properties": {
+                    "id": {
+                        "type": "string"
                     },
-                    {
-                        "name": "value",
-                        "schema": {
-                            "type": "number"
-                        }
+                    "value": {
+                        "type": "number"
                     }
-                ]
+                }
             },
             "Asset": {
                 "$id": "Asset",
                 "type": "object",
                 "additionalProperties": false,
-                "properties": [
-                    {
-                        "name": "id",
-                        "schema": {
-                            "type": "string"
-                        }
+                "properties": {
+                    "id": {
+                        "type": "string"
                     },
-                    {
-                        "name": "name",
-                        "schema": {
-                            "type": "string"
-                        }
+                    "name": {
+                        "type": "string"
                     },
-                    {
-                        "name": "value",
-                        "schema": {
-                            "type": "number"
-                        }
+                    "value": {
+                        "type": "number"
                     },
-                    {
-                        "name": "extra",
-                        "schema": {
-                            "$ref": "SomethingThatCouldBeAProperty"
-                        }
+                    "extra": {
+                        "$ref": "SomethingThatCouldBeAProperty"
                     }
-                ]
+                }
             }
         }
     }

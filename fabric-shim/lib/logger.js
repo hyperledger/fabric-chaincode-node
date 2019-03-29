@@ -15,6 +15,7 @@ const util = require('util');
 const padding = '                                               ';
 
 const formatter = name => winston.format.combine(
+    winston.format.splat(),
     winston.format.colorize(),
     winston.format.timestamp(),
     winston.format.simple(),

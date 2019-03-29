@@ -323,7 +323,7 @@ const Chaincode = class {
 	// useful helper transactions
     async getKey(stub, args) {
         if (args.length !== 1) {
-            throw new Error('Incorrect no. of parameters');
+            throw new Error(`Incorrect no. of parameters, expected 1 got ${args.length}`);
         }
         const res = await stub.getState(args[0]);
         console.log(res);

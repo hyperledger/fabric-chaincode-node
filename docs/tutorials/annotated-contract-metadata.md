@@ -256,3 +256,73 @@ This example is defining the concept of a person; who has a name, address and an
   }
 }
 ```
+## String and Number validation
+
+Strict semantic checking can be performed on strings and numbers. As an example consider this extract of metadata describing the parameters of a function
+```
+  "parameters": [
+      {
+          "name": "pupilName",
+          "description": "",
+          "required": true,
+          "schema": {
+              "type": "string"
+          }
+      },
+      {
+          "name": "formId",
+          "description": "",
+          "required": true,
+          "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9]+$"
+          }
+      },
+      {
+          "name": "description",
+          "description": "",
+          "required": true,
+          "schema": {
+              "type": "string",
+              "maxLength": 100
+          }
+      },
+      {
+          "name": "lifetime",
+          "description": "days this is valid for (30 if not given)",
+          "required": false,
+          "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+          }
+      },
+      {
+          "name": "startDate",
+          "description": "Start date yyyy-mm-dd, today if not specified",
+          "required": false,
+          "schema": {
+              "type": "string",
+              "format": "date"
+          }
+      }
+  ]
+```
+
+**Note: The `required` tag at present is not enforced by the node chaincode.**
+
+- __Pupilname__ this is a string, but has no restrictions placed up on it. 
+- __formId__ a string, but has to matched the regular expression. In this case it has to be exactly composed of lower or upcase letters and numbers
+- __description__ a string, with the restriction that it can't be more than 100 characters in length
+- __lifetime__ an integer with minimum value of 1 and maxiomum of 30
+- __startDate__ an string but has to contain a date (As defined by full-date - [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)).  
+
+The alternative to `format:date` is `format:dateTime` ... the string here has to confirmed to date-time defined in [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14)
+
+
+
+
+
+
+
+

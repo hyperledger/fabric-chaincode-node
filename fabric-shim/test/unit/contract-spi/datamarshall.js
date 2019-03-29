@@ -206,7 +206,7 @@ describe('datamarshall.js', () => {
             }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors.map((err) => { return err.message; }))}`); // eslint-disable-line
             sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {type: 'string'}, 'logging prefix');
             sinon.assert.calledWith(dm.ajv.compile, {components: {schemas: {}}, properties: {prop: {type: 'string'}}});
-            sinon.assert.calledWith(validateStub, 'some validate data');
+            sinon.assert.calledWith(validateStub, {prop: 'some validate data'});
         });
 
         it ('should handle when type invalid for $ref', () => {
@@ -239,7 +239,7 @@ describe('datamarshall.js', () => {
                 dm.handleParameters(fn, ['"one"'], 'logging prefix');
             }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors.map((err) => { return err.message; }))}`); // eslint-disable-line
             sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {$ref:'#/components/schemas/someComponent'}, 'logging prefix');
-            sinon.assert.calledWith(validateStub, 'some validate data');
+            sinon.assert.calledWith(validateStub, {prop:'some validate data'});
         });
 
         it ('should push valid values to returned array for primitve types', () => {
@@ -285,8 +285,8 @@ describe('datamarshall.js', () => {
             sinon.assert.calledWith(dm.ajv.compile, {components: {schemas: dm.components}, properties: {prop: {$ref: '#/components/schemas/someComponent'}}});
 
             sinon.assert.calledTwice(validateStub);
-            sinon.assert.calledWith(validateStub, 'some validate data');
-            sinon.assert.calledWith(validateStub, 'some other validate data');
+            sinon.assert.calledWith(validateStub, {prop:'some validate data'});
+            sinon.assert.calledWith(validateStub, {prop:'some other validate data'});
 
             expect(returned).to.deep.equal(['some value', 'some other value']);
         });
