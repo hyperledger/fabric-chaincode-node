@@ -41,8 +41,8 @@ const DEPS = [
     path.join(baseDir, 'peer/chaincode_shim.proto'),
     path.join(baseDir, 'peer/proposal.proto'),
     path.join(baseDir, 'peer/proposal_response.proto'),
-    path.join(baseDir, 'token/transaction.proto'),
-    path.join(baseDir, 'token/expectations.proto')
+    path.join(baseDir, 'token/operations.proto'),
+    path.join(baseDir, 'token/transaction.proto')
 ];
 
 gulp.task('protos', function() {
