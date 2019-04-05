@@ -1,0 +1,43 @@
+v2.0.0-alpha April 5th, 2019
+-----------------------------
+
+Release Notes
+-------------
+The main change in the v2.0.0 alpha over v1.4.1 is the level of NodeJS runtime has moved up to version 10
+v2.0.0 has v1.4.1 level of base functionality
+
+Migration Notes
+---------------
+Note that a change needed to be made to the metadata schema as it was in error; it had diverged from the JSONSchema standard
+so that it was not possible to validate complex objects.
+
+If you have custom metadata defined in the contract, then for the complex objects defined in the 'components' section
+the properties of this object where previously held as array; they now need to be held as a map with the key as the name
+of the property
+
+Return types on functions where returned as an array of schema objects. this has been modified to be a single object. i.e. 
+the single value array is now just a single value.
+
+There is also a new nodeenv docker image that is used for hosting the chaincode rather than use the baseos image. 
+
+Summary of the programming model
+-------------------------------
+
+This is designed to improve developer productivity and ease of use.
+For more information see https://hyperledger-fabric.readthedocs.io/en/developapps/developing_applications.html
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v141

@@ -1,3 +1,52 @@
+## v2.0.0
+Fri  5 Apr 13:38:54 BST 2019
+
+* [00dc003](https://github.com/hyperledger/fabric/commit/00dc003) [FAB-14144](https://jira.hyperledger.org/browse/FAB-14144) Integration test reformat
+* [ade6b17](https://github.com/hyperledger/fabric/commit/ade6b17) [FAB-14730](https://jira.hyperledger.org/browse/FAB-14730) Add getPrivateDataHash
+* [ab0a573](https://github.com/hyperledger/fabric/commit/ab0a573) [FAB-14919](https://jira.hyperledger.org/browse/FAB-14919) Update proto copy to fix build
+* [d1c03f0](https://github.com/hyperledger/fabric/commit/d1c03f0) Upgrade nodeenv to Node 10
+* [04276dd](https://github.com/hyperledger/fabric/commit/04276dd) [FAB-14571](https://jira.hyperledger.org/browse/FAB-14571) Upgrade node version to 10.15.2
+* [11f7d09](https://github.com/hyperledger/fabric/commit/11f7d09) Revert "Upgrade nodeenv to Node 10"
+* [3b08ffa](https://github.com/hyperledger/fabric/commit/3b08ffa) [FAB-14722](https://jira.hyperledger.org/browse/FAB-14722) send metadata when handling params
+* [9f725f4](https://github.com/hyperledger/fabric/commit/9f725f4) Retire dormant fabric-chaincode-node maintainers
+* [7d6d6e0](https://github.com/hyperledger/fabric/commit/7d6d6e0) Upgrade nodeenv to Node 10
+* [e198775](https://github.com/hyperledger/fabric/commit/e198775) [FAB-14440](https://jira.hyperledger.org/browse/FAB-14440) Port of gRPC loader fix
+* [541582b](https://github.com/hyperledger/fabric/commit/541582b) [FAB-14442](https://jira.hyperledger.org/browse/FAB-14442) Boolean return values
+* [ff7f09c](https://github.com/hyperledger/fabric/commit/ff7f09c) [FAB-13051](https://jira.hyperledger.org/browse/FAB-13051) add package-lock.json files
+* [1ee762c](https://github.com/hyperledger/fabric/commit/1ee762c) [FAB-14537](https://jira.hyperledger.org/browse/FAB-14537) components ref components
+* [7b258b9](https://github.com/hyperledger/fabric/commit/7b258b9) [FAB-14414](https://jira.hyperledger.org/browse/FAB-14414) adding own network for tests
+* [805d1a4](https://github.com/hyperledger/fabric/commit/805d1a4) [FAB-14246](https://jira.hyperledger.org/browse/FAB-14246) generateSchema for maps
+* [e634779](https://github.com/hyperledger/fabric/commit/e634779) [FAB-13048](https://jira.hyperledger.org/browse/FAB-13048) Addition tx logging
+* [8521ea9](https://github.com/hyperledger/fabric/commit/8521ea9) [FAB-14095](https://jira.hyperledger.org/browse/FAB-14095) metadata ignore contract fcns
+* [4cbd4c2](https://github.com/hyperledger/fabric/commit/4cbd4c2) [FAB-14133](https://jira.hyperledger.org/browse/FAB-14133) updated property tag to handle array type
+* [4c68291](https://github.com/hyperledger/fabric/commit/4c68291) [FAB-14093](https://jira.hyperledger.org/browse/FAB-14093) [FAB-14097] schema update
+* [486ea6d](https://github.com/hyperledger/fabric/commit/486ea6d) [FAB-13692](https://jira.hyperledger.org/browse/FAB-13692) add submitTx by default to txns
+* [01cac04](https://github.com/hyperledger/fabric/commit/01cac04) [FAB-14071](https://jira.hyperledger.org/browse/FAB-14071) added schema ref to generated metadata
+* [c52de4a](https://github.com/hyperledger/fabric/commit/c52de4a) [FAB-13319](https://jira.hyperledger.org/browse/FAB-13319) update to set default value for metadata
+* [cc6ebdf](https://github.com/hyperledger/fabric/commit/cc6ebdf) [FAB-13925](https://jira.hyperledger.org/browse/FAB-13925) Updated to handle numeric type conversion
+* [a072c81](https://github.com/hyperledger/fabric/commit/a072c81) [FAB-13938](https://jira.hyperledger.org/browse/FAB-13938) adding npm ignore
+* [bfd7142](https://github.com/hyperledger/fabric/commit/bfd7142) [FAB-13909](https://jira.hyperledger.org/browse/FAB-13909) fix for unknown transaction shim.error
+* [8d87135](https://github.com/hyperledger/fabric/commit/8d87135) [FAB-13048](https://jira.hyperledger.org/browse/FAB-13048) adding logging
+* [a53d637](https://github.com/hyperledger/fabric/commit/a53d637) [FAB-13874](https://jira.hyperledger.org/browse/FAB-13874) Publish nodeenv image with stable tag
+* [19a48f4](https://github.com/hyperledger/fabric/commit/19a48f4) [FAB-13864](https://jira.hyperledger.org/browse/FAB-13864) adding description to param
+* [26e6fb6](https://github.com/hyperledger/fabric/commit/26e6fb6) [FAB-12846](https://jira.hyperledger.org/browse/FAB-12846) added ability to specify arrays
+* [7940bde](https://github.com/hyperledger/fabric/commit/7940bde) [FAB-13816](https://jira.hyperledger.org/browse/FAB-13816) Fixed format of generated metadata
+* [a4e725e](https://github.com/hyperledger/fabric/commit/a4e725e) [FAB-13789](https://jira.hyperledger.org/browse/FAB-13789) Fix env variables, update metadata layout
+* [3b2d186](https://github.com/hyperledger/fabric/commit/3b2d186) [FAB-13431](https://jira.hyperledger.org/browse/FAB-13431) Publish nodeenv image to nexus
+* [7dc48bd](https://github.com/hyperledger/fabric/commit/7dc48bd) [FAB-13462](https://jira.hyperledger.org/browse/FAB-13462) reintroducing devmode tests
+* [8e813ef](https://github.com/hyperledger/fabric/commit/8e813ef) [FAB-12959](https://jira.hyperledger.org/browse/FAB-12959) metadata generate command
+* [081f11d](https://github.com/hyperledger/fabric/commit/081f11d) [FAB-13699](https://jira.hyperledger.org/browse/FAB-13699) Reformatted gulp test-e2e tasks
+* [90cae9a](https://github.com/hyperledger/fabric/commit/90cae9a) [FAB-13551](https://jira.hyperledger.org/browse/FAB-13551) Updated Gulp Version
+* [1456c48](https://github.com/hyperledger/fabric/commit/1456c48) [FAB-13380](https://jira.hyperledger.org/browse/FAB-13380) Fix docs for testing chaincode
+* [0269cd5](https://github.com/hyperledger/fabric/commit/0269cd5) [FAB-13462](https://jira.hyperledger.org/browse/FAB-13462) Add dev mode test logging + disable
+* [dfef7e4](https://github.com/hyperledger/fabric/commit/dfef7e4) Configure Stale ProBot
+* [d5f65b2](https://github.com/hyperledger/fabric/commit/d5f65b2) [FAB-13429](https://jira.hyperledger.org/browse/FAB-13429)Fix command in fabric-chaincode-api tutorial
+* [b7532c5](https://github.com/hyperledger/fabric/commit/b7532c5) [FAB-13426](https://jira.hyperledger.org/browse/FAB-13426) Fix type definition for protobuf bytes
+* [90bfcf4](https://github.com/hyperledger/fabric/commit/90bfcf4) [FAB-11555](https://jira.hyperledger.org/browse/FAB-11555) Create fabric-nodeenv image
+* [c6ece0c](https://github.com/hyperledger/fabric/commit/c6ece0c) [FAB-12072](https://jira.hyperledger.org/browse/FAB-12072) inversion of control
+* [588accf](https://github.com/hyperledger/fabric/commit/588accf) [FAB-13319](https://jira.hyperledger.org/browse/FAB-13319) Adding default annotation
+* [35686d7](https://github.com/hyperledger/fabric/commit/35686d7) [FAB-13229](https://jira.hyperledger.org/browse/FAB-13229) master prepare next release
+
 ## v1.4.0-rc1
 Tue 11 Dec 08:58:56 GMT 2018
 
