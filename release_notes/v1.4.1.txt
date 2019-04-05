@@ -1,4 +1,4 @@
-v1.4.1 March 29, 2019
+v1.4.1 April 5, 2019
 -----------------------------
 
 Release Notes
@@ -59,4 +59,4 @@ none
 
 Change Log
 ----------
-https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v140
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v141
