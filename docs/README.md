@@ -16,10 +16,13 @@ To confirm that the `fabric-shim` maintains API and functional compatibility wit
 
 Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
 
-
 ## API documentation versions
 
 [Release 1.3](../release-1.3) | [Release 1.2](../release-1.2) | [Release 1.1](../release-1.1) | [Master branch](../master)
+
+## Release Notes
+
+Please read the [Release Notes](https://github.com/hyperledger/fabric-chaincode-node/tree/release-1.4/release_notes) for the 1.4 release.
 
 ## Contract Interface
 
