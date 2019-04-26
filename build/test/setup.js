@@ -216,3 +216,5 @@ gulp.task('channel-init', ['docker-ready'], shell.task([
     // create channel, join peer0 to the channel
     'docker exec cli /etc/hyperledger/config/channel-init.sh'
 ]));
+
+gulp.task('start-fabric', ['channel-init']);

@@ -110,10 +110,50 @@
     },
     "components": {
         "schemas": {
+            "Person": {
+                "$id": "Person",
+                "type": "object",
+                "properties": {
+                    "eyeColour": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Bob": {
+                "$id": "Bob",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "houseName": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "Person"
+                    }
+                ]
+            },
+            "Fred": {
+                "$id": "Fred",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "favouriteColour": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "Person"
+                    }
+                ]
+            },
             "SomethingThatCouldBeAProperty": {
                 "$id": "SomethingThatCouldBeAProperty",
                 "type": "object",
-                "additionalProperties": false,
                 "properties": {
                     "id": {
                         "type": "string"
@@ -126,7 +166,6 @@
             "Asset": {
                 "$id": "Asset",
                 "type": "object",
-                "additionalProperties": false,
                 "properties": {
                     "id": {
                         "type": "string"

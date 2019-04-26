@@ -204,7 +204,7 @@ describe('datamarshall.js', () => {
             expect(() => {
                 dm.handleParameters(fn, ['"one"'], 'logging prefix');
             }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors.map((err) => { return err.message; }))}`); // eslint-disable-line
-            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {type: 'string'}, 'logging prefix');
+            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {components: {schemas: {  }}, properties: {prop: {type: 'string'}}}, 'logging prefix');
             sinon.assert.calledWith(dm.ajv.compile, {components: {schemas: {}}, properties: {prop: {type: 'string'}}});
             sinon.assert.calledWith(validateStub, {prop: 'some validate data'});
         });
@@ -238,7 +238,18 @@ describe('datamarshall.js', () => {
             expect(() => {
                 dm.handleParameters(fn, ['"one"'], 'logging prefix');
             }).to.throw(`Unable to validate parameter due to ${JSON.stringify(validateStub.errors.map((err) => { return err.message; }))}`); // eslint-disable-line
-            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {$ref:'#/components/schemas/someComponent'}, 'logging prefix');
+            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {
+                components: {
+                    schemas: {
+                        someComponent: {
+                            $id: 'someComponent',
+                            properties: {name: {type: 'string'}},
+                            type: 'object'
+                        }
+                    }
+                },
+                properties: {prop: {$ref: '#/components/schemas/someComponent'}}
+            }, 'logging prefix');
             sinon.assert.calledWith(validateStub, {prop:'some validate data'});
         });
 
@@ -277,8 +288,30 @@ describe('datamarshall.js', () => {
             const returned = dm.handleParameters(fn, ['"one"', '"two"'], 'logging prefix');
 
             sinon.assert.calledTwice(dm.fromWireBuffer);
-            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {type: 'string'}, 'logging prefix');
-            sinon.assert.calledWith(dm.fromWireBuffer, '"two"', {$ref: '#/components/schemas/someComponent'}, 'logging prefix');
+            sinon.assert.calledWith(dm.fromWireBuffer, '"one"', {
+                components: {
+                    schemas: {
+                        someComponent: {
+                            $id: 'someComponent',
+                            properties: {name: {type: 'string'}},
+                            type: 'object'
+                        }
+                    }
+                },
+                properties: {prop: {type: 'string'}}
+            }, 'logging prefix');
+            sinon.assert.calledWith(dm.fromWireBuffer, '"two"', {
+                components: {
+                    schemas: {
+                        someComponent: {
+                            $id: 'someComponent',
+                            properties: {name: {type: 'string'}},
+                            type: 'object'
+                        }
+                    }
+                },
+                properties: {prop: {$ref: '#/components/schemas/someComponent'}}
+            }, 'logging prefix');
 
             sinon.assert.calledTwice(dm.ajv.compile);
             sinon.assert.calledWith(dm.ajv.compile, {components: {schemas: dm.components}, properties: {prop: {type: 'string'}}});

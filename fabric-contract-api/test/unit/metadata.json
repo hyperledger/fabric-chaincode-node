@@ -1,0 +1,556 @@
+{
+    "$schema": "https://fabric-shim.github.io/release-1.4/contract-schema.json",
+    "contracts": {
+        "ShippingContract": {
+            "name": "ShippingContract",
+            "contractInstance": {
+                "name": "ShippingContract",
+                "default": true
+            },
+            "transactions": [
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [],
+                    "name": "tracing"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryExpectedShipments"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "setShipmentReceived"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "asset",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Asset"
+                            }
+                        },
+                        {
+                            "name": "consumer",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Business"
+                            }
+                        }
+                    ],
+                    "name": "requestShipment"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryShipments"
+                },
+                {
+                    "tag": [],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "queryShipment"
+                }
+            ],
+            "info": {
+                "title": "",
+                "version": ""
+            }
+        },
+        "ProducerEndpoint": {
+            "name": "ProducerEndpoint",
+            "contractInstance": {
+                "name": "ProducerEndpoint"
+            },
+            "transactions": [
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [],
+                    "name": "tracing"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryExpectedShipments"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "setShipmentReceived"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "asset",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Asset"
+                            }
+                        },
+                        {
+                            "name": "consumer",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Business"
+                            }
+                        }
+                    ],
+                    "name": "requestShipment"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryShipments"
+                },
+                {
+                    "tag": [],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "queryShipment"
+                }
+            ],
+            "info": {
+                "title": "",
+                "version": ""
+            }
+        },
+        "ConsumerEndpoint": {
+            "name": "ConsumerEndpoint",
+            "contractInstance": {
+                "name": "ConsumerEndpoint"
+            },
+            "transactions": [
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [],
+                    "name": "tracing"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryExpectedShipments"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "setShipmentReceived"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "asset",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Asset"
+                            }
+                        },
+                        {
+                            "name": "consumer",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Business"
+                            }
+                        }
+                    ],
+                    "name": "requestShipment"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryShipments"
+                },
+                {
+                    "tag": [],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "queryShipment"
+                }
+            ],
+            "info": {
+                "title": "",
+                "version": ""
+            }
+        },
+        "AgentContract": {
+            "name": "AgentContract",
+            "contractInstance": {
+                "name": "AgentContract"
+            },
+            "transactions": [
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [],
+                    "name": "tracing"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryExpectedShipments"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "setShipmentReceived"
+                },
+                {
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "asset",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Asset"
+                            }
+                        },
+                        {
+                            "name": "consumer",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Business"
+                            }
+                        }
+                    ],
+                    "name": "requestShipment"
+                },
+                {
+                    "tag": [],
+                    "parameters": [],
+                    "name": "queryShipments"
+                },
+                {
+                    "tag": [],
+                    "parameters": [
+                        {
+                            "name": "shipmentId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "name": "queryShipment"
+                }
+            ],
+            "info": {
+                "title": "",
+                "version": ""
+            }
+        },
+        "org.hyperledger.fabric": {
+            "name": "org.hyperledger.fabric",
+            "contractInstance": {
+                "name": "org.hyperledger.fabric"
+            },
+            "transactions": [
+                {
+                    "name": "GetMetadata"
+                }
+            ],
+            "info": {
+                "title": "",
+                "version": ""
+            }
+        }
+    },
+    "info": {
+        "version": "0.0.18",
+        "title": "shipping"
+    },
+    "components": {
+        "schemas": {
+            "State": {
+                "$id": "State",
+                "type": "object",
+                "properties": {}
+            },
+            "Asset": {
+                "$id": "Asset",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "assetId": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            },
+            "Business": {
+                "$id": "Business",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "address": {
+                                "type": "string"
+                            },
+                            "phone": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            },
+            "Device": {
+                "$id": "Device",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "deviceId": {
+                                "type": "string"
+                            },
+                            "details": {
+                                "type": "string"
+                            },
+                            "class": {
+                                "type": "string"
+                            },
+                            "code": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            },
+            "Environment": {
+                "$id": "Environment",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "temperature": {
+                                "type": "number"
+                            },
+                            "tempUnit": {
+                                "type": "string"
+                            },
+                            "humidty": {
+                                "type": "number"
+                            },
+                            "accelx": {
+                                "type": "number"
+                            },
+                            "accely": {
+                                "type": "number"
+                            },
+                            "accelz": {
+                                "type": "number"
+                            },
+                            "altitude": {
+                                "type": "number"
+                            },
+                            "pressure": {
+                                "type": "number"
+                            },
+                            "deviceCondition": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            },
+            "Event": {
+                "$id": "Event",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "eventId": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            },
+                            "timezone": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            },
+            "Geolocation": {
+                "$id": "Geolocation",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "latitiude": {
+                                "type": "number"
+                            },
+                            "longtitude": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            },
+            "Transport": {
+                "$id": "Transport",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "transportId": {
+                                "type": "string"
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            },
+            "Shipment": {
+                "$id": "Shipment",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "shipmentId": {
+                                "type": "string"
+                            },
+                            "asset": {
+                                "$ref": "Asset"
+                            },
+                            "transport": {
+                                "$ref": "Transport"
+                            },
+                            "buisness": {
+                                "$ref": "Business"
+                            },
+                            "environment": {
+                                "$ref": "Environment"
+                            },
+                            "device": {
+                                "$ref": "Device"
+                            },
+                            "event": {
+                                "$ref": "Event"
+                            },
+                            "geolocation": {
+                                "$ref": "Geolocation"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "State"
+                    }
+                ]
+            }
+        }
+    }
+}

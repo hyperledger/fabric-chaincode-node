@@ -40,6 +40,7 @@ describe('Typescript chaincode', () => {
             ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
 
             if (!ajv.validate(JSON.parse(schema), payload)) {
+                console.log(ajv.errorsText());
                 throw new Error('Expected generated metadata to match the schema');
             }
 

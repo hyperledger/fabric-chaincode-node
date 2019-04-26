@@ -14,7 +14,9 @@
   "scripts": {
     "test": "gulp test-headless",
     "schema:test": "ajv compile -s ./fabric-contract-api/schema/contract-schema.json && ajv validate -s ./fabric-contract-api/schema/contract-schema.json -d ./fabric-contract-api/schema/example-full.json",
-    "postinstall": "npm --prefix fabric-contract-api install && npm --prefix fabric-shim install && npm --prefix fabric-shim-crypto install"
+    "postinstall": "npm --prefix fabric-contract-api install && npm --prefix fabric-shim install && npm --prefix fabric-shim-crypto install",
+    "clean:modules": "find . -maxdepth 2 -type d -name node_modules | xargs rm -rf",
+    "clean:locks": "find . -type f -name package-lock.json | xargs rm "
   },
   "dependencies": {
     "@types/node": "^8.9.4",

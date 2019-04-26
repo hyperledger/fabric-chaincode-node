@@ -20,6 +20,7 @@ if (typeof(results.thePromise) !== 'undefined') {
         console.log('\nCommand succeeded\n');
     }).catch((error) => {
         logger.error(error);
+        console.error(error.stack);
         console.error(error + '\nCommand failed\n');
         process.exit(1);
     });
