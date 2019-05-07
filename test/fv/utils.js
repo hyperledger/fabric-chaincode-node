@@ -12,6 +12,10 @@ const fs = require('fs');
 const path = require('path');
 const getTLSArgs = require('../../build/test/utils').getTLSArgs;
 
+// Increase the timeouts on zLinux!
+const arch = require('os').arch();
+const multiplier = arch === 's390x' ? 2 : 1;
+
 function getPackageVersion() {
     const packageJsonPath = path.join(__dirname, './../../package.json');
     const packageJson = fs.readFileSync(packageJsonPath);
@@ -110,12 +114,12 @@ async function installAndInstantiate(ccName, instantiateFunc, instantiateArgs) {
 }
 
 const TIMEOUTS = {
-    LONGEST_STEP : 24000 * 1000,
-    LONG_STEP : 240 * 1000,
-    MED_STEP : 120 * 1000,
-    SHORT_STEP: 60 * 1000,
-    LONG_INC : 30 * 1000,
-    MED_INC : 10 * 1000,
-    SHORT_INC: 5 * 1000
+    LONGEST_STEP : 24000 * 1000 * multiplier,
+    LONG_STEP : 240 * 1000 * multiplier,
+    MED_STEP : 120 * 1000 * multiplier,
+    SHORT_STEP: 60 * 1000 * multiplier,
+    LONG_INC : 30 * 1000 * multiplier,
+    MED_INC : 10 * 1000 * multiplier,
+    SHORT_INC: 5 * 1000 * multiplier
 };
 module.exports = {installAndInstantiate, invoke, query, packPackages, deletePackages, TIMEOUTS};

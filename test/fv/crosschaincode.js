@@ -20,6 +20,9 @@ describe('Chaincode crosschaincode', () => {
 
         await utils.installAndInstantiate(suite, 'org.mynamespace.crosschaincode:instantiate');
         await utils.installAndInstantiate(suite2, 'org.mynamespace.crosschaincode2:instantiate');
+
+        // kick crosschaincode2 on org2 - shouldn't need this!
+        await utils.query(suite2, 'org.mynamespace.crosschaincode2:getKey', ['key1']);
     });
 
     describe('Invoke', () => {
