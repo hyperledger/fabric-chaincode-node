@@ -21,6 +21,28 @@ const _serviceProto = ProtoLoader.load({
 
 const Stub = rewire('../../lib/stub.js');
 
+class DummyIterator {
+    constructor() {
+        this.items = [1, 2, 3, 4, 5];
+        this.count = 0;
+        this.closeCalled = false;
+    }
+
+    async next() {
+        return new Promise((resolve, reject) => {
+            if (this.count === this.items.length) {
+                resolve({done: true});
+            }
+            resolve({value: this.items[this.count], done: false});
+            this.count++;
+        });
+    }
+    async close() {
+        this.closeCalled = true;
+        return Promise.resolve();
+    }
+}
+
 describe('Stub', () => {
     describe('validateCompositeKeyAttribute', () => {
         const validateCompositeKeyAttribute = Stub.__get__('validateCompositeKeyAttribute');
@@ -71,6 +93,124 @@ describe('Stub', () => {
 
             expect(computeProposalBinding(decodedSP)).to.deep.equal('44206e945c5cc2b752deacc05b2d6cd58a3799fec52143c986739bab57417aaf');
         });
+    });
+
+    describe('convertToAsyncIterator', () => {
+        let dummyIteratorPromise;
+        const convertToAsyncIterator = Stub.__get__('convertToAsyncIterator');
+        beforeEach(() => {
+            dummyIteratorPromise = Promise.resolve(new DummyIterator());
+        });
+
+        it('should inject a function into the promise that returns an object with the correct methods', () => {
+            const returnedPromise = convertToAsyncIterator(dummyIteratorPromise);
+            expect(returnedPromise[Symbol.asyncIterator]).to.be.a('function');
+            const returnedObj = returnedPromise[Symbol.asyncIterator]();
+            expect(returnedObj.next).to.be.a('function');
+            expect(returnedObj.return).to.be.a('function');
+        });
+
+        it('should be possible to iterate using async for of', async () => {
+            const returnedPromise = convertToAsyncIterator(dummyIteratorPromise);
+            const allResults = [];
+            for await (const res of returnedPromise) {
+                allResults.push(res);
+            }
+            expect(allResults).to.deep.equal([1, 2, 3, 4, 5]);
+            const iterator = await dummyIteratorPromise;
+            expect(iterator.closeCalled).to.be.true;
+        });
+
+        it('should close the iterator if we break out of the loop', async () => {
+            const returnedPromise = convertToAsyncIterator(dummyIteratorPromise);
+            const allResults = [];
+            let cc = 0;
+            for await (const res of returnedPromise) {
+                allResults.push(res);
+                cc++;
+                if (cc === 3) {
+                    break;
+                }
+            }
+            expect(allResults).to.deep.equal([1, 2, 3]);
+            const iterator = await dummyIteratorPromise;
+            expect(iterator.closeCalled).to.be.true;
+        });
+
+        it('should close the iterator if we break out of the loop straight away', async () => {
+            const returnedPromise = convertToAsyncIterator(dummyIteratorPromise);
+            const allResults = [];
+            for await (const res of returnedPromise) {
+                res;
+                break;
+            }
+            expect(allResults).to.deep.equal([]);
+            const iterator = await dummyIteratorPromise;
+            expect(iterator.closeCalled).to.be.true;
+        });
+
+        it('should close the iterator if we throw out of the loop', async () => {
+            const returnedPromise = convertToAsyncIterator(dummyIteratorPromise);
+            const allResults = [];
+            let cc = 0;
+
+            try {
+                for await (const res of returnedPromise) {
+                    allResults.push(res);
+                    cc++;
+                    if (cc === 3) {
+                        throw new Error('get me out of here');
+                    }
+                }
+            } catch (err) { // eslint-disable-noempty
+
+            }
+            expect(allResults).to.deep.equal([1, 2, 3]);
+            const iterator = await dummyIteratorPromise;
+            expect(iterator.closeCalled).to.be.true;
+        });
+
+        it('should work with a promise that returns an object with an iterator property deconstructed by the caller', async () => {
+            const dummyObjWithIteratorPromise = Promise.resolve({iterator: new DummyIterator(), metadata: 'stuff'})
+                .then((result) => result.iterator);
+            const returnedPromise = convertToAsyncIterator(dummyObjWithIteratorPromise);
+            const allResults = [];
+            for await (const res of returnedPromise) {
+                allResults.push(res);
+            }
+            expect(allResults).to.deep.equal([1, 2, 3, 4, 5]);
+            const iterator = await dummyObjWithIteratorPromise;
+            expect(iterator.closeCalled).to.be.true;
+        });
+
+        it('should work with a promise that returns an object with an iterator property not deconstructed by caller', async () => {
+            const dummyObjWithIteratorPromise = Promise.resolve({iterator: new DummyIterator(), metadata: 'stuff'});
+            const returnedPromise = convertToAsyncIterator(dummyObjWithIteratorPromise);
+            const allResults = [];
+            for await (const res of returnedPromise) {
+                allResults.push(res);
+            }
+            expect(allResults).to.deep.equal([1, 2, 3, 4, 5]);
+            const {iterator} = await dummyObjWithIteratorPromise;
+            expect(iterator.closeCalled).to.be.true;
+        });
+
+
+        it('should handle a promise rejection', async () => {
+            const dummyIteratorRejection = Promise.reject(new Error('im rejected'));
+            const returnedPromise = convertToAsyncIterator(dummyIteratorRejection);
+            const allResults = [];
+            try {
+                for await (const res of returnedPromise) {
+                    allResults.push(res);
+                }
+            } catch (err) {
+                expect(err.message).to.equal('im rejected');
+            }
+
+        });
+
+
     });
 
     describe('ChaincodeStub', () => {

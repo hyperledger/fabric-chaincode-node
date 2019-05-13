@@ -4,5 +4,8 @@
 	},
 	"using-contractinterface":{
 		"title": "Using the Contract Interface"
-	}
+    },
+    "using-iterators": {
+        "title": "Working with apis that return iterators"
+    }
 }

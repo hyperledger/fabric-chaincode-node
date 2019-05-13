@@ -28,6 +28,18 @@ async function getAllResults(iterator, getKeys) {
     }
 }
 
+async function getAllResultsUsingAsyncIterator(promiseOfIterator, getKeys) {
+    const allResults = [];
+    for await (const res of promiseOfIterator) {
+        const theVal = (getKeys) ? res.key : res.value.toString('utf8');
+        allResults.push(theVal);
+    }
+
+    // iterator will be automatically closed on exit from the loop
+    // either by reaching the end, or a break or throw terminated the loop
+    return allResults;
+}
+
 class CrudChaincode extends Contract {
 
     constructor() {
@@ -93,16 +105,34 @@ class CrudChaincode extends Contract {
         return (await getAllResults(result)).toString().split(',');
     }
 
+    async getPartialCompositeKeyUsingAsyncIterator({stub}) {
+        const {params} = stub.getFunctionAndParameters();
+        const promiseOfIterator = stub.getStateByPartialCompositeKey('name~color', params);
+        return (await getAllResultsUsingAsyncIterator(promiseOfIterator)).toString().split(',');
+    }
+
     async getKeysByRange({stub}) {
         const {params} = stub.getFunctionAndParameters();
         const result = await stub.getStateByRange(params[0], params[1]);
         return (await getAllResults(result)).toString().split(',');
     }
 
+    async getKeysByRangeUsingAsyncIterator({stub}) {
+        const {params} = stub.getFunctionAndParameters();
+        const promiseOfIterator = stub.getStateByRange(params[0], params[1]);
+        return (await getAllResultsUsingAsyncIterator(promiseOfIterator)).toString().split(',');
+    }
+
     async getHistoryForKey({stub}) {
         const {params} = stub.getFunctionAndParameters();
         const iterator = await stub.getHistoryForKey(params[0]);
         return (await getAllResults(iterator)).toString().split(',');
+    }
+
+    async getHistoryForKeyUsingAsyncIterator({stub}) {
+        const {params} = stub.getFunctionAndParameters();
+        const promiseOfIterator = stub.getHistoryForKey(params[0]);
+        return (await getAllResultsUsingAsyncIterator(promiseOfIterator)).toString().split(',');
     }
 
     async getQueryResultWithPagination({stub}) {
@@ -128,6 +158,27 @@ class CrudChaincode extends Contract {
         return {results1, metadata1, results2, metadata2};
     }
 
+    async getQueryResultWithPaginationUsingAsyncIterator({stub}) {
+        const query = {
+            selector: {
+                key: {
+                    $regex: 'k[0-4]'
+                }
+            }
+        };
+
+        let promiseOfIterator = stub.getQueryResultWithPagination(JSON.stringify(query), 2);
+        let results = await getAllResultsUsingAsyncIterator(promiseOfIterator, true /* get keys instead of values */);
+        const results1 = results;
+        const metadata1 = (await promiseOfIterator).metadata;
+
+        promiseOfIterator = stub.getQueryResultWithPagination(JSON.stringify(query), 1, metadata1.bookmark);
+        results = await getAllResultsUsingAsyncIterator(promiseOfIterator, true /* get keys instead of values */);
+        const results2 = results;
+        const metadata2 = (await promiseOfIterator).metadata;
+        return {results1, metadata1, results2, metadata2};
+    }
+
     async getStateByRangeWithPagination({stub}) {
         let {params} = stub.getFunctionAndParameters();
         params = params.map((p) => {
@@ -141,16 +192,41 @@ class CrudChaincode extends Contract {
         return (await getAllResults(iterator)).toString().split(',');
     }
 
+    async getStateByRangeWithPaginationUsingAsyncIterator({stub}) {
+        let {params} = stub.getFunctionAndParameters();
+        params = params.map((p) => {
+            if (p === parseInt(p).toString()) {
+                return parseInt(p);
+            } else {
+                return p;
+            }
+        });
+        const promiseOfIterator = stub.getStateByRangeWithPagination(...params);
+        return (await getAllResultsUsingAsyncIterator(promiseOfIterator)).toString().split(',');
+    }
+
     async getStateByPartialCompositeKey({stub}) {
         const {params} = stub.getFunctionAndParameters();
         const iterator = await stub.getStateByPartialCompositeKey(params[0], params.slice(1));
         return await getAllResults(iterator);
     }
 
+    async getStateByPartialCompositeKeyUsingAsyncIterator({stub}) {
+        const {params} = stub.getFunctionAndParameters();
+        const promiseOfIterator =  stub.getStateByPartialCompositeKey(params[0], params.slice(1));
+        return await getAllResultsUsingAsyncIterator(promiseOfIterator);
+    }
+
     async getStateByPartialCompositeKeyWithPagination({stub}) {
         const {params} = stub.getFunctionAndParameters();
         const {iterator} = await stub.getStateByPartialCompositeKeyWithPagination(params[0], [], parseInt(params[1]), '');
         return await getAllResults(iterator);
+    }
+
+    async getStateByPartialCompositeKeyWithPaginationUsingAsyncIterator({stub}) {
+        const {params} = stub.getFunctionAndParameters();
+        const promiseOfIterator = stub.getStateByPartialCompositeKeyWithPagination(params[0], [], parseInt(params[1]), '');
+        return await getAllResultsUsingAsyncIterator(promiseOfIterator);
     }
 
     /*

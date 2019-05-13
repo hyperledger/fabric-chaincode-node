@@ -37,7 +37,7 @@ const _serviceProto = ProtoLoader.load({
     file: 'peer/chaincode_shim.proto'
 }).protos;
 
-const logger = require('./logger').getLogger('lib/chaincode.js');
+const logger = require('./logger').getLogger('lib/stub.js');
 
 const VALIDATION_PARAMETER = 'VALIDATION_PARAMETER';
 
@@ -103,6 +103,42 @@ function createQueryMetadata(pageSize, bookmark) {
     metadata.setPageSize(pageSize);
     metadata.setBookmark(bookmark);
     return metadata.toBuffer();
+}
+
+// function to convert a promise that either will resolve to an iterator or an object
+// that contains an iterator in the `iterator` property field into an async iterable
+// isActualIterator declares whether the promise will resolve to an actual iterator
+// or an object containing the iterator
+function convertToAsyncIterator(promise) {
+    promise[Symbol.asyncIterator] = () => {
+        let iterator;
+        return {
+            next: async () => {
+                if (!iterator) {
+                    const response = await promise;
+                    // determine if we get the actual iterator or an object
+                    // that contains the iterator as a property.
+                    iterator = response.iterator ? response.iterator : response;
+                }
+                const nextVal = await iterator.next();
+                if (nextVal.done) {
+                    logger.debug('iterator automatically closed as all values retrieved');
+                    await iterator.close();
+                }
+                return nextVal;
+            },
+            return: async () => {
+                // cannot come up with a for/of scenario where return
+                // might be called without next being called first so
+                // assume that iterator will have been set. If promise
+                // get's rejected in next then return isn't called either.
+                logger.debug('iterator closed as exited from loop before completion');
+                await iterator.close();
+                return {done: true};
+            }
+        };
+    };
+    return promise;
 }
 
 /**
@@ -520,16 +556,38 @@ class ChaincodeStub {
 	 * @param {string} endKey State variable key as the end of the key range (exclusive)
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
-    async getStateByRange(startKey, endKey) {
+    getStateByRange(startKey, endKey) {  // due to async iterator, cannot be declared async
         if (!startKey) {
             startKey = EMPTY_KEY_SUBSTITUTE;
         }
-        validateSimpleKeys(startKey, endKey);
+        try {
+            validateSimpleKeys(startKey, endKey);
+        } catch (err) {
+            return Promise.reject(err);
+        }
         // Access public data by setting the collection to empty string
         const collection = '';
-        const {iterator} = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
-        return iterator;
+        // Need to ensure that the resolved promise returns an iterator and not an object containing an iterator property.
+        const promise = this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId)
+            .then((result) => result.iterator);
+        return convertToAsyncIterator(promise);
     }
+
+    /**
+	 * @typedef {Object} QueryResponseMetadata
+	 * @property {number} fetched_records_count number of records fetched
+     * @property {string} bookmark the current bookmark to be used on the next pagination query
+	 * @memberof fabric-shim
+	 * @class
+	 */
+
+    /**
+	 * @typedef {Object} PaginationQueryResponse
+	 * @property {StateQueryIterator} iterator the iterator which provices access to the returned data
+     * @property {QueryResponseMetadata} metadata the pagination metadata
+	 * @memberof fabric-shim
+	 * @class
+	 */
 
     /**
 	 * getStateByRangeWithPagination returns a range iterator over a set of keys in the
@@ -553,18 +611,24 @@ class ChaincodeStub {
 	 * @param {string} endKey
 	 * @param {int} pageSize
 	 * @param {string} bookmark
+	 * @returns {Promise} Promise for a {@link PaginationQueryResponse} object
 	 */
-    async getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark) {
+    getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark) {  // due to async iterator, cannot be declared async
         if (!startKey) {
             startKey = EMPTY_KEY_SUBSTITUTE;
         }
         if (!bookmark) {
             bookmark = '';
         }
-        validateSimpleKeys(startKey, endKey);
+        try {
+            validateSimpleKeys(startKey, endKey);
+        } catch (err) {
+            return Promise.reject(err);
+        }
         const collection = '';
         const metadata = createQueryMetadata(pageSize, bookmark);
-        return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
+        const promise = this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -589,11 +653,13 @@ class ChaincodeStub {
 	 * @param {string} query Query string native to the underlying state database
 	 * @returns {Promise} Promise for a {@link StateQueryIterator} object
 	 */
-    async getQueryResult(query) {
+    getQueryResult(query) { // due to async iterator, cannot be declared async
         // Access public data by setting the collection to empty string
         const collection = '';
-        const {iterator} =  await this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
-        return iterator;
+        // Need to ensure that the resolved promise returns an iterator and not an object containing an iterator property.
+        const promise = this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId)
+            .then((result) => result.iterator);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -614,14 +680,16 @@ class ChaincodeStub {
 	 * @param {string} query
 	 * @param {int} pageSize
 	 * @param {string} bookmark
+	 * @returns {Promise} Promise for a {@link PaginationQueryResponse} object
 	 */
-    async getQueryResultWithPagination(query, pageSize, bookmark) {
+    getQueryResultWithPagination(query, pageSize, bookmark) { // due to async iterator, cannot be declared async
         if (!bookmark) {
             bookmark = '';
         }
         const metadata = createQueryMetadata(pageSize, bookmark);
         const collection = '';
-        return await this.handler.handleGetQueryResult(collection, query, metadata, this.channel_id, this.txId);
+        const promise = this.handler.handleGetQueryResult(collection, query, metadata, this.channel_id, this.txId);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -641,8 +709,9 @@ class ChaincodeStub {
 	 * @param {string} key The state variable key
 	 * @returns {Promise} Promise for a {@link HistoryQueryIterator} object
 	 */
-    async getHistoryForKey(key) {
-        return await this.handler.handleGetHistoryForKey(key, this.channel_id, this.txId);
+    getHistoryForKey(key) { // due to async iterator, cannot be declared async
+        const promise = this.handler.handleGetHistoryForKey(key, this.channel_id, this.txId);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -783,13 +852,15 @@ class ChaincodeStub {
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
 	 * @return {Promise} A promise that resolves with a {@link StateQueryIterator}, rejects if an error occurs
 	 */
-    async getStateByPartialCompositeKey(objectType, attributes) {
+    getStateByPartialCompositeKey(objectType, attributes) { // due to async iterator, cannot be declared async
         const partialCompositeKey = this.createCompositeKey(objectType, attributes);
         const startKey = partialCompositeKey;
         const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
         const collection = '';
-        const {iterator} = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
-        return iterator;
+        // Need to ensure that the resolved promise returns an iterator and not an object containing an iterator property.
+        const promise = this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId)
+            .then((result) => result.iterator);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -816,8 +887,9 @@ class ChaincodeStub {
 	 * @param {string[]} attributes
 	 * @param {int} pageSize
 	 * @param {string} bookmark
+	 * @returns {Promise} Promise for a {@link PaginationQueryResponse} object
 	 */
-    async getStateByPartialCompositeKeyWithPagination(objectType, attributes, pageSize, bookmark) {
+    getStateByPartialCompositeKeyWithPagination(objectType, attributes, pageSize, bookmark) { // due to async iterator, cannot be declared async
         if (!bookmark) {
             bookmark = '';
         }
@@ -826,7 +898,8 @@ class ChaincodeStub {
         const endKey = partialCompositeKey + MAX_UNICODE_RUNE_VALUE;
         const collection = '';
         const metadata = createQueryMetadata(pageSize, bookmark);
-        return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
+        const promise = this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId, metadata);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -956,6 +1029,13 @@ class ChaincodeStub {
     }
 
     /**
+	 * @typedef {Object} PrivateQueryResponse
+	 * @property {StateQueryIterator} iterator the iterator which provices access to the returned data
+	 * @memberof fabric-shim
+	 * @class
+	 */
+
+    /**
 	 * getPrivateDataByRange returns a range iterator over a set of keys in a
 	 * given private collection. The iterator can be used to iterate over all keys
 	 * between the startKey (inclusive) and endKey (exclusive).
@@ -969,20 +1049,22 @@ class ChaincodeStub {
 	 * @param {string} collection The collection name
 	 * @param {string} startKey Private data variable key as the start of the key range (inclusive)
 	 * @param {string} endKey Private data variable key as the end of the key range (exclusive)
+	 * @returns {Promise} Promise for a {@link PrivateQueryResponse} object
 	 */
-    async getPrivateDataByRange(collection, startKey, endKey) {
+    getPrivateDataByRange(collection, startKey, endKey) { // due to async iterator, cannot be declared async
         logger.debug('getPrivateDataByRange called with collection:%s, startKey:%s, endKey:%s', collection, startKey, endKey);
         if (arguments.length !== 3) {
-            throw new Error('getPrivateDataByRange requires three arguments, collection, startKey and endKey');
+            return Promise.reject(new Error('getPrivateDataByRange requires three arguments, collection, startKey and endKey'));
         }
         if (!collection || typeof collection !== 'string') {
-            throw new Error('collection must be a valid string');
+            return Promise.reject(new Error('collection must be a valid string'));
         }
         if (!startKey) {
             startKey = EMPTY_KEY_SUBSTITUTE;
         }
 
-        return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+        const promise = this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -1000,18 +1082,20 @@ class ChaincodeStub {
 	 * @param {string} collection The collection name
 	 * @param {string} objectType A string used as the prefix of the resulting key
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
+	 * @returns {Promise} Promise for a {@link PrivateQueryResponse} object
 	 */
-    async getPrivateDataByPartialCompositeKey(collection, objectType, attributes) {
-        logger.debug('getPrivateDataByRange called with collection:%s, objectType:%s, attributes:%j', collection, objectType, attributes);
+    getPrivateDataByPartialCompositeKey(collection, objectType, attributes) { // due to async iterator, cannot be declared async
+        logger.debug('getPrivateDataByPartialCompositeKey called with collection:%s, objectType:%s, attributes:%j', collection, objectType, attributes);
         if (arguments.length !== 3) {
-            throw new Error('getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes');
+            return Promise.reject(new Error('getPrivateDataByPartialCompositeKey requires three arguments, collection, objectType and attributes'));
         }
         if (!collection || typeof collection !== 'string') {
-            throw new Error('collection must be a valid string');
+            return Promise.reject(new Error('collection must be a valid string'));
         }
         const partialCompositeKey = this.createCompositeKey(objectType, attributes);
 
-        return this.getPrivateDataByRange(collection, partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+        const promise = this.getPrivateDataByRange(collection, partialCompositeKey, partialCompositeKey + MAX_UNICODE_RUNE_VALUE);
+        return convertToAsyncIterator(promise);
     }
 
     /**
@@ -1029,18 +1113,19 @@ class ChaincodeStub {
 	 *
 	 * @param {string} collection The collection name
 	 * @param {string} query The query to be performed
-	 * @returns {Promise} Promise for a {@link PrivateQueryIterator} object
+	 * @returns {Promise} Promise for a {@link PrivateQueryResponse} object
 	 */
-    async getPrivateDataQueryResult(collection, query) {
+    getPrivateDataQueryResult(collection, query) { // due to async iterator, cannot be declared async
         logger.debug('getPrivateDataQueryResult called with collection:%s, query:%j', collection, query);
         if (arguments.length !== 2) {
-            throw new Error('getPrivateDataQueryResult requires two arguments, collection and query');
+            return Promise.reject(new Error('getPrivateDataQueryResult requires two arguments, collection and query'));
         }
         if (!collection || typeof collection !== 'string') {
-            throw new Error('collection must be a valid string');
+            return Promise.reject(new Error('collection must be a valid string'));
         }
 
-        return this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
+        const promise = this.handler.handleGetQueryResult(collection, query, null, this.channel_id, this.txId);
+        return convertToAsyncIterator(promise);
     }
 }
 

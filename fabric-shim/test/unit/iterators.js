@@ -101,7 +101,7 @@ describe('Iterator', () => {
                 getResultFromBytesStub.restore();
             });
 
-            it ('should return value of first element of results converted from bytes and done true when has_more false and results has no more elements after currentLoc', () => {
+            it ('should return value of first element of results converted from bytes and done false when has_more false and results has no more elements after currentLoc', () => {
                 mockResponse.results = ['some result bytes'];
                 mockResponse.has_more = false;
 
@@ -111,11 +111,11 @@ describe('Iterator', () => {
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(result).to.deep.equal({
                     value: 'some result',
-                    done: true
+                    done: false
                 });
             });
 
-            it ('should return value of first element of results converted from bytes and done true when has_more true and results has no more elements after currentLoc', () => {
+            it ('should return value of first element of results converted from bytes and done false when has_more true and results has no more elements after currentLoc', () => {
                 mockResponse.results = ['some result bytes'];
                 mockResponse.has_more = true;
 
@@ -177,7 +177,7 @@ describe('Iterator', () => {
                 });
             });
 
-            it ('should return value of first element of results converted from bytes and done false and emit', () => {
+            it ('should return value of first element of results converted from bytes and done false', () => {
                 mockResponse.results = ['some result bytes', 'some more result bytes'];
                 mockResponse.has_more = false;
 
@@ -186,22 +186,12 @@ describe('Iterator', () => {
                     done: false
                 };
 
-                const emitStub = sinon.stub(ci, 'emit');
-                const listenerCountStub = sinon.stub(ci, 'listenerCount').returns(1);
-
                 const result = ci._createAndEmitResult();
 
                 expect(getResultFromBytesStub.calledOnce).to.be.ok;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal(expectedResult);
-                expect(listenerCountStub.calledOnce).to.be.ok;
-                expect(listenerCountStub.firstCall.args).to.deep.equal(['data']);
-                expect(emitStub.calledOnce).to.be.ok;
-                expect(emitStub.firstCall.args).to.deep.equal(['data', ci, expectedResult]);
-
-                emitStub.restore();
-                listenerCountStub.restore();
             });
         });
 
@@ -246,6 +236,7 @@ describe('Iterator', () => {
                 expect(ci.response).to.deep.equal(nextResponse);
             });
 
+            /*
             it ('should emit an error if error occurs when has_more and listenerCount for data > 0', async () => {
                 mockResponse.results = [];
                 mockResponse.has_more = true;
@@ -270,6 +261,7 @@ describe('Iterator', () => {
                 listenerCountStub.restore();
                 emitStub.restore();
             });
+            */
 
             it ('should throw an error if error occurs when has_more and listenerCount for data = 0', async () => {
                 mockResponse.results = [];
@@ -278,8 +270,6 @@ describe('Iterator', () => {
                 const err = new Error('some error');
 
                 mockHandler.handleQueryStateNext = sinon.stub().rejects(err);
-                const emitStub = sinon.stub(ci, 'emit');
-                const listenerCountStub = sinon.stub(ci, 'listenerCount').returns(0);
 
                 ci.currentLoc = 1;
 
@@ -287,45 +277,26 @@ describe('Iterator', () => {
 
                 await expect(result).to.eventually.be.rejected;
                 expect(createAndEmitResultStub.notCalled).to.be.ok;
-                expect(listenerCountStub.calledOnce).to.be.ok;
-                expect(listenerCountStub.firstCall.args).to.deep.equal(['data']);
-                expect(emitStub.notCalled).to.be.ok;
-
-                listenerCountStub.restore();
-                emitStub.restore();
             });
 
-            it ('should return done and emit end if response does not has_more and listenerCount for end > 0', async () => {
+            it ('should return done if response does not has_more and listenerCount for end > 0', async () => {
                 mockResponse.results = [];
                 mockResponse.has_more = false;
-
-                const emitStub = sinon.stub(ci, 'emit');
-                const listenerCountStub = sinon.stub(ci, 'listenerCount').returns(1);
 
                 const result = await ci.next();
 
                 expect(result).to.deep.equal({done: true});
                 expect(createAndEmitResultStub.notCalled).to.be.true;
-                expect(listenerCountStub.calledOnce).to.be.ok;
-                expect(listenerCountStub.firstCall.args).to.deep.equal(['end']);
-                expect(emitStub.calledOnce).to.be.ok;
-                expect(emitStub.firstCall.args).to.deep.equal(['end', ci]);
             });
 
-            it ('should return done and not emit end if response does not has_more and listenerCount for end = 0', async () => {
+            it ('should return done if response does not has_more and listenerCount for end = 0', async () => {
                 mockResponse.results = [];
                 mockResponse.has_more = false;
-
-                const emitStub = sinon.stub(ci, 'emit');
-                const listenerCountStub = sinon.stub(ci, 'listenerCount').returns(0);
 
                 const result = await ci.next();
 
                 expect(result).to.deep.equal({done: true});
                 expect(createAndEmitResultStub.notCalled).to.be.true;
-                expect(listenerCountStub.calledOnce).to.be.ok;
-                expect(listenerCountStub.firstCall.args).to.deep.equal(['end']);
-                expect(emitStub.notCalled).to.be.ok;
             });
         });
     });

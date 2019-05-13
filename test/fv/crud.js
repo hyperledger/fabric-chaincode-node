@@ -48,19 +48,32 @@ describe('Chaincode CRUD', () => {
             expect(payload).to.equal('annblack');
         });
 
-        it('should return a list of results from a partial composite key', async function() {
+        it('should return a list of results from a partial composite key using the old iterator style', async function() {
             this.timeout(SHORT_STEP);
             const payload = await utils.query(suite, 'org.mynamespace.crud:getPartialCompositeKey', ['ann']);
             expect(JSON.parse(payload)).to.deep.equal(['annblack', 'annred', 'annyellow']);
         });
 
-        it('should return all keys between key1 and key3', async function() {
+        it('should return a list of results from a partial composite key using the new iterator style', async function() {
+            this.timeout(SHORT_STEP);
+            const payload = await utils.query(suite, 'org.mynamespace.crud:getPartialCompositeKeyUsingAsyncIterator', ['ann']);
+            expect(JSON.parse(payload)).to.deep.equal(['annblack', 'annred', 'annyellow']);
+        });
+
+
+        it('should return all keys between key1 and key3 using the old iterator style', async function() {
             this.timeout(SHORT_STEP);
             const payload = await utils.query(suite, 'org.mynamespace.crud:getKeysByRange', ['key1', 'key4']);
             expect(JSON.parse(payload)).to.deep.equal(['value1', 'value2', 'value3']);
         });
 
-        it('should get the history for a key', async function () {
+        it('should return all keys between key1 and key3 using the new iterator style', async function() {
+            this.timeout(SHORT_STEP);
+            const payload = await utils.query(suite, 'org.mynamespace.crud:getKeysByRangeUsingAsyncIterator', ['key1', 'key4']);
+            expect(JSON.parse(payload)).to.deep.equal(['value1', 'value2', 'value3']);
+        });
+
+        it('should get the history for a key using the old and new iterator style', async function () {
             this.timeout(LONG_STEP);
 
             await utils.invoke(suite, 'org.mynamespace.crud:putKey', ['key1', 'newValue1']);
@@ -68,11 +81,15 @@ describe('Chaincode CRUD', () => {
             await utils.invoke(suite, 'org.mynamespace.crud:putKey', ['key1', 'newValue3']);
             await utils.invoke(suite, 'org.mynamespace.crud:putKey', ['key1', 'value1']);
 
-            const payload = await utils.query(suite, 'org.mynamespace.crud:getHistoryForKey', ['key1']);
+            let payload = await utils.query(suite, 'org.mynamespace.crud:getHistoryForKey', ['key1']);
             expect(JSON.parse(payload)).to.deep.equal(['value1', 'newValue1', 'newValue2', 'newValue3', 'value1']);
+
+            payload = await utils.query(suite, 'org.mynamespace.crud:getHistoryForKeyUsingAsyncIterator', ['key1']);
+            expect(JSON.parse(payload)).to.deep.equal(['value1', 'newValue1', 'newValue2', 'newValue3', 'value1']);
+
         });
 
-        it('should get a query result with pagination without setting a bookmark', async function () {
+        it('should get a query result with pagination without setting a bookmark using the old iterator style', async function () {
             this.timeout(MED_STEP);
 
             const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPagination', []));
@@ -82,7 +99,18 @@ describe('Chaincode CRUD', () => {
             expect(payload.metadata1.bookmark).to.exist;
         });
 
-        it('should get a query result with pagination with a set bookmark', async function () {
+        it('should get a query result with pagination without setting a bookmark using the new iterator style', async function () {
+            this.timeout(MED_STEP);
+
+            const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPaginationUsingAsyncIterator', []));
+            expect(payload.results1.length).to.equal(2, 'Should return 2 keys');
+            expect(payload.results1).to.deep.equal(['jsonkey0', 'jsonkey1']);
+            expect(payload.metadata1.fetched_records_count).to.equal(2);
+            expect(payload.metadata1.bookmark).to.exist;
+        });
+
+
+        it('should get a query result with pagination with a set bookmark using the old iterator style', async function () {
             this.timeout(MED_STEP);
 
             const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPagination', []));
@@ -91,7 +119,17 @@ describe('Chaincode CRUD', () => {
             expect(payload.metadata2.fetched_records_count).to.equal(1);
         });
 
-        it('should return a paginated list', async function () {
+        it('should get a query result with pagination with a set bookmark using the new iterator style', async function () {
+            this.timeout(MED_STEP);
+
+            const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPaginationUsingAsyncIterator', []));
+            expect(payload.results2.length).to.equal(1);
+            expect(payload.results2).to.deep.equal(['jsonkey2']);
+            expect(payload.metadata2.fetched_records_count).to.equal(1);
+        });
+
+
+        it('should return a paginated list using the old iterator style', async function () {
             this.timeout(SHORT_STEP);
 
             const payload1 = await utils.query(suite, 'org.mynamespace.crud:getStateByRangeWithPagination', ['key1', 'key4', 2, 'key2']);
@@ -100,18 +138,39 @@ describe('Chaincode CRUD', () => {
             expect(JSON.parse(payload2)).to.deep.equal(['value1', 'value2', 'value3']);
         });
 
-        it('should return a state from a partial composite key', async function() {
+        it('should return a paginated list using the new iterator style', async function () {
+            this.timeout(SHORT_STEP);
+
+            const payload1 = await utils.query(suite, 'org.mynamespace.crud:getStateByRangeWithPaginationUsingAsyncIterator', ['key1', 'key4', 2, 'key2']);
+            const payload2 = await utils.query(suite, 'org.mynamespace.crud:getStateByRangeWithPaginationUsingAsyncIterator', ['key1', 'key4', 3, '']);
+            expect(JSON.parse(payload1)).to.deep.equal(['value2', 'value3']);
+            expect(JSON.parse(payload2)).to.deep.equal(['value1', 'value2', 'value3']);
+        });
+
+
+        it('should return a state from a partial composite key using the old iterator style', async function() {
             this.timeout(SHORT_STEP);
             const payload = await utils.query(suite, 'org.mynamespace.crud:getStateByPartialCompositeKey', ['name~color', 'ann']);
             expect(JSON.parse(payload)).to.deep.equal(['annblack', 'annred', 'annyellow']);
         });
 
-        it('should return a paginated list from partial composte key', async function() {
+        it('should return a state from a partial composite key using the new iterator style', async function() {
+            this.timeout(SHORT_STEP);
+            const payload = await utils.query(suite, 'org.mynamespace.crud:getStateByPartialCompositeKeyUsingAsyncIterator', ['name~color', 'ann']);
+            expect(JSON.parse(payload)).to.deep.equal(['annblack', 'annred', 'annyellow']);
+        });
+
+        it('should return a paginated list from partial composte key using the old iterator style', async function() {
             this.timeout(SHORT_STEP);
             const payload = await utils.query(suite, 'org.mynamespace.crud:getStateByPartialCompositeKeyWithPagination', ['name~color', 1]);
             expect(JSON.parse(payload)).to.deep.equal(['annblack']);
         });
 
+        it('should return a paginated list from partial composte key using the new iterator style', async function() {
+            this.timeout(SHORT_STEP);
+            const payload = await utils.query(suite, 'org.mynamespace.crud:getStateByPartialCompositeKeyWithPaginationUsingAsyncIterator', ['name~color', 1]);
+            expect(JSON.parse(payload)).to.deep.equal(['annblack']);
+        });
     });
 
     describe('Put', () => {

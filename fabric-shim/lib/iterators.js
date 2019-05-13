@@ -1,7 +1,7 @@
 'use strict';
 const ProtoLoader = require('./protoloader');
 const path = require('path');
-const EventEmitter = require('events');
+const logger = require('./logger').getLogger('lib/iterators.js');
 
 const _queryresultProto = ProtoLoader.load({
     root: path.join(__dirname, './protos'),
@@ -15,7 +15,7 @@ const _queryresultProto = ProtoLoader.load({
  * @class
  * @memberof fabric-shim
  */
-class CommonIterator extends EventEmitter {
+class CommonIterator {
 
     /**
 	 * constructor
@@ -25,7 +25,6 @@ class CommonIterator extends EventEmitter {
 	 * @param {object} response decoded payload
 	 */
     constructor(handler, channel_id, txID, response, type) {
-        super();
         this.type = type;
         this.handler = handler;
         this.channel_id = channel_id;
@@ -41,6 +40,7 @@ class CommonIterator extends EventEmitter {
 	 * if there is a problem
 	 */
     async close() {
+        logger.debug('close called on %s iterator for txid: %s', this.type, this.txID);
         return await this.handler.handleQueryStateClose(this.response.id, this.channel_id, this.txID);
     }
 
@@ -59,16 +59,15 @@ class CommonIterator extends EventEmitter {
 
 
     /*
-	 * creates a return value and emits an event
+	 * creates a return value
 	 */
     _createAndEmitResult() {
         const queryResult = {};
         queryResult.value = this._getResultFromBytes(this.response.results[this.currentLoc]);
         this.currentLoc++;
-        queryResult.done = !(this.currentLoc < this.response.results.length || this.response.has_more);
-        if (this.listenerCount('data') > 0) {
-            this.emit('data', this, queryResult);
-        }
+        // TODO: potential breaking change if it's assumed that if done == true then it has a valid value
+        queryResult.done = false;
+        // queryResult.done = !(this.currentLoc < this.response.results.length || this.response.has_more);
         return queryResult;
     }
 
@@ -92,21 +91,9 @@ class CommonIterator extends EventEmitter {
                     this.response = response;
                     return this._createAndEmitResult();
                 } catch (err) {
-                    // if someone is utilising the event driven way to work with
-                    // iterators (by explicitly checking for data here, not error)
-                    // then emit an error event. This means it will emit an event
-                    // even if no-one is listening for the error event. Error events
-                    // are handled specially by Node.
-                    if (this.listenerCount('data') > 0) {
-                        this.emit('error', this, err);
-                        return;
-                    }
+                    logger.error('unexpected error received getting next value: %s', err.message);
                     throw err;
                 }
-            }
-            // no more, just return EMCA spec defined response
-            if (this.listenerCount('end') > 0) {
-                this.emit('end', this);
             }
             return {done: true};
         }
