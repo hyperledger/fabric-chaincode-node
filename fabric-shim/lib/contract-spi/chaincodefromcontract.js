@@ -234,6 +234,20 @@ class ChaincodeFromContract {
                     transaction.tags = ['submitTx'];
                 }
 
+                // add 'argN' parameters, skipping the first (stub) parameter
+                if (propValue.length > 1) {
+                    transaction.parameters = [];
+                    for (let param = 1; param < propValue.length; param++) {
+                        transaction.parameters.push({
+                            name: `arg${param - 1}`,
+                            description: `Argument ${param - 1}`,
+                            schema: {
+                                type: 'string'
+                            }
+                        });
+                    }
+                }
+
                 transactions.push(transaction);
             }
         }
