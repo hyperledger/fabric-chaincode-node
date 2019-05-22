@@ -119,7 +119,9 @@ describe('Logger', () => {
             log.debug();
             log.debug('hello');
             log.debug('hello', {'one':'two'});
-            // sinon.assert.calledWith(logSpy,'wibble');
+            log.debug('error', {error:new Error()});
+            log.debug('error', {error:{message:''}});
+
         });
 
         it ('', () => {
@@ -127,7 +129,7 @@ describe('Logger', () => {
 
             const log = Logger.getLogger('fred');
             log.debug('hello', 'fred');
-            // sinon.assert.calledWith(logSpy,'wibble');
+
         });
     });
 
