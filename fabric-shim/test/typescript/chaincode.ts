@@ -77,6 +77,7 @@ class TestTS implements ChaincodeInterface {
         this.testCompositeKey(stub);
         await this.testState(stub);
         await this.testOtherIteratorCalls(stub);
+        await this.testAsyncIterators(stub);
         await this.testPrivateData(stub);
         await this.testOtherStubCalls(stub);
         this.testClientIdentity(stub);
@@ -147,7 +148,7 @@ class TestTS implements ChaincodeInterface {
         this.testStateQueryIterator(queryResult);
     }
 
-    async testIterator(iterator: Iterators.CommonIterator) {
+    async testIterator(iterator: Iterators.CommonIterator<any>) {
         const historyNext: Promise<any> = iterator.next();
         const nextVal: any = await historyNext;
         const historyClose: Promise<void> = iterator.close();
@@ -170,7 +171,7 @@ class TestTS implements ChaincodeInterface {
     }
 
     async testStateQueryIterator(stateQuery: Iterators.StateQueryIterator) {
-        const stateNext: Iterators.NextResult = await stateQuery.next();
+        const stateNext: Iterators.NextResult<Iterators.KV> = await stateQuery.next();
         await stateQuery.close();
         const done: boolean = stateNext.done;
         const keyVal: Iterators.KV = stateNext.value;
@@ -195,6 +196,21 @@ class TestTS implements ChaincodeInterface {
         const delPrivateData: Promise<void> = stub.deletePrivateData(collection, key);
         await delPrivateData;
 
+    }
+
+    async testAsyncIterators(stub: ChaincodeStub): Promise<void> {
+        const iterator = stub.getStateByRange('key2', 'key6');
+        for await (const res of iterator) {
+            const value = res.value;
+        }
+        const iteratorPage = stub.getStateByRangeWithPagination('key2', 'key6', 3);
+        for await (const res of iteratorPage) {
+            const value = res.value;
+        }
+        const iteratorHistory = stub.getHistoryForKey('key1');
+        for await (const res of iteratorHistory) {
+            const tx_id = res.tx_id;
+        }
     }
 
     async testOtherStubCalls(stub: ChaincodeStub): Promise<void> {

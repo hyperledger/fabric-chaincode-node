@@ -22,7 +22,10 @@
             "*": [
               "node_modules/*"
             ]
-        }
+        },
+        "lib": [
+            "esnext"
+        ]
     },
     "files": [
         "index.d.ts"

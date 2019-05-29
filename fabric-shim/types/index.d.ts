@@ -71,6 +71,10 @@ declare module 'fabric-shim' {
         ERROR: number;
     }
 
+    interface AsyncIterable<T> {
+        [Symbol.asyncIterator]: () => AsyncIterator<T>;
+    }
+
     export class ChaincodeStub {
         getArgs(): string[];
         getStringArgs(): string[];
@@ -90,14 +94,14 @@ declare module 'fabric-shim' {
         deleteState(key: string): Promise<void>;
         setStateValidationParameter(key: string, ep: Buffer): Promise<void>;
         getStateValidationParameter(key: string): Promise<Buffer>;
-        getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator>;
-        getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
-        getStateByPartialCompositeKey(objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator>;
-        getStateByPartialCompositeKeyWithPagination(objectType: string, attributes: string[], pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
+        getStateByRange(startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
+        getStateByRangeWithPagination(startKey: string, endKey: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> & AsyncIterable<Iterators.KV>;
+        getStateByPartialCompositeKey(objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
+        getStateByPartialCompositeKeyWithPagination(objectType: string, attributes: string[], pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> & AsyncIterable<Iterators.KV>;
 
-        getQueryResult(query: string): Promise<Iterators.StateQueryIterator>;
-        getQueryResultWithPagination(query: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>>;
-        getHistoryForKey(key: string): Promise<Iterators.HistoryQueryIterator>;
+        getQueryResult(query: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
+        getQueryResultWithPagination(query: string, pageSize: number, bookmark?: string): Promise<StateQueryResponse<Iterators.StateQueryIterator>> & AsyncIterable<Iterators.KV>;
+        getHistoryForKey(key: string): Promise<Iterators.HistoryQueryIterator> & AsyncIterable<Iterators.KeyModification>;
 
         invokeChaincode(chaincodeName: string, args: string[], channel: string): Promise<ChaincodeResponse>;
         setEvent(name: string, payload: Buffer): void;
@@ -111,9 +115,9 @@ declare module 'fabric-shim' {
         deletePrivateData(collection: string, key: string): Promise<void>;
         setPrivateDataValidationParameter(collection: string, key: string, ep: Buffer): Promise<void>;
         getPrivateDataValidationParameter(collection: string, key: string): Promise<Buffer>;
-        getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator>;
-        getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator>;
-        getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator>;
+        getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
+        getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
+        getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
 
         static RESPONSE_CODE: ResponseCode;
     }
@@ -130,23 +134,18 @@ declare module 'fabric-shim' {
 
     export namespace Iterators {
 
-        interface CommonIterator extends EventEmitter {
+        interface CommonIterator<T> {
             close(): Promise<void>;
-            next(): Promise<any>;
+            next(): Promise<NextResult<T>>;
         }
 
-        interface HistoryQueryIterator extends CommonIterator {
-            next(): Promise<NextKeyModificationResult>;
-        }
-
-        interface StateQueryIterator extends CommonIterator {
-            next(): Promise<NextResult>;
-        }
-
-        interface NextResult {
-            value: KV;
+        interface NextResult<T> {
+            value: T;
             done: boolean;
         }
+
+        type HistoryQueryIterator = CommonIterator<KeyModification>;
+        type StateQueryIterator = CommonIterator<KV>;
 
         interface NextKeyModificationResult {
             value: KeyModification;
@@ -154,8 +153,10 @@ declare module 'fabric-shim' {
         }
 
         interface KV {
+            namespace: string;
             key: string;
             value: ProtobufBytes;
+            getNamespace(): string;
             getKey(): string;
             getValue(): ProtobufBytes;
         }
