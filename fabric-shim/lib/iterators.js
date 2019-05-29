@@ -76,8 +76,9 @@ class CommonIterator extends EventEmitter {
 	 * Get the next value and return it through a promise and also emit
 	 * it if event listeners have been registered.
 	 * @async
-	 * @return {promise} a promise that is fulfilled with the next value or
-	 * is rejected otherwise
+	 * @return {promise} a promise that is fulfilled with the next value.
+	 * If there is no more next value, "done" key of the object is true.
+	 * It is rejected if any error occurs.
 	 */
     async next() {
         // check to see if there are some results left in the current result set
