@@ -38,9 +38,9 @@ const util = require('util');
 /**
  * Support the Updating of values within the SmartContract
  */
-class UpdateValuesContract extends Contract
+class UpdateValuesContract extends Contract {
 
-  constructor(){
+    constructor() {
 	   	super('UpdateValuesContract');
 	}
 
@@ -57,7 +57,7 @@ class UpdateValuesContract extends Contract
 	  //  .....
 	}
 
-};
+}
 
 module.exports = UpdateValuesContract
 ```
