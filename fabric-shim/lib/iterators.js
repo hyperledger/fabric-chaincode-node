@@ -72,11 +72,11 @@ class CommonIterator {
     }
 
     /**
-	 * Get the next value and return it through a promise and also emit
-	 * it if event listeners have been registered.
+	 * Get the next value and return it through a promise.
 	 * @async
-	 * @return {promise} a promise that is fulfilled with the next value or
-	 * is rejected otherwise
+	 * @return {promise} a promise that is fulfilled with an object { value: (next value) },
+	 * is fulfilled with an object { done: true } if there is no more value,
+	 * or is rejected if any error occurs.
 	 */
     async next() {
         // check to see if there are some results left in the current result set
