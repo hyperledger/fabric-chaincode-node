@@ -855,6 +855,26 @@ class ChaincodeStub {
     }
 
     /**
+	 * getPrivateDataHash returns the hash of the value of the specified `key` from
+	 * the specified `collection`.
+	 *
+	 * @param {string} collection The collection name
+	 * @param {string} key Private data variable key to retrieve a hash from the state store
+	 * @returns {Promise<byte[]>} Promise for the private value hash from the state store
+	 */
+    async getPrivateDataHash(collection, key) {
+        logger.debug('getPrivateDataHash called with collection:%s, key:%s', collection, key);
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!key || typeof key !== 'string') {
+            throw new Error('key must be a valid string');
+        }
+
+        return await this.handler.handleGetPrivateDataHash(collection, key, this.channel_id, this.txId);
+    }
+
+    /**
 	 * putPrivateData puts the specified `key` and `value` into the transaction's
 	 * private writeSet. Note that only hash of the private writeSet goes into the
 	 * transaction proposal response (which is sent to the client who issued the
