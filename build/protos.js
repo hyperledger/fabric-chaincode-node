@@ -45,10 +45,11 @@ const DEPS = [
     path.join(baseDir, 'token/expectations.proto')
 ];
 
-gulp.task('protos', function() {
+function protos() {
     return gulp.src(DEPS, {base: baseDir})
         .pipe(debug())
         .pipe(gulp.dest(path.join(__dirname, '../fabric-shim/lib/protos')));
-});
+}
 
 module.exports.DEPS = DEPS;
+exports.protos = protos;

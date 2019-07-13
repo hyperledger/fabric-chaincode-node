@@ -5,22 +5,33 @@
 */
 'use strict';
 /* eslint-disable no-console*/
-const gulp = require('gulp');
-const del = require('del');
+const {series, src, dest} = require('gulp');
 const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
 const shell = require('gulp-shell');
-const replace = require('gulp-replace');
-const runSequence = require('run-sequence');
+
+const version = require(path.join(__dirname, '../../package.json')).version;
+// const replace = require('gulp-replace');
+// const runSequence = require('run-sequence');
 const merge = require('merge-stream');
+const delay = require('delay');
+const getTLSArgs = require('./utils').getTLSArgs;
 
-const constants = require('../../test/constants.js');
+const {shell: runcmds} = require('./../shell/cmd');
 
+
+const networkDir = path.join(__dirname, 'network');
+const dockerComposeDir = path.join(networkDir, 'docker-compose');
+const dockerCfgPath = '/etc/hyperledger/config';
+const dockerCfgTxPath = '/etc/hyperledger/configtx';
+const channelName = 'mychannel';
+const tls = require('./utils').tls;
+// const version = require(path.join(__dirname, '../../package.json')).version;
 const arch = process.arch;
 const release = require(path.join(__dirname, '../../package.json')).testFabricVersion;
 const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
-const version = require(path.join(__dirname, '../../package.json')).version;
+
 let dockerImageTag = '';
 let thirdpartyImageTag = '';
 let docker_arch = '';
@@ -50,118 +61,35 @@ if (!/master/.test(release)) {
 // these environment variables would be read at test/fixtures/docker-compose.yaml
 process.env.DOCKER_IMG_TAG = dockerImageTag;
 process.env.THIRDPARTY_IMG_TAG = thirdpartyImageTag;
+process.env.DOCKER_DEVMODE = process.env.DEVMODE ? process.env.DEVMODE : 'true';
+// // by default for running the tests print debug to a file
+// const debugPath = path.join(constants.tempdir, 'logs/test-debug.log');
+// console.log('\n####################################################');
+// console.log(util.format('# debug log: %s', debugPath));
+// console.log('####################################################\n');
 
-// by default for running the tests print debug to a file
-const debugPath = path.join(constants.tempdir, 'logs/test-debug.log');
-console.log('\n####################################################');
-console.log(util.format('# debug log: %s', debugPath));
-console.log('####################################################\n');
+// function clean_up () {
+//     // some tests create temporary files or directories
+//     // they are all created in the same temp folder
+//     fs.removeSync(constants.tempdir);
+//     return fs.ensureFileSync(debugPath);
+// }
 
-gulp.task('clean-up', function() {
-    // some tests create temporary files or directories
-    // they are all created in the same temp folder
-    fs.removeSync(constants.tempdir);
-    return fs.ensureFileSync(debugPath);
-});
-
-// re-use the "basic-network" artifacts from fabric-samples
-// by copying them to the temp folder and override the
-// docker-compose.yml's content to fit the needs of the test environment
-const samplesPath = constants.BasicNetworkSamplePath;
-const testDir = constants.BasicNetworkTestDir;
-console.log('\n####################################################');
-console.log('BasicNetworkSamplePath: %s', samplesPath);
-console.log('BasicNetworkTestDir: %s', testDir);
-console.log('####################################################\n');
-
-const devmode = process.env.DEVMODE ? process.env.DEVMODE : 'true';
-const tls = process.env.TLS ? process.env.TLS : 'false';
-gulp.task('docker-copy', ['clean-up'], function() {
-    gulp.src([
-        path.join(__dirname, 'docker-compose.yml'),
-    ], {base: __dirname})
-        .pipe(replace(
-            'command: peer node start',
-            util.format('command: peer node start --peer-chaincodedev=%s', devmode)))
-        .pipe(replace(
-            'FABRIC_CA_SERVER_TLS_ENABLED=true',
-            util.format('FABRIC_CA_SERVER_TLS_ENABLED=%s', tls)))
-        .pipe(replace(
-            'ORDERER_GENERAL_TLS_ENABLED=true',
-            util.format('ORDERER_GENERAL_TLS_ENABLED=%s', tls)))
-        .pipe(replace(
-            'CORE_PEER_TLS_ENABLED=true',
-            util.format('CORE_PEER_TLS_ENABLED=%s', tls)))
-        .pipe(gulp.dest(testDir));
-
-    gulp.src([
-        path.join(samplesPath, 'configtx.yaml'),
-        path.join(samplesPath, 'config'), // copy the empty folder only
-        path.join(samplesPath, 'crypto-config/**'),
-        path.join(samplesPath, '../chaincode'), // copy the empty folder only
-    ], {base: samplesPath})
-        .pipe(gulp.dest(testDir));
-
-    return gulp.src([
-        'test/fixtures/channel-init.sh',
-    ])
-        .pipe(gulp.dest(testDir));
-
-});
-
-gulp.task('fv-pre-test', (done) => {
-    const tasks = ['fv-pack', 'fv-copy', 'fv-clean'];
-    runSequence(...tasks, done);
-});
-
-gulp.task('fv-pack', () => {
-    return gulp.src('*.js')
+function _clean_up_chaincode () {
+    return src('*.js', {read: false})
         .pipe(shell([
-            'npm pack ./fabric-contract-api',
-            'npm pack ./fabric-shim',
-            'npm pack ./fabric-shim-crypto',
+            'find . -name "fabric*.tgz" -depth -exec rm {} \\;',
+            'find test -name "node_modules" -depth -exec rm -r {} \\;'
         ]));
-});
-
-gulp.task('fv-copy', ['fv-copy-depts'], () => {
-    return gulp.src([
-        'test/fv/**/*',
-    ], {base: 'test'})
-        .pipe(gulp.dest(testDir));
-});
-
-gulp.task('fv-copy-depts', () => {
-    let dirContents = fs.readdirSync('test/fv');
-    dirContents = dirContents.filter(c => c.match(/.*.js/) && c !== 'utils.js');
-    const chaincodeNames = dirContents.map(n => n.replace('.js', ''));
-    const streams = [];
-    for (const c in chaincodeNames) {
-        const name = chaincodeNames[c];
-        const directory =  `test/fv/${name}`;
-        fs.ensureDirSync(path.join(testDir, 'test', name));
-        const stream = gulp.src([
-            path.join(__dirname, `../../fabric-contract-api-${version}.tgz`),
-            path.join(__dirname, `../../fabric-shim-${version}.tgz`),
-            path.join(__dirname, `../../fabric-shim-crypto-${version}.tgz`),
-        ])
-            .pipe(gulp.dest(directory));
-        streams.push(stream);
-    }
-
-    return merge(...streams);
-});
-
-gulp.task('fv-clean', () => {
-    return del(path.join(__dirname, '../../**/*.tgz'));
-});
+}
 
 // This and other usage of the gulp-shell module cannot use the
 // short-hand style because we must delay the use of the testDir
 // to task invocation time, rather than module load time (which
 // using the short-hand style will cause), because the testDir
 // is not defined until the 'clean-up' task has been run
-gulp.task('docker-clean', ['docker-copy'], () => {
-    return gulp.src('*.js', {read: false})
+function _docker_clean () {
+    return src('*.js', {read: false})
         .pipe(shell([
             // stop and remove chaincode docker instances
             'docker kill $(docker ps | grep "dev-peer0.org[12].example.com" | awk \'{print $1}\')',
@@ -171,50 +99,178 @@ gulp.task('docker-clean', ['docker-copy'], () => {
             'docker rmi $(docker images | grep "^dev-peer0.org[12].example.com" | awk \'{print $3}\')',
 
             // clean up all the containers created by docker-compose
-            util.format('docker-compose -f %s down', fs.realpathSync(path.join(testDir, 'docker-compose.yml')))
+            util.format('docker-compose -f %s down --volumes', fs.realpathSync(path.join(dockerComposeDir, 'docker-compose-cli.yaml'))),
+            util.format('docker-compose -f %s -p node down --volumes', fs.realpathSync(path.join(dockerComposeDir, 'docker-compose.yaml'))),
+            util.format('docker-compose -f %s -p node down --volumes', fs.realpathSync(path.join(dockerComposeDir, 'docker-compose-tls.yaml')))
         ], {
             verbose: true, // so we can see the docker command output
             ignoreErrors: true // kill and rm may fail because the containers may have been cleaned up
         }));
-});
 
-gulp.task('docker-cli-ready', ['docker-clean'], () => {
-    return gulp.src('*.js', {read: false})
+}
+
+function _docker_cli_ready () {
+    return src('*.js', {read: false})
         .pipe(shell([
             // make sure that necessary containers are up by docker-compose
-            util.format('docker-compose -f %s up -d cli', fs.realpathSync(path.join(testDir, 'docker-compose.yml')))
+            util.format('docker-compose -f %s up -d', fs.realpathSync(path.join(dockerComposeDir, 'docker-compose-cli.yaml'))),
         ]));
-});
+}
 
-gulp.task('generate-config', ['docker-cli-ready'], () => {
-    return gulp.src('*.js', {read: false})
+const cliReady = series(_clean_up_chaincode, _docker_clean, _docker_cli_ready);
+// --
+
+function _generate_config () {
+    return src('*.js', {read: false})
         .pipe(shell([
-            util.format('docker exec cli configtxgen -profile OneOrgOrdererGenesis -outputBlock %s',
-                '/etc/hyperledger/configtx/genesis.block'),
-            util.format('docker exec cli configtxgen -profile OneOrgChannel -outputCreateChannelTx %s -channelID mychannel',
-                '/etc/hyperledger/configtx/channel.tx'),
-            'docker exec cli cp /etc/hyperledger/fabric/core.yaml /etc/hyperledger/config/'
+            util.format(
+                'docker exec cli rm -rf %s/crypto-config',
+                dockerCfgPath
+            ),
+            util.format(
+                'docker exec cli rm -f %s/channel.tx',
+                dockerCfgPath
+            ),
+            util.format(
+                'docker exec cli rm -f %s/core.yaml',
+                dockerCfgPath
+            ),
+            util.format(
+                'docker exec cli rm -f %s/genesis.block',
+                dockerCfgPath
+            ),
+            util.format(
+                'docker exec cli rm -f %s/mychannel.block',
+                dockerCfgPath
+            ),
+            util.format(
+                'docker exec cli cryptogen generate --config=%s/crypto-config.yaml --output %s/crypto-config',
+                dockerCfgPath,
+                dockerCfgPath
+            ),
+            util.format(
+                'docker exec cli configtxgen -profile TwoOrgsOrdererGenesis -outputBlock %s/genesis.block -channelID not%s',
+                dockerCfgPath,
+                channelName
+            ),
+            util.format(
+                'docker exec cli configtxgen -profile TwoOrgsChannel -outputCreateChannelTx %s/channel.tx -channelID %s',
+                dockerCfgPath,
+                channelName
+            ),
+            util.format(
+                'docker exec cli cp /etc/hyperledger/fabric/core.yaml %s',
+                dockerCfgPath
+            ),
+            util.format(
+                'docker exec cli sh %s/rename_sk.sh',
+                dockerCfgPath
+            ),
+            util.format(
+                'docker-compose -f %s down',
+                fs.realpathSync(path.join(dockerComposeDir, 'docker-compose-cli.yaml'))
+            )
         ], {
             verbose: true, // so we can see the docker command output
             ignoreErrors: true // kill and rm may fail because the containers may have been cleaned up
         }));
-});
 
+}
+
+const generateConfig = series(cliReady, _generate_config);
+
+// --
 // variable to construct the docker network name used by
 // chaincode container to find peer node
 process.env.COMPOSE_PROJECT_NAME = 'basicnetwork';
+function _start_docker () {
+    const composeFile = tls ? 'docker-compose-tls.yaml' : 'docker-compose.yaml';
 
-gulp.task('docker-ready', ['generate-config'], () => {
-    return gulp.src('*.js', {read: false})
+    console.log(`################\nUsing docker compose file: ${composeFile}\n################`); // eslint-disable-line no-console
+
+    return src('*.js', {read: false})
         .pipe(shell([
             // make sure that necessary containers are up by docker-compose
-            util.format('docker-compose -f %s up -d', fs.realpathSync(path.join(testDir, 'docker-compose.yml')))
+            util.format('docker-compose -f %s -p node up -d', fs.realpathSync(path.join(dockerComposeDir, composeFile)))
         ]));
-});
+}
 
-gulp.task('channel-init', ['docker-ready'], shell.task([
-    // create channel, join peer0 to the channel
-    'docker exec cli /etc/hyperledger/config/channel-init.sh'
-]));
+const dockerReady = series(generateConfig, _start_docker);
 
-gulp.task('start-fabric', ['channel-init']);
+// --
+async function _channel_init () {
+    await runcmds([
+        // create channel, join peer0 to the channel
+        'docker exec org1_cli /etc/hyperledger/fixtures/channel-init.sh',
+        'docker exec org2_cli /etc/hyperledger/fixtures/channel-init.sh'
+    ]);
+}
+
+async function _channel_create () {
+    await delay(3000);
+    await runcmds([
+        util.format(
+            'docker exec org1_cli peer channel create -o orderer.example.com:7050 -c %s -f %s/channel.tx --outputBlock %s/mychannel.block %s',
+            channelName,
+            dockerCfgTxPath,
+            dockerCfgTxPath,
+            channelName,
+            getTLSArgs()
+        )
+    ]);
+}
+
+const localPublish = async () => {
+    await runcmds([
+        util.format('npm pack %s', path.join(__dirname, '../../fabric-contract-api')),
+        util.format('npm pack %s', path.join(__dirname, '../../fabric-shim')),
+        util.format('npm pack %s', path.join(__dirname, '../../fabric-shim-crypto'))
+    ]);
+};
+
+const copyPublishedToChaincode = () => {
+
+    const streams = [];
+
+    // Copy to fv tests
+    const fvPath = path.join(__dirname, '../../test/fv');
+
+    let dirContents = fs.readdirSync(fvPath);
+    dirContents = dirContents.filter(c => c.match(/.*.js/) && c !== 'utils.js');
+
+    const chaincodeNames = dirContents.map(n => n.replace('.js', ''));
+    for (const c in chaincodeNames) {
+        const name = chaincodeNames[c];
+        const directory = `test/fv/${name}`;
+
+        fs.ensureDirSync(path.join(fvPath, name));
+
+        const stream = src([
+            path.join(process.cwd(), `fabric-contract-api-${version}.tgz`),
+            path.join(process.cwd(), `fabric-shim-${version}.tgz`),
+            path.join(process.cwd(), `fabric-shim-crypto-${version}.tgz`),
+        ])
+            .pipe(dest(directory));
+        streams.push(stream);
+    }
+
+    // copy to scenario test
+    const stream = src([
+        path.join(process.cwd(), `fabric-contract-api-${version}.tgz`),
+        path.join(process.cwd(), `fabric-shim-${version}.tgz`),
+        path.join(process.cwd(), `fabric-shim-crypto-${version}.tgz`),
+    ])
+        .pipe(dest(path.join(__dirname, '../../test/scenario')));
+
+    streams.push(stream);
+
+    return merge(...streams);
+};
+
+
+
+const channelSetup = series(_channel_create, _channel_init);
+
+// --
+const startFabric = series(dockerReady, channelSetup, localPublish, copyPublishedToChaincode);
+exports.startFabric = startFabric;

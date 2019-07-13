@@ -24,3 +24,10 @@ yarn.lock
 **/typescript/*.js.map
 fabric*.tgz
 test/fv/annotations/dist
+
+
+
+build/test/network/crypto-material/*.block
+build/test/network/crypto-material/*.tx
+build/test/network/crypto-material/crypto-config
+build/test/network/crypto-material/core.yaml

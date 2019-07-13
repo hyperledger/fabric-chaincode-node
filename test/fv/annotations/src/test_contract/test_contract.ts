@@ -1,3 +1,9 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
+
 import { Contract, Context, Transaction, Returns, Object, Property } from 'fabric-contract-api';
 
 @Object()

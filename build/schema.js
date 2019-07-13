@@ -7,11 +7,10 @@
 /* eslint-disable no-console*/
 'use strict';
 
-const gulp = require('gulp');
 const util = require('util');
 const execFile = util.promisify(require('child_process').execFile);
 
-gulp.task('test-schema', async () => {
+async function test_schema () {
     const options = {};
     const script = 'npm';
     const schemaTestCmd = 'run schema:test';
@@ -26,8 +25,9 @@ gulp.task('test-schema', async () => {
         console.log(stderr);
     }
 
-});
+}
 
+exports.test_schema = test_schema;
 
 
 

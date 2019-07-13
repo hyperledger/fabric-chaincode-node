@@ -168,8 +168,8 @@ e2e_Tests() {
         echo -e "\033[32m ------> Run Integration and Scenario Tests" "\033[0m"
         echo "#################################################################"
 
-        ls -l /tmp/fabric-shim/chaincode/hyperledger/fabric || true
-        ls -l /tmp/fabric-shim/chaincode/hyperledger || true
+        # ls -l /tmp/fabric-shim/chaincode/hyperledger/fabric || true
+        # ls -l /tmp/fabric-shim/chaincode/hyperledger || true
 
         docker images | grep hyperledger && docker ps -a
         gulp test-e2e || err_Check "ERROR!!! test-e2e failed"

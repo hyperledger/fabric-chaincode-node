@@ -7,7 +7,8 @@ const gulp = require('gulp');
 const eslint = require('gulp-eslint');
 const path = require('path');
 
-gulp.task('lint', function () {
+
+function lint() {
     return gulp.src([
         '**/*.js',
         '!fabric-contract-api/node_modules/**',
@@ -20,4 +21,6 @@ gulp.task('lint', function () {
     ], {
         base: path.join(__dirname, '..')
     }).pipe(eslint()).pipe(eslint.format()).pipe(eslint.failAfterError());
-});
+}
+
+exports.lint = lint;

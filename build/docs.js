@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 /* eslint-disable no-console */
-const gulp = require('gulp');
+const {src, dest, series} = require('gulp');
 const jsdoc = require('gulp-jsdoc3');
 const fs = require('fs-extra');
 const path = require('path');
@@ -15,17 +15,12 @@ if (!currentBranch) {
     currentBranch = 'master';
 }
 
-
 let docsRoot;
 if (process.env.DOCS_ROOT) {
     docsRoot = process.env.DOCS_ROOT;
 } else {
     docsRoot = './docs/gen';
 }
-
-gulp.task('clean', function() {
-    return fs.removeSync(path.join(docsRoot, currentBranch));
-});
 
 const docSrc = [
     'docs/README.md',
@@ -35,13 +30,18 @@ const docSrc = [
     'fabric-contract-api/lib/**/*.js'
 ];
 
-gulp.task('schema-docs', () => {
-    return gulp.src('fabric-contract-api/schema/contract-schema.json')
-        .pipe(gulp.dest(path.join(docsRoot, currentBranch)));
-});
+const _clean = (done) => {
+    fs.removeSync(path.join(docsRoot, currentBranch));
+    done();
+};
 
-gulp.task('jsdocs', ['clean'], function (cb) {
-    gulp.src(docSrc, {read: false}).pipe(jsdoc({
+const _schema_docs = () => {
+    return src('fabric-contract-api/schema/contract-schema.json')
+        .pipe(dest(path.join(docsRoot, currentBranch)));
+};
+
+const _jsdocs = (cb) => {
+    src(docSrc, {read: false}).pipe(jsdoc({
         opts: {
             tutorials: './docs/tutorials',
             destination: path.join(docsRoot, currentBranch)
@@ -53,20 +53,14 @@ gulp.task('jsdocs', ['clean'], function (cb) {
 
     }, cb)
     );
-});
-
-
-gulp.task('docs-dev', ['docs'], function() {
-    gulp.watch(docSrc, ['docs']);
-});
+};
 
 // for the rare occurance where something needs to be bootsrap in the docs ahead of a release
-gulp.task('bootstrap', function() {
-    gulp.src('./docs/bootstrap/**/*').pipe(gulp.dest(docsRoot));
-});
+// const _bootstrap = () => {
+//     return src('./docs/bootstrap/**/*').pipe(gulp.dest(docsRoot));
+// };
 
-gulp.task('docs', ['jsdocs', 'schema-docs', 'bootstrap'], () => {
-
+const _docs = (done) => {
     const relativePath = '.';
     const packageJson = require(path.join(__dirname, '..', 'package.json'));
     let mapping = ['ClientIdentity',
@@ -91,12 +85,19 @@ gulp.task('docs', ['jsdocs', 'schema-docs', 'bootstrap'], () => {
     // also copies the
     if (currentBranch === 'master') {
         const pathToReleasedSchema = path.resolve(docsRoot, packageJson.docsLatestVersion, 'contract-schema.json');
-        return gulp.src(['./docs/redirectTemplates/*.html', pathToReleasedSchema])
+        return src(['./docs/redirectTemplates/*.html', pathToReleasedSchema])
             .pipe(replace('LATEST__VERSION', packageJson.docsLatestVersion))
             .pipe(replace('FILENAME__MAPPING', mapping.join(',')))
             .pipe(replace('RELATIVE__PATH', relativePath))
-            .pipe(gulp.dest(docsRoot));
+            .pipe(dest(docsRoot));
     } else {
         console.log(`Not updating or routing logic, as not master branch - it is ${currentBranch}`);
+        done();
     }
-});
+};
+
+
+const jsdocs = series(_clean, _jsdocs);
+const docs = series(jsdocs, _schema_docs, _docs);
+
+exports.docs = docs;
