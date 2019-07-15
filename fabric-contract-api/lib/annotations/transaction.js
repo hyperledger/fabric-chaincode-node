@@ -10,7 +10,7 @@ const Logger = require('../logger');
 const logger = Logger.getLogger('./lib/annotations/object.js');
 require('reflect-metadata');
 
-module.exports.Transaction = function Transaction(commit = true) {
+module.exports.Transaction = function Transaction (commit = true) {
     return (target, propertyKey) => {
         logger.debug('@Transaction args:', `Property Key -> ${propertyKey}, Commit -> ${commit},`, 'Target ->', target.constructor.name);
 
@@ -45,7 +45,9 @@ module.exports.Transaction = function Transaction(commit = true) {
             };
 
             const type = typeof paramType === 'function' ? paramType.name : paramType.toString();
-
+            if (type === 'Object') {
+                throw new Error(`Type not properly specified for parameter ${paramName}, can not process pure Object types`);
+            }
             obj.schema = utils.generateSchema(type);
 
             return obj;
@@ -76,7 +78,7 @@ module.exports.Transaction = function Transaction(commit = true) {
     };
 };
 
-module.exports.Returns = function Returns(returnType) {
+module.exports.Returns = function Returns (returnType) {
     return (target, propertyKey) => {
         logger.debug('@Returns args:', `, Property Key -> ${propertyKey}, Return Type -> ${returnType},`, 'Target ->', target.constructor.name);
 
@@ -93,7 +95,7 @@ module.exports.Returns = function Returns(returnType) {
     };
 };
 
-module.exports.Param = function Param(paramName, paramType, description) {
+module.exports.Param = function Param (paramName, paramType, description) {
     return (target, propertyKey) => {
         logger.info('@Param args:', `Property Key -> ${propertyKey}, Param Name -> ${paramName}, Param Type -> ${paramType}, Description -> ${description},`, 'Target ->', target.constructor.name);
 
