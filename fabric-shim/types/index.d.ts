@@ -101,6 +101,7 @@ declare module 'fabric-shim' {
         splitCompositeKey(compositeKey: string): SplitCompositekey;
 
         getPrivateData(collection: string, key: string): Promise<Buffer>;
+        getPrivateDataHash(collection: string, key: string): Promise<Buffer>;
         putPrivateData(collection: string, key: string, value: Buffer): Promise<void>;
         deletePrivateData(collection: string, key: string): Promise<void>;
         setPrivateDataValidationParameter(collection: string, key: string, ep: Buffer): Promise<void>;
