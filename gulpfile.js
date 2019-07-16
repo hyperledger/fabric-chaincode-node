@@ -20,7 +20,7 @@ const {docs} = require('./build/docs');
 //     runSequence(...tasks, done);
 // });
 
-
+exports.unittest = unittest;
 exports.lint = lint;
 exports.test_schema = test_schema;
 exports.startFabric = startFabric;
