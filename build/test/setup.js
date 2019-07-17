@@ -10,6 +10,7 @@ const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
 const shell = require('gulp-shell');
+const rename = require('gulp-rename');
 
 const version = require(path.join(__dirname, '../../package.json')).version;
 // const replace = require('gulp-replace');
@@ -250,6 +251,9 @@ const copyPublishedToChaincode = () => {
             path.join(process.cwd(), `fabric-shim-${version}.tgz`),
             path.join(process.cwd(), `fabric-shim-crypto-${version}.tgz`),
         ])
+            .pipe(rename(function(filename) {
+                filename.basename = filename.basename.replace(`-${version}`, '');
+            }))
             .pipe(dest(directory));
         streams.push(stream);
     }
@@ -260,6 +264,9 @@ const copyPublishedToChaincode = () => {
         path.join(process.cwd(), `fabric-shim-${version}.tgz`),
         path.join(process.cwd(), `fabric-shim-crypto-${version}.tgz`),
     ])
+        .pipe(rename(function(filename) {
+            filename.basename = filename.basename.replace(`-${version}`, '');
+        }))
         .pipe(dest(path.join(__dirname, '../../test/scenario')));
 
     streams.push(stream);
