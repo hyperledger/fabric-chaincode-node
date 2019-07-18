@@ -1,0 +1,32 @@
+v1.4.2 July 18, 2019
+-----------------------------
+
+Release Notes
+-------------
+This is a maintence release and contains bug fixes, and minor updates. 
+
+Corrections have been made to the Typescript exports
+
+Login information has been updated as some information was reported as being lost in v1.4.1
+
+The getPrivateDataHash API has been ported to this release; this requires a Fabric 1.4.2 peer or later to use
+
+Migration Notes
+---------------
+None known
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v142

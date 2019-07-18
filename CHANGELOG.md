@@ -1,3 +1,16 @@
+## v1.4.2
+Thu 18 Jul 09:35:53 BST 2019
+
+* [f93af73](https://github.com/hyperledger/fabric/commit/f93af73) [FAB-15990](https://jira.hyperledger.org/browse/FAB-15990) release scripts
+* [6b6ae59](https://github.com/hyperledger/fabric/commit/6b6ae59) [FAB-15882](https://jira.hyperledger.org/browse/FAB-15882) Typescript corrections
+* [3cbcc4e](https://github.com/hyperledger/fabric/commit/3cbcc4e) [FAB-15928](https://jira.hyperledger.org/browse/FAB-15928) Add getPrivateDataHash
+* [4f95777](https://github.com/hyperledger/fabric/commit/4f95777) [FAB-15579](https://jira.hyperledger.org/browse/FAB-15579) Fix doc for CommonIterator.next()
+* [0a3f305](https://github.com/hyperledger/fabric/commit/0a3f305) [FAB-15188](https://jira.hyperledger.org/browse/FAB-15188) Return missing information
+* [4d444fa](https://github.com/hyperledger/fabric/commit/4d444fa) [FAB-15190](https://jira.hyperledger.org/browse/FAB-15190) Superclass properties
+* [4404f04](https://github.com/hyperledger/fabric/commit/4404f04) [FAB-15458](https://jira.hyperledger.org/browse/FAB-15458) update grpc version
+* [832d379](https://github.com/hyperledger/fabric/commit/832d379) [FAB-15150](https://jira.hyperledger.org/browse/FAB-15150) Add in link to release notes
+* [6112a84](https://github.com/hyperledger/fabric/commit/6112a84) [FAB-14975](https://jira.hyperledger.org/browse/FAB-14975) Prepare next release
+
 ## v1.4.1
 Fri  5 Apr 12:34:34 BST 2019
 
