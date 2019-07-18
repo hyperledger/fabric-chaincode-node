@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim-test",
-  "version": "1.4.2",
+  "version": "1.4.3-snapshot",
   "description": "fabric-shim, fabric-shim-crypto",
   "testFabricVersion": "1.4.0",
   "testFabricThirdParty": "0.4.15",
@@ -59,6 +59,7 @@
     "require-dir": "^0.3.2",
     "rewire": "^4.0.1",
     "run-sequence": "^2.2.1",
+    "semver": "^6.2.0",
     "sinon": "^6.1.5",
     "sinon-test": "^2.2.0",
     "typescript": "3.0.1"
