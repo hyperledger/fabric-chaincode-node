@@ -146,8 +146,8 @@ class ChaincodeFromContract {
         return errors;
     }
 
-    /** Load the contract implementation code
-     *
+    /**
+     * Load the contract implementation code
      */
     _resolveContractImplementations(contractClasses) {
         logger.debug('Supplied contract classes', contractClasses);
@@ -303,14 +303,7 @@ class ChaincodeFromContract {
      * @param {ChaincodeStub} stub Stub class giving the full api
      */
     async Init(stub) {
-        const args = stub.getBufferArgs();
-        if (args.length >= 1) {
-            const fnName = args[0].toString();
-            return this.invokeFunctionality(stub, fnName, args.slice(1));
-        } else {
-            const message = 'Default initiator successful.';
-            return shim.success(Buffer.from(message));
-        }
+        return this.invokeFunctionality(stub);
     }
 
     /**
@@ -319,9 +312,7 @@ class ChaincodeFromContract {
      * @param {ChaincodeStub} stub Stub class giving the full api
      */
     async Invoke(stub) {
-        const args = stub.getBufferArgs();
-        const fnName = args[0].toString();
-        return this.invokeFunctionality(stub, fnName, args.slice(1));
+        return this.invokeFunctionality(stub);
     }
 
     /**
@@ -330,7 +321,16 @@ class ChaincodeFromContract {
      * @param {ChaincodeStub} stub Stub class giving the full api
 	 * @param {Object} fAndP Function and Paramters obtained from the smart contract argument
      */
-    async invokeFunctionality(stub, fAndP, bufferArgs) {
+    async invokeFunctionality(stub) {
+        const bufferArgs = stub.getBufferArgs();
+        if ((!bufferArgs) || (bufferArgs.length < 1)) {
+            const message = 'Default initiator successful.';
+            return shim.success(Buffer.from(message));
+        }
+
+        const fAndP = bufferArgs[0].toString();
+        const txArgs = bufferArgs.slice(1);
+
         const txID = stub.getTxID();
         const channelID = stub.getChannelID();
         const loggerPrefix = utils.generateLoggingPrefix(channelID, txID);
@@ -369,7 +369,7 @@ class ChaincodeFromContract {
 
                 // marhsall the parameters into the correct types for hanlding by
                 // the tx function
-                const parameters = dataMarshall.handleParameters(functionExists, bufferArgs, loggerPrefix);
+                const parameters = dataMarshall.handleParameters(functionExists, txArgs, loggerPrefix);
 
                 // before tx
                 await contractInstance.beforeTransaction(ctx);
