@@ -56,6 +56,22 @@ const certWithLongDNs = '-----BEGIN CERTIFICATE-----' +
 'KsFQrpVnF8O6hoHOYZQ=' +
 '-----END CERTIFICATE-----';
 
+const certWithMultipleAttributes = '-----BEGIN CERTIFICATE-----' +
+'MIIChzCCAi6gAwIBAgIURilAHeqwLu/fNUv8eZoGPRh3H4IwCgYIKoZIzj0EAwIw' +
+'czELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+'biBGcmFuY2lzY28xGTAXBgNVBAoTEG9yZzEuZXhhbXBsZS5jb20xHDAaBgNVBAMT' +
+'E2NhLm9yZzEuZXhhbXBsZS5jb20wHhcNMTkwNzMxMTYxNzAwWhcNMjAwNzMwMTYy' +
+'MjAwWjAgMQ8wDQYDVQQLEwZjbGllbnQxDTALBgNVBAMTBHRlc3QwWTATBgcqhkjO' +
+'PQIBBggqhkjOPQMBBwNCAAR2taQK8w7D3hr3gBxCz+8eV4KSv7pFQfNjDHMMe9J9' +
+'LJwcLpVTT5hYiLLRaqQonLBxBE3Ey0FneySvFuBScas3o4HyMIHvMA4GA1UdDwEB' +
+'/wQEAwIHgDAMBgNVHRMBAf8EAjAAMB0GA1UdDgQWBBQi3mhXS/WzcjBniwAmPdYP' +
+'kHqVVzArBgNVHSMEJDAigCC7VXjmSEugjAB/A0S6vfMxLsUIgag9WVNwtwwebnRC' +
+'7TCBggYIKgMEBQYHCAEEdnsiYXR0cnMiOnsiYXR0cjEiOiJ2YWwxIiwiZm9vIjoi' +
+'YmFyIiwiaGVsbG8iOiJ3b3JsZCIsImhmLkFmZmlsaWF0aW9uIjoiIiwiaGYuRW5y' +
+'b2xsbWVudElEIjoidGVzdCIsImhmLlR5cGUiOiJjbGllbnQifX0wCgYIKoZIzj0E' +
+'AwIDRwAwRAIgQxEFvnZTEsf3CSZmp9IYsxcnEOtVYleOd86LAKtk1wICIH7XOPwW' +
+'/RE4Z8WLZzFei/78Oezbx6obOvBxPMsVWRe5' +
+'-----END CERTIFICATE-----';
 describe('Client-Identity', () => {
 
     it ('should throw an error when using a bad cert', () => {
@@ -65,7 +81,7 @@ describe('Client-Identity', () => {
         }).to.throw(/Failed to find start line or end line of the certificate./);
     });
 
-    describe('Certificate with values', () => {
+    describe('Certificate with attributes', () => {
         const stub = mockStub(certWithAttrs);
         const cid = new shim.ClientIdentity(stub);
 
@@ -81,7 +97,7 @@ describe('Client-Identity', () => {
             expect(cid.attrs.attr1).to.deep.equal('val1');
         });
 
-        it ('should return correct value on getX509Certificate()', () => {
+        it ('should return correct values on getX509Certificate()', () => {
             const x509 = cid.getX509Certificate();
 
             expect(x509.subject.commonName).to.deep.equal('MyTestUserWithAttrs');
@@ -109,7 +125,7 @@ describe('Client-Identity', () => {
         });
     });
 
-    describe('Certificate without values', () => {
+    describe('Certificate without attributes', () => {
         const stub = mockStub(certWithoutAttrs);
         const cid = new shim.ClientIdentity(stub);
 
@@ -130,6 +146,26 @@ describe('Client-Identity', () => {
             expect(cid.getID()).to.deep.equal('x509::/C=US/ST=California/L=San Francisco/CN=User1@org2.example.com::/C=US/ST=California/L=San Francisco/O=org2.example.com/CN=ca.org2.example.com');
         });
     });
+
+    describe('Certificate with multiple attributes', () => {
+        const stub = mockStub(certWithMultipleAttributes);
+        const cid = new shim.ClientIdentity(stub);
+
+        it ('should return correct value on getID()', () => {
+            expect(cid.getID()).to.deep.equal('x509::/OU=client/CN=test::/C=US/ST=California/L=San Francisco/O=org1.example.com/CN=ca.org1.example.com');
+        });
+
+        it ('should have correct mspId', () => {
+            expect(cid.getMSPID()).to.deep.equal('dummyId');
+        });
+
+        it('should have correct attributes', () => {
+            expect(cid.attrs.attr1).to.deep.equal('val1');
+            expect(cid.attrs.hello).to.deep.equal('world');
+            expect(cid.attrs.foo).to.deep.equal('bar');
+        });
+    });
+
 });
 
 function mockStub(cert) {
