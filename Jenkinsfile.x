@@ -74,7 +74,7 @@ node ('hyp-x') { // trigger build on x86_64 node
       }
 // clean environment and get env data
       stage("Clean Environment - Get Env Info") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+         // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --clean_Environment --env_Info'
@@ -85,11 +85,11 @@ node ('hyp-x') { // trigger build on x86_64 node
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-         }
+         // }
       }
 // Pull Fabric, Fabric-ca Images
       stage("Pull Docker Images") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+         // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --pull_Docker_Images'
@@ -100,11 +100,11 @@ node ('hyp-x') { // trigger build on x86_64 node
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-         }
+         // }
       }
 // Run gulp tests (e2e tests)
       stage("Run Headless & E2E tests") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+         // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --e2e_Tests'
@@ -115,7 +115,7 @@ node ('hyp-x') { // trigger build on x86_64 node
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-         }
+         // }
       }
 
 // Publish hyperledger/fabric-nodeenv image from merged job only
@@ -159,7 +159,7 @@ def publishNpm() {
         withCredentials([[$class       : 'StringBinding',
                       credentialsId: 'NPM_LOCAL',
                       variable : 'NPM_TOKEN']]) {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+        // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --publish_NpmModules'
@@ -170,7 +170,7 @@ def publishNpm() {
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-        }
+        // }
         }
       }
 }
@@ -183,7 +183,7 @@ def apiDocs() {
                          credentialsId: 'chaincode-node-credentials',
                          usernameVariable: 'CHAINCODE_NODE_USERNAME',
                          passwordVariable: 'CHAINCODE_NODE_PASSWORD']]) {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+        // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --publish_ApiDocs'
@@ -194,7 +194,7 @@ def apiDocs() {
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-        }
+        // }
         }
       }
 }
@@ -204,7 +204,7 @@ def publishNodeenv() {
       stage("Publish nodeenv image") {
         def ROOTDIR = pwd()
         configFileProvider([configFile(fileId: 'fabric-settings', variable: 'SETTINGS_FILE')]) {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+        // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --publish_Nodeenv_Image'
@@ -215,7 +215,7 @@ def publishNodeenv() {
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-        }
+        // }
         }
       }
 }
