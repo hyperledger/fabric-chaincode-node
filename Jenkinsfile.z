@@ -69,7 +69,7 @@ node('hyp-z') {
       }
 // clean environment and get env data
       stage("Clean Environment - Get Env Info") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+         // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --clean_Environment --env_Info'
@@ -80,12 +80,12 @@ node('hyp-z') {
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-         }
+         // }
       }
 
 // Run gulp tests (e2e tests)
       stage("Run Headless & E2E Tests") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+         // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --e2e_Tests'
@@ -96,7 +96,7 @@ node('hyp-z') {
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-         }
+         // }
      }
     } finally { // Code for coverage report
              step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/cobertura-coverage.xml', failUnhealthy: false, failUnstable: false, failNoReports: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])

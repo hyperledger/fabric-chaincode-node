@@ -69,7 +69,7 @@ node ('hyp-x') { // trigger build on x86_64 node
       }
 // clean environment and get env data
       stage("Clean Environment - Get Env Info") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+         // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --clean_Environment --env_Info'
@@ -80,12 +80,12 @@ node ('hyp-x') { // trigger build on x86_64 node
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-         }
+         // }
       }
 
 // Run gulp tests (e2e tests)
       stage("Run Headless & E2E tests") {
-         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+         // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
            try {
                  dir("${ROOTDIR}/$PROJECT_DIR/fabric-chaincode-node/scripts/Jenkins_Scripts") {
                  sh './CI_Script.sh --e2e_Tests'
@@ -96,7 +96,7 @@ node ('hyp-x') { // trigger build on x86_64 node
                  currentBuild.result = 'FAILURE'
                  throw err
            }
-         }
+         // }
       }
 
 // Publish npm modules from merged job
@@ -128,7 +128,7 @@ if (env.JOB_NAME == "fabric-chaincode-node-merge-x86_64") {
 def publishNpm() {
 // Publish npm modules after successful merge
       stage("Publish npm Modules") {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+        // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
         def ROOTDIR = pwd()
         withCredentials([[$class       : 'StringBinding',
                       credentialsId: 'NPM_LOCAL',
@@ -144,14 +144,14 @@ def publishNpm() {
                  throw err
            }
         }
-        }
+        // }
       }
 }
 
 def apiDocs() {
 // Publish SDK_NODE API docs after successful merge
       stage("Publish API Docs") {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+        // wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
         def ROOTDIR = pwd()
         withCredentials([[$class     : 'UsernamePasswordMultiBinding',
                          credentialsId: 'chaincode-node-credentials',
@@ -168,6 +168,6 @@ def apiDocs() {
                  throw err
           }
         }
-        }
+        // }
       }
 }
