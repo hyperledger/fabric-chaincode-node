@@ -18,8 +18,8 @@
     "author": "",
     "license": "APACHE-2.0",
     "dependencies": {
-      "fabric-shim": "file:./fabric-shim-2.0.0-alpha.tgz",
-      "fabric-contract-api": "file:./fabric-contract-api-2.0.0-alpha.tgz",
+      "fabric-shim": "file:./fabric-shim-2.0.0-snapshot.tgz",
+      "fabric-contract-api": "file:./fabric-contract-api-2.0.0-snapshot.tgz",
       "@types/node": "^10.3.6",
       "ts-node": "^3.3.0",
       "tslint": "^5.6.0",
