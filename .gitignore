@@ -4,11 +4,6 @@ node_modules/*
 fabric-contract-api/node_modules/*
 fabric-shim/node_modules/*
 fabric-shim-crypto/node_modules/*
-fabric-shim/lib/protos/common/*
-fabric-shim/lib/protos/msp/*
-fabric-shim/lib/protos/peer/*
-fabric-shim/lib/protos/ledger/*
-fabric-shim/lib/protos/token/*
 npm-shrinkwrap.json
 npm-debug.log
 .DS_Store

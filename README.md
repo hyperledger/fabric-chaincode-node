@@ -12,7 +12,6 @@ The "src" folder contains the resources to become part of the npm package, inclu
 
 The "build" folder contains the "build" steps. This being javascript there's no need to compile, but special build steps are still needed to accomplish the following:
 * linting: to make sure we enforce a somewhat consistent coding style
-* dependency sharing: the proto files needed by the fabric-shim are a subset of what the fabric defines in the "protos" folder. They need to get copied to the proper locations for things to work, including the "src/lib/protos" folder so the code can load them
 
 The "test" folder contains the unit and integration tests, as well as artefacts used by the tests
 
@@ -78,7 +77,6 @@ The resulting folder structure should be:
 Before you launch a fabric network, run these commands from the fabric-chaincode-node folder first:
 ```
 npm install
-gulp protos
 ```
 
 Next run this single command to bring up a basic network of one orderer (using "SOLO"), one peer (using CouchDB as state database), then create a channel called "mychannel", and join the peer to that channel:
@@ -177,7 +175,6 @@ In the output of the command, you should see the following indicating successful
 Alternatively you can use the `peer` binary to test the node.js chaincode. Change directory to the fabric-chaincode-node folder. Before launching the chaincode, run these commands first:
 ```
 npm install
-gulp protos
 ```
 
 Run the following command to launch the test (replacing "192.168.1.64" with the IP address of the target peer):

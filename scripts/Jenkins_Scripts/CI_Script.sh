@@ -195,7 +195,6 @@ e2e_Tests() {
 
         gulp docker-image-build
         docker images | grep hyperledger && docker ps -a
-        gulp protos || err_Check "ERROR!!! protos failed" # make protos inside fabric-shim ready for packing
 
         DEVMODE=false gulp channel-init || err_Check "ERROR!!! channel-init failed"
         gulp test-e2e || err_Check "ERROR!!! test-e2e failed"
