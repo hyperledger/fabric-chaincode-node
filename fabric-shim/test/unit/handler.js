@@ -20,6 +20,7 @@ const QMsg = Handler.__get__('QMsg');
 const StateQueryIterator = require('../../../fabric-shim/lib/iterators.js').StateQueryIterator;
 const HistoryQueryIterator = require('../../../fabric-shim/lib/iterators.js').HistoryQueryIterator;
 
+const fabprotos = require('../../bundle');
 const grpc = require('grpc');
 
 const sandbox = sinon.createSandbox();
@@ -839,15 +840,9 @@ describe('Handler', () => {
 
             let expectedMsg;
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.GetState();
-                payload.setKey(key);
-                payload.setCollection(collection);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_STATE,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_STATE,
+                    payload: fabprotos.protos.GetState.encode({key, collection}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -891,16 +886,9 @@ describe('Handler', () => {
             let expectedMsg;
 
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.PutState();
-                payload.setKey(key);
-                payload.setValue(value);
-                payload.setCollection(collection);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.PUT_STATE,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.PUT_STATE,
+                    payload: fabprotos.protos.PutState.encode({key, value, collection}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -943,15 +931,9 @@ describe('Handler', () => {
             let expectedMsg;
 
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.DelState();
-                payload.setKey(key);
-                payload.setCollection(collection);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.DEL_STATE,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.DEL_STATE,
+                    payload: fabprotos.protos.DelState.encode({key, collection}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -995,20 +977,16 @@ describe('Handler', () => {
             const ep = Buffer.from('theEP');
 
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const stateMetadata = new serviceProto.StateMetadata();
-                stateMetadata.setMetakey(metadataKey);
-                stateMetadata.setValue(ep);
-
-                const payload = new serviceProto.PutStateMetadata();
-                payload.setKey(key);
-                payload.setCollection(collection);
-                payload.setMetadata(stateMetadata);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.PUT_STATE_METADATA,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.PUT_STATE_METADATA,
+                    payload: fabprotos.protos.PutStateMetadata.encode({
+                        key,
+                        collection,
+                        metadata: {
+                            metakey: metadataKey,
+                            value: ep
+                        }
+                    }).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1050,15 +1028,9 @@ describe('Handler', () => {
 
             let expectedMsg;
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.GetState();
-                payload.setKey(key);
-                payload.setCollection(collection);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_PRIVATE_DATA_HASH,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_PRIVATE_DATA_HASH,
+                    payload: fabprotos.protos.GetState.encode({key, collection}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1100,15 +1072,9 @@ describe('Handler', () => {
             let expectedMsg;
 
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.GetStateMetadata();
-                payload.setKey(key);
-                payload.setCollection(collection);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_STATE_METADATA,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_STATE_METADATA,
+                    payload: fabprotos.protos.GetStateMetadata.encode({key, collection}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1151,16 +1117,9 @@ describe('Handler', () => {
 
             let expectedMsg;
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.GetStateByRange();
-                payload.setStartKey(startKey);
-                payload.setEndKey(endKey);
-                payload.setCollection(collection);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+                    payload: fabprotos.protos.GetStateByRange.encode({startKey, endKey, collection}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1202,17 +1161,9 @@ describe('Handler', () => {
 
                 const result = await handler.handleGetStateByRange(collection, startKey, endKey, 'theChannelID', 'theTxID', metadata);
 
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.GetStateByRange();
-                payload.setStartKey(startKey);
-                payload.setEndKey(endKey);
-                payload.setCollection(collection);
-                payload.setMetadata(metadata);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+                    payload: fabprotos.protos.GetStateByRange.encode({startKey, endKey, collection, metadata}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1229,14 +1180,9 @@ describe('Handler', () => {
 
             let expectedMsg;
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.QueryStateNext();
-                payload.setId(id);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_NEXT,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.QUERY_STATE_NEXT,
+                    payload: fabprotos.protos.QueryStateNext.encode({id}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1277,14 +1223,9 @@ describe('Handler', () => {
 
             let expectedMsg;
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.QueryStateClose();
-                payload.setId(id);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
+                    payload: fabprotos.protos.QueryStateNext.encode({id}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1325,17 +1266,10 @@ describe('Handler', () => {
             const query = 'some query';
 
             let expectedMsg;
-            let serviceProto;
             before(() => {
-                serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.GetQueryResult();
-                payload.setQuery(query);
-                payload.setCollection(collection);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_QUERY_RESULT,
+                    payload: fabprotos.protos.GetQueryResult.encode({query, collection}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1376,14 +1310,10 @@ describe('Handler', () => {
                 const metadata = Buffer.from('some metadata');
 
                 const result = handler.handleGetQueryResult(collection, query, metadata, 'theChannelID', 'theTxID');
-                const payload = new serviceProto.GetQueryResult();
-                payload.setQuery(query);
-                payload.setCollection(collection);
-                payload.setMetadata(metadata);
 
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_QUERY_RESULT,
+                    payload: fabprotos.protos.GetQueryResult.encode({query, collection, metadata}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1400,14 +1330,9 @@ describe('Handler', () => {
 
             let expectedMsg;
             before(() => {
-                const serviceProto = Handler.__get__('_serviceProto');
-
-                const payload = new serviceProto.GetHistoryForKey();
-                payload.setKey(key);
-
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
+                    payload: fabprotos.protos.GetHistoryForKey.encode({key}).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1447,27 +1372,20 @@ describe('Handler', () => {
             const chaincodeName = 'myChaincode';
             const args = ['duck', 'duck', 'goose'];
 
-            const serviceProto = Handler.__get__('_serviceProto');
-
             let expectedMsg;
             before(() => {
-                const chaincodeProto = Handler.__get__('_chaincodeProto');
-
-                const payload = new chaincodeProto.ChaincodeSpec();
-                const chaincodeId = new chaincodeProto.ChaincodeID();
-                const chaincodeInput = new chaincodeProto.ChaincodeInput();
-                chaincodeId.setName(chaincodeName);
-                const inputArgs = [];
-                args.forEach((arg) => {
-                    inputArgs.push(Buffer.from(arg, 'utf8'));
-                });
-                chaincodeInput.setArgs(inputArgs);
-                payload.setChaincodeId(chaincodeId);
-                payload.setInput(chaincodeInput);
+                const argsAsBuffers = args.map((arg) => Buffer.from(arg, 'utf8'));
 
                 expectedMsg = {
-                    type: serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
-                    payload: payload.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.INVOKE_CHAINCODE,
+                    payload: fabprotos.protos.ChaincodeSpec.encode({
+                        chaincodeId: {
+                            name: chaincodeName
+                        },
+                        input: {
+                            args: argsAsBuffers
+                        }
+                    }).finish(),
                     channel_id: 'theChannelID',
                     txid: 'theTxID'
                 };
@@ -1479,10 +1397,9 @@ describe('Handler', () => {
             });
 
             it ('should return decoded response when chaincode message type COMPLETED', async () => {
-                const responseProto = Handler.__get__('_responseProto');
                 const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: serviceProto.ChaincodeMessage.Type.COMPLETED, payload: 'some payload'});
-                const decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: fabprotos.protos.ChaincodeMessage.Type.COMPLETED, payload: 'some payload'});
+                const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
                 const result = await handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
 
@@ -1495,10 +1412,9 @@ describe('Handler', () => {
             });
 
             it ('should throw an error when _askPeerAndListen resolves with an error', async () => {
-                const responseProto = Handler.__get__('_responseProto');
                 const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: serviceProto.ChaincodeMessage.Type.ERROR, payload: 'some payload'});
-                const decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: fabprotos.protos.ChaincodeMessage.Type.ERROR, payload: 'some payload'});
+                const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
                 const result = handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
 
@@ -1510,10 +1426,9 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const responseProto = Handler.__get__('_responseProto');
                 const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
-                const decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+                const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
                 const result = handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
 
@@ -1525,10 +1440,9 @@ describe('Handler', () => {
             });
 
             it ('should return nothing chaincode message type not COMPLETED or ERROR', async () => {
-                const responseProto = Handler.__get__('_responseProto');
                 const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: serviceProto.ChaincodeMessage.Type.SOMETHING_ELSE, payload: 'some payload'});
-                const decodeStub = sandbox.stub(responseProto.Response, 'decode').returns('some response');
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: fabprotos.protos.ChaincodeMessage.Type.SOMETHING_ELSE, payload: 'some payload'});
+                const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
                 const result = await handler.handleInvokeChaincode(chaincodeName, args, 'theChannelID', 'theTxID');
 
@@ -1573,8 +1487,6 @@ describe('Handler', () => {
     describe('handleMessage', () => {
 
         let handleMessage;
-        let chaincodeProto;
-        let serviceProto;
 
         let decodeStub;
 
@@ -1599,12 +1511,10 @@ describe('Handler', () => {
 
         beforeEach(() => {
             handleMessage = Handler.__get__('handleMessage');
-            chaincodeProto = Handler.__get__('_chaincodeProto');
-            serviceProto = Handler.__get__('_serviceProto');
 
             mockHandler._stream = {write: sinon.stub()};
 
-            decodeStub = sandbox.stub(chaincodeProto.ChaincodeInput, 'decode').returns('some message');
+            decodeStub = sandbox.stub(fabprotos.protos.ChaincodeInput, 'decode').returns('some message');
 
             const createStubStub = sandbox.stub().returns(mockStub);
             Handler.__set__('createStub', createStubStub);
@@ -1620,7 +1530,7 @@ describe('Handler', () => {
 
             beforeEach(() => {
                 expectedResponse = {
-                    type: serviceProto.ChaincodeMessage.Type.ERROR,
+                    type: fabprotos.protos.ChaincodeMessage.Type.ERROR,
                     payload: Buffer.from('shim message'),
                     channel_id: msg.channel_id,
                     txid: msg.txid
@@ -1629,7 +1539,7 @@ describe('Handler', () => {
 
             it ('should handle an error decoding the payload', async () => {
                 decodeStub.restore();
-                decodeStub = sandbox.stub(chaincodeProto.ChaincodeInput, 'decode').throws('some error');
+                decodeStub = sandbox.stub(fabprotos.protos.ChaincodeInput, 'decode').throws('some error');
 
                 expectedResponse.payload = msg.payload;
 
@@ -1724,8 +1634,8 @@ describe('Handler', () => {
 
             beforeEach(() => {
                 expectedResponse = {
-                    type: serviceProto.ChaincodeMessage.Type.COMPLETED,
-                    payload: 'a buffered payload',
+                    type: fabprotos.protos.ChaincodeMessage.Type.COMPLETED,
+                    payload: fabprotos.protos.Response.encode({status: Stub.RESPONSE_CODE.OK}).finish(),
                     channel_id: msg.channel_id,
                     txid: msg.txid,
                     chaincode_event: mockStub.chaincodeEvent
@@ -1733,9 +1643,7 @@ describe('Handler', () => {
             });
 
             it ('should write a COMPLETE message when successful init', async () => {
-                mockHandler.chaincode.Init = sandbox.stub().resolves({status: Stub.RESPONSE_CODE.OK, toBuffer: () => {
-                    return 'a buffered payload';
-                }});
+                mockHandler.chaincode.Init = sandbox.stub().resolves({status: Stub.RESPONSE_CODE.OK});
 
                 await handleMessage(msg, mockHandler, 'init');
 
@@ -1747,9 +1655,7 @@ describe('Handler', () => {
             });
 
             it ('should write a COMPLETE message when successful invoke', async () => {
-                mockHandler.chaincode.Invoke = sandbox.stub().resolves({status: Stub.RESPONSE_CODE.OK, toBuffer: () => {
-                    return 'a buffered payload';
-                }});
+                mockHandler.chaincode.Invoke = sandbox.stub().resolves({status: Stub.RESPONSE_CODE.OK});
 
                 await handleMessage(msg, mockHandler, 'invoke');
 
@@ -1819,25 +1725,23 @@ describe('Handler', () => {
 
         before(() => {
             handleGetStateMetadata = Handler.__get__('handleGetStateMetadata');
-            const serviceProto = Handler.__get__('_serviceProto');
             ep = Buffer.from('someEP');
             metaKey = 'theMetaKey';
 
-            const stateMetadata = new serviceProto.StateMetadata();
-            stateMetadata.setMetakey(metaKey);
-            stateMetadata.setValue(ep);
-
-            payload = new serviceProto.StateMetadataResult();
-            const entries = [stateMetadata];
-            payload.setEntries(entries);
-
-            payload = payload.toBuffer();
+            payload = fabprotos.protos.StateMetadataResult.encode({
+                entries: [
+                    {
+                        metakey: metaKey,
+                        value: ep
+                    }
+                ]
+            }).finish();
         });
 
         it('should success', () => {
             const res = handleGetStateMetadata(payload);
             expect(res).to.haveOwnProperty(metaKey);
-            expect(res[metaKey].toBuffer()).to.eql(ep);
+            expect(res[metaKey]).to.eql(ep);
         });
     });
 
@@ -1848,7 +1752,6 @@ describe('Handler', () => {
 
         let MSG_TYPE;
 
-        let serviceProto;
         let parseResponse;
 
         let handler;
@@ -1863,16 +1766,9 @@ describe('Handler', () => {
 
             MSG_TYPE = Handler.__get__('MSG_TYPE');
 
-            serviceProto = Handler.__get__('_serviceProto');
-            serviceProto.QueryResponse = {
-                decode: sinon.stub().returns(qrDecodedPayload)
-            };
-            serviceProto.ChaincodeMessage = {
-                decode: sinon.stub().returns(ccDecodedPayload)
-            };
-            serviceProto.QueryResponseMetadata = {
-                decode: sinon.stub().returns(mdDecodedPayload)
-            };
+            sandbox.stub(fabprotos.protos.QueryResponse, 'decode').returns(qrDecodedPayload);
+            sandbox.stub(fabprotos.protos.ChaincodeMessage, 'decode').returns(ccDecodedPayload);
+            sandbox.stub(fabprotos.protos.QueryResponseMetadata, 'decode').returns(mdDecodedPayload);
 
             parseResponse = Handler.__get__('parseResponse');
         });
@@ -1968,9 +1864,7 @@ describe('Handler', () => {
                 results: 'some results',
                 metadata: 'some metadata',
             };
-            serviceProto.QueryResponse = {
-                decode: sinon.stub().returns(pagedQrPayload)
-            };
+            fabprotos.protos.QueryResponse.decode.returns(pagedQrPayload);
             Handler.__set__('StateQueryIterator', mockStateQueryIterator);
 
             const result = parseResponse(handler, res, 'GetStateByRange');
@@ -1979,9 +1873,7 @@ describe('Handler', () => {
             expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, pagedQrPayload]);
 
             expect(result.metadata).to.eql(mdDecodedPayload);
-            serviceProto.QueryResponse = {
-                decode: sinon.stub().returns(qrDecodedPayload)
-            };
+            fabprotos.protos.QueryResponse.decode.returns(qrDecodedPayload);
         });
 
         it ('should return a StateQueryIterator for GetQueryResult', () => {

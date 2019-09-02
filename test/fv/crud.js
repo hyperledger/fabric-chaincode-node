@@ -95,7 +95,7 @@ describe('Chaincode CRUD', () => {
             const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPagination', []));
             expect(payload.results1.length).to.equal(2, 'Should return 2 keys');
             expect(payload.results1).to.deep.equal(['jsonkey0', 'jsonkey1']);
-            expect(payload.metadata1.fetched_records_count).to.equal(2);
+            expect(payload.metadata1.fetchedRecordsCount).to.equal(2);
             expect(payload.metadata1.bookmark).to.exist;
         });
 
@@ -105,7 +105,7 @@ describe('Chaincode CRUD', () => {
             const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPaginationUsingAsyncIterator', []));
             expect(payload.results1.length).to.equal(2, 'Should return 2 keys');
             expect(payload.results1).to.deep.equal(['jsonkey0', 'jsonkey1']);
-            expect(payload.metadata1.fetched_records_count).to.equal(2);
+            expect(payload.metadata1.fetchedRecordsCount).to.equal(2);
             expect(payload.metadata1.bookmark).to.exist;
         });
 
@@ -116,7 +116,7 @@ describe('Chaincode CRUD', () => {
             const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPagination', []));
             expect(payload.results2.length).to.equal(1);
             expect(payload.results2).to.deep.equal(['jsonkey2']);
-            expect(payload.metadata2.fetched_records_count).to.equal(1);
+            expect(payload.metadata2.fetchedRecordsCount).to.equal(1);
         });
 
         it('should get a query result with pagination with a set bookmark using the new iterator style', async function () {
@@ -125,7 +125,7 @@ describe('Chaincode CRUD', () => {
             const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.crud:getQueryResultWithPaginationUsingAsyncIterator', []));
             expect(payload.results2.length).to.equal(1);
             expect(payload.results2).to.deep.equal(['jsonkey2']);
-            expect(payload.metadata2.fetched_records_count).to.equal(1);
+            expect(payload.metadata2.fetchedRecordsCount).to.equal(1);
         });
 
 

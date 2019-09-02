@@ -15,6 +15,7 @@ const Iterator = rewire('../../../fabric-shim/lib/iterators.js');
 const StateQueryIterator = Iterator.StateQueryIterator;
 const HistoryQueryIterator = Iterator.HistoryQueryIterator;
 const handler = require('../../../fabric-shim/lib/handler.js');
+const fabprotos = require('../../bundle');
 
 const channel_id = 'theChannelId';
 const txID = 'aTx';
@@ -59,9 +60,8 @@ describe('Iterator', () => {
 
         describe('_getResultFromBytes', () => {
 
-            const QRProto = Iterator.__get__('_queryresultProto');
-            QRProto.KV.decode = sinon.stub().returns('decoded KV');
-            QRProto.KeyModification.decode = sinon.stub().returns('decoded Keymodification');
+            fabprotos.queryresult.KV.decode = sinon.stub().returns('decoded KV');
+            fabprotos.queryresult.KeyModification.decode = sinon.stub().returns('decoded Keymodification');
 
             it ('should return KV decode on resultbytes for a QUERY type', () => {
                 const ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'QUERY');

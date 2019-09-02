@@ -1,12 +1,13 @@
-'use strict';
-const ProtoLoader = require('./protoloader');
-const path = require('path');
-const logger = require('./logger').getLogger('lib/iterators.js');
+/*
+# Copyright Zhao Chaoyi. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
 
-const _queryresultProto = ProtoLoader.load({
-    root: path.join(__dirname, './protos'),
-    file: 'ledger/queryresult/kv_query_result.proto'
-}).queryresult;
+'use strict';
+
+const fabprotos = require('../bundle');
+const logger = require('./logger').getLogger('lib/iterators.js');
 
 /**
  * CommonIterator allows a chaincode to check whether any more result(s)
@@ -50,9 +51,9 @@ class CommonIterator {
 	 */
     _getResultFromBytes(bytes) {
         if (this.type === 'QUERY') {
-            return _queryresultProto.KV.decode(bytes.resultBytes);
+            return fabprotos.queryresult.KV.decode(bytes.resultBytes);
         } else if (this.type === 'HISTORY') {
-            return _queryresultProto.KeyModification.decode(bytes.resultBytes);
+            return fabprotos.queryresult.KeyModification.decode(bytes.resultBytes);
         }
         throw new Error('Iterator constructed with unknown type: ' + this.type);
     }

@@ -169,16 +169,8 @@ function mockStub(cert) {
     return {
         getCreator: function() {
             return {
-                getMspid: function() {
-                    return 'dummyId';
-                },
-                getIdBytes: function() {
-                    const buf = Buffer.from(cert);
-                    buf.toBuffer = function() {
-                        return this;
-                    };
-                    return buf;
-                }
+                mspid: 'dummyId',
+                idBytes: Buffer.from(cert)
             };
         },
         getTxID: function() {

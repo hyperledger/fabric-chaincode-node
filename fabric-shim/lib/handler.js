@@ -8,10 +8,11 @@
 /* eslint-disable no-useless-escape */
 process.env.GRPC_SSL_CIPHER_SUITES = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384';
 
+const protoLoader = require('@grpc/proto-loader');
 const grpc = require('grpc');
-const ProtoLoader = require('./protoloader');
-const {URL} = require('url');
+const fabprotos = require('../bundle');
 const path = require('path');
+const {URL} = require('url');
 const util = require('util');
 const StateQueryIterator = require('./iterators').StateQueryIterator;
 const HistoryQueryIterator = require('./iterators').HistoryQueryIterator;
@@ -20,21 +21,6 @@ const logger = require('./logger').getLogger('lib/handler.js');
 const Stub = require('./stub.js');
 
 const utils = require('./utils/utils');
-
-const _serviceProto = ProtoLoader.load({
-    root: path.join(__dirname, './protos'),
-    file: 'peer/chaincode_shim.proto'
-}).protos;
-
-const _chaincodeProto = ProtoLoader.load({
-    root: path.join(__dirname, './protos'),
-    file: 'peer/chaincode.proto'
-}).protos;
-
-const _responseProto = ProtoLoader.load({
-    root: path.join(__dirname, './protos'),
-    file: 'peer/proposal_response.proto'
-}).protos;
 
 const STATES = {
     Created: 'created',
@@ -52,6 +38,23 @@ const MSG_TYPE = {
     TRANSACTION: 'TRANSACTION',	// _serviceProto.ChaincodeMessage.Type.TRANSACTION
     COMPLETED: 'COMPLETED',		// _serviceProto.ChaincodeMessage.Type.COMPLETED
 };
+
+const PROTO_PATH = path.resolve(__dirname, '..', 'protos', 'peer', 'chaincode_shim.proto');
+const packageDefinition = protoLoader.loadSync(
+    PROTO_PATH,
+    {
+        keepCase: true,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true,
+        includeDirs: [
+            path.resolve(__dirname, '..', 'google-protos'),
+            path.resolve(__dirname, '..', 'protos')
+        ]
+    }
+);
+const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
 /*
  * Simple class to represent a message to be queued with the associated
@@ -259,7 +262,7 @@ class ChaincodeSupportClient {
             this._request_timeout = opts['request-timeout'];
         }
 
-        this._client = new _serviceProto.ChaincodeSupport(this._endpoint.addr, this._endpoint.creds, this._options);
+        this._client = new protoDescriptor.protos.ChaincodeSupport(this._endpoint.addr, this._endpoint.creds, this._options);
     }
 
     close() {
@@ -362,13 +365,9 @@ class ChaincodeSupportClient {
     }
 
     async handleGetState(collection, key, channel_id, txId) {
-        const payload = new _serviceProto.GetState();
-        payload.setKey(key);
-        payload.setCollection(collection);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.GET_STATE,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.GET_STATE,
+            payload: fabprotos.protos.GetState.encode({key, collection}).finish(),
             txid: txId,
             channel_id: channel_id
         };
@@ -377,114 +376,76 @@ class ChaincodeSupportClient {
     }
 
     async handlePutState(collection, key, value, channel_id, txId) {
-        const payload = new _serviceProto.PutState();
-        payload.setKey(key);
-        payload.setValue(value);
-        payload.setCollection(collection);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.PUT_STATE,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.PUT_STATE,
+            payload: fabprotos.protos.PutState.encode({key, value, collection}).finish(),
             txid: txId,
             channel_id: channel_id
         };
-
         return await this._askPeerAndListen(msg, 'PutState');
     }
 
     async handleDeleteState(collection, key, channel_id, txId) {
-        const payload = new _serviceProto.DelState();
-        payload.setKey(key);
-        payload.setCollection(collection);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.DEL_STATE,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.DEL_STATE,
+            payload: fabprotos.protos.DelState.encode({key, collection}).finish(),
             txid: txId,
             channel_id: channel_id
         };
-
         return await this._askPeerAndListen(msg, 'DeleteState');
     }
 
     async handlePutStateMetadata(collection, key, metakey, ep, channel_id, txId) {
-        // construct payload for PutStateMetadata
-        const stateMetadata = new _serviceProto.StateMetadata();
-        stateMetadata.setMetakey(metakey);
-        stateMetadata.setValue(ep);
-
-        const payload = new _serviceProto.PutStateMetadata();
-        payload.setKey(key);
-        payload.setCollection(collection);
-        payload.setMetadata(stateMetadata);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.PUT_STATE_METADATA,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.PUT_STATE_METADATA,
+            payload: fabprotos.protos.PutStateMetadata.encode({
+                key,
+                collection,
+                metadata: {
+                    metakey,
+                    value: ep
+                }
+            }).finish(),
             txid: txId,
             channel_id: channel_id
         };
-
         return this._askPeerAndListen(msg, 'PutStateMetadata');
     }
 
     async handleGetPrivateDataHash(collection, key, channel_id, txId) {
-        const payload = new _serviceProto.GetState();
-        payload.setKey(key);
-        payload.setCollection(collection);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.GET_PRIVATE_DATA_HASH,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.GET_PRIVATE_DATA_HASH,
+            payload: fabprotos.protos.GetState.encode({key, collection}).finish(),
             txid: txId,
             channel_id: channel_id
         };
-
         return await this._askPeerAndListen(msg, 'GetPrivateDataHash');
     }
 
     async handleGetStateMetadata(collection, key, channel_id, txId) {
-        // construct payload for GetStateMetadata
-        const payload = new _serviceProto.GetStateMetadata();
-        payload.setKey(key);
-        payload.setCollection(collection);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.GET_STATE_METADATA,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.GET_STATE_METADATA,
+            payload: fabprotos.protos.GetStateMetadata.encode({key, collection}).finish(),
             txid: txId,
             channel_id: channel_id
         };
-
         return this._askPeerAndListen(msg, 'GetStateMetadata');
     }
 
     async handleGetStateByRange(collection, startKey, endKey, channel_id, txId, metadata) {
-        const payload = new _serviceProto.GetStateByRange();
-        payload.setStartKey(startKey);
-        payload.setEndKey(endKey);
-        payload.setCollection(collection);
-        if (metadata) {
-            payload.setMetadata(metadata);
-        }
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.GET_STATE_BY_RANGE,
+            payload: fabprotos.protos.GetStateByRange.encode({startKey, endKey, collection, metadata}).finish(),
             txid: txId,
             channel_id: channel_id
         };
-
         return await this._askPeerAndListen(msg, 'GetStateByRange');
     }
 
     async handleQueryStateNext(id, channel_id, txId) {
-        const payload = new _serviceProto.QueryStateNext();
-        payload.setId(id);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.QUERY_STATE_NEXT,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.QUERY_STATE_NEXT,
+            payload: fabprotos.protos.QueryStateNext.encode({id}).finish(),
             txid: txId,
             channel_id
         };
@@ -492,12 +453,9 @@ class ChaincodeSupportClient {
     }
 
     async handleQueryStateClose(id, channel_id, txId) {
-        const payload = new _serviceProto.QueryStateClose();
-        payload.setId(id);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.QUERY_STATE_CLOSE,
+            payload: fabprotos.protos.QueryStateClose.encode({id}).finish(),
             txid: txId,
             channel_id: channel_id
         };
@@ -505,16 +463,9 @@ class ChaincodeSupportClient {
     }
 
     async handleGetQueryResult(collection, query, metadata, channel_id, txId) {
-        const payload = new _serviceProto.GetQueryResult();
-        payload.setQuery(query);
-        payload.setCollection(collection);
-        if (metadata) {
-            payload.setMetadata(metadata);
-        }
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.GET_QUERY_RESULT,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.GET_QUERY_RESULT,
+            payload: fabprotos.protos.GetQueryResult.encode({query, collection, metadata}).finish(),
             txid: txId,
             channel_id: channel_id
         };
@@ -522,12 +473,9 @@ class ChaincodeSupportClient {
     }
 
     async handleGetHistoryForKey(key, channel_id, txId) {
-        const payload = new _serviceProto.GetHistoryForKey();
-        payload.setKey(key);
-
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.GET_HISTORY_FOR_KEY,
+            payload: fabprotos.protos.GetHistoryForKey.encode({key}).finish(),
             txid: txId,
             channel_id: channel_id
         };
@@ -535,21 +483,17 @@ class ChaincodeSupportClient {
     }
 
     async handleInvokeChaincode(chaincodeName, args, channel_id, txId) {
-        const payload = new _chaincodeProto.ChaincodeSpec();
-        const chaincodeId = new _chaincodeProto.ChaincodeID();
-        const chaincodeInput = new _chaincodeProto.ChaincodeInput();
-        chaincodeId.setName(chaincodeName);
-        const inputArgs = [];
-        args.forEach((arg) => {
-            inputArgs.push(Buffer.from(arg, 'utf8'));
-        });
-        chaincodeInput.setArgs(inputArgs);
-        payload.setChaincodeId(chaincodeId);
-        payload.setInput(chaincodeInput);
-
+        const argsAsBuffers = args.map((arg) => Buffer.from(arg, 'utf8'));
         const msg = {
-            type: _serviceProto.ChaincodeMessage.Type.INVOKE_CHAINCODE,
-            payload: payload.toBuffer(),
+            type: fabprotos.protos.ChaincodeMessage.Type.INVOKE_CHAINCODE,
+            payload: fabprotos.protos.ChaincodeSpec.encode({
+                chaincodeId: {
+                    name: chaincodeName
+                },
+                input: {
+                    args: argsAsBuffers
+                }
+            }).finish(),
             txid: txId,
             channel_id: channel_id
         };
@@ -557,12 +501,12 @@ class ChaincodeSupportClient {
         const message = await this._askPeerAndListen(msg, 'InvokeChaincode');
         // here the message type comes back as an enumeration value rather than a string
         // so need to use the enumerated value
-        if (message.type === _serviceProto.ChaincodeMessage.Type.COMPLETED) {
-            return _responseProto.Response.decode(message.payload);
+        if (message.type === fabprotos.protos.ChaincodeMessage.Type.COMPLETED) {
+            return fabprotos.protos.Response.decode(message.payload);
         }
 
         // Catch the transaction and rethrow the data
-        if (message.type === _serviceProto.ChaincodeMessage.Type.ERROR) {
+        if (message.type === fabprotos.protos.ChaincodeMessage.Type.ERROR) {
             const errorData = message.payload.toString('utf8');
             throw new Error(errorData);
         }
@@ -601,11 +545,11 @@ async function handleMessage(msg, client, action) {
 
     let nextStateMsg, input;
     try {
-        input = _chaincodeProto.ChaincodeInput.decode(msg.payload);
+        input = fabprotos.protos.ChaincodeInput.decode(msg.payload);
     } catch (err) {
         logger.error('%s Incorrect payload format. Sending ERROR message back to peer', loggerPrefix);
         nextStateMsg = {
-            type: _serviceProto.ChaincodeMessage.Type.ERROR,
+            type: fabprotos.protos.ChaincodeMessage.Type.ERROR,
             payload: msg.payload,
             txid: msg.txid,
             channel_id : msg.channel_id
@@ -619,7 +563,7 @@ async function handleMessage(msg, client, action) {
         } catch (err) {
             logger.error(util.format('Failed to construct a chaincode stub instance from the INIT message: %s', err));
             nextStateMsg = {
-                type: _serviceProto.ChaincodeMessage.Type.ERROR,
+                type: fabprotos.protos.ChaincodeMessage.Type.ERROR,
                 payload: Buffer.from(err.toString()),
                 txid: msg.txid,
                 channel_id : msg.channel_id
@@ -642,9 +586,10 @@ async function handleMessage(msg, client, action) {
                     loggerPrefix, method);
                 logger.error(errMsg);
 
-                resp =  new _responseProto.Response();
-                resp.status = Stub.RESPONSE_CODE.ERROR;
-                resp.message = errMsg;
+                resp = {
+                    status: Stub.RESPONSE_CODE.ERROR,
+                    message: errMsg
+                };
             }
 
             logger.debug(util.format(
@@ -659,7 +604,7 @@ async function handleMessage(msg, client, action) {
                 logger.error(errMsg);
 
                 nextStateMsg = {
-                    type: _serviceProto.ChaincodeMessage.Type.ERROR,
+                    type: fabprotos.protos.ChaincodeMessage.Type.ERROR,
                     payload: Buffer.from('' + resp.message),
                     txid: msg.txid,
                     channel_id: msg.channel_id
@@ -669,8 +614,8 @@ async function handleMessage(msg, client, action) {
                     loggerPrefix, method));
 
                 nextStateMsg = {
-                    type: _serviceProto.ChaincodeMessage.Type.COMPLETED,
-                    payload: resp.toBuffer(),
+                    type: fabprotos.protos.ChaincodeMessage.Type.COMPLETED,
+                    payload: fabprotos.protos.Response.encode(resp).finish(),
                     txid: msg.txid,
                     channel_id: msg.channel_id,
                     chaincode_event: stub.chaincodeEvent
@@ -711,14 +656,14 @@ function newErrorMsg(msg, state) {
 }
 
 function handleGetQueryResult(handler, res, method) {
-    const payload = _serviceProto.QueryResponse.decode(res.payload);
+    const payload = fabprotos.protos.QueryResponse.decode(res.payload);
     const iterator = new StateQueryIterator(handler, res.channel_id, res.txid, payload);
 
     const result = {iterator};
 
     if (payload.metadata) {
         logger.debug(util.format('Received metadata for method: %s', method));
-        const metadata = _serviceProto.QueryResponseMetadata.decode(payload.metadata);
+        const metadata = fabprotos.protos.QueryResponseMetadata.decode(payload.metadata);
         result.metadata = metadata;
         logger.debug(util.format('metadata: %j', result.metadata));
     }
@@ -729,13 +674,13 @@ function handleGetQueryResult(handler, res, method) {
 function handleGetStateMetadata(payload) {
     const method = 'handleGetStateMetadata';
     logger.debug('%s - get response from peer.', method);
-    const decoded = _serviceProto.StateMetadataResult.decode(payload);
+    const decoded = fabprotos.protos.StateMetadataResult.decode(payload);
     logger.debug('%s - decoded response:%j', method, decoded);
-    const entries = decoded.getEntries();
+    const entries = decoded.entries;
     const metadata = {};
 
     entries.forEach(entry => {
-        metadata[entry.getMetakey()] = entry.getValue();
+        metadata[entry.metakey] = entry.value;
     });
 
     logger.debug('%s - metadata: %j', method, metadata);
@@ -755,12 +700,12 @@ function parseResponse(handler, res, method) {
             case 'GetQueryResult':
                 return handleGetQueryResult(handler, res, method);
             case 'GetHistoryForKey':
-                return new HistoryQueryIterator(handler, res.channel_id, res.txid, _serviceProto.QueryResponse.decode(res.payload));
+                return new HistoryQueryIterator(handler, res.channel_id, res.txid, fabprotos.protos.QueryResponse.decode(res.payload));
             case 'QueryStateNext':
             case 'QueryStateClose':
-                return _serviceProto.QueryResponse.decode(res.payload);
+                return fabprotos.protos.QueryResponse.decode(res.payload);
             case 'InvokeChaincode':
-                return _serviceProto.ChaincodeMessage.decode(res.payload);
+                return fabprotos.protos.ChaincodeMessage.decode(res.payload);
             case 'GetStateMetadata':
                 return handleGetStateMetadata(res.payload);
         }

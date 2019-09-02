@@ -453,11 +453,7 @@ describe('chaincodefromcontract', () => {
         });
 
         it('should pass the logging object to contracts', async () => {
-            const idBytes = {
-                toBuffer: () => {
-                    return new Buffer(certWithoutAttrs);
-                }
-            };
+            const idBytes = Buffer.from(certWithoutAttrs);
             const tempClass =  class  extends Contract {
                 constructor() {
                     super('logging');
@@ -495,8 +491,8 @@ describe('chaincodefromcontract', () => {
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
 
             const mockSigningId = {
-                getMspid: sinon.stub(),
-                getIdBytes: sinon.stub().returns(idBytes)
+                mspid: 'Org1MSP',
+                idBytes
             };
             const cc = new ChaincodeFromContract([tempClass], defaultSerialization);
             const mockStub = {getBufferArgs: sandbox.stub().returns(['logging:alpha']),
@@ -621,11 +617,7 @@ describe('chaincodefromcontract', () => {
 
         it ('should handle valid contract name, but missing function', async () => {
 
-            const idBytes = {
-                toBuffer: () => {
-                    return new Buffer(certWithoutAttrs);
-                }
-            };
+            const idBytes = Buffer.from(certWithoutAttrs);
 
             const ctx = {
                 setChaincodeStub: sandbox.stub(),
@@ -660,8 +652,8 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
 
             const mockSigningId = {
-                getMspid: sinon.stub(),
-                getIdBytes: sinon.stub().returns(idBytes)
+                mspid: 'Org1MSP',
+                idBytes
             };
 
             const mockStub = {
@@ -683,11 +675,7 @@ describe('chaincodefromcontract', () => {
         });
 
         it('should handle valid contract name, but missing function and throws error', async () => {
-            const idBytes = {
-                toBuffer: () => {
-                    return new Buffer(certWithoutAttrs);
-                }
-            };
+            const idBytes = Buffer.from(certWithoutAttrs);
 
 
             const systemContract = new SystemContract();
@@ -705,8 +693,8 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
 
             const mockSigningId = {
-                getMspid: sinon.stub(),
-                getIdBytes: sinon.stub().returns(idBytes)
+                mspid: 'Org1MSP',
+                idBytes
             };
 
             const ctx = {
@@ -747,11 +735,7 @@ describe('chaincodefromcontract', () => {
 
         it('should handle valid contract name, with valid function', async () => {
 
-            const idBytes = {
-                toBuffer: () => {
-                    return new Buffer(certWithoutAttrs);
-                }
-            };
+            const idBytes = Buffer.from(certWithoutAttrs);
 
 
             const systemContract = new SystemContract();
@@ -769,8 +753,8 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
 
             const mockSigningId = {
-                getMspid: sinon.stub(),
-                getIdBytes: sinon.stub().returns(idBytes)
+                mspid: 'Org1MSP',
+                idBytes
             };
 
             const ctx = {
@@ -821,11 +805,7 @@ describe('chaincodefromcontract', () => {
 
         it('should handle functions with returned values schema', async () => {
 
-            const idBytes = {
-                toBuffer: () => {
-                    return new Buffer(certWithoutAttrs);
-                }
-            };
+            const idBytes = Buffer.from(certWithoutAttrs);
             const systemContract = new SystemContract();
             sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
                 .returns({
@@ -841,8 +821,8 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
 
             const mockSigningId = {
-                getMspid: sinon.stub(),
-                getIdBytes: sinon.stub().returns(idBytes)
+                mspid: 'Org1MSP',
+                idBytes
             };
 
             const ctx = {

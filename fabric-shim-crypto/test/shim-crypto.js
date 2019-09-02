@@ -21,29 +21,17 @@ const ECDSAKey = ShimCrypto.__get__('ECDSAKey');
 const mapItems = {};
 mapItems.iv = {
     key: INIT_VECTOR,
-    value: {
-        toBuffer: () => {
-            return Buffer.from('0123456789012345');
-        }
-    }
+    value: Buffer.from('0123456789012345')
 };
 
 mapItems.encryptKey = {
     key: ENCRYPT_KEY,
-    value: {
-        toBuffer: () => {
-            return Buffer.from('01234567890123456789012345678901');
-        }
-    }
+    value: Buffer.from('01234567890123456789012345678901')
 };
 
 mapItems.signKey = {
     key: SIGN_KEY,
-    value: {
-        toBuffer: () => {
-            return Buffer.from('some signKey');
-        }
-    }
+    value: Buffer.from('some signKey')
 };
 
 const saveImportKey = ShimCrypto.__get__('importKey');
@@ -84,9 +72,9 @@ describe('enc-sign', () => {
             expect(sc._ecdsa).to.be.undefined;
 
             expect(mockCreateCipher.calledOnce).to.be.ok;
-            expect(mockCreateCipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value.toBuffer(), mapItems.iv.value.toBuffer()]);
+            expect(mockCreateCipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, mapItems.iv.value]);
             expect(mockCreateDecipher.calledOnce).to.be.ok;
-            expect(mockCreateDecipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value.toBuffer(), mapItems.iv.value.toBuffer()]);
+            expect(mockCreateDecipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, mapItems.iv.value]);
         });
 
         it ('should set key values when init vector not in map', () => {
@@ -105,9 +93,9 @@ describe('enc-sign', () => {
             expect(mockRandomBytes.calledOnce).to.be.ok;
             expect(mockRandomBytes.firstCall.args).to.deep.equal([16]);
             expect(mockCreateCipher.calledOnce).to.be.ok;
-            expect(mockCreateCipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value.toBuffer(), 'some random bytes']);
+            expect(mockCreateCipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, 'some random bytes']);
             expect(mockCreateDecipher.calledOnce).to.be.ok;
-            expect(mockCreateDecipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value.toBuffer(), 'some random bytes']);
+            expect(mockCreateDecipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, 'some random bytes']);
         });
 
         it ('should set sign key values', () => {
@@ -121,7 +109,7 @@ describe('enc-sign', () => {
             expect(sc._ecdsa).to.deep.equal(ecStubInstance);
 
             expect(mockImportKey.calledOnce).to.be.ok;
-            expect(mockImportKey.firstCall.args).to.deep.equal([mapItems.signKey.value.toBuffer()]);
+            expect(mockImportKey.firstCall.args).to.deep.equal([mapItems.signKey.value]);
             expect(mockEC.calledOnce).to.be.ok;
             expect(mockEC.firstCall.args).to.deep.equal([elliptic.curves.p256]);
 

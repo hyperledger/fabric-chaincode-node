@@ -44,9 +44,7 @@ declare module 'fabric-shim' {
 
     interface SerializedIdentity {
         mspid: string;
-        id_bytes: Buffer;
-        getMspid(): string;
-        getIdBytes(): Buffer;
+        idBytes: Buffer;
     }
 
     interface QueryResponseMetadata {

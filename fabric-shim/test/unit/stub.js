@@ -5,19 +5,12 @@
 */
 /* global describe it beforeEach afterEach after  */
 
-const ByteBuffer = require('bytebuffer');
 const sinon = require('sinon');
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const rewire = require('rewire');
-const ProtoLoader = require('../../lib/protoloader');
-const path = require('path');
-
-const _serviceProto = ProtoLoader.load({
-    root: path.join(__dirname, '../../lib/protos'),
-    file: 'peer/chaincode_shim.proto'
-}).protos;
+const fabprotos = require('../../bundle');
 
 const Stub = rewire('../../lib/stub.js');
 
@@ -73,15 +66,11 @@ describe('Stub', () => {
             const decodedSP = {
                 proposal: {
                     header: {
-                        signature_header: {
+                        signatureHeader: {
                             nonce: Buffer.from('100'),
-                            creator: {
-                                toBuffer: () => {
-                                    return Buffer.from('some creator');
-                                }
-                            }
+                            creator: Buffer.from('some creator')
                         },
-                        channel_header: {
+                        channelHeader: {
                             epoch: {
                                 high: 10,
                                 low: 1
@@ -91,7 +80,7 @@ describe('Stub', () => {
                 }
             };
 
-            expect(computeProposalBinding(decodedSP)).to.deep.equal('44206e945c5cc2b752deacc05b2d6cd58a3799fec52143c986739bab57417aaf');
+            expect(computeProposalBinding(decodedSP)).to.deep.equal('ff7e9beabf035d45cb5922278f423ba92f1e85d43d54c2304038f2f2b131625b');
         });
     });
 
@@ -216,42 +205,29 @@ describe('Stub', () => {
     describe('ChaincodeStub', () => {
         const sandbox = sinon.createSandbox();
 
-        const buf1 = ByteBuffer.fromUTF8('invoke');
-        const buf2 = ByteBuffer.fromUTF8('someKey');
-        const buf3 = ByteBuffer.fromUTF8('someValue');
+        const buf1 = Buffer.from('invoke');
+        const buf2 = Buffer.from('someKey');
+        const buf3 = Buffer.from('someValue');
 
         const decodedProposal = {
-            header: {
-                toBuffer: () => {
-                    return Buffer.from('some header');
-                }
-            },
-            payload: {
-                toBuffer: () => {
-                    return Buffer.from('some payload');
-                }
-            }
+            header: Buffer.from('some header'),
+            payload: Buffer.from('some payload')
         };
 
         const decodedCCPP = {
-            getTransientMap: () => {
-                return 'some transient map';
+            TransientMap: {
+                key1: 'value1',
+                key2: 'value2'
             }
         };
 
         const decodedHeader = {
-            signature_header: 'some signature header',
-            channel_header: 'somne channel header'
+            signatureHeader: 'some signature header',
+            channelHeader: 'somne channel header'
         };
 
         const decodedSigHeader = {
-            getNonce: () => {
-                return {
-                    toBuffer: () => {
-                        return Buffer.from('some nonce');
-                    }
-                };
-            },
+            nonce: Buffer.from('some nonce'),
             creator: 'some creator'
         };
 
@@ -259,27 +235,22 @@ describe('Stub', () => {
             timestamp: 'some timestamp'
         };
 
-        const _proposalProto = Stub.__get__('_proposalProto');
         let _proposalProtoProposalDecodeStub;
         let _proposalProtoChaincodeProposalPayloadDecodeStub;
-
-        const _commonProto = Stub.__get__('_commonProto');
         let _commonProtoHeaderDecodeStub;
         let _commonProtoSignatureHeaderDecodeStub;
         let _commonProtoChannelHeaderDecodeStub;
-
-        const _idProto = Stub.__get__('_idProto');
         let _idProtoSerializedIdentityDecodeStub;
 
         beforeEach(() => {
-            _proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').returns(decodedProposal);
-            _proposalProtoChaincodeProposalPayloadDecodeStub = sandbox.stub(_proposalProto.ChaincodeProposalPayload, 'decode').returns(decodedCCPP);
+            _proposalProtoProposalDecodeStub = sandbox.stub(fabprotos.protos.Proposal, 'decode').returns(decodedProposal);
+            _proposalProtoChaincodeProposalPayloadDecodeStub = sandbox.stub(fabprotos.protos.ChaincodeProposalPayload, 'decode').returns(decodedCCPP);
 
-            _commonProtoHeaderDecodeStub = sandbox.stub(_commonProto.Header, 'decode').returns(decodedHeader);
-            _commonProtoSignatureHeaderDecodeStub = sandbox.stub(_commonProto.SignatureHeader, 'decode').returns(decodedSigHeader);
-            _commonProtoChannelHeaderDecodeStub = sandbox.stub(_commonProto.ChannelHeader, 'decode').returns(decodedChannelHeader);
+            _commonProtoHeaderDecodeStub = sandbox.stub(fabprotos.common.Header, 'decode').returns(decodedHeader);
+            _commonProtoSignatureHeaderDecodeStub = sandbox.stub(fabprotos.common.SignatureHeader, 'decode').returns(decodedSigHeader);
+            _commonProtoChannelHeaderDecodeStub = sandbox.stub(fabprotos.common.ChannelHeader, 'decode').returns(decodedChannelHeader);
 
-            _idProtoSerializedIdentityDecodeStub = sandbox.stub(_idProto.SerializedIdentity, 'decode').returns('some creator');
+            _idProtoSerializedIdentityDecodeStub = sandbox.stub(fabprotos.msp.SerializedIdentity, 'decode').returns('some creator');
         });
 
         afterEach(() => {
@@ -299,7 +270,7 @@ describe('Stub', () => {
 
         it ('should throw an error for an invalid proposal', () => {
             _proposalProtoProposalDecodeStub.restore();
-            _proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').throws();
+            _proposalProtoProposalDecodeStub = sandbox.stub(fabprotos.protos.Proposal, 'decode').throws();
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -310,7 +281,7 @@ describe('Stub', () => {
 
         it ('should throw an error for a proposal with an empty header', () => {
             _proposalProtoProposalDecodeStub.restore();
-            _proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').returns({});
+            _proposalProtoProposalDecodeStub = sandbox.stub(fabprotos.protos.Proposal, 'decode').returns({});
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -324,7 +295,7 @@ describe('Stub', () => {
 
         it ('should throw an error for a proposal with an empty payload', () => {
             _proposalProtoProposalDecodeStub.restore();
-            _proposalProtoProposalDecodeStub = sandbox.stub(_proposalProto.Proposal, 'decode').returns({header: decodedProposal.header});
+            _proposalProtoProposalDecodeStub = sandbox.stub(fabprotos.protos.Proposal, 'decode').returns({header: decodedProposal.header});
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -338,7 +309,7 @@ describe('Stub', () => {
 
         it ('should throw an error for a proposal with an invalid header', () => {
             _commonProtoHeaderDecodeStub.restore();
-            _commonProtoHeaderDecodeStub = sandbox.stub(_commonProto.Header, 'decode').throws();
+            _commonProtoHeaderDecodeStub = sandbox.stub(fabprotos.common.Header, 'decode').throws();
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -352,7 +323,7 @@ describe('Stub', () => {
 
         it ('should throw an error for a proposal with an invalid signature header', () => {
             _commonProtoSignatureHeaderDecodeStub.restore();
-            _commonProtoSignatureHeaderDecodeStub = sandbox.stub(_commonProto.SignatureHeader, 'decode').throws();
+            _commonProtoSignatureHeaderDecodeStub = sandbox.stub(fabprotos.common.SignatureHeader, 'decode').throws();
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -366,7 +337,7 @@ describe('Stub', () => {
 
         it ('should throw an error for a proposal with an invalid creator', () => {
             _idProtoSerializedIdentityDecodeStub.restore();
-            _idProtoSerializedIdentityDecodeStub = sandbox.stub(_idProto.SerializedIdentity, 'decode').throws();
+            _idProtoSerializedIdentityDecodeStub = sandbox.stub(fabprotos.msp.SerializedIdentity, 'decode').throws();
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -380,7 +351,7 @@ describe('Stub', () => {
 
         it ('should throw an error for a proposal with an invalid channelHeader', () => {
             _commonProtoChannelHeaderDecodeStub.restore();
-            _commonProtoChannelHeaderDecodeStub = sandbox.stub(_commonProto.ChannelHeader, 'decode').throws();
+            _commonProtoChannelHeaderDecodeStub = sandbox.stub(fabprotos.common.ChannelHeader, 'decode').throws();
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -394,7 +365,7 @@ describe('Stub', () => {
 
         it ('should throw an error for a proposal with an invalid payload', () => {
             _proposalProtoChaincodeProposalPayloadDecodeStub.restore();
-            sandbox.stub(_proposalProto.ChaincodeProposalPayload, 'decode').throws();
+            sandbox.stub(fabprotos.protos.ChaincodeProposalPayload, 'decode').throws();
 
             expect(() => {
                 new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
@@ -426,7 +397,8 @@ describe('Stub', () => {
             expect(stub.proposal).to.deep.equal(decodedProposal);
             expect(stub.txTimestamp).to.deep.equal('some timestamp');
             expect(stub.creator).to.deep.equal('some creator');
-            expect(stub.transientMap).to.deep.equal('some transient map');
+            expect(stub.transientMap.get('key1')).to.equal('value1');
+            expect(stub.transientMap.get('key2')).to.equal('value2');
             expect(stub.signedProposal).to.deep.equal({
                 signature: 'some signature',
                 proposal: {
@@ -447,11 +419,11 @@ describe('Stub', () => {
             expect(_commonProtoHeaderDecodeStub.calledOnce).to.be.ok;
             expect(_commonProtoHeaderDecodeStub.firstCall.args).to.deep.equal([decodedProposal.header]);
             expect(_commonProtoSignatureHeaderDecodeStub.calledOnce).to.be.ok;
-            expect(_commonProtoSignatureHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.signature_header]);
+            expect(_commonProtoSignatureHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.signatureHeader]);
             expect(_idProtoSerializedIdentityDecodeStub.calledOnce).to.be.ok;
             expect(_idProtoSerializedIdentityDecodeStub.firstCall.args).to.deep.equal([decodedSigHeader.creator]);
             expect(_commonProtoChannelHeaderDecodeStub.calledOnce).to.be.ok;
-            expect(_commonProtoChannelHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.channel_header]);
+            expect(_commonProtoChannelHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.channelHeader]);
             expect(_proposalProtoChaincodeProposalPayloadDecodeStub.calledOnce).to.be.ok;
             expect(_proposalProtoChaincodeProposalPayloadDecodeStub.firstCall.args).to.deep.equal([decodedProposal.payload]);
 
@@ -484,7 +456,7 @@ describe('Stub', () => {
                     args: [buf1, buf2, buf3]
                 });
 
-                expect(stub.getBufferArgs()).to.deep.equal([buf1.buffer, buf2.buffer, buf3.buffer]);
+                expect(stub.getBufferArgs()).to.deep.equal([buf1, buf2, buf3]);
             });
         });
 
@@ -789,10 +761,11 @@ describe('Stub', () => {
 
                 expect(result).to.deep.equal('some state');
                 expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
-                const metadata = new _serviceProto.QueryResponseMetadata();
-                metadata.setBookmark('');
-                metadata.setFetchedRecordsCount(3);
-                expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', EMPTY_KEY_SUBSTITUTE, 'end key', 'dummyChannelId', 'dummyTxid', metadata.toBuffer()]);
+                const metadataBuffer = fabprotos.protos.QueryResponseMetadata.encode({
+                    bookmark: '',
+                    fetchedRecordsCount: 3
+                }).finish();
+                expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', EMPTY_KEY_SUBSTITUTE, 'end key', 'dummyChannelId', 'dummyTxid', metadataBuffer]);
             });
 
             it('should have default bookmark eqls an empty string', async () => {
@@ -808,10 +781,11 @@ describe('Stub', () => {
 
                 expect(result).to.deep.equal('some state');
                 expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
-                const metadata = new _serviceProto.QueryResponseMetadata();
-                metadata.setFetchedRecordsCount(3);
-                metadata.setBookmark('');
-                expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid', metadata.toBuffer()]);
+                const metadataBuffer = fabprotos.protos.QueryResponseMetadata.encode({
+                    bookmark: '',
+                    fetchedRecordsCount: 3
+                }).finish();
+                expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid', metadataBuffer]);
             });
 
             it('should have default bookmark eqls an empty string', async () => {
@@ -827,10 +801,11 @@ describe('Stub', () => {
 
                 expect(result).to.deep.equal('some state');
                 expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
-                const metadata = new _serviceProto.QueryResponseMetadata();
-                metadata.setFetchedRecordsCount(3);
-                metadata.setBookmark('a bookmark');
-                expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid', metadata.toBuffer()]);
+                const metadataBuffer = fabprotos.protos.QueryResponseMetadata.encode({
+                    bookmark: 'a bookmark',
+                    fetchedRecordsCount: 3
+                }).finish();
+                expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid', metadataBuffer]);
             });
         });
 
@@ -867,7 +842,7 @@ describe('Stub', () => {
                 expect(result).to.deep.equal('some query result');
                 expect(handleGetQueryResultStub.calledOnce).to.be.ok;
                 const metadata = handleGetQueryResultStub.firstCall.args[2];
-                const decoded = _serviceProto.QueryMetadata.decode(metadata);
+                const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(3);
                 expect(decoded.bookmark).to.equal('');
             });
@@ -886,7 +861,7 @@ describe('Stub', () => {
                 expect(result).to.deep.equal('some query result');
                 expect(handleGetQueryResultStub.calledOnce).to.be.ok;
                 const metadata = handleGetQueryResultStub.firstCall.args[2];
-                const decoded = _serviceProto.QueryMetadata.decode(metadata);
+                const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(3);
                 expect(decoded.bookmark).to.equal('a bookmark');
             });
@@ -963,31 +938,9 @@ describe('Stub', () => {
             });
 
             it ('should set an event', () => {
-                const saveEventProto = Stub.__get__('_eventProto');
-
-                const setEventNameSpy = sinon.spy();
-                const setPayloadSpy = sinon.spy();
-
-                function CustomEvent () {
-                    this.setEventName = setEventNameSpy;
-                    this.setPayload = setPayloadSpy;
-                }
-
-                const eventProtoStub = {
-                    ChaincodeEvent: CustomEvent
-                };
-
-                Stub.__set__('_eventProto', eventProtoStub);
-
-                stub.setEvent('some name', 'some payload');
-
-                expect(stub.chaincodeEvent).to.deep.equal(new CustomEvent());
-                expect(setEventNameSpy.calledOnce).to.be.ok;
-                expect(setEventNameSpy.firstCall.args).to.deep.equal(['some name']);
-                expect(setPayloadSpy.calledOnce).to.be.ok;
-                expect(setPayloadSpy.firstCall.args).to.deep.equal(['some payload']);
-
-                Stub.__set__('_eventProto', saveEventProto);
+                stub.setEvent('some name', Buffer.from('some payload'));
+                expect(stub.chaincodeEvent.eventName).to.equal('some name');
+                expect(stub.chaincodeEvent.payload).to.deep.equal(Buffer.from('some payload'));
             });
         });
 
@@ -1111,7 +1064,7 @@ describe('Stub', () => {
                 expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
                 expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
                 const metadata = handleGetStateByRangeStub.firstCall.args[5];
-                const decoded = _serviceProto.QueryMetadata.decode(metadata);
+                const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(3);
                 expect(decoded.bookmark).to.equal('');
             });
@@ -1130,7 +1083,7 @@ describe('Stub', () => {
                 expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
                 expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
                 const metadata = handleGetStateByRangeStub.firstCall.args[5];
-                const decoded = _serviceProto.QueryMetadata.decode(metadata);
+                const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(23);
                 expect(decoded.bookmark).to.equal('a bookmark');
             });

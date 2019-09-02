@@ -10,18 +10,14 @@ const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 const rewire = require('rewire');
-const ProtoLoader = require('../../lib/protoloader');
+const fabprotos = require('../../bundle');
 const path = require('path');
 
 const Logger = require('../../lib/logger');
 
+const Stub = require('../../lib/stub');
 const chaincodePath = '../../lib/chaincode.js';
 const StartCommand = require('../../lib/cmds/startCommand.js');
-
-const _serviceProto = ProtoLoader.load({
-    root: path.join(__dirname, '../../lib/protos'),
-    file: 'peer/chaincode_shim.proto'
-}).protos;
 
 describe('Chaincode', () => {
     let Chaincode;
@@ -105,7 +101,7 @@ describe('Chaincode', () => {
             const args = chat.firstCall.args;
             expect(args.length).to.deep.equal(1);
             expect(typeof args[0]).to.deep.equal('object');
-            expect(args[0].type).to.deep.equal(_serviceProto.ChaincodeMessage.Type.REGISTER);
+            expect(args[0].type).to.deep.equal(fabprotos.protos.ChaincodeMessage.Type.REGISTER);
 
             chat.restore();
             getArgsStub.restore();
@@ -218,7 +214,7 @@ describe('Chaincode', () => {
                 const args = chat.firstCall.args;
                 expect(args.length).to.deep.equal(1);
                 expect(typeof args[0]).to.deep.equal('object');
-                expect(args[0].type).to.deep.equal(_serviceProto.ChaincodeMessage.Type.REGISTER);
+                expect(args[0].type).to.deep.equal(fabprotos.protos.ChaincodeMessage.Type.REGISTER);
 
                 chat.restore();
             });
@@ -316,51 +312,25 @@ describe('Chaincode', () => {
     });
 
     describe('response', () => {
-        let respProto;
-        let ChaincodeStub;
-        let mockResponse;
-        let saveClass;
-
-        beforeEach(() => {
-            Chaincode = rewire(chaincodePath);
-
-            respProto = Chaincode.__get__('_responseProto');
-            ChaincodeStub = Chaincode.__get__('ChaincodeStub');
-            mockResponse = sinon.createStubInstance(respProto.Response);
-            saveClass = respProto.Response;
-
-            class MockResponse {
-                constructor() {
-                    return mockResponse;
-                }
-            }
-
-            respProto.Response = MockResponse;
-        });
-
-        after(() => {
-            respProto.Response = saveClass;
-        });
-
         it ('should let the code response an error', () => {
             const result = Chaincode.error('error msg');
 
             expect(result.message).to.deep.equal('error msg');
-            expect(result.status).to.deep.equal(ChaincodeStub.RESPONSE_CODE.ERROR);
+            expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.ERROR);
         });
 
         it ('should handle an empty success', () => {
             const result = Chaincode.success();
 
             expect(result.payload).to.deep.equal(Buffer.from(''));
-            expect(result.status).to.deep.equal(ChaincodeStub.RESPONSE_CODE.OK);
+            expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.OK);
         });
 
         it ('should handle a success with message', () => {
             const result = Chaincode.success('msg');
 
             expect(result.payload).to.deep.equal('msg');
-            expect(result.status).to.deep.equal(ChaincodeStub.RESPONSE_CODE.OK);
+            expect(result.status).to.deep.equal(Stub.RESPONSE_CODE.OK);
         });
     });
 

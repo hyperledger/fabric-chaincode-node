@@ -84,26 +84,11 @@ describe('KeyEndorsementPolicy', () => {
             expect(policy).haveOwnProperty('version').eqls(0);
             expect(policy).haveOwnProperty('identities').to.be.an('array');
             expect(policy.identities.length).to.eql(3);
-            expect(policy.rule.toRaw()).to.deep.eqls({
-                n_out_of: {
-                    n: 3,
-                    rules: [{
-                        n_out_of: null,
-                        signed_by: 0,
-                        Type: 'signed_by'
-                    }, {
-                        n_out_of: null,
-                        signed_by: 1,
-                        Type: 'signed_by'
-                    }, {
-                        n_out_of: null,
-                        signed_by: 2,
-                        Type: 'signed_by'
-                    }]
-                },
-                signed_by: 0,
-                Type: 'n_out_of'
-            });
+            expect(policy.rule.nOutOf.n).to.eql(3);
+            expect(policy.rule.nOutOf.rules.length).to.eql(3);
+            expect(policy.rule.nOutOf.rules[0].signedBy).to.eql(0);
+            expect(policy.rule.nOutOf.rules[1].signedBy).to.eql(1);
+            expect(policy.rule.nOutOf.rules[2].signedBy).to.eql(2);
         });
     });
 

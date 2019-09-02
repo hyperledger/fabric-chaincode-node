@@ -222,10 +222,8 @@ class TestTS implements ChaincodeInterface {
         const TxTimestamp: Timestamp = stub.getTxTimestamp();
 
         const creator: SerializedIdentity = stub.getCreator();
-        let idbytes: Buffer = creator.getIdBytes();
-        idbytes = creator.id_bytes;
+        let idbytes: Buffer = creator.idBytes;
         let mspid: string = creator.mspid;
-        mspid = creator.getMspid();
 
         const invokeChaincode: ChaincodeResponse = await stub.invokeChaincode('ccid', ['bob', 'duck'], 'channelid');
     }

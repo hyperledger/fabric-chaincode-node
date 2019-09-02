@@ -40,18 +40,16 @@ class ChaincodeCryptoLibrary {
         if (!iv) {
             // transaction proposal did not include an IV, generate one
             iv = crypto.randomBytes(16);
-        } else { // 128-bit IV for AES (block size)
-            iv = iv.toBuffer();
         }
 
         if (key) {
-            this.cipher = crypto.createCipheriv(ALGORITHM, key.toBuffer(), iv);
-            this.decipher = crypto.createDecipheriv(ALGORITHM, key.toBuffer(), iv);
+            this.cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+            this.decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
         }
 
         const signKey = tmap.get(SIGN_KEY);
         if (signKey) {
-            this.signKey = importKey(signKey.toBuffer());
+            this.signKey = importKey(signKey);
             this._ecdsa = new EC(elliptic.curves.p256);
         }
     }
