@@ -82,10 +82,10 @@ describe('Chaincode CRUD', () => {
             await utils.invoke(suite, 'org.mynamespace.crud:putKey', ['key1', 'value1']);
 
             let payload = await utils.query(suite, 'org.mynamespace.crud:getHistoryForKey', ['key1']);
-            expect(JSON.parse(payload)).to.deep.equal(['value1', 'newValue1', 'newValue2', 'newValue3', 'value1']);
+            expect(JSON.parse(payload)).to.deep.equal(['value1', 'newValue3', 'newValue2', 'newValue1', 'value1']);
 
             payload = await utils.query(suite, 'org.mynamespace.crud:getHistoryForKeyUsingAsyncIterator', ['key1']);
-            expect(JSON.parse(payload)).to.deep.equal(['value1', 'newValue1', 'newValue2', 'newValue3', 'value1']);
+            expect(JSON.parse(payload)).to.deep.equal(['value1', 'newValue3', 'newValue2', 'newValue1', 'value1']);
 
         });
 
