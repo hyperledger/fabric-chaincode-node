@@ -6,13 +6,12 @@
 */
 declare module 'fabric-shim' {
 
-    import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
     import { EventEmitter } from 'events';
     import { LoggerInstance } from 'winston';
 
-    interface ProtobufBytes {
-        toBuffer(force_copy?: boolean): Buffer;
-        toString(encoding?: string): string;
+    interface Timestamp {
+        seconds: number;
+        nanos: number;
     }
 
     interface ChaincodeResponse {
@@ -48,7 +47,7 @@ declare module 'fabric-shim' {
     }
 
     interface QueryResponseMetadata {
-        fetched_records_count: number;
+        fetchedRecordsCount: number;
         bookmark: string;
     }
 
@@ -153,21 +152,14 @@ declare module 'fabric-shim' {
         interface KV {
             namespace: string;
             key: string;
-            value: ProtobufBytes;
-            getNamespace(): string;
-            getKey(): string;
-            getValue(): ProtobufBytes;
+            value: Uint8Array;
         }
 
         interface KeyModification {
-            is_delete: boolean;
-            value: ProtobufBytes;
+            isDelete: boolean;
+            value: Uint8Array;
             timestamp: Timestamp;
-            tx_id: string;
-            getIsDelete(): boolean;
-            getValue(): ProtobufBytes;
-            getTimestamp(): Timestamp;
-            getTxId(): string;
+            txId: string;
         }
     }
 
@@ -207,52 +199,34 @@ declare module 'fabric-shim' {
 
     export namespace ChaincodeProposal {
         interface SignedProposal {
-            proposal_bytes: Proposal;
-            getProposalBytes(): Proposal;
-            signature: Buffer;
-            getSignature(): Buffer;
+            proposal: Proposal;
+            signature: Uint8Array;
         }
 
         interface Proposal {
             header: Header;
-            getHeader(): Header;
             payload: ChaincodeProposalPayload;
-            getPayload(): ChaincodeProposalPayload;
-            extension: Buffer;
-            getExtension(): Buffer;
         }
 
         interface Header {
-            channel_header: ChannelHeader;
-            getChannelHeader(): ChannelHeader;
-            signature_header: SignatureHeader;
-            getSignatureHeader(): SignatureHeader;
+            channelHeader: ChannelHeader;
+            signatureHeader: SignatureHeader;
         }
 
         interface ChannelHeader {
             type: HeaderType;
-            getType(): HeaderType;
             version: number;
-            getVersion(): number;
             timestamp: Timestamp;
-            getTimestamp(): Timestamp;
-            channel_id: string;
-            getChannelId(): string;
-            tx_id: string;
-            getTxId(): string;
+            channelId: string;
+            txId: string;
             epoch: number;
-            getEpoch(): number;
-            extension: Buffer;
-            getExtension(): Buffer;
-            tls_cert_hash: Buffer;
-            getTlsCertHash(): Buffer;
+            extension: Uint8Array;
+            tlsCertHash: Uint8Array;
         }
 
         interface SignatureHeader {
             creator: SerializedIdentity;
-            getCreator(): SerializedIdentity;
-            nonce: Buffer;
-            getNonce(): Buffer;
+            nonce: Uint8Array;
         }
 
         interface ChaincodeProposalPayload {

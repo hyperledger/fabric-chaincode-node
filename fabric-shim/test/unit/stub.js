@@ -403,11 +403,11 @@ describe('Stub', () => {
                 signature: 'some signature',
                 proposal: {
                     header: {
-                        signature_header: {
+                        signatureHeader: {
                             creator: 'some creator',
                             nonce: Buffer.from('some nonce')
                         },
-                        channel_header: decodedChannelHeader
+                        channelHeader: decodedChannelHeader
                     },
                     payload: decodedCCPP
                 }

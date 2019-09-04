@@ -38,7 +38,6 @@
   "dependencies": {
     "@fidm/x509": "^1.2.1",
     "@grpc/proto-loader": "^0.5.1",
-    "@types/google-protobuf": "^3.2.7",
     "@types/node": "^8.9.4",
     "ajv": "^6.5.5",
     "fabric-contract-api": "unstable",

@@ -21,9 +21,9 @@ import { Shim,
     StateQueryResponse,
     KeyEndorsementPolicy,
     ENDORSER_ROLES,
+    Timestamp
  } from 'fabric-shim';
 
-import { Timestamp } from 'google-protobuf/google/protobuf/timestamp_pb';
 import { LoggerInstance } from 'winston';
 
 class TestTS implements ChaincodeInterface {
@@ -160,14 +160,10 @@ class TestTS implements ChaincodeInterface {
         await historyQuery.close();
         const done: boolean = historyNext.done;
         const keyMod: Iterators.KeyModification = historyNext.value;
-        let isDelete: boolean = keyMod.is_delete;
-        isDelete = keyMod.getIsDelete();
+        let isDelete: boolean = keyMod.isDelete;
         let timestamp: Timestamp = keyMod.timestamp;
-        timestamp = keyMod.getTimestamp();
-        let txid: string = keyMod.tx_id;
-        txid = keyMod.getTxId();
-        let value: Buffer = keyMod.value.toBuffer();
-        value = keyMod.getValue().toBuffer();
+        let txid: string = keyMod.txId;
+        let value: Uint8Array = keyMod.value;
     }
 
     async testStateQueryIterator(stateQuery: Iterators.StateQueryIterator) {
@@ -176,9 +172,7 @@ class TestTS implements ChaincodeInterface {
         const done: boolean = stateNext.done;
         const keyVal: Iterators.KV = stateNext.value;
         let key: string = keyVal.key;
-        key = keyVal.getKey();
-        let val: Buffer = keyVal.value.toBuffer();
-        val = keyVal.getValue().toBuffer();
+        let val: Uint8Array = keyVal.value;
     }
 
     async testPrivateData(stub: ChaincodeStub): Promise<void> {
@@ -209,7 +203,7 @@ class TestTS implements ChaincodeInterface {
         }
         const iteratorHistory = stub.getHistoryForKey('key1');
         for await (const res of iteratorHistory) {
-            const tx_id = res.tx_id;
+            const tx_id = res.txId;
         }
     }
 
@@ -272,44 +266,25 @@ class TestTS implements ChaincodeInterface {
     }
 
     testSignedProposal(proposal: ChaincodeProposal.SignedProposal) {
-        let prop: ChaincodeProposal.Proposal = proposal.proposal_bytes;
-        let sig: Buffer = proposal.signature;
-        prop = proposal.getProposalBytes();
-        sig = proposal.getSignature();
+        let prop: ChaincodeProposal.Proposal = proposal.proposal;
+        let sig: Uint8Array = proposal.signature;
 
-        let ext: Buffer = prop.extension;
-        ext = prop.getExtension();
         let hdr: ChaincodeProposal.Header = prop.header;
-        hdr = prop.getHeader();
         let payload: ChaincodeProposal.ChaincodeProposalPayload = prop.payload;
-        payload = prop.getPayload();
 
-        let cHdr: ChaincodeProposal.ChannelHeader = hdr.channel_header;
-        cHdr = hdr.getChannelHeader();
-        let sHdr: ChaincodeProposal.SignatureHeader = hdr.signature_header;
-        sHdr = hdr.getSignatureHeader();
+        let cHdr: ChaincodeProposal.ChannelHeader = hdr.channelHeader;
+        let sHdr: ChaincodeProposal.SignatureHeader = hdr.signatureHeader;
 
-        let chId: string = cHdr.channel_id;
-        chId = cHdr.getChannelId();
+        let chId: string = cHdr.channelId;
         let epoch: number = cHdr.epoch;
-        epoch = cHdr.getEpoch();
-        ext = cHdr.extension;
-        ext = cHdr.getExtension();
         let timestamp: Timestamp = cHdr.timestamp;
-        timestamp = cHdr.getTimestamp();
-        let hash: Buffer = cHdr.tls_cert_hash;
-        hash = cHdr.getTlsCertHash();
-        let txId: string = cHdr.tx_id;
-        txId = cHdr.getTxId();
+        let hash: Uint8Array = cHdr.tlsCertHash;
+        let txId: string = cHdr.txId;
         let type: ChaincodeProposal.HeaderType = cHdr.type;
-        type = cHdr.getType();
         let version: number = cHdr.version;
-        version = cHdr.getVersion();
 
         let creator: SerializedIdentity = sHdr.creator;
-        creator = sHdr.getCreator();
-        let nonce: Buffer = sHdr.nonce;
-        nonce = sHdr.getNonce();
+        let nonce: Uint8Array = sHdr.nonce;
 
         let input: Buffer = payload.input;
         input = payload.getInput();
@@ -318,7 +293,7 @@ class TestTS implements ChaincodeInterface {
     }
 
     testQueryResponseMetadata(metadata: QueryResponseMetadata) {
-        const cnt: number = metadata.fetched_records_count;
+        const cnt: number = metadata.fetchedRecordsCount;
         const bookmark: string = metadata.bookmark;
     }
 

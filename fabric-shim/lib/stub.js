@@ -171,7 +171,7 @@ class ChaincodeStub {
             let signatureHeader;
             try {
                 signatureHeader = fabprotos.common.SignatureHeader.decode(header.signatureHeader);
-                decodedSP.proposal.header.signature_header = {nonce: signatureHeader.nonce};
+                decodedSP.proposal.header.signatureHeader = {nonce: signatureHeader.nonce};
             } catch (err) {
                 throw new Error(util.format('Decoding SignatureHeader failed: %s', err));
             }
@@ -179,7 +179,7 @@ class ChaincodeStub {
             let creator;
             try {
                 creator = fabprotos.msp.SerializedIdentity.decode(signatureHeader.creator);
-                decodedSP.proposal.header.signature_header.creator = creator;
+                decodedSP.proposal.header.signatureHeader.creator = creator;
                 this.creator = creator;
             } catch (err) {
                 throw new Error(util.format('Decoding SerializedIdentity failed: %s', err));
@@ -188,7 +188,7 @@ class ChaincodeStub {
             let channelHeader;
             try {
                 channelHeader = fabprotos.common.ChannelHeader.decode(header.channelHeader);
-                decodedSP.proposal.header.channel_header = channelHeader;
+                decodedSP.proposal.header.channelHeader = channelHeader;
                 this.txTimestamp = channelHeader.timestamp;
             } catch (err) {
                 throw new Error(util.format('Decoding ChannelHeader failed: %s', err));
