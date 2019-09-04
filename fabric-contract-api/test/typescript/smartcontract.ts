@@ -6,7 +6,7 @@
 */
 
 import { Contract, Context } from 'fabric-contract-api';
-import { ChaincodeStub, ClientIdentity } from 'fabric-shim';
+import { ChaincodeStub, ClientIdentity } from 'fabric-shim-api';
 
 export class ScenarioContext extends Context{
 

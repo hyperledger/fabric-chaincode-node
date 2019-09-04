@@ -4,51 +4,20 @@
  SPDX-License-Identifier: Apache-2.0
 
 */
-declare module 'fabric-shim' {
+declare module 'fabric-shim-api' {
 
-    import { EventEmitter } from 'events';
-    import { Logger } from 'winston';
-
-    import {
-        ChaincodeInterface,
-        ChaincodeProposal,
-        ChaincodeResponse,
-        ChaincodeStub as IChaincodeStub,
-        ClientIdentity as IClientIdentity,
-        Iterators,
-        QueryResponseMetadata,
-        SerializedIdentity,
-        SplitCompositekey,
-        StateQueryResponse,
-        Timestamp
-    } from 'fabric-shim-api';
-
-    export {
-        ChaincodeInterface,
-        ChaincodeProposal,
-        ChaincodeResponse,
-        Iterators,
-        QueryResponseMetadata,
-        SerializedIdentity,
-        SplitCompositekey,
-        StateQueryResponse,
-        Timestamp
+    interface Timestamp {
+        seconds: number;
+        nanos: number;
     }
 
-    export function error(msg: Uint8Array): ChaincodeResponse;
-    export function newLogger(name: string): LoggerInstance;
-    export function start(chaincode: ChaincodeInterface): any;
-    export function success(payload?: Uint8Array): ChaincodeResponse;
-
-    export class Shim {
-        static error(msg: Uint8Array): ChaincodeResponse;
-        static newLogger(name: string): LoggerInstance;
-        static start(chaincode: ChaincodeInterface): any;
-        static success(payload?: Uint8Array): ChaincodeResponse;
+    interface ChaincodeResponse {
+        status: number;
+        message: string;
+        payload: Uint8Array;
     }
 
-    export class ClientIdentity implements IClientIdentity {
-        constructor(stub: ChaincodeStub);
+    interface ClientIdentity {
         assertAttributeValue(attrName: string, attrValue: string): boolean;
         getAttributeValue(attrName: string): string | null;
         getID(): string;
@@ -56,19 +25,28 @@ declare module 'fabric-shim' {
         getMSPID(): string;
     }
 
-    export enum RESPONSE_CODE {
+    interface SerializedIdentity {
+        mspid: string;
+        idBytes: Uint8Array;
+    }
+
+    interface QueryResponseMetadata {
+        fetchedRecordsCount: number;
+        bookmark: string;
+    }
+
+    interface StateQueryResponse<T> {
+        iterator: T;
+        metadata: QueryResponseMetadata;
+    }
+
+    enum RESPONSE_CODE {
         OK = 200,
         ERRORTHRESHOLD = 400,
         ERROR = 500
     }
 
-    class ResponseCode {
-        OK: number;
-        ERRORTHRESHOLD: number;
-        ERROR: number;
-    }
-
-    export class ChaincodeStub implements IChaincodeStub {
+    interface ChaincodeStub {
         getArgs(): string[];
         getStringArgs(): string[];
         getFunctionAndParameters(): { params: string[], fcn: string };
@@ -111,20 +89,99 @@ declare module 'fabric-shim' {
         getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
         getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
         getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
-
-        static RESPONSE_CODE: ResponseCode;
     }
 
-    export class KeyEndorsementPolicy {
-        constructor(policy?: Uint8Array);
-        getPolicy(): Uint8Array;
-        addOrgs(role: string, ...newOrgs: string[]): void;
-        delOrgs(...delOrgs: string[]):void;
-        listOrgs(): string[];
+    interface SplitCompositekey {
+        objectType: string;
+        attributes: string[];
     }
 
-    export enum ENDORSER_ROLES {
-        MEMBER = 'MEMBER',
-        PEER = 'PEER'
+    interface ChaincodeInterface {
+        Init(stub: ChaincodeStub): Promise<ChaincodeResponse>;
+        Invoke(stub: ChaincodeStub): Promise<ChaincodeResponse>;
     }
+
+    namespace Iterators {
+
+        interface CommonIterator<T> {
+            close(): Promise<void>;
+            next(): Promise<NextResult<T>>;
+        }
+
+        interface NextResult<T> {
+            value: T;
+            done: boolean;
+        }
+
+        type HistoryQueryIterator = CommonIterator<KeyModification>;
+        type StateQueryIterator = CommonIterator<KV>;
+
+        interface NextKeyModificationResult {
+            value: KeyModification;
+            done: boolean;
+        }
+
+        interface KV {
+            namespace: string;
+            key: string;
+            value: Uint8Array;
+        }
+
+        interface KeyModification {
+            isDelete: boolean;
+            value: Uint8Array;
+            timestamp: Timestamp;
+            txId: string;
+        }
+    }
+
+    namespace ChaincodeProposal {
+        interface SignedProposal {
+            proposal: Proposal;
+            signature: Uint8Array;
+        }
+
+        interface Proposal {
+            header: Header;
+            payload: ChaincodeProposalPayload;
+        }
+
+        interface Header {
+            channelHeader: ChannelHeader;
+            signatureHeader: SignatureHeader;
+        }
+
+        interface ChannelHeader {
+            type: HeaderType;
+            version: number;
+            timestamp: Timestamp;
+            channelId: string;
+            txId: string;
+            epoch: number;
+            extension: Uint8Array;
+            tlsCertHash: Uint8Array;
+        }
+
+        interface SignatureHeader {
+            creator: SerializedIdentity;
+            nonce: Uint8Array;
+        }
+
+        interface ChaincodeProposalPayload {
+            input: Uint8Array;
+            transientMap: Map<string, Uint8Array>;
+        }
+
+        enum HeaderType {
+            MESSAGE = 0,
+            CONFIG = 1,
+            CONFIG_UPDATE = 2,
+            ENDORSER_TRANSACTION = 3,
+            ORDERER_TRANSACTION = 4,
+            DELIVER_SEEK_INFO = 5,
+            CHAINCODE_PACKAGE = 6,
+            PEER_ADMIN_OPERATION = 8
+        }
+    }
+
 }

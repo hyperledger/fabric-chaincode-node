@@ -19,6 +19,7 @@
     "@types/node": "^8.9.4",
     "fabric-contract-api": "file:./fabric-contract-api",
     "fabric-shim": "file:./fabric-shim",
+    "fabric-shim-api": "file:./fabric-shim-api",
     "fabric-shim-crypto": "file:./fabric-shim-crypto",
     "fs-extra": "^7.0.1"
   },

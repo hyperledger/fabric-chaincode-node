@@ -1,0 +1,37 @@
+/*
+ Copyright 2018 IBM All Rights Reserved.
+
+ SPDX-License-Identifier: Apache-2.0
+*/
+{
+    "compilerOptions": {
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "declaration": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "target": "es6",
+        "outDir": "dist",
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+              "node_modules/*"
+            ]
+        },
+        "lib": [
+            "esnext"
+        ]
+    },
+    "files": [
+        "index.d.ts"
+    ],
+    "formatCodeOptions": {
+        "indentSize": 2,
+        "tabSize": 2
+    }
+}

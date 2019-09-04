@@ -12,6 +12,7 @@ gulp.task('lint', function () {
         '**/*.js',
         '!fabric-contract-api/node_modules/**',
         '!fabric-shim/node_modules/**',
+        '!fabric-shim-api/node_modules/**',
         '!fabric-shim-crypto/node_modules/**',
         '!test/node_modules/**',
         '!**/typescript/*.js',
