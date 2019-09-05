@@ -56,6 +56,24 @@ const certWithLongDNs = '-----BEGIN CERTIFICATE-----' +
 'KsFQrpVnF8O6hoHOYZQ=' +
 '-----END CERTIFICATE-----';
 
+const certWithLotsOfAttrs = '-----BEGIN CERTIFICATE-----\n' +
+'MIICuDCCAl6gAwIBAgIUFAyz0HVql93FhIgU3DJah7vtQLswCgYIKoZIzj0EAwIw\n' +
+'czELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh\n' +
+'biBGcmFuY2lzY28xGTAXBgNVBAoTEG9yZzEuZXhhbXBsZS5jb20xHDAaBgNVBAMT\n' +
+'E2NhLm9yZzEuZXhhbXBsZS5jb20wHhcNMTkwOTA1MTYzMTAwWhcNMjAwOTA0MTYz\n' +
+'NjAwWjAjMQ8wDQYDVQQLEwZjbGllbnQxEDAOBgNVBAMTB3NzdG9uZTEwWTATBgcq\n' +
+'hkjOPQIBBggqhkjOPQMBBwNCAAQdB0zBWOdBTQZjOIQ3s+px0g1wpeXrkC+suY2N\n' +
+'jANugF1ie1QF0YT97gt7o0jMCItLFF+RTU3HiIn+mW5omKtro4IBHjCCARowDgYD\n' +
+'VR0PAQH/BAQDAgeAMAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFC1x4XKFPRRXvLd2\n' +
+'kq+Ly1CCjkKXMCsGA1UdIwQkMCKAIBw8JOPUf5+Yky3e04oqNRH5VpBhHBHdnpKN\n' +
+'TniD3O9UMIGtBggqAwQFBgcIAQSBoHsiYXR0cnMiOnsiaGYuQWZmaWxpYXRpb24i\n' +
+'OiIiLCJoZi5FbnJvbGxtZW50SUQiOiJzc3RvbmUxIiwiaGYuVHlwZSI6ImNsaWVu\n' +
+'dCIsInRlc3QxIjoiZm9vYmFyIiwidGVzdDIiOiJ3b3cgc3VjaCBhdHRyaWJ1dGVz\n' +
+'IiwidGVzdDMiOiJyb2NraW5nIGFyb3VuZCB0aGUgd29ybGQifX0wCgYIKoZIzj0E\n' +
+'AwIDSAAwRQIhAJQoKLJv6CzpQNgkIrt27qUbKvTyp2hveRiQEf9ke8jWAiARdmfu\n' +
+'K7/4F98z4aWuP1rA8+j3mRtXFaIQBk9+4eKETg==\n' +
+'-----END CERTIFICATE-----\n';
+
 describe('Client-Identity', () => {
 
     it ('should throw an error when using a bad cert', () => {
@@ -73,19 +91,18 @@ describe('Client-Identity', () => {
             expect(cid.getMSPID()).to.deep.equal('dummyId');
         });
 
+        it ('should return correct ID bytes', () => {
+            const actualIdBytes = cid.getIDBytes();
+            const expectedIdBytes = Buffer.from(certWithAttrs);
+            expect(actualIdBytes.compare(expectedIdBytes)).to.equal(0);
+        });
+
         it ('should return correct value on getID()', () => {
             expect(cid.getID()).to.deep.equal('x509::/CN=MyTestUserWithAttrs::/CN=fabric-ca-server');
         });
 
         it ('should have correct attrs', () => {
             expect(cid.attrs.attr1).to.deep.equal('val1');
-        });
-
-        it ('should return correct value on getX509Certificate()', () => {
-            const x509 = cid.getX509Certificate();
-
-            expect(x509.subject.commonName).to.deep.equal('MyTestUserWithAttrs');
-            expect(x509.serial).to.deep.equal('1E4998E9F44FD00353BF3681C0A0A431964F5275');
         });
 
         it ('should return the value when getAttributeValue() called with known attribute', () => {
@@ -106,6 +123,22 @@ describe('Client-Identity', () => {
 
         it ('should return false when unknown attribute in assertAttributeValue()', () => {
             expect(cid.assertAttributeValue('unknown', 'val1')).to.deep.equal(false);
+        });
+    });
+
+    describe('Certificate with multiple attributes', () => {
+        const stub = mockStub(certWithLotsOfAttrs);
+        const cid = new shim.ClientIdentity(stub);
+
+        it('should have correct attributes', () => {
+            expect(cid.attrs).to.deep.equal({
+                'hf.Affiliation': '',
+                'hf.EnrollmentID': 'sstone1',
+                'hf.Type': 'client',
+                test1: 'foobar',
+                test2: 'wow such attributes',
+                test3: 'rocking around the world'
+            });
         });
     });
 

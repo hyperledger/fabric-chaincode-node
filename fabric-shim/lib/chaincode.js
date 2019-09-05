@@ -9,8 +9,7 @@
 const ProtoLoader = require('./protoloader');
 const path = require('path');
 const util = require('util');
-const X509 = require('@ampretia/x509');
-const jsrsasign = require('jsrsasign');
+const {Certificate} = require('@fidm/x509');
 const Logger = require('./logger');
 
 const utils = require('./utils/utils');
@@ -213,7 +212,7 @@ class Shim {
     }
 }
 
-// special OID used by Fabric to save attributes in x.509 certificates
+// special OID used by Fabric to save attributes in X.509 certificates
 const FABRIC_CERT_ATTR_OID = '1.2.3.4.5.6.7.8.1';
 
 /**
@@ -248,23 +247,25 @@ class ClientIdentity {
 
         this.mspId = signingId.getMspid();
 
-        const idBytes = signingId.getIdBytes().toBuffer();
-        const normalizedCert = normalizeX509(idBytes.toString(), loggerPrefix);
-        const cert = X509.parseCert(normalizedCert);
-        this.cert = cert;
-
-        this.attrs = {};
-        if (cert && cert.extensions && cert.extensions[FABRIC_CERT_ATTR_OID]) {
-            const attr_string = cert.extensions[FABRIC_CERT_ATTR_OID];
-            const attr_object = JSON.parse(attr_string);
-            const attrs = attr_object.attrs;
-            this.attrs = attrs;
-        }
+        this.idBytes = signingId.getIdBytes().toBuffer();
+        const normalizedCert = normalizeX509(this.idBytes.toString(), loggerPrefix);
 
         // assemble the unique ID based on certificate
-        const x = new jsrsasign.X509();
-        x.readCertPEM(normalizedCert);
-        this.id = `x509::${x.getSubjectString()}::${x.getIssuerString()}`;
+        const certificate = Certificate.fromPEM(normalizedCert);
+        function formatDN(dn) {
+            return dn.attributes.map((attribute) => {
+                const value = attribute.value.replace('/', '\\/');
+                return `/${attribute.shortName}=${value}`;
+            }).join('');
+        }
+        this.id = `x509::${formatDN(certificate.subject)}::${formatDN(certificate.issuer)}`;
+        const extension = certificate.extensions.find((ext) => ext.oid === FABRIC_CERT_ATTR_OID);
+        this.attrs = {};
+        if (extension) {
+            const str = extension.value.toString();
+            const obj = JSON.parse(str);
+            this.attrs = obj.attrs;
+        }
         logger.debug(`${loggerPrefix} Generated client identity`, this.mspId, this.attrs, this.id);
     }
 
@@ -286,11 +287,23 @@ class ClientIdentity {
     }
 
     /**
+	 * getIDBytes returns the ID bytes associated with the invoking identity. If the MSP is
+     * implemented with X.509 certificates, then these ID bytes will be those of the X.509
+     * certificate. If you wish to inspect the contents of the X.509 certificate, then you
+     * must use an X.509 parsing library (for example, jsrsasign or @fidm/x509) to decode
+     * these ID bytes.
+	 * @returns {Uint8Array}
+	 */
+    getIDBytes() {
+        return this.idBytes;
+    }
+
+    /**
 	 * getAttributeValue returns the value of the client's attribute named `attrName`.
 	 * If the invoking identity possesses the attribute, returns the value of the attribute.
 	 * If the invoking identity does not possess the attribute, returns null.
 	 * @param {string} attrName Name of the attribute to retrieve the value from the
-	 *     identity's credentials (such as x.509 certificate for PKI-based MSPs).
+	 *     identity's credentials (such as X.509 certificate for PKI-based MSPs).
 	 * @returns {string | null} Value of the attribute or null if the invoking identity
 	 *     does not possess the attribute.
 	 */
@@ -307,7 +320,7 @@ class ClientIdentity {
 	 * assertAttributeValue verifies that the invoking identity has the attribute named `attrName`
 	 * with a value of `attrValue`.
 	 * @param {string} attrName Name of the attribute to retrieve the value from the
-	 *     identity's credentials (such as x.509 certificate for PKI-based MSPs)
+	 *     identity's credentials (such as X.509 certificate for PKI-based MSPs)
 	 * @param {string} attrValue Expected value of the attribute
 	 * @returns {boolean} True if the invoking identity possesses the attribute and the attribute
 	 *     value matches the expected value. Otherwise, returns false.
@@ -321,52 +334,6 @@ class ClientIdentity {
         } else {
             return false;
         }
-    }
-
-    /**
-	 * An object representing an x.509 certificate with the following structure:
-	 * <br><pre>
-	 * { subject: {
-     *     countryName: 'US',
-     *     postalCode: '10010',
-     *     stateOrProvinceName: 'NY',
-     *     localityName: 'New York',
-     *     streetAddress: '902 Broadway, 4th Floor',
-     *     organizationName: 'Nodejitsu',
-     *     organizationalUnitName: 'PremiumSSL Wildcard',
-     *     commonName: '*.nodejitsu.com'
-     *   },
-     *   issuer: {
-     *     countryName: 'GB',
-     *     stateOrProvinceName: 'Greater Manchester',
-     *     localityName: 'Salford',
-     *     organizationName: 'COMODO CA Limited',
-     *     commonName: 'COMODO High-Assurance Secure Server CA'
-     *   },
-     *   notBefore: Sun Oct 28 2012 20:00:00 GMT-0400 (EDT),
-     *   notAfter: Wed Nov 26 2014 18:59:59 GMT-0500 (EST),
-     *   altNames: [ '*.nodejitsu.com', 'nodejitsu.com' ],
-     *   signatureAlgorithm: 'sha1WithRSAEncryption',
-     *   fingerPrint: 'E4:7E:24:8E:86:D2:BE:55:C0:4D:41:A1:C2:0E:06:96:56:B9:8E:EC',
-     *   publicKey: {
-     *     algorithm: 'rsaEncryption',
-     *     e: '65537',
-     *     n: '.......'
-     *   }
-     * }
-	 * @typedef {object} X509Certificate
-	 * @class
-	 * @memberof fabric-shim
-	 */
-
-    /**
-	 * getX509Certificate returns the X509 certificate associated with the invoking identity,
-	 * or null if it was not identified by an X509 certificate, for instance if the MSP is
-	 * implemented with an alternative to PKI such as [Identity Mixer]{@link https://jira.hyperledger.org/browse/FAB-5673}.
-	 * @returns {X509Certificate | null}
-	 */
-    getX509Certificate() {
-        return this.cert;
     }
 }
 
@@ -403,7 +370,7 @@ function isTLS() {
 /*
  * Make sure there's a start line with '-----BEGIN CERTIFICATE-----'
  * and end line with '-----END CERTIFICATE-----', so as to be compliant
- * with x509 parsers
+ * with X.509 parsers
  */
 function normalizeX509(raw, loggerPrefix) {
     logger.debug(`${loggerPrefix} [normalizeX509] raw cert: ${raw}`);

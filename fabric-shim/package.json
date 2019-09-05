@@ -32,23 +32,21 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@types/google-protobuf": "^3.2.7",
+    "@fidm/x509": "^1.2.1",
     "@types/node": "^8.9.4",
-    "@types/winston": "^2.3.9",
     "ajv": "^6.5.5",
     "fabric-contract-api": "unstable",
     "fs-extra": "^7.0.1",
     "grpc": "1.19.0",
-    "jsrsasign": "^8.0.4",
     "reflect-metadata": "^0.1.12",
     "winston": "^2.4.1",
-    "@ampretia/x509": "^0.4.0",
     "yargs": "^10.0.2",
     "yargs-parser": "^11.0.0",
     "protobufjs": "5.0.3"
   },
   "devDependencies": {
     "mocha": "5.2.0",
-    "nyc": "13.1.0"
+    "nyc": "^14.1.1"
   },
   "nyc": {
     "include": [
