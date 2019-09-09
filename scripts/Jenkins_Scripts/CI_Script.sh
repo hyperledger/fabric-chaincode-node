@@ -175,8 +175,10 @@ e2e_Tests() {
     echo -e "\033[32m ------> Run Integration and Scenario Tests" "\033[0m"
     echo "#################################################################"
 
-    gulp docker-image-build
+    gulp docker-image-build || err_and_exit "ERROR!!! docker-image-build failed"
     docker images | grep hyperledger && docker ps -a
+
+    gulp verdaccio-start || err_and_exit "ERROR!!! verdaccio-start failed"
 
     DEVMODE=false gulp channel-init || err_and_exit "ERROR!!! channel-init failed"
     gulp test-e2e || err_and_exit "ERROR!!! test-e2e failed"

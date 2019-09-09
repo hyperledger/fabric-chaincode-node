@@ -15,6 +15,7 @@ const path = require('path');
 const getTLSArgs = require('./utils').getTLSArgs;
 
 const Ajv = require('ajv');
+const ip = require('ip');
 
 const execFile = util.promisify(require('child_process').execFile);
 const CHANNEL_NAME = 'mychannel';
@@ -105,9 +106,10 @@ gulp.task('st-install_chaincode', () => {
         // the test folder containing scenario is mapped to /opt/gopath/src/github.com/chaincode
         '/opt/gopath/src/github.com/chaincode/scenario'
     );
-
+    const npmrc = path.join(__dirname, '..', '..', 'test', 'scenario', '.npmrc');
     return gulp.src('*.js', {read: false})
         .pipe(shell([
+            `echo "registry=http://${ip.address()}:4873" > ${npmrc}`,
             util.format(
                 'docker exec %s %s',
                 'org1_cli',
@@ -118,6 +120,7 @@ gulp.task('st-install_chaincode', () => {
                 'org2_cli',
                 peerInstall
             ),
+            `rm -f ${npmrc}`
         ]));
 });
 

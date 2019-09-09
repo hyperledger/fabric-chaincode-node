@@ -11,49 +11,23 @@ const exec = util.promisify(childProcess.exec);
 const fs = require('fs');
 const path = require('path');
 const getTLSArgs = require('../../build/test/utils').getTLSArgs;
+const ip = require('ip');
 
 // Increase the timeouts on zLinux!
 const arch = require('os').arch();
 const multiplier = arch === 's390x' ? 2 : 1;
 
-function getPackageVersion() {
-    const packageJsonPath = path.join(__dirname, './../../package.json');
-    const packageJson = fs.readFileSync(packageJsonPath);
-    const version = JSON.parse(packageJson.toString()).version;
-    return version;
-}
-
-async function packPackage(packageName, ccName) {
-    const version = getPackageVersion();
-    const p = path.join(__dirname, `../../${packageName}`);
-    const packCmd = `cd ${p} && npm pack && mv ./${packageName}-${version}.tgz ../test/fv/${ccName}/`;
-    await exec(packCmd);
-}
-
-async function packPackages(ccName) {
-    await packPackage('fabric-contract-api', ccName);
-    await packPackage('fabric-shim', ccName);
-    await packPackage('fabric-shim-crypto', ccName);
-}
-
-async function deletePackage(packageName, ccName) {
-    const version = getPackageVersion();
-    const cmd = `rm ${__dirname}/${ccName}/${packageName}-${version}.tgz`;
-    await exec(cmd);
-}
-
-async function deletePackages(ccName) {
-    await deletePackage('fabric-contract-api', ccName);
-    await deletePackage('fabric-shim', ccName);
-    await deletePackage('fabric-shim-crypto', ccName);
-}
-
 async function install(ccName) {
-    // const folderName = '/opt/gopath/src/github.com/fv/' + ccName;
-    const folderName = '/opt/gopath/src/github.com/chaincode/fv/' + ccName;
-    const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName}`;
-    await exec(util.format(cmd, 'org1_cli'));
-    await exec(util.format(cmd, 'org2_cli'));
+    const npmrc = path.join(__dirname, ccName, '.npmrc');
+    try {
+        fs.writeFileSync(npmrc, `registry=http://${ip.address()}:4873`);
+        const folderName = '/opt/gopath/src/github.com/chaincode/fv/' + ccName;
+        const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName}`;
+        await exec(util.format(cmd, 'org1_cli'));
+        await exec(util.format(cmd, 'org2_cli'));
+    } finally {
+        fs.unlinkSync(npmrc);
+    }
 }
 
 async function instantiate(ccName, func, args) {
@@ -122,4 +96,4 @@ const TIMEOUTS = {
     MED_INC : 10 * 1000 * multiplier,
     SHORT_INC: 5 * 1000 * multiplier
 };
-module.exports = {installAndInstantiate, invoke, query, packPackages, deletePackages, TIMEOUTS};
+module.exports = {installAndInstantiate, invoke, query, TIMEOUTS};

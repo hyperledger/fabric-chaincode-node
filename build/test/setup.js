@@ -1,9 +1,14 @@
+/*
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+*/
+
 const gulp = require('gulp');
 const shell = require('gulp-shell');
 const fs = require('fs-extra');
 const path = require('path');
 const util = require('util');
-const merge = require('merge-stream');
 const delay = require('delay');
 const log = require('fancy-log');
 const getTLSArgs = require('./utils').getTLSArgs;
@@ -14,7 +19,6 @@ const dockerCfgPath = '/etc/hyperledger/config';
 const dockerCfgTxPath = '/etc/hyperledger/configtx';
 const channelName = 'mychannel';
 const tls = require('./utils').tls;
-const version = require(path.join(__dirname, '../../package.json')).version;
 
 const arch = process.arch;
 const release = require(path.join(__dirname, '../../package.json')).testFabricVersion;
@@ -145,55 +149,7 @@ gulp.task('generate-config', gulp.series('cli-ready', () => {
         }));
 }));
 
-gulp.task('local-publish', gulp.series('generate-config', () => {
-    return gulp.src('*.js', {read: false})
-        .pipe(shell([
-            util.format('npm pack %s', path.join(__dirname, '../../fabric-contract-api')),
-            util.format('npm pack %s', path.join(__dirname, '../../fabric-shim')),
-            util.format('npm pack %s', path.join(__dirname, '../../fabric-shim-crypto'))
-        ]));
-}));
-
-gulp.task('copy-published-to-chaincode', gulp.series('local-publish', () => {
-
-    const streams = [];
-
-    // Copy to fv tests
-    const fvPath = path.join(__dirname, '../../test/fv');
-
-    let dirContents = fs.readdirSync(fvPath);
-    dirContents = dirContents.filter(c => c.match(/.*.js/) && c !== 'utils.js');
-
-    const chaincodeNames = dirContents.map(n => n.replace('.js', ''));
-    for (const c in chaincodeNames) {
-        const name = chaincodeNames[c];
-        const directory =  `test/fv/${name}`;
-
-        fs.ensureDirSync(path.join(fvPath, name));
-
-        const stream = gulp.src([
-            path.join(process.cwd(), `fabric-contract-api-${version}.tgz`),
-            path.join(process.cwd(), `fabric-shim-${version}.tgz`),
-            path.join(process.cwd(), `fabric-shim-crypto-${version}.tgz`),
-        ])
-            .pipe(gulp.dest(directory));
-        streams.push(stream);
-    }
-
-    // copy to scenario test
-    const stream = gulp.src([
-        path.join(process.cwd(), `fabric-contract-api-${version}.tgz`),
-        path.join(process.cwd(), `fabric-shim-${version}.tgz`),
-        path.join(process.cwd(), `fabric-shim-crypto-${version}.tgz`),
-    ])
-        .pipe(gulp.dest(path.join(__dirname, '../../test/scenario')));
-
-    streams.push(stream);
-
-    return merge(...streams);
-}));
-
-gulp.task('docker-setup', gulp.series('copy-published-to-chaincode', () => {
+gulp.task('docker-setup', gulp.series('generate-config', () => {
     const composeFile = tls ? 'docker-compose-tls.yaml' : 'docker-compose.yaml';
 
     console.log(`################\nUsing docker compose file: ${composeFile}\n################`); // eslint-disable-line no-console
