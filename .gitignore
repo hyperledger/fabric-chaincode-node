@@ -1,9 +1,6 @@
 coverage
-docs/gen
-node_modules/*
-fabric-contract-api/node_modules/*
-fabric-shim/node_modules/*
-fabric-shim-crypto/node_modules/*
+node_modules
+**/node_modules/*
 npm-shrinkwrap.json
 npm-debug.log
 .DS_Store
@@ -17,12 +14,21 @@ yarn.lock
 .nyc_output
 **/typescript/*.js
 **/typescript/*.js.map
-fabric*.tgz
-test/fv/annotations/dist
-test/fv/*/node_modules
-test/scenario/node_modules
 
-build/test/network/crypto-material/*.block
-build/test/network/crypto-material/*.tx
-build/test/network/crypto-material/crypto-config
-build/test/network/crypto-material/core.yaml
+fabric*.tgz
+
+# Crypto material
+tools/toolchain/network/crypto-material/*.block
+tools/toolchain/network/crypto-material/*.tx
+tools/toolchain/network/crypto-material/crypto-config
+tools/toolchain/network/crypto-material/core.yaml
+
+docs/**/_out
+
+# Rush files
+common/temp/**
+.rush/temp/**
+**/*.build.error.log
+**/*.build.log
+
+package-deps.json

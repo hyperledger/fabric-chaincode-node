@@ -1,0 +1,71 @@
+{
+  "name": "fabric-contract-api",
+  "version": "2.0.0-snapshot",
+  "tag": "unstable",
+  "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperledger/fabric-chaincode-node"
+  },
+  "scripts": {
+    "buildt": "tsc --project test/typescript",
+    "test": "nyc mocha --recursive 'test/unit/**/*.js'",
+    "build": "npm run lint && npm run test:unit && npm run test:schema",
+    "lint": "eslint ./lib/",
+    "test:unit": "npm run test",
+    "test:schema": "ajv compile -s ./schema/contract-schema.json && ajv validate -s ./schema/contract-schema.json -d ./schema/example-full.json"
+  },
+  "keywords": [
+    "fabric-shim",
+    "Hyperledger Fabric",
+    "Fabric Shim"
+  ],
+  "engines": {
+    "node": "10.15.2",
+    "npm": "^6.4.1"
+  },
+  "license": "Apache-2.0",
+  "types": "./types/index.d.ts",
+  "nyc": {
+    "exclude": [
+      "coverage/**",
+      "test/**",
+      "gulpfile.js"
+    ],
+    "reporter": [
+      "text-summary",
+      "html",
+      "cobertura"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100
+  },
+  "dependencies": {
+    "fabric-shim-api": "2.0.0-snapshot",
+    "fast-safe-stringify": "~2.0.7",
+    "get-params": "^0.1.2",
+    "reflect-metadata": "^0.1.12",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "ajv": "^6.5.5",
+    "ajv-cli": "^3.0.0",
+    "chai": "^4.1.1",
+    "chai-as-promised": "^7.1.1",
+    "chai-things": "^0.2.0",
+    "eslint": "4.0.0",
+    "gulp": "^4.0.0",
+    "gulp-debug": "~4.0.0",
+    "gulp-eslint": "~6.0.0",
+    "mocha": "5.2.0",
+    "nyc": "14.1.1",
+    "rewire": "~4.0.1",
+    "sinon": "~7.4.2",
+    "typescript": "3.0.1"
+  }
+}

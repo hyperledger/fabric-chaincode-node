@@ -44,7 +44,7 @@ describe('Typescript chaincode', () => {
             this.timeout(SHORT_STEP);
             const payload = JSON.parse(await utils.query(suite, 'org.hyperledger.fabric:GetMetadata'));
 
-            const schema = fs.readFileSync(path.join(__dirname, '../../fabric-contract-api/schema/contract-schema.json'));
+            const schema = fs.readFileSync(path.join(__dirname, '../../apis/fabric-contract-api/schema/contract-schema.json'));
 
             const ajv = new Ajv({schemaId: 'id'});
             ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
@@ -53,8 +53,8 @@ describe('Typescript chaincode', () => {
                 throw new Error('Expected generated metadata to match the schema');
             }
 
-            const expectedMetadata = fs.readFileSync(path.join(__dirname, './annotations/src/test_contract/expected-metadata.json'));
-            expect(payload).to.deep.equal(JSON.parse(expectedMetadata));
+            const expectedMetadata = fs.readFileSync(path.join(__dirname, '../chaincodes/annotations/src/test_contract/expected-metadata.json'));
+            expect(payload).to.eql(JSON.parse(expectedMetadata));
         });
 
     });

@@ -1,0 +1,19 @@
+{
+    "name": "apidocs",
+    "version": "1.0.0",
+    "description": "",
+    "main": "docs.js",
+    "scripts": {
+        "build": "gulp -f docs.js docs",
+        "publish": "./Publish_API_Docs.sh"
+    },
+    "dependencies": {
+        "gulp": "^4.0.0",
+        "gulp-jsdoc3": "^2.0.0",
+        "gulp-replace": "^0.6.1",
+        "fs-extra": "^7.0.1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

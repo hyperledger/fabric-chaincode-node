@@ -1,0 +1,23 @@
+{
+  "name": "fabric-e2e-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "docker.js",
+  "scripts": {
+    "build": "",
+    "test:e2e": "gulp -f ./scenario.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "git-rev-sync": "~1.12.0",
+    "gulp": "^4.0.0",
+    "toolchain": "1.0.0",
+    "delay": "~4.3.0",
+    "fs-extra": "~8.1.0",
+    "ip": "^1.1.5",
+    "ajv": "^6.5.5",
+    "ajv-cli": "^3.0.0"
+  }
+}

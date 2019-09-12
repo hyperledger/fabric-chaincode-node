@@ -61,25 +61,25 @@ versions() {
   echo -e "\033[32m ======> Current RELEASE_VERSION:" "\033[0m"
 }
 
-cd $WORKSPACE/gopath/src/github.com/hyperledger/fabric-chaincode-node
+ROOT=$WORKSPACE/gopath/src/github.com/hyperledger/fabric-chaincode-node
 npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
 
-cd ../fabric-shim-api
+cd ${ROOT}/apis/fabric-shim-api
 versions
 echo -e "\033[32m ======> fabric-shim-api" "\033[0m"
 npmPublish fabric-shim-api
 
-cd fabric-shim
+cd ${ROOT}/libraries/fabric-shim
 versions
 echo -e "\033[32m ======> fabric-shim" "\033[0m"
 npmPublish fabric-shim
 
-cd ../fabric-shim-crypto
+cd ${ROOT}/libraries/fabric-shim-crypto
 versions
 echo -e "\033[32m ======> fabric-shim-crypto" "\033[0m"
 npmPublish fabric-shim-crypto
 
-cd ../fabric-contract-api
+cd ${ROOT}/api/fabric-contract-api
 versions
 echo -e "\033[32m ======> fabric-contract-api" "\033[0m"
 npmPublish fabric-contract-api

@@ -1,0 +1,73 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
+
+    "commands": [
+        {
+            "commandKind": "bulk",
+            "name": "test:unit",
+            "summary": "Run unit tests",
+            "description": "Runs the unit tests on all projects (including code coverage).",
+            "enableParallelism": true,
+            "ignoreMissingScript": true
+        },
+        {
+            "commandKind": "bulk",
+            "name": "test:fv",
+            "summary": "Run fv tests.",
+            "description": "Runs FV tests on all projects.",
+            "enableParallelism": true,
+            "ignoreMissingScript": true
+        },
+        {
+            "commandKind": "bulk",
+            "name": "test:e2e",
+            "summary": "end to end testing",
+            "description": "Runs the Scenario e2e tests.",
+            "enableParallelism": true,
+            "ignoreMissingScript": true
+        },        
+        {
+            "commandKind": "global",
+            "name": "update-protos",
+            "summary": "updates the protos from fabric",
+            "description": "Run this command to copy in proto definitions and build the matching code",
+            "shellCommand": "npm run --prefix ./libraries/fabric-shim update"
+        },
+        {
+            "commandKind": "bulk",
+            "name": "lint",
+            "summary": "lints the codebase",
+            "description": "Run this command to run eslint on the whole codebase",
+            "enableParallelism": true,
+            "ignoreMissingScript": true
+        },
+        {
+            "commandKind": "global",
+            "name": "start-verdaccio",
+            "summary": "Starts local npm regisry",
+            "description": "Run this command to start local npm registry (verdaccio) and publish modules",
+            "shellCommand": "gulp -f ./tools/toolchain/verdaccio/index.js start"
+        },
+        {
+            "commandKind": "global",
+            "name": "stop-verdaccio",
+            "summary": "Stops local npm regisry",
+            "description": "Run this command to stop local npm registry (verdaccio)",
+            "shellCommand": "gulp -f ./tools/toolchain/verdaccio/index.js stop"
+        },
+        {
+            "commandKind": "global",
+            "name": "start-fabric",
+            "summary": "Starts local Fabric test network ",
+            "description": "Run this command to start local Fabric network for testing",
+            "shellCommand": "gulp -f ./tools/toolchain/fabric.js"
+        },
+        {
+            "commandKind": "global",
+            "name": "stop-fabric",
+            "summary": "Starts local Fabric test network ",
+            "description": "Run this command to stop local Fabric network created for testing",
+            "shellCommand": "gulp -f ./tools/toolchain/fabric.js stopFabric"
+        }
+    ]
+}

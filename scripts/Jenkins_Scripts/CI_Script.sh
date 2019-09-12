@@ -42,6 +42,9 @@ Parse_Arguments() {
             --e2e_Tests)
                 e2e_Tests
                 ;;
+            --fullBuild)
+                fullBuild
+                ;;    
             --publish_NpmModules)
                 publish_NpmModules
                 ;;
@@ -150,9 +153,7 @@ install_Npm() {
     if [[ $ARCH == "amd64" ]]; then
         echo -e "\033[32m npm version ------> $(npm -v)" "\033[0m"
         echo -e "\033[32m node version ------> $(node -v)" "\033[0m"
-
-        npm install || err_and_exit "ERROR!!! npm install failed"
-        npm install -g gulp
+        npm install -g gulp        
     fi
 }
 
@@ -232,6 +233,26 @@ publish_NpmModules() {
 publish_ApiDocs() {
     echo
     echo -e "\033[32m -----------> Publish NODE_SDK API docs after successful merge on amd64" "\033[0m"
-    ./Publish_API_Docs.sh
+    ${WORKSPACE}/gopath/src/github.com/hyperledger/fabric-chaincode-node/docs/apidocs/Publish_API_Docs.sh
 }
+
+fullBuild() {
+
+    echo -e "\033[32m Execute Chaincode Node Full Build" "\033[0m"
+    cd ${WORKSPACE}/gopath/src/github.com/hyperledger/fabric-chaincode-node
+
+    # Install NPM before start the tests
+    install_Npm
+
+    node common/scripts/install-run-rush.js install
+    node common/scripts/install-run-rush.js update
+    node common/scripts/install-run-rush.js rebuild
+
+    # equivalent to the test-e2e
+    node common/scripts/install-run-rush.js start-fabric
+    node common/scripts/install-run-rush.js start-verdaccio
+    node common/scripts/install-run-rush.js test:fv
+
+}
+
 Parse_Arguments $@

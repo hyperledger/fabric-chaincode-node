@@ -1,0 +1,45 @@
+{
+  "name": "fvtests",
+  "version": "2.0.0-snapshot",
+  "description": "fv tests",
+  "testFabricVersion": "master",
+  "testFabricThirdParty": "0.4.15",
+  "docsLatestVersion": "release-1.4",
+  "engines": {
+    "node": "10.15.2",
+    "npm": "^6.4.1"
+  },
+  "engineStrict": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "hello": "echo test fv project",
+    "test:fv": "mocha *.js",
+    "build": ""
+  },
+  "dependencies": {
+    "@sinonjs/referee-sinon": "~5.0.0",
+    "ajv": "^6.5.5",
+    "ajv-cli": "^3.0.0",
+    "chai": "^4.1.1",
+    "chai-as-promised": "^7.1.1",
+    "chai-things": "^0.2.0",
+    "del": "^3.0.0",
+    "delay": "^3.1.0",
+    "eslint": "4.0.0",
+    "fabric-contract-api": "2.0.0-snapshot",
+    "fabric-shim": "2.0.0-snapshot",
+    "fabric-shim-api": "2.0.0-snapshot",
+    "fabric-shim-crypto": "2.0.0-snapshot",
+    "fs-extra": "^7.0.1",
+    "git-rev-sync": "^1.12.0",
+    "gulp": "^4.0.0",
+    "ip": "^1.1.5",
+    "istanbul-api": "^1.1.13",
+    "jsverify": "~0.8.4",
+    "mocha": "5.2.0",
+    "mockery": "^2.1.0",
+    "rewire": "^4.0.1",
+    "sinon": "^6.1.5",
+    "sinon-test": "^2.2.0"
+  }
+}
