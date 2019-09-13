@@ -1,28 +1,28 @@
 {
-    "name": "ts_chaincode",
-    "description": "Chaincode testing typescript functionality and annotations",
-    "engines": {
-      "node": ">=8.4.0",
-      "npm": ">=5.3.0"
-    },
-    "scripts": {
-      "build": "tsc",
-      "start": "fabric-chaincode-node start",
-      "prestart": "tsc"
-    },
-    "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
-    "engine-strict": true,
-    "engineStrict": true,
-    "version": "1.0.0",
-    "author": "",
-    "license": "APACHE-2.0",
-    "dependencies": {
-      "fabric-shim": "unstable",
-      "fabric-contract-api": "unstable",
-      "@types/node": "^10.3.6",
-      "ts-node": "^3.3.0",
-      "tslint": "^5.6.0",
-      "typescript": "^2.5.3"
-    }
+  "name": "ts_chaincode",
+  "description": "Chaincode testing typescript functionality and annotations",
+  "engines": {
+    "node": ">=8.4.0",
+    "npm": ">=5.3.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "fabric-chaincode-node start",
+    "prestart": "tsc"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "engine-strict": true,
+  "engineStrict": true,
+  "version": "1.0.0",
+  "author": "",
+  "license": "APACHE-2.0",
+  "dependencies": {
+    "fabric-shim": "unstable",
+    "fabric-contract-api": "unstable",
+    "@types/node": "^10.3.6",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.6.0",
+    "typescript": "^2.5.3"
   }
+}
