@@ -118,7 +118,25 @@ describe('Transaction.js', () => {
                 ]
             }], mockTarget);
         });
+        it ('should error if missing type', () => {
 
+            sandbox.stub(Reflect, 'getMetadata').onFirstCall().returns([{
+                name: 'someTransaction',
+                tag: ['submitTx']
+            }]).onSecondCall().returns([
+                MockContext,
+                'Object'
+            ]);
+
+            TransactionAnnotations.__set__('getParams', () => {
+                return ['ctx', 'param1'];
+            });
+
+            (() => {
+                transaction(mockTarget, 'mockKey');
+            }).should.throw(/Type not properly specified for parameter .*?, can not process pure Object types/);
+
+        });
         it ('should handle existing transactions of which matches name and already has param metadata', () => {
             const transactions = [{
                 name: 'mockKey',

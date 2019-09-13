@@ -33,6 +33,12 @@ declare module 'fabric-contract-api' {
 
     }
 
+
+    export class JSONSerializer {
+        toBuffer(result: any,schema:any,loggerPrefix?:string): Buffer;
+        fromBuffer(data: Buffer,schema:any,loggerPrefix?:string): any;
+    }
+
     export function Transaction(commit?: boolean): (target: any, propertyKey: string | symbol) => void;
     export function Param(paramName: string, paramType: string, description?: string): (target: any, propertyKey: string | symbol) => void;
     export function Returns(returnType?: string): (target: any, propertyKey: string | symbol) => void;
