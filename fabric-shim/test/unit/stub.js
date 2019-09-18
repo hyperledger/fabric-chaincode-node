@@ -939,7 +939,7 @@ describe('Stub', () => {
 
             it ('should set an event', () => {
                 stub.setEvent('some name', Buffer.from('some payload'));
-                expect(stub.chaincodeEvent.eventName).to.equal('some name');
+                expect(stub.chaincodeEvent.event_name).to.equal('some name');
                 expect(stub.chaincodeEvent.payload).to.deep.equal(Buffer.from('some payload'));
             });
         });

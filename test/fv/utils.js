@@ -87,6 +87,15 @@ async function installAndInstantiate(ccName, instantiateFunc, instantiateArgs) {
     return instantiate(ccName, instantiateFunc, instantiateArgs);
 }
 
+async function getLastBlock() {
+    const cmd = 'docker exec org1_cli bash -c "peer channel fetch newest -c mychannel /tmp/mychannel.block && configtxlator proto_decode --type common.Block --input=/tmp/mychannel.block"';
+    const {error, stdout, stderr} = await exec(cmd);
+    if (error) {
+        throw new Error(error, stderr);
+    }
+    return JSON.parse(stdout.trim());
+}
+
 const TIMEOUTS = {
     LONGEST_STEP : 24000 * 1000 * multiplier,
     LONG_STEP : 240 * 1000 * multiplier,
@@ -96,4 +105,4 @@ const TIMEOUTS = {
     MED_INC : 10 * 1000 * multiplier,
     SHORT_INC: 5 * 1000 * multiplier
 };
-module.exports = {installAndInstantiate, invoke, query, TIMEOUTS};
+module.exports = {installAndInstantiate, invoke, query, getLastBlock, TIMEOUTS};

@@ -734,8 +734,11 @@ class ChaincodeStub {
             throw new Error('Event name must be a non-empty string');
         }
 
+        // Because this is passed directly into gRPC as an object, rather
+        // than a serialized protocol buffer message, it uses snake_case
+        // rather than camelCase like the rest of the code base.
         this.chaincodeEvent = {
-            eventName: name,
+            event_name: name,
             payload
         };
     }
