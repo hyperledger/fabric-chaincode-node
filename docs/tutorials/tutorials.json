@@ -16,6 +16,9 @@
 	},
 	"data-types-and-contracts":{
 		"title":"Details of type handling"
-	}
+	},
+	"using-iterators": {
+        "title": "Working with apis that return iterators"
+    }
 
 }
