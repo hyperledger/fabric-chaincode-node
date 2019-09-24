@@ -101,7 +101,7 @@ module.exports = class DataMarshall {
         for (let i = 0; i < fn.parameters.length; i++) {
             const supplied = parameters[i];
             const expected = expectedParams[i];
-            logger.debug(`${loggerPrefix} Expected parameter ${expected}`);
+            logger.debug(`${loggerPrefix} Expected parameter ${JSON.stringify(expected)}`);
             logger.debug(`${loggerPrefix} Supplied parameter ${supplied}`);
             // check the type
             const schema = {
@@ -120,7 +120,9 @@ module.exports = class DataMarshall {
             const validator = this.ajv.compile(schema);
 
             const {value, validateData} = this.fromWireBuffer(supplied, expected.schema, loggerPrefix);
-            const valid = validator(validateData);
+            logger.debug(`${JSON.stringify(validateData)}`);
+            logger.debug(`${JSON.stringify(schema)}`);
+            const valid = validator({prop:validateData});
 
             if (!valid) {
                 const errors = JSON.stringify(validator.errors.map((err) => {

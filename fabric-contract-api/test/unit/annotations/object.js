@@ -19,8 +19,6 @@ const ObjectAnnotations = rewire('./../../../lib/annotations/object');
 const Object = ObjectAnnotations.Object;
 const Property = ObjectAnnotations.Property;
 
-const utils = require('../../../lib/annotations/utils');
-
 describe ('Object.js', () => {
 
     const mockTarget = {
@@ -93,11 +91,6 @@ describe ('Object.js', () => {
     });
 
     describe('#Property', () => {
-        let generateSchemaStub;
-
-        beforeEach(() => {
-            generateSchemaStub = sandbox.stub(utils, 'generateSchema').returns('some new schema');
-        });
 
         it ('should use the type and name passed', () => {
             getMetadataStub.onFirstCall().returns({'some': 'properties'});
@@ -106,12 +99,12 @@ describe ('Object.js', () => {
 
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
-            sinon.assert.calledOnce(generateSchemaStub);
-            sinon.assert.calledWith(generateSchemaStub, 'SoMe tYPe');
             sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
                 'some': 'properties',
-                'some name': 'some new schema'
-            });
+                'some name': {
+                    '$ref': 'SoMe tYPe'
+                }
+            }, mockTarget);
         });
 
         it ('should handle the reflected type being a function when type not passed and is function', () => {
@@ -124,11 +117,12 @@ describe ('Object.js', () => {
             sinon.assert.calledTwice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
-            sinon.assert.calledOnce(generateSchemaStub);
-            sinon.assert.calledWith(generateSchemaStub, 'Fred');
+
             sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
-                'some key': 'some new schema'
-            });
+                'some key': {
+                    $ref: 'Fred'
+                }
+            }, mockTarget);
         });
 
         it ('should handle the reflected type being a function when type not passed and is not function', () => {
@@ -141,11 +135,13 @@ describe ('Object.js', () => {
             sinon.assert.calledTwice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
-            sinon.assert.calledOnce(generateSchemaStub);
-            sinon.assert.calledWith(generateSchemaStub, 'soMe TyPe');
+
             sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
-                'some key': 'some new schema'
-            });
+                'some key': {
+                    '$ref': 'soMe TyPe'
+                }
+            }, mockTarget
+            );
         });
     });
 });

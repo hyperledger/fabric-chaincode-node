@@ -7,7 +7,7 @@
 declare module 'fabric-shim' {
 
     import { EventEmitter } from 'events';
-    import { LoggerInstance } from 'winston';
+    import { Logger } from 'winston';
 
     interface Timestamp {
         seconds: number;
@@ -21,13 +21,13 @@ declare module 'fabric-shim' {
     }
 
     export function error(msg: Buffer): ChaincodeResponse;
-    export function newLogger(name: string): LoggerInstance;
+    export function newLogger(name: string): Logger;
     export function start(chaincode: ChaincodeInterface): any;
     export function success(payload?: Buffer): ChaincodeResponse;
 
     export class Shim {
         static error(msg: Buffer): ChaincodeResponse;
-        static newLogger(name: string): LoggerInstance;
+        static newLogger(name: string): Logger;
         static start(chaincode: ChaincodeInterface): any;
         static success(payload?: Buffer): ChaincodeResponse;
     }

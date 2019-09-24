@@ -44,7 +44,7 @@
     "fs-extra": "^7.0.1",
     "grpc": "^1.23.3",
     "reflect-metadata": "^0.1.12",
-    "winston": "^2.4.1",
+    "winston": "^3.2.1",
     "yargs": "^10.0.2",
     "yargs-parser": "^11.0.0"
   },

@@ -24,16 +24,16 @@ import { Shim,
     Timestamp
  } from 'fabric-shim';
 
-import { LoggerInstance } from 'winston';
+import { Logger } from 'winston';
 
 class TestTS implements ChaincodeInterface {
     async Init(stub: ChaincodeStub): Promise<ChaincodeResponse> {
-        const logger: LoggerInstance = shim.newLogger('init');
+        const logger: Logger = shim.newLogger('init');
         return shim.success();
     }
 
     async Invoke(stub: ChaincodeStub): Promise<ChaincodeResponse> {
-        const logger: LoggerInstance = Shim.newLogger('invoke');
+        const logger: Logger = Shim.newLogger('invoke');
         const args: string[] = stub.getArgs();
         const strArgs: string[] = stub.getStringArgs();
         const {fcn, params} =  stub.getFunctionAndParameters();

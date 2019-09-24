@@ -83,6 +83,27 @@ class ChaincodeFromContract {
      */
     _compileSchemas() {
 
+        const schemaList = [];
+        for (const name in  this.metadata.components.schemas) {
+            const s =  this.metadata.components.schemas[name];
+
+            schemaList.push(s);
+        }
+
+        if (schemaList.length > 0) {
+            // provide the list of schemas (of the complex types) to AJV, identified by name
+
+            const ajv = this._ajv(schemaList);
+            // create validators for each complex type
+            // have lowercases the ids
+            this.contractImplementations.schemas = {};
+            schemaList.forEach((e) => {
+                const id = e.$id;
+                this.contractImplementations.schemas[id] = {};
+                this.contractImplementations.schemas[id].validator = ajv.getSchema(id);
+            });
+
+        }
         // final step is to setup up data marhsall instances
         const requestedSerializer = this.serializers.transaction;
         for (const contractName in this.contractImplementations) {
