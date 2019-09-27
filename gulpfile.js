@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-
 const {lint} = require('./build/eslint');
 const {protos} = require('./build/protos');
 const {unittest} = require('./build/test/unit');
@@ -27,10 +26,11 @@ exports.startFabric = startFabric;
 exports.fvtest = testfvshim;
 exports.scenario = testScenario;
 exports.docs = docs;
-exports.default = series(lint, protos, test_schema, unittest);
+exports.protos = protos;
+exports.default = series(lint, test_schema, unittest);
 
 // backward compatable names for the Jenkins build
 task('channel-init', startFabric);
-task('test-headless', series(lint, protos, test_schema, unittest));
+task('test-headless', series(lint, test_schema, unittest));
 task('test-e2e', series(testfvshim, testScenario));
 // task('test-devmode', series(test-scenario-devmode));

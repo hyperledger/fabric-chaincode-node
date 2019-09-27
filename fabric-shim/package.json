@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node index.js",
     "compile": "tsc --project test/typescript",
-    "test": "nyc mocha --recursive 'test/unit/**/*.js'"
+    "test": "nyc mocha --recursive 'test/unit/**/*.js' ",
+    "tgzpack": "npm pack"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "mocha": "5.2.0",
+    "mocha-junit-reporter": "^1.23.1",
     "nyc": "13.1.0",
     "typescript": "3.0.1"
   },

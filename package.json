@@ -16,7 +16,8 @@
     "schema:test": "ajv compile -s ./fabric-contract-api/schema/contract-schema.json && ajv validate -s ./fabric-contract-api/schema/contract-schema.json -d ./fabric-contract-api/schema/example-full.json",
     "postinstall": "npm --prefix fabric-contract-api install && npm --prefix fabric-shim install && npm --prefix fabric-shim-crypto install",
     "clean:modules": "find . -maxdepth 2 -type d -name node_modules | xargs rm -rf",
-    "clean:locks": "find . -type f -name package-lock.json | xargs rm "
+    "clean:locks": "find . -type f -name package-lock.json | xargs rm ",
+    "tgzpack": "npm --prefix fabric-contract-api run tgzpack && npm --prefix fabric-shim run tgzpack && npm --prefix fabric-shim-crypto run tgzpack"
   },
   "dependencies": {
     "@types/node": "^8.9.4",
@@ -55,6 +56,7 @@
     "jsdoc": "^3.5.5",
     "merge-stream": "^1.0.1",
     "mocha": "3.4.2",
+    "mocha-junit-reporter": "^1.23.1",
     "mockery": "^2.1.0",
     "require-dir": "^0.3.2",
     "rewire": "^4.0.1",

@@ -29,6 +29,15 @@ function npm () {
         });
     });
 
+    ['ci'].forEach((m) => {
+        Object.defineProperty(_npm, m, {
+            get: function () {
+                this.args.push('-- --reporter mocha-junit-reporter');
+                return this;
+            }
+        });
+    });
+
     // single-arg fn
     ['prefix'].forEach((m) => {
         Object.defineProperty(_npm, m, {

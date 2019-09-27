@@ -9,7 +9,8 @@ const jsdoc = require('gulp-jsdoc3');
 const fs = require('fs-extra');
 const path = require('path');
 const replace = require('gulp-replace');
-let currentBranch = process.env.GERRIT_BRANCH;
+
+let currentBranch = process.env.GERRIT_BRANCH || process.env.BUILD_SOURCEBRANCHNAME;
 
 if (!currentBranch) {
     currentBranch = 'master';

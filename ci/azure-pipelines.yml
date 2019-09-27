@@ -1,0 +1,128 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+# 
+# fabric-chaincode-node azure pipeline configuration.
+# 
+
+trigger:
+  branches:
+    include:
+      - 'master'
+      - 'release-1.4'
+  tags:
+    include:
+      - '*'
+
+# These are custom defined variables, the pipeline one is currently used for the build scripts
+# to know to produce tests results in XML format for Azure to consume, for developers
+# this isn't set so command line output is given
+# 
+variables:
+  component: fabric-chaincode-node
+  pipeline: ci 
+
+# Build on Ubutu
+pool:
+  vmImage: 'ubuntu-latest'
+
+# 
+# The stages and jobs, potential for rationalization and optimization
+# Keeping it simple and explict whilst we gain experience
+stages:
+    - stage: Build_and_Test
+      jobs:
+        - job: main
+          displayName: 'Build, lint, UT'
+          steps:
+            - task: NodeTool@0
+              inputs:
+                versionSpec: '8.x' 
+            - script: |
+                npm install
+                npm install -g gulp-cli
+              displayName: 'Setup the node environment'
+            - script: gulp test-headless
+              displayName: 'Unit tests'  
+            - task: PublishTestResults@2
+              inputs:
+                testResultsFiles: '**/test-results.xml'
+                artifactName: 'Unit Test results'
+                testRunTitle: 'Unit Test results'
+            - task: PublishCodeCoverageResults@1
+              inputs:
+                codeCoverageTool: 'cobertura'
+                summaryFileLocation: '**/cobertura-coverage.xml'        
+                artifactName: 'Unit Test Coverage'
+        - job: fvt
+          displayName: 'FV Tests'
+          dependsOn: main
+          steps:         
+            - task: NodeTool@0
+              inputs:
+                versionSpec: '8.x' 
+            - script: |
+                npm install
+                npm install -g gulp-cli
+              displayName: 'Setup the node environment'                 
+            - script: |
+                DEVMODE=false gulp channel-init 
+                docker images | grep hyperledger && docker ps -a
+                gulp test-e2e 
+              displayName: 'FV Tests'  
+            - task: PublishTestResults@2
+              inputs:
+                testResultsFiles: '**/test-results.xml'
+                artifactName: 'FV Test results'
+                testRunTitle: 'FV Test results'  
+        - job: pack_tgz
+          dependsOn: 
+            - main 
+            - fvt
+          steps:
+            - script: |
+                npm run tgzpack
+            - task: CopyFiles@2
+              inputs:
+                contents: '**/fabric-*/*.tgz'
+                targetFolder: $(Build.ArtifactStagingDirectory)/tgz
+            - task: PublishBuildArtifacts@1
+              inputs:
+                pathToPublish: $(Build.ArtifactStagingDirectory)/tgz
+                artifactName: MyBuildOutputs
+                        
+        - job: apidocs
+          steps:
+            - task: NodeTool@0
+              inputs:
+                versionSpec: '8.x' 
+            - script: |
+                npm install
+                npm install -g gulp-cli
+              displayName: 'Setup the node environment'            
+            - script: |
+                gulp docs
+              displayName: 'Produce API docs'
+            - publish: $(System.DefaultWorkingDirectory)/docs/gen/
+              artifact: 'jsdocs'
+    - stage: Publish_tag
+      condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
+      jobs:
+        - job: update_version
+          steps:
+            - script: |
+                env | sort
+                echo "Update the version number"
+                echo "Make sure release notes are present"
+                echo "Make sure change history is present"
+        - job: npm_publish
+          steps:
+            - script: |
+                echo "Setup .npmrc"
+                echo "Use pipeline secret to login"
+                echo "publish"
+        - job: jsdoc_publish    
+          steps:
+            - script: |
+                echo "checkout docs branch"
+                echo "checking"

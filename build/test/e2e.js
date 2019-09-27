@@ -17,7 +17,11 @@ const {shell: runcmds} = require('./../shell/cmd');
 
 const testfvshim = async () => {
     const dir = path.join(__dirname, '../../test/fv');
-    await runcmds([`npx mocha --recursive ${dir}`]);
+    if (process.env.PIPELINE) {
+        await runcmds([`npx mocha --recursive ${dir}  -- --reporter mocha-junit-reporter`]);
+    } else {
+        await runcmds([`npx mocha --recursive ${dir}`]);
+    }
 };
 
 exports.testfvshim = testfvshim;
