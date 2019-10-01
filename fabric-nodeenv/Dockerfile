@@ -11,3 +11,4 @@ RUN apk add --no-cache \
 RUN mkdir -p /chaincode/input \
 	&& mkdir -p /chaincode/output \
 	&& mkdir -p /usr/local/src;
+ADD build.sh start.sh /chaincode/
