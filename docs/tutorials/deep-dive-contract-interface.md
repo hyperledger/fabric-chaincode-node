@@ -15,7 +15,7 @@ Each Smart Contract package is, from a node perspective, a NPM module.
 - index.js
     - It is mandatory to have a `contracts` element exported that is a array of classes. 
     - Each of these classes must extend the `Contract` class from the `fabric-contract-api` module
-    - Optionally, a custom `serializer` may be defined to control how data is converted for transmission between chaincode, peer and ultimately client applications.
+    - Optionally, a custom `serializer` may be defined to control how data is converted for transmission between chaincode, peer and ultimately client applications (in future this could also include serialization to the ledger state).
 
 *JavaScript example index.js*
 
@@ -117,7 +117,7 @@ A correctly specified metadata file, at the top level has this structure
 
 ```json
 {
-    "$schema" : "https://fabric-shim.github.io/release-1.4/contract-schema.json",
+    "$schema" : "https://fabric-shim.github.io/master/contract-schema.json",
     "info" : {
 
     },

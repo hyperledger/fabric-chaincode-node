@@ -1,11 +1,21 @@
 {
 	"using-chaincodeinterface":{
-		"title": "Using the Chaincode Interface"
+		"title":"Using the Chaincode Interface"
 	},
 	"using-contractinterface":{
-		"title": "Using the Contract Interface"
-    },
-    "using-iterators": {
-        "title": "Working with apis that return iterators"
-    }
+		"title":"Using the Contract Interface"
+	},
+	"using-iterators":{
+		"title":"Working with apis that return iterators"
+	},
+	"annotated-contract-metadata":{
+		"title":"Walkthrough of annotated metadata.json"
+	},
+	"deep-dive-contract-interface":{
+		"title":"Deep dive on Contract Interface"
+	},
+	"using-typescript-decorators":{
+		"title":"Using TypeScript Decorators"
+	}
+
 }
