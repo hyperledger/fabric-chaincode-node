@@ -25,6 +25,9 @@ module.exports.Transaction = function Transaction (commit = true) {
 
         const description = '';
         const contextType = target.createContext().constructor;
+
+        logger.debug(`Transaction ${target} -> ${propertyKey} params`, paramNames);
+
         const paramTypes = Reflect.getMetadata('design:paramtypes', target, propertyKey) || [];
 
         let numRemoved = 0;
