@@ -79,7 +79,7 @@ versions
 echo -e "\033[32m ======> fabric-shim-crypto" "\033[0m"
 npmPublish fabric-shim-crypto
 
-cd ${ROOT}/api/fabric-contract-api
+cd ${ROOT}/apis/fabric-contract-api
 versions
 echo -e "\033[32m ======> fabric-contract-api" "\033[0m"
 npmPublish fabric-contract-api
