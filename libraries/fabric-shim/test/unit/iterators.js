@@ -58,7 +58,8 @@ describe('Iterator', () => {
                 const result = await ci.close();
 
                 expect(result).to.deep.equal('some resolution');
-                expect(mockHandler.handleQueryStateClose.calledOnce).to.be.ok;
+
+                expect(mockHandler.handleQueryStateClose.calledOnce).to.be.true;
                 expect(mockHandler.handleQueryStateClose.firstCall.args).to.deep.equal([mockResponse.id, channel_id, txID]);
             });
         });
@@ -112,7 +113,7 @@ describe('Iterator', () => {
 
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.ok;
+                expect(getResultFromBytesStub.calledOnce).to.be.true;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(result).to.deep.equal({
                     value: 'some result',
@@ -126,7 +127,7 @@ describe('Iterator', () => {
 
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.ok;
+                expect(getResultFromBytesStub.calledOnce).to.be.true;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal({
@@ -141,7 +142,7 @@ describe('Iterator', () => {
 
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.ok;
+                expect(getResultFromBytesStub.calledOnce).to.be.true;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal({
@@ -156,7 +157,7 @@ describe('Iterator', () => {
 
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.ok;
+                expect(getResultFromBytesStub.calledOnce).to.be.true;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal({
@@ -173,7 +174,7 @@ describe('Iterator', () => {
 
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.ok;
+                expect(getResultFromBytesStub.calledOnce).to.be.true;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some more result bytes']);
                 expect(ci.currentLoc).to.deep.equal(2);
                 expect(result).to.deep.equal({
@@ -193,7 +194,7 @@ describe('Iterator', () => {
 
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.ok;
+                expect(getResultFromBytesStub.calledOnce).to.be.true;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal(expectedResult);
@@ -281,7 +282,7 @@ describe('Iterator', () => {
                 const result = ci.next();
 
                 await expect(result).to.eventually.be.rejected;
-                expect(createAndEmitResultStub.notCalled).to.be.ok;
+                expect(createAndEmitResultStub.notCalled).to.be.true;
             });
 
             it ('should return done if response does not has_more and listenerCount for end > 0', async () => {
@@ -310,7 +311,7 @@ describe('Iterator', () => {
         it ('should extend CommonIterator using QUERY for type', () => {
             const sqi = new StateQueryIterator(mockHandler, channel_id, txID, mockResponse);
 
-            expect(sqi instanceof Iterator.__get__('CommonIterator')).to.be.ok;
+            expect(sqi instanceof Iterator.__get__('CommonIterator')).to.be.true;
             expect(sqi.type).to.deep.equal('QUERY');
         });
     });
@@ -319,7 +320,7 @@ describe('Iterator', () => {
         it ('should extend CommonIterator using HISTORY for type', () => {
             const hqi = new HistoryQueryIterator(mockHandler, channel_id, txID, mockResponse);
 
-            expect(hqi instanceof Iterator.__get__('CommonIterator')).to.be.ok;
+            expect(hqi instanceof Iterator.__get__('CommonIterator')).to.be.true;
             expect(hqi.type).to.deep.equal('HISTORY');
         });
     });
