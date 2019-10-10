@@ -42,6 +42,9 @@ npmPublish() {
 
       # Replace existing version with $UNSTABLE_INCREMENT_VERSION
       sed -i 's/\(.*\"version\"\: \"\)\(.*\)/\1'$UNSTABLE_INCREMENT_VERSION\"\,'/' package.json
+
+      # Update the dependencies with that refer to any fabric-* module to be the matching number
+      sed -i 's/\(.*\"fabric-.*\"\)\(2.0.0-snapshot\)/\1'$UNSTABLE_INCREMENT_VERSION'/' package.json
       npm publish --tag $CURRENT_TAG
 
   else
