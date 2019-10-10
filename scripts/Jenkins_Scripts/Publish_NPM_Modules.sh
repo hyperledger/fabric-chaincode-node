@@ -15,21 +15,6 @@ npmPublish() {
       echo "----> Don't publish npm modules on skip tag"
   elif [[ "$CURRENT_TAG" = *"unstable"* ]]; then
       echo
-      UNSTABLE_VER=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
-      ver=$NF
-      sub(/.*\./,"",rel)
-      sub(/\.[[:digit:]]+$/,"",ver)
-      print ver}')
-
-      echo "======> UNSTABLE VERSION:" $UNSTABLE_VER
-# Increment unstable version here
-      UNSTABLE_INCREMENT=$(npm dist-tags ls "$1" | awk "/$CURRENT_TAG"":"/'{
-      ver=$NF
-      rel=$NF
-      sub(/.*\./,"",rel)
-      sub(/\.[[:digit:]]+$/,"",ver)
-      print ver"."rel+1}')
-
       echo "======> Incremented UNSTABLE VERSION:" $UNSTABLE_INCREMENT
 
       # Get last digit of the unstable version of $CURRENT_TAG
@@ -45,44 +30,58 @@ npmPublish() {
 
       # Update the dependencies with that refer to any fabric-* module to be the matching number
       sed -i 's/\(.*\"fabric-.*\"\)\(2.0.0-snapshot\)/\1'$UNSTABLE_INCREMENT_VERSION'/' package.json
-      npm publish --tag $CURRENT_TAG
+      npm publish --tag $CURRENT_TAG 
 
   else
       # Publish node modules on latest tag
       echo -e "\033[32m ======> RELEASE_VERSION: $RELEASE_VERSION" "\033[0m"
       echo
       echo -e "\033[32m ======> CURRENT_TAG: $CURRENT_TAG" "\033[0m"
-      npm publish --tag $CURRENT_TAG
+      npm publish --tag $CURRENT_TAG 
   fi
-}
-versions() {
-
-  CURRENT_TAG=$(cat package.json | grep tag | awk -F\" '{ print $4 }')
-  echo -e "\033[32m ======> CURRENT_TAG: $CURRENT_TAG" "\033[0m"
-
-  RELEASE_VERSION=$(cat package.json | grep version | awk -F\" '{ print $4 }')
-  echo -e "\033[32m ======> Current RELEASE_VERSION:" "\033[0m"
 }
 
 ROOT=$WORKSPACE/gopath/src/github.com/hyperledger/fabric-chaincode-node
+
 npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
 
+cd ${ROOT}
+
+CURRENT_TAG=$(cat package.json | grep tag | awk -F\" '{ print $4 }')
+echo -e "\033[32m ======> CURRENT_TAG: $CURRENT_TAG" "\033[0m"
+
+RELEASE_VERSION=$(cat package.json | grep version | awk -F\" '{ print $4 }')
+echo -e "\033[32m ======> Current RELEASE_VERSION:" "\033[0m"
+
+# lock step versions to fabric-shim
+UNSTABLE_VER=$(npm dist-tags ls fabric-shim | awk "/$CURRENT_TAG"":"/'{
+      ver=$NF
+      sub(/.*\./,"",rel)
+      sub(/\.[[:digit:]]+$/,"",ver)
+      print ver}')
+
+echo "======> UNSTABLE VERSION:" $UNSTABLE_VER
+# Increment unstable version here
+# lock step versions to fabric-shim
+UNSTABLE_INCREMENT=$(npm dist-tags ls fabric-shim | awk "/$CURRENT_TAG"":"/'{
+      ver=$NF
+      rel=$NF
+      sub(/.*\./,"",rel)
+      sub(/\.[[:digit:]]+$/,"",ver)
+      print ver"."rel+1}')
+
 cd ${ROOT}/apis/fabric-shim-api
-versions
 echo -e "\033[32m ======> fabric-shim-api" "\033[0m"
-npmPublish fabric-shim-api
+npmPublish
 
 cd ${ROOT}/libraries/fabric-shim
-versions
 echo -e "\033[32m ======> fabric-shim" "\033[0m"
-npmPublish fabric-shim
+npmPublish
 
 cd ${ROOT}/libraries/fabric-shim-crypto
-versions
 echo -e "\033[32m ======> fabric-shim-crypto" "\033[0m"
-npmPublish fabric-shim-crypto
+npmPublish
 
 cd ${ROOT}/apis/fabric-contract-api
-versions
 echo -e "\033[32m ======> fabric-contract-api" "\033[0m"
-npmPublish fabric-contract-api
+npmPublish
