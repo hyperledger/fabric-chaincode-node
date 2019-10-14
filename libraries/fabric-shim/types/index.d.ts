@@ -36,13 +36,13 @@ declare module 'fabric-shim' {
     }
 
     export function error(msg: Uint8Array): ChaincodeResponse;
-    export function newLogger(name: string): LoggerInstance;
+    export function newLogger(name: string): Logger;
     export function start(chaincode: ChaincodeInterface): any;
     export function success(payload?: Uint8Array): ChaincodeResponse;
 
     export class Shim {
         static error(msg: Uint8Array): ChaincodeResponse;
-        static newLogger(name: string): LoggerInstance;
+        static newLogger(name: string): Logger;
         static start(chaincode: ChaincodeInterface): any;
         static success(payload?: Uint8Array): ChaincodeResponse;
     }
