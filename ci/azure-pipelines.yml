@@ -19,6 +19,7 @@ trigger:
 # this isn't set so command line output is given
 # 
 variables:
+  - group: Chaincode_Node_Vars   
   component: fabric-chaincode-node
   pipeline: ci 
 
