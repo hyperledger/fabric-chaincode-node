@@ -7,6 +7,7 @@ Maintainers
 | David Kelsey              | davidkel            | davidkel         | davidkel       | d_kelsey@uk.ibm.com                 |
 | Chaoyi Zhao               | zhaochy             | zhaochy1990      | zhaochy        | zhaochy_2015@hotmail.com            |
 | Matthew B White           | mbwhite             | mbwhite          | mbwhite        | whitemat@uk.ibm.com                 |
+| Andrew Hurt               | awjh-ibm            | awjh-ibm         | awjh-ibm       | andrew.hurt1@ibm.com                |
 
 Also: Please see the [Release Manager section](https://github.com/hyperledger/fabric/blob/master/docs/source/MAINTAINERS.rst)
 
