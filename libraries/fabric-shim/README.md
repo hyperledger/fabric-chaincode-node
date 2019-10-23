@@ -2,7 +2,7 @@
 
 
 
-[![Version](https://badge.fury.io/js/fabric-shim.svg)](http://badge.fury.io/js/fabric-shim) [![Build Status](https://jenkins.hyperledger.org/buildStatus/icon?job=fabric-chaincode-node-merge-x86_64)](https://jenkins.hyperledger.org/view/fabric-chaincode-node/job/fabric-chaincode-node-merge-x86_64)
+[![Version](https://badge.fury.io/js/fabric-shim.svg)](http://badge.fury.io/js/fabric-shim)
 
 
 The `fabric-shim` provides the *chaincode interface*, a lower level API for implementing "Smart Contracts". To confirm that this is the same as the `fabric-shim` in previous versions of Hyperledger Fabric.

@@ -29,7 +29,7 @@ The following [Rush categories](https://rushjs.io/pages/maintainer/add_to_repo/)
 
 ## Using the repo
 
-* Clone the repo, and ensure you are using nove v10, and have rush installed
+* Clone the repo, and ensure you are using node v10, and have rush installed
 * `rush update` is needed to ensure everything is correctly linked and updated.
 
 At this point the repo is fully ready for use and running tests, etc. A full sequence of build-test that is equivalent to the CI pipeline is
@@ -57,6 +57,6 @@ See our [Code of Conduct Guidelines](../blob/master/CODE_OF_CONDUCT.md).
 
 ## Maintainers <a name="maintainers"></a>
 
-Should you have any questions or concerns, please reach out to one of the project's [Maintainers](../blob/master/MAINTAINERS.md).
+Should you have any questions or concerns, please reach out to one of the project's [Maintainers](../master/MAINTAINERS.md).
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.

@@ -88,21 +88,7 @@ stages:
               inputs:
                 testResultsFiles: '**/test-results.xml'
                 artifactName: 'FV Test results'
-                testRunTitle: 'FV Test results'                      
-        - job: apidocs
-          steps:
-            - task: NodeTool@0
-              inputs:
-                versionSpec: '8.x' 
-            - script: |
-                npm install
-                npm install -g gulp-cli
-              displayName: 'Setup the node environment'            
-            - script: |
-                gulp docs
-              displayName: 'Produce API docs'
-            - publish: $(System.DefaultWorkingDirectory)/docs/gen/
-              artifact: 'jsdocs'
+                testRunTitle: 'FV Test results'
     - stage: Publish_tag
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
