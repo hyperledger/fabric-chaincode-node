@@ -1,0 +1,17 @@
+{
+  "name": "azure-mocha-reporter",
+  "version": "1.0.0",
+  "description": "Very simple spliter for mocah to Spec (humans) and JUnit format (AzurePipelines)",
+  "main": "index.js",
+  "scripts": {
+    "build": ""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha-junit-reporter": "1.23.1",
+    "mocha": "^5.2.0"
+  }
+}

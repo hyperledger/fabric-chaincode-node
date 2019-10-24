@@ -68,6 +68,20 @@
             "summary": "Starts local Fabric test network ",
             "description": "Run this command to stop local Fabric network created for testing",
             "shellCommand": "gulp -f ./tools/toolchain/fabric.js stopFabric"
+        },
+        {
+            "commandKind": "global",
+            "name": "logs",
+            "summary": "Lists build log files created",
+            "description": "Run this command to list the build logs created after rush rebuild",
+            "shellCommand": "./tools/logfiles.sh"
+        },
+        {
+            "commandKind": "global",
+            "name": "edge-docker",
+            "summary": "Gets the latest master docker images for Fabric ",
+            "description": "Run this command before doing anything to get the master branch Fabric docker images",
+            "shellCommand": "./tools/getEdgeDocker.sh"
         }
     ]
 }

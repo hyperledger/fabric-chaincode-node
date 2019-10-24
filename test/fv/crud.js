@@ -11,7 +11,7 @@ const expect = chai.expect;
 const utils = require('./utils');
 const {SHORT_STEP, MED_STEP, LONG_STEP} = utils.TIMEOUTS;
 
-describe('Chaincode CRUD', () => {
+describe.only('Chaincode CRUD', () => {
     const suite = 'crud';
 
     before(async function () {
