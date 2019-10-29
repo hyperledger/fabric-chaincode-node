@@ -5,9 +5,9 @@ npm-debug.log
 .DS_Store
 fabric-shim/.DS_Store
 test/.DS_Store
-// ignore vscode config
+# ignore vscode config
 .vscode
-// ignore webstorm config
+# ignore webstorm config
 .idea
 yarn.lock
 .nyc_output
