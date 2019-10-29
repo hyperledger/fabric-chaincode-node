@@ -365,6 +365,11 @@
             "reviewCategory": "tools"
         },
         {
+            "packageName": "azure-mocha-reporter",
+            "projectFolder": "tools/azure-mocha-reporter",
+            "reviewCategory": "tools"
+        },
+        {
             "packageName": "fvtests",
             "projectFolder": "test/fv",
             "reviewCategory": "test"

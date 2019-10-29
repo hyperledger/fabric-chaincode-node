@@ -1,7 +1,6 @@
 coverage
 node_modules
 **/node_modules/*
-npm-shrinkwrap.json
 npm-debug.log
 .DS_Store
 fabric-shim/.DS_Store
@@ -32,3 +31,4 @@ common/temp/**
 **/*.build.log
 
 package-deps.json
+test-results.xml

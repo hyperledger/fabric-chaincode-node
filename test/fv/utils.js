@@ -33,9 +33,10 @@ async function install(ccName) {
     try {
         fs.writeFileSync(npmrc, `registry=http://${ip.address()}:4873`);
         const folderName = '/opt/gopath/src/github.com/chaincode/' + ccName;
-        const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName}`;
+        const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName} --connTimeout 60s`;       
         await exec(util.format(cmd, 'org1_cli'));
         await exec(util.format(cmd, 'org2_cli'));
+
     } finally {
         fs.unlinkSync(npmrc);
     }
@@ -43,6 +44,7 @@ async function install(ccName) {
 
 async function instantiate(ccName, func, args) {
     const cmd = `docker exec org1_cli peer chaincode instantiate ${getTLSArgs()} -o orderer.example.com:7050 -l node -C mychannel -n ${ccName} -v v0 -c '${printArgs(func, args)}' -P 'OR ("Org1MSP.member")'`;
+    console.log(cmd)
     const res = await exec(cmd);
     await new Promise(resolve => setTimeout(resolve, 5000));
     return res;
@@ -81,9 +83,9 @@ async function query(ccName, func, args, transient) {
     let cmd;
 
     if (transient) {
-        cmd = `docker exec org2_cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --transient '${transient}'`;
+        cmd = `docker exec org2_cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --transient '${transient}' 2>&1`;
     } else {
-        cmd = `docker exec org2_cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}'`;
+        cmd = `docker exec org2_cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' 2>&1`;
     }
     const {error, stdout, stderr} = await exec(cmd);
     if (error) {

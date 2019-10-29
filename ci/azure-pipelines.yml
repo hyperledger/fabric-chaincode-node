@@ -6,6 +6,20 @@
 # 
 name: RELEASE-$(Date:yyyyMMdd)$(Rev:.rrr)
 
+# Daily build for final quality
+# cf https://crontab.guru/#0_23_*_*_*
+schedules:
+  - cron: "0 23 * * *"
+    displayName: 'Chaincode Node Nightly Driver'
+    branches:
+      include:
+        - master
+    always: true
+
+
+# Trigger on the master and the release-1.4 branches only
+# Stndard Pull Request and Merge builds
+# Any git tag will also trigger a build that should do publishing
 trigger:
   branches:
     include:
@@ -15,10 +29,12 @@ trigger:
     include:
       - '*'
 
+
 # These are custom defined variables, the pipeline one is currently used for the build scripts
 # to know to produce tests results in XML format for Azure to consume, for developers
 # this isn't set so command line output is given
 # 
+# Chaincode_Node_Vars is the protected group of keys for publishing
 variables:
   - group: Chaincode_Node_Vars
   - name: component
@@ -26,7 +42,7 @@ variables:
   - name: pipeline
     value: ci 
 
-# Build on Ubutu
+# Build on Ubuntu
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -34,6 +50,17 @@ pool:
 # The stages and jobs, potential for rationalization and optimization
 # Keeping it simple and explict whilst we gain experience
 stages:
+
+    # output some basic information for reference
+    # Not for use every time, but this can be useful template to keep
+    # - stage: info
+    #   jobs:
+    #     - job: env_info
+    #       steps:
+    #         - script: |
+    #             env | sort
+
+    # Primary stage of building, linting and unit tests
     - stage: Build_and_Test
       jobs:
         - job: main
@@ -43,12 +70,14 @@ stages:
               inputs:
                 versionSpec: '10.x' 
             - script: |
+                set -ev
                 node common/scripts/install-run-rush.js install
-                node common/scripts/install-run-rush.js update
-              displayName: 'Setup the node environment'
+              displayName: 'Setup the rush environment'
             - script: |
+                set -ev 
                 node common/scripts/install-run-rush.js rebuild
               displayName: 'Full rebuild'              
+
             - task: PublishTestResults@2
               condition: or(succeeded(), failed())   # publish either way
               inputs:
@@ -60,10 +89,42 @@ stages:
               inputs:
                 codeCoverageTool: 'cobertura'
                 summaryFileLocation: '**/cobertura-coverage.xml'        
-                artifactName: 'Unit Test Coverage'
+                artifactName: 'Unit Test Coverage' 
+            # CopyFiles can follow symlinks hence be careful with node_modules           
+            - task: CopyFiles@2
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                contents: |
+                  **/*.build*.log                    
+                  !**/node_modules/**                 
+                targetFolder: $(Build.ArtifactStagingDirectory)/logs
+            - task: PublishBuildArtifacts@1    
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                pathToPublish:  $(Build.ArtifactStagingDirectory)/logs
+                artifactName: 'Build logs'                 
+            - task: PublishBuildArtifacts@1    
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                pathToPublish: docs/apidocs/_out
+                artifactName: 'JS API Doc'     
+
+            # Copy the built artifacts to the staging directory, tgz, and the docker image    
             - script: |
+                set -ev
                 node common/scripts/install-run-rush.js publish --include-all --pack --release-folder $(Build.ArtifactStagingDirectory)/tgz --publish   
-              displayName: 'Package as tgz'                  
+                docker image save hyperledger/fabric-nodeenv | gzip > $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
+              displayName: 'Package tgz and docker image'    
+            - task: PublishBuildArtifacts@1    
+              inputs:
+                pathToPublish:  $(Build.ArtifactStagingDirectory)/tgz
+                artifactName: node-tgz        
+            - task: PublishBuildArtifacts@1    
+              inputs:
+                pathToPublish:  $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
+                artifactName: nodeenv-docker-image        
+        
+        # Run the FV tests but using the built material        
         - job: fvt
           displayName: 'FV Tests'
           dependsOn: main
@@ -71,44 +132,58 @@ stages:
             - task: NodeTool@0
               inputs:
                 versionSpec: '10.x' 
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: nodeenv-docker-image
+                path: $(Build.SourcesDirectory)/build
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: node-tgz 
+                path: $(Build.SourcesDirectory)/build
             - script: |
+                set -ev
+                ./tools/getEdgeDocker.sh                                # essential to get master docker images of peer etc.
+                docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
+                docker images
                 node common/scripts/install-run-rush.js install
-                node common/scripts/install-run-rush.js update
-                node common/scripts/install-run-rush.js rebuild  # replace this with pull from the artifacts staging
-              displayName: 'Setup the node environment'                 
+                node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
+              displayName: 'Get the latest master docker images'              
             - script: |
+                set -ev
                 node common/scripts/install-run-rush.js start-fabric
-                node common/scripts/install-run-rush.js start-verdaccio
+                node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
                 docker images | grep hyperledger && docker ps -a
                 node common/scripts/install-run-rush.js test:fv
                 node common/scripts/install-run-rush.js test:e2e
               displayName: 'FV Tests'  
+
             - task: PublishTestResults@2
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 testResultsFiles: '**/test-results.xml'
-                artifactName: 'FV Test results'
-                testRunTitle: 'FV Test results'                      
-        - job: apidocs
-          steps:
-            - task: NodeTool@0
+                testRunTitle: 'FV Test results'
+            - task: CopyFiles@2
+              condition: or(succeeded(), failed())   # publish either way
               inputs:
-                versionSpec: '8.x' 
-            - script: |
-                npm install
-                npm install -g gulp-cli
-              displayName: 'Setup the node environment'            
-            - script: |
-                gulp docs
-              displayName: 'Produce API docs'
-            - publish: $(System.DefaultWorkingDirectory)/docs/gen/
-              artifact: 'jsdocs'
+                sourceFolder: $(Build.SourcesDirectory)/test
+                contents: |
+                  **/*.build*.log
+                  !**/node_modules/**
+                targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
+            - task: PublishBuildArtifacts@1    
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
+                artifactName: 'Test logs'           
+
+    # Publish tag for the Merge build of a regular PRi.e. w
     - stage: Publish_tag
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
         - job: update_version
           steps:
             - script: |
+                set -ev
                 env | sort
                 echo "Update the version number"
                 echo "Make sure release notes are present"
@@ -116,11 +191,13 @@ stages:
         - job: npm_publish
           steps:
             - script: |
+                set -ev
                 echo "Setup .npmrc"
                 echo "Use pipeline secret to login"
                 echo "publish"
         - job: jsdoc_publish    
           steps:
             - script: |
+                set -ev
                 echo "checkout docs branch"
                 echo "checking"
