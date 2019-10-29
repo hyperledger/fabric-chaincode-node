@@ -13,7 +13,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "hello": "echo test fv project",
-    "test:fv": "mocha *.js",
+    "test:fv": "mocha *.js --reporter azure-mocha-reporter 2>&1",
     "build": ""
   },
   "dependencies": {
@@ -40,6 +40,8 @@
     "mockery": "^2.1.0",
     "rewire": "^4.0.1",
     "sinon": "^6.1.5",
-    "sinon-test": "^2.2.0"
+    "sinon-test": "^2.2.0",
+  
+    "azure-mocha-reporter": "1.0.0"
   }
 }

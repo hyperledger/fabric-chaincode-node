@@ -10,13 +10,13 @@
   "scripts": {
     "start": "./startup.sh",
     "compile": "tsc --project test/typescript",
-    "test": "nyc mocha --recursive 'test/unit/**/*.js'",
+    "test": "nyc mocha --recursive 'test/unit/**/*.js' --reporter azure-mocha-reporter",
     "update:clean": "rimraf bundle.js bundle.d.ts protos && mkdirp protos",
     "update:copy": "cpx \"${GOPATH}/src/github.com/hyperledger/fabric-protos/**/*.proto\" protos --verbose",
     "update:pbjs": "pbjs -t static-module -p google-protos -p protos $(find google-protos protos -name \"*.proto\" -type f) -o bundle.js",
     "update:pbts": "pbts -o bundle.d.ts bundle.js",
     "update": "npm run update:clean && npm run update:copy && npm run update:pbjs && npm run update:pbts",
-    "lint":"eslint ./lib",
+    "lint": "eslint ./lib",
     "build": "npm run lint & npm test 2>&1"
   },
   "repository": {
@@ -37,6 +37,25 @@
   },
   "types": "./types/index.d.ts",
   "license": "Apache-2.0",
+  "nyc": {
+    "exclude": [
+      "coverage/**",
+      "test/**",
+      "gulpfile.js",
+      "bundle.js"
+    ],
+    "reporter": [
+      "text-summary",
+      "cobertura",
+      "html"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100
+  },
   "dependencies": {
     "@fidm/x509": "^1.2.1",
     "@grpc/proto-loader": "^0.5.1",
@@ -52,35 +71,17 @@
     "yargs-parser": "^11.0.0"
   },
   "devDependencies": {
-    "cpx": "^1.5.0",
-    "mocha": "^5.2.0",
-    "nyc": "^14.1.1",
-    "rimraf": "^3.0.0",
-    "sinon": "~7.4.2",
     "chai": "^4.1.1",
     "chai-as-promised": "^7.1.1",
     "chai-things": "^0.2.0",
-    "rewire": "~4.0.1",
+    "cpx": "^1.5.0",
     "eslint": "4.0.0",
-    "mockery": "^2.1.0"
-  },
-  "nyc": {
-    "exclude": [
-        "coverage/**",
-        "test/**",
-        "gulpfile.js",
-        "bundle.js"
-    ],
-    "reporter": [
-        "text-summary",
-        "cobertura",
-        "html"
-    ],
-    "all": true,
-    "check-coverage": true,
-    "statements": 100,
-    "branches": 100,
-    "functions": 100,
-    "lines": 100
-   }
+    "mocha": "^5.2.0",
+    "mockery": "^2.1.0",
+    "nyc": "^14.1.1",
+    "rewire": "~4.0.1",
+    "rimraf": "^3.0.0",
+    "sinon": "~7.4.2",
+    "azure-mocha-reporter": "1.0.0"
+  }
 }

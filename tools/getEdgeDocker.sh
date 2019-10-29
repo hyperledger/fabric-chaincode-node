@@ -18,8 +18,11 @@ MASTER_TAG=$ARCH-master
 
 echo "---------> STABLE_VERSION:" $STABLE_VERSION
 
+# Specifically not pulling down javaenv nodeenv
+# javaenv not needed and we've just rebuilt the nodeenv
+
 dockerTag() {
-  for IMAGES in peer orderer ca ca orderer baseos ccenv javaenv nodeenv tools; do
+  for IMAGES in peer orderer ca ca orderer baseos ccenv  tools; do
     echo "Images: $IMAGES"
     echo
     docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG
@@ -36,7 +39,7 @@ dockerTag() {
 }
 
 dockerTag2() {
-  for IMAGES in baseos ccenv javaenv nodeenv; do
+  for IMAGES in baseos ccenv; do
     echo "Images: $IMAGES"
     echo
     docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG

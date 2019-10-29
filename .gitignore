@@ -1,14 +1,13 @@
 coverage
 node_modules
 **/node_modules/*
-npm-shrinkwrap.json
 npm-debug.log
 .DS_Store
 fabric-shim/.DS_Store
 test/.DS_Store
-// ignore vscode config
+# ignore vscode config
 .vscode
-// ignore webstorm config
+# ignore webstorm config
 .idea
 yarn.lock
 .nyc_output
@@ -32,3 +31,4 @@ common/temp/**
 **/*.build.log
 
 package-deps.json
+test-results.xml
