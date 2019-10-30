@@ -123,7 +123,7 @@ stages:
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
                 artifactName: nodeenv-docker-image        
-        
+    
         # Run the FV tests but using the built material        
         - job: fvt
           displayName: 'FV Tests'
@@ -175,7 +175,11 @@ stages:
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
                 artifactName: 'Test logs'           
-
+            - task: PublishBuildArtifacts@1
+              condition: or(succeeded(), failed())   # publish either way    
+              inputs:
+                pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
+                artifactName: nodeenv-docker-image    
     # Publish tag for the Merge build of a regular PRi.e. w
     - stage: Publish_tag
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))

@@ -140,3 +140,12 @@ services:
       - /var/run/:/host/var/run/
     depends_on:
       - peer0.org2.example.com
+      
+  logging:
+    container_name: logging
+    image: gliderlabs/logspout
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/logs
+    ports:
+    - 17056:80         
