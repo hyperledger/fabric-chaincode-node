@@ -32,3 +32,4 @@ common/temp/**
 
 package-deps.json
 test-results.xml
+docker.log
