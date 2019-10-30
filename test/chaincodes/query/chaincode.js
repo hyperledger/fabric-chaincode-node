@@ -19,7 +19,7 @@ async function getAllResults(iterator, getKeys) {
             throw new Error('no value and not done (internal error?)');
         }
         const theVal = (getKeys) ? res.value.key : res.value.value.toString('utf8');
-        allResults.push(theVal);
+        allResults.push(JSON.parse(theVal));
         if (res.done) {
             await iterator.close();
             loop = false;

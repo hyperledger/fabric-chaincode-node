@@ -120,8 +120,7 @@
             "type": "object",
             "description": "A complex type used in a domain",
             "required": [
-                "$id",
-                "properties"
+                "$id"
             ],
             "properties": {
                 "$id": {
