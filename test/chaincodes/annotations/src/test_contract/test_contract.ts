@@ -19,14 +19,14 @@ class SomethingThatCouldBeAProperty {
         this.value = value;
     }
 
-    serialize():string {
+    serialize(): string {
         return JSON.stringify({
             id: this.id,
             value: this.value
         });
     }
 
-    static deserialize(stringifed: string):SomethingThatCouldBeAProperty {
+    static deserialize(stringifed: string): SomethingThatCouldBeAProperty {
         const json = JSON.parse(stringifed);
 
         if (!json.hasOwnProperty('id') || !json.hasOwnProperty('value')) {
@@ -60,7 +60,7 @@ class Asset {
         this.extra = extra;
     }
 
-    serialize():string {
+    serialize(): string {
         return JSON.stringify({
             id: this.id,
             name: this.name,
@@ -69,7 +69,7 @@ class Asset {
         });
     }
 
-    static deserialize(stringifed: string):Asset {
+    static deserialize(stringifed: string): Asset {
         const json = JSON.parse(stringifed);
 
         if (!json.hasOwnProperty('id') || !json.hasOwnProperty('name') || !json.hasOwnProperty('value')) {
@@ -78,6 +78,25 @@ class Asset {
 
         return new Asset(json.id, json.name, json.value, SomethingThatCouldBeAProperty.deserialize(json.extra));
     }
+}
+
+@Object()
+class Person {
+    @Property()
+    private eyeColour: string;
+}
+
+@Object()
+class Bob extends Person {
+    @Property()
+    private houseName: string;
+
+}
+
+@Object()
+class Fred extends Person {
+    @Property()
+    private favouriteColour: string;
 }
 
 export default class TestContract extends Contract {
@@ -113,5 +132,5 @@ export default class TestContract extends Contract {
     public async ignoreMe(ctx: Context, id: string) {
         // DO NOTHING
     }
-
+    
 }

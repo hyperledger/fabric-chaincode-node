@@ -19,18 +19,27 @@ const ObjectAnnotations = rewire('./../../../lib/annotations/object');
 const Object = ObjectAnnotations.Object;
 const Property = ObjectAnnotations.Property;
 
-describe ('Object.js', () => {
+class SuperAsset {
 
-    const mockTarget = {
-        name: 'steve'
-    };
+}
+
+class SubAsset extends SuperAsset {
+
+}
+describe('Object.js', () => {
+
+
+    const mockTarget = new SubAsset();
+    mockTarget.name = 'steve';
 
     let sandbox;
     let defineMetadataStub;
     let getMetadataStub;
+    let getOwnMetadataStub;
     beforeEach(() => {
         sandbox = sinon.createSandbox();
         getMetadataStub = sandbox.stub(Reflect, 'getMetadata');
+        getOwnMetadataStub = sandbox.stub(Reflect, 'getOwnMetadata');
         defineMetadataStub = sandbox.stub(Reflect, 'defineMetadata');
     });
 
@@ -46,59 +55,90 @@ describe ('Object.js', () => {
             object = Object();
         });
 
-        it ('should add object as key when no objects exist for global yet', () => {
+        it('should add object as key when no objects exist for global yet', () => {
             getMetadataStub
                 .onFirstCall().returns(undefined)
                 .onSecondCall().returns({'some': 'properties'});
 
-            object(mockTarget);
+            object(SubAsset);
 
             sinon.assert.calledTwice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget.prototype);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', SubAsset.prototype);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:objects', {
-                'steve':  {
-                    $id: 'steve',
-                    additionalProperties: false,
-                    properties: {'some': 'properties'},
-                    type: 'object'
+                SubAsset:{
+                    $id: 'SubAsset',
+                    allOf: [{properties: {some: 'properties'}, type: 'object'}, {$ref: 'SuperAsset'}],
+                    cnstr: SubAsset
+
                 }
-            });
+            }, sinon.match.any
+            );
         });
 
-        it ('should add object as key when objects exist for global', () => {
+        it('should add object as key when objects exist for global', () => {
             getMetadataStub
                 .onFirstCall().returns({'object1': {}})
                 .onSecondCall().returns(undefined);
 
-            object(mockTarget);
+            object(SubAsset);
 
             sinon.assert.calledTwice(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget.prototype);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', SubAsset.prototype);
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:objects', {
                 'object1': {},
-                'steve':  {
-                    $id: 'steve',
-                    additionalProperties: false,
-                    properties: {},
-                    type: 'object'
+                SubAsset:{
+                    $id: 'SubAsset',
+                    allOf: [{properties: {}, type: 'object'}, {$ref: 'SuperAsset'}],
+                    cnstr: SubAsset
+
                 }
-            });
+            }, sinon.match.any
+            );
         });
+
+        it('should add object with no supertype', () => {
+            getMetadataStub
+                .onFirstCall().returns(undefined)
+                .onSecondCall().returns({'some': 'properties'});
+
+            new Object({discriminator:'type'})(SuperAsset);
+
+            sinon.assert.calledTwice(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', SuperAsset.prototype);
+            sinon.assert.calledOnce(defineMetadataStub);
+        });
+
+
+        it('should add object with no supertype, and no expected subtypes', () => {
+            getMetadataStub
+                .onFirstCall().returns(undefined)
+                .onSecondCall().returns({'some': 'properties'});
+
+            new Object()(SuperAsset);
+
+            sinon.assert.calledTwice(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:objects', global);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', SuperAsset.prototype);
+            sinon.assert.calledOnce(defineMetadataStub);
+
+        });
+
     });
 
     describe('#Property', () => {
 
-        it ('should use the type and name passed', () => {
-            getMetadataStub.onFirstCall().returns({'some': 'properties'});
+        it('should use the type and name passed', () => {
+            getOwnMetadataStub.onFirstCall().returns({'some': 'properties'});
 
             Property('some name', 'SoMe tYPe')(mockTarget);
 
-            sinon.assert.calledOnce(getMetadataStub);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
+            sinon.assert.calledOnce(getOwnMetadataStub);
+            sinon.assert.calledWith(getOwnMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
                 'some': 'properties',
                 'some name': {
@@ -107,15 +147,17 @@ describe ('Object.js', () => {
             }, mockTarget);
         });
 
-        it ('should handle the reflected type being a function when type not passed and is function', () => {
+        it('should handle the reflected type being a function when type not passed', () => {
+            getOwnMetadataStub
+                .onFirstCall().returns(undefined);
             getMetadataStub
-                .onFirstCall().returns(undefined)
-                .onSecondCall().returns(function Fred() {});
+                .onFirstCall().returns(function Fred () { });
 
 
             Property('some name')(mockTarget, 'some key');
-            sinon.assert.calledTwice(getMetadataStub);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
+            sinon.assert.calledOnce(getOwnMetadataStub);
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWith(getOwnMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
 
             sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
@@ -125,15 +167,17 @@ describe ('Object.js', () => {
             }, mockTarget);
         });
 
-        it ('should handle the reflected type being a function when type not passed and is not function', () => {
+        it('should handle the reflected type being a function when type not passed', () => {
+            getOwnMetadataStub
+                .onFirstCall().returns(undefined);
             getMetadataStub
-                .onFirstCall().returns(undefined)
-                .onSecondCall().returns('soMe TyPe');
+                .onFirstCall().returns('soMe TyPe');
 
 
             Property()(mockTarget, 'some key');
-            sinon.assert.calledTwice(getMetadataStub);
-            sinon.assert.calledWith(getMetadataStub, 'fabric:object-properties', mockTarget);
+            sinon.assert.calledOnce(getOwnMetadataStub);
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWith(getOwnMetadataStub, 'fabric:object-properties', mockTarget);
             sinon.assert.calledWith(getMetadataStub, 'design:type', mockTarget, 'some key');
 
             sinon.assert.calledWith(defineMetadataStub, 'fabric:object-properties', {
