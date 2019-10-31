@@ -2,7 +2,7 @@
 [![NPM](https://nodei.co/npm/fabric-shim.svg?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/fabric-shim/)
 
 
-[![Version](https://badge.fury.io/js/fabric-shim.svg)](http://badge.fury.io/js/fabric-shim) [![Build Status](https://jenkins.hyperledger.org/buildStatus/icon?job=fabric-chaincode-node-merge-x86_64)](https://jenkins.hyperledger.org/view/fabric-chaincode-node/job/fabric-chaincode-node-merge-x86_64)
+[![Version](https://badge.fury.io/js/fabric-shim.svg)](http://badge.fury.io/js/fabric-shim)
 
 The `fabric-contract-api` provides the *contract interface*  a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#smart-contract). Working with this API provides a high level entry point to writing business logic.
 
