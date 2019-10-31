@@ -29,7 +29,6 @@ exports.docs = docs;
 exports.protos = protos;
 exports.default = series(lint, test_schema, unittest);
 
-// backward compatable names for the Jenkins build
 task('channel-init', startFabric);
 task('test-headless', series(lint, test_schema, unittest));
 task('test-e2e', series(testfvshim, testScenario));
