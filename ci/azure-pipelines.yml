@@ -81,7 +81,13 @@ stages:
               inputs:
                 testResultsFiles: '**/test-results.xml'
                 artifactName: 'FV Test results'
-                testRunTitle: 'FV Test results'  
+                testRunTitle: 'FV Test results'
+            - task: PublishBuildArtifacts@1
+              condition: or(succeeded(), failed())   # publish either way    
+              inputs:
+                pathToPublish: build/test/network/docker-compose/logs/docker.log
+                artifactName: nodeenv-docker-image                    
+                
         - job: pack_tgz
           dependsOn: 
             - main 
