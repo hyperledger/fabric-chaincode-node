@@ -192,7 +192,8 @@ function _start_docker () {
     return src('*.js', {read: false})
         .pipe(shell([
             // make sure that necessary containers are up by docker-compose
-            util.format('docker-compose -f %s -p node up -d', fs.realpathSync(path.join(dockerComposeDir, composeFile)))
+            util.format('docker-compose -f %s -p node up -d', fs.realpathSync(path.join(dockerComposeDir, composeFile))),
+            'docker exec -d logging sh -c \'wget -q -O /logs/docker.log http://127.0.0.1:80/logs\''
         ]));
 }
 
