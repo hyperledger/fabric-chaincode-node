@@ -12,6 +12,6 @@
   },
   "devDependencies": {
     "mocha-junit-reporter": "1.23.1",
-    "mocha": "^5.2.0"
+    "mocha": "6.2.2"
   }
 }
