@@ -29,14 +29,14 @@
         "jsrsasign": "^8.0.4"
     },
     "devDependencies": {
-        "mocha": "5.2.0",
+        "mocha": "6.2.2",
         "eslint": "4.0.0",
-        "nyc": "13.1.0",
+        "nyc": "14.1.1",
         "typescript": "3.0.1",
         "chai": "^4.1.1",
         "chai-as-promised": "^7.1.1",
-        "rewire": "~4.0.1",
-        "sinon": "~7.4.2",
+        "rewire": "4.0.1",
+        "sinon": "7.5.0",
         "chai-things": "^0.2.0",
         "azure-mocha-reporter": "1.0.0"
     },
