@@ -180,6 +180,29 @@ stages:
               inputs:
                 pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
                 artifactName: nodeenv-docker-image    
+
+        # Job to handle the auditing of the code
+        # NPM audit is run on a 'fake' installation of the libraries
+        # Pulling in all the dependencies it will be able to run NPM AUDIT, and if that returns a
+        # error code the job will fail.
+        - job: src_audit
+          displayName: 'Node Module Auditing'
+          dependsOn: main
+          steps:
+            - task: NodeTool@0
+              inputs:
+                versionSpec: '10.x' 
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: node-tgz 
+                path: $(Build.SourcesDirectory)/build
+            - script: |              
+                node common/scripts/install-run-rush.js install
+                node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
+                mkdir -p $(Build.SourcesDiredctory)/audit && cd $(Build.SourcesDiredctory)/audit && npm init -y
+                npm install --registry http://localhost:4873 fabric-shim fabric-shim-crypto fabric-shim-api fabric-contract-api --save
+                npm audit
+    
     # Publish tag for the Merge build of a regular PRi.e. w
     - stage: Publish_tag
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
