@@ -4,7 +4,7 @@
 # 
 # fabric-chaincode-node azure pipeline configuration.
 # 
-name: RELEASE-$(Date:yyyyMMdd)$(Rev:.rrr)
+name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 
 # Daily build for final quality
 # cf https://crontab.guru/#0_23_*_*_*
@@ -202,8 +202,61 @@ stages:
                 mkdir -p $(Build.SourcesDiredctory)/audit && cd $(Build.SourcesDiredctory)/audit && npm init -y
                 npm install --registry http://localhost:4873 fabric-shim fabric-shim-crypto fabric-shim-api fabric-contract-api --save
                 npm audit
-    
-    # Publish tag for the Merge build of a regular PRi.e. w
+
+    - stage: Snapshot_Publish
+      condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
+      jobs:    
+        # Publish the snapshot images etc.
+        # Original source of these is https://github.com/hyperledger/ci-management/blob/master/jjb/fabric-chaincode-java/shell/include-raw-publish-docker-jar.sh
+        - job: snapshot_publish         
+          steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: nodeenv-docker-image
+                path: $(Build.SourcesDirectory)/build
+            - script: |
+                docker image load --input build/java-nodeenv.tar.gz         # gets the build image of nodeenv
+                docker images
+                # Publish docker images to nexus repository
+                docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
+                echo "Logged in to docker registry"
+                # tag javaenv image to $PUSH_VERSION
+                docker tag hyperledger/fabric-javaenv ${DOCKER_REGISTRY_URL}/fabric-javaenv:amd64-${MAPPED_VERSION}
+                # push javaenv to nexus repository
+                docker push ${DOCKER_REGISTRY_URL}/fabric-javaenv:amd64-${MAPPED_VERSION}
+              env: 
+                DOCKER_REGISTRY_USERNAME: vsts
+                DOCKER_REGISTRY_PASSWORD: $(GITHUB_PAT)
+                DOCKER_REGISTRY_URL: docker.pkg.github.com/hyperledger/fabric-chaincode-java
+                MAPPED_VERSION:  $(PUSH_VERSION)
+        - job: jsdoc
+          steps:
+            - script: |
+                node common/scripts/install-run-rush.js install
+                cd ${BUILD_SOURCEBRANCH}/docs/apidocs
+                CHAINCODE_NODE_COMMIT=$(git rev-parse --short HEAD)
+                echo "---------> CHAINCODE_NODE_COMMIT:" $CHAINCODE_NODE_COMMIT
+                TARGET_REPO=$CHAINCODE_NODE_USERNAME.github.io.git
+                git config --global user.email "fabric.shim@gmail.com"
+                git config --global user.name "fabric-shim"
+                git clone https://github.com/$CHAINCODE_NODE_USERNAME/$TARGET_REPO
+
+                # build docs
+                DOCS_ROOT=$CHAINCODE_NODE_USERNAME.github.io gulp -f docs.js docs
+
+                cd $CHAINCODE_NODE_USERNAME.github.io
+                git add .
+                git commit -m "CHAINCODE_NODE commit - $CHAINCODE_NODE_COMMIT"
+                git config remote.gh-pages.url https://$CHAINCODE_NODE_USERNAME:$CHAINCODE_NODE_PASSWORD@github.com/$CHAINCODE_NODE_USERNAME/$TARGET_REPO
+
+                # Push API docs to Target repository
+                git push gh-pages master
+
+              env:
+                CHAINCODE_NODE_USERNAME: fabric-shim
+
+
+    # Publish tag for git tag release build
     - stage: Publish_tag
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
