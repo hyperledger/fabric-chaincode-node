@@ -2,6 +2,18 @@
   "name": "fabric-shim",
   "entries": [
     {
+      "version": "2.0.1",
+      "tag": "fabric-shim_v2.0.1",
+      "date": "Fri, 08 Nov 2019 15:17:47 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "r01"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.0.0",
       "tag": "fabric-shim_v2.0.0",
       "date": "Fri, 08 Nov 2019 15:15:13 GMT",
