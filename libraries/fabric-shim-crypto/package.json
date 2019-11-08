@@ -10,7 +10,7 @@
     },
     "scripts": {
         "test": "nyc mocha --recursive 'test/**/*.js' --reporter azure-mocha-reporter",
-        "lint":"eslint ./lib/",
+        "lint": "eslint ./lib/",
         "build": "npm run lint && npm test"
     },
     "keywords": [
@@ -29,16 +29,16 @@
         "jsrsasign": "^8.0.4"
     },
     "devDependencies": {
-        "mocha": "6.2.2",
-        "eslint": "4.0.0",
-        "nyc": "14.1.1",
-        "typescript": "3.0.1",
+        "azure-mocha-reporter": "1.0.0",
         "chai": "^4.1.1",
         "chai-as-promised": "^7.1.1",
+        "chai-things": "^0.2.0",
+        "eslint": "4.0.0",
+        "mocha": "6.2.2",
+        "nyc": "14.1.1",
         "rewire": "4.0.1",
         "sinon": "7.5.0",
-        "chai-things": "^0.2.0",
-        "azure-mocha-reporter": "1.0.0"
+        "typescript": "3.0.1"
     },
     "nyc": {
         "exclude": [
