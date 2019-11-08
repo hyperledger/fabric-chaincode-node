@@ -46,11 +46,18 @@ stages:
               inputs:
                 versionSpec: '8.x' 
             - script: |
+                npm -v
                 npm install
                 npm install -g gulp-cli
               displayName: 'Setup the node environment'
+            - script: cd $(Build.SourcesDirectory)/fabric-contract-api && ../ci/npmAudit.sh
+              displayName: 'Run npm audit in fabric-contract-api'
+            - script: cd $(Build.SourcesDirectory)/fabric-shim && ../ci/npmAudit.sh
+              displayName: 'Run npm audit in fabric-shim'
+            - script: cd $(Build.SourcesDirectory)/fabric-shim-crypto && ../ci/npmAudit.sh
+              displayName: 'Run npm audit in fabric-shim-crypto'
             - script: gulp test-headless
-              displayName: 'Unit tests'  
+              displayName: 'Unit tests'
             - task: PublishTestResults@2
               inputs:
                 testResultsFiles: '**/test-results.xml'
@@ -59,7 +66,7 @@ stages:
             - task: PublishCodeCoverageResults@1
               inputs:
                 codeCoverageTool: 'cobertura'
-                summaryFileLocation: '**/cobertura-coverage.xml'        
+                summaryFileLocation: '**/cobertura-coverage.xml'
                 artifactName: 'Unit Test Coverage'
         - job: fvt
           displayName: 'FV Tests'
@@ -71,7 +78,7 @@ stages:
             - script: |
                 npm install
                 npm install -g gulp-cli
-              displayName: 'Setup the node environment'                 
+              displayName: 'Setup the node environment'
             - script: |
                 DEVMODE=false gulp channel-init 
                 docker images | grep hyperledger && docker ps -a
@@ -83,14 +90,14 @@ stages:
                 artifactName: 'FV Test results'
                 testRunTitle: 'FV Test results'
             - task: PublishBuildArtifacts@1
-              condition: or(succeeded(), failed())   # publish either way    
+              condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish: build/test/network/docker-compose/logs/docker.log
-                artifactName: nodeenv-docker-image                    
+                artifactName: nodeenv-docker-image
                 
         - job: pack_tgz
-          dependsOn: 
-            - main 
+          dependsOn:
+            - main
             - fvt
           steps:
             - script: |
@@ -112,7 +119,7 @@ stages:
             - script: |
                 npm install
                 npm install -g gulp-cli
-              displayName: 'Setup the node environment'            
+              displayName: 'Setup the node environment'
             - script: |
                 gulp docs
               displayName: 'Produce API docs'
@@ -131,10 +138,13 @@ stages:
         - job: npm_publish
           steps:
             - script: |
+                cd $(Build.SourcesDirectory)/fabric-contract-api && npm shrinkwrap
+                cd $(Build.SourcesDirectory)/fabric-shim && npm shrinkwrap
+                cd $(Build.SourcesDirectory)/fabric-shim-crypto && npm shrinkwrap
                 echo "Setup .npmrc"
                 echo "Use pipeline secret to login"
                 echo "publish"
-        - job: jsdoc_publish    
+        - job: jsdoc_publish 
           steps:
             - script: |
                 echo "checkout docs branch"

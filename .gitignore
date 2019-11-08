@@ -2,18 +2,11 @@ coverage
 docs/gen
 node_modules/*
 **/node_modules/*
-fabric-shim/node_modules/*
-
-npm-shrinkwrap.json
-package-lock.json
 npm-debug.log
+**/npm-shrinkwrap.json
 .DS_Store
-fabric-shim/.DS_Store
-test/.DS_Store
-# ignore vscode config
-.vscode
-# ignore webstorm config
-.idea
+**.DS_Store
+**/test-results.xml
 yarn.lock
 .nyc_output
 **/typescript/*.js
@@ -21,7 +14,10 @@ yarn.lock
 fabric*.tgz
 test/fv/annotations/dist
 
-**/test-results.xml
+# ignore vscode config
+.vscode
+# ignore webstorm config
+.idea
 
 build/test/network/crypto-material/*.block
 build/test/network/crypto-material/*.tx
