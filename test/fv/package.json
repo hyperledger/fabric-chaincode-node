@@ -27,7 +27,7 @@
     "delay": "4.3.0",
     "eslint": "4.0.0",
     "fabric-contract-api": "2.0.0-snapshot",
-    "fabric-shim": "2.0.0-snapshot",
+    "fabric-shim": "2.0.0",
     "fabric-shim-api": "2.0.0-snapshot",
     "fabric-shim-crypto": "2.0.0-snapshot",
     "fs-extra": "8.1.0",
