@@ -40,7 +40,7 @@ function abort {
 # Suffix can be added after the version eg rc or beta etc.
 if [ -z ${NEW_SUFFIX+x} ]; then
   echo Suffix is not specified using pure version number
-  NEW_VERSION=$(jq '.version' ${DIR}/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9])-.*/\1/")
+  NEW_VERSION=$(jq '.version' ${DIR}/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
   NEW_TAG="latest"
 elif [[ ${NEW_SUFFIX} == 'snapshot' ]]; then
   echo new suffix is ${NEW_SUFFIX}
@@ -53,7 +53,7 @@ else  # for beta, rc etc releases where the version doesn't change
   NEW_TAG="${NEW_SUFFIX}-1.4"
 fi
 
-echo New version string will be "${NEW_VERSION}"
+echo New version string will be :${NEW_VERSION}:
 
 # do the release notes and changelog for this new version exist if needed
 if [[ ${NEW_TAG} == 'latest' ]]; then
@@ -67,7 +67,7 @@ if [[ ${NEW_TAG} == 'latest' ]]; then
     echo Previous version is v${OLD_VERSION}
 
     echo "Writing change log..."
-    "${DIR}/scripts/changelog.sh" "v${OLD_VERSION}" "v${NEW_VERSION}"
+    "${DIR}/ci/changelog.sh" "v${OLD_VERSION}" "v${NEW_VERSION}"
     echo "...done"
 fi
 

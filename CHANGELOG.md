@@ -1,3 +1,17 @@
+## v1.4.4
+Tue 12 Nov 10:10:48 GMT 2019
+
+* [2c8ebeb](https://github.com/hyperledger/fabric/commit/2c8ebeb) Remove references to Jenkins Move old jenkins scripts in ci/oldScripts
+* [5eb9a3d](https://github.com/hyperledger/fabric/commit/5eb9a3d) Docker Logs capture (#17)
+* [cfd25fb](https://github.com/hyperledger/fabric/commit/cfd25fb) Remove Jenkins CI Scripts
+* [4451ad7](https://github.com/hyperledger/fabric/commit/4451ad7) [FAB-16711](https://jira.hyperledger.org/browse/FAB-16711) Azure EnvVars
+* [ad81fd2](https://github.com/hyperledger/fabric/commit/ad81fd2) [FAB-16711](https://jira.hyperledger.org/browse/FAB-16711) Update to azure-pipelines
+* [39f8c12](https://github.com/hyperledger/fabric/commit/39f8c12) [IN-68] Add default GitHub SECURITY policy
+* [b5e4e3b](https://github.com/hyperledger/fabric/commit/b5e4e3b) [FAB-16658](https://jira.hyperledger.org/browse/FAB-16658) iterator tutorial
+* [3fa37da](https://github.com/hyperledger/fabric/commit/3fa37da) [FABCI-405] Remove AnsiColor Wrapper
+* [92e331c](https://github.com/hyperledger/fabric/commit/92e331c) Cert with multiple attrs - added a test to cover this
+* [11a3a27](https://github.com/hyperledger/fabric/commit/11a3a27) [FAB-16006](https://jira.hyperledger.org/browse/FAB-16006) Prepare fro 1.4.3-snapshot
+
 ## v1.4.2
 Thu 18 Jul 09:35:53 BST 2019
 
