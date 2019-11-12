@@ -3,7 +3,6 @@ node_modules
 **/node_modules/*
 npm-debug.log
 .DS_Store
-fabric-shim/.DS_Store
 test/.DS_Store
 # ignore vscode config
 .vscode
