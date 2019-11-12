@@ -76,7 +76,7 @@ stages:
             - script: |
                 set -ev 
                 node common/scripts/install-run-rush.js rebuild
-              displayName: 'Full rebuild'              
+              displayName: 'Full rebuild'
 
             - task: PublishTestResults@2
               condition: or(succeeded(), failed())   # publish either way
@@ -88,43 +88,43 @@ stages:
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 codeCoverageTool: 'cobertura'
-                summaryFileLocation: '**/cobertura-coverage.xml'        
+                summaryFileLocation: '**/cobertura-coverage.xml'
                 artifactName: 'Unit Test Coverage' 
-            # CopyFiles can follow symlinks hence be careful with node_modules           
+            # CopyFiles can follow symlinks hence be careful with node_modules
             - task: CopyFiles@2
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 contents: |
-                  **/*.build*.log                    
-                  !**/node_modules/**                 
+                  **/*.build*.log
+                  !**/node_modules/**
                 targetFolder: $(Build.ArtifactStagingDirectory)/logs
             - task: PublishBuildArtifacts@1    
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/logs
-                artifactName: 'Build logs'                 
+                artifactName: 'Build logs'
             - task: PublishBuildArtifacts@1    
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish: docs/apidocs/_out
-                artifactName: 'JS API Doc'     
+                artifactName: 'JS API Doc'
 
-            # Copy the built artifacts to the staging directory, tgz, and the docker image    
+            # Copy the built artifacts to the staging directory, tgz, and the docker image
             - script: |
                 set -ev
-                node common/scripts/install-run-rush.js publish --include-all --pack --release-folder $(Build.ArtifactStagingDirectory)/tgz --publish   
+                node common/scripts/install-run-rush.js publish --include-all --pack --release-folder $(Build.ArtifactStagingDirectory)/tgz --publish
                 docker image save hyperledger/fabric-nodeenv | gzip > $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
               displayName: 'Package tgz and docker image'    
-            - task: PublishBuildArtifacts@1    
+            - task: PublishBuildArtifacts@1
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/tgz
-                artifactName: node-tgz        
-            - task: PublishBuildArtifacts@1    
+                artifactName: node-tgz
+            - task: PublishBuildArtifacts@1
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
-                artifactName: nodeenv-docker-image        
+                artifactName: nodeenv-docker-image
     
-        # Run the FV tests but using the built material        
+        # Run the FV tests but using the built material
         - job: fvt
           displayName: 'FV Tests'
           dependsOn: main
@@ -176,7 +176,7 @@ stages:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
                 artifactName: 'Test logs'           
             - task: PublishBuildArtifacts@1
-              condition: or(succeeded(), failed())   # publish either way    
+              condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
                 artifactName: nodeenv-docker-image    
@@ -199,9 +199,10 @@ stages:
             - script: |              
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
-                mkdir -p $(Build.SourcesDiredctory)/audit && cd $(Build.SourcesDiredctory)/audit && npm init -y
+                mkdir -p $(Build.SourcesDirectory)/audit && cd $(Build.SourcesDirectory)/audit && npm init -y
                 npm install --registry http://localhost:4873 fabric-shim fabric-shim-crypto fabric-shim-api fabric-contract-api --save
                 npm audit
+              displayName: 'Run npm audit'
     
         # Publish the snapshot images etc.
         # Original source of these is https://github.com/hyperledger/ci-management/blob/master/jjb/fabric-chaincode-java/shell/include-raw-publish-docker-jar.sh
@@ -253,7 +254,7 @@ stages:
                 CHAINCODE_NODE_USERNAME: fabric-shim
 
 
-    # Publish tag for the Merge build of a regular PRi.e. w
+    # Publish a new version, triggered by a git tag
     - stage: Publish_tag
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
