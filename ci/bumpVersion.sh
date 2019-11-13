@@ -1,30 +1,7 @@
 #!/bin/bash
-# Release process for the Java chaincode is this
 #
-# > Work from the latest release-1.4 branch
-# > Write a new release notes file along the lines of the the existing files
-# > Run the script
+# SPDX-License-Identifier: Apache-2.0
 #
-#        ./scripts/release.sh
-#
-#   This will change the version to the correct release version and set the tag to mark the package
-#   as npm publishable by the merge builds
-# > Submit this to gerrit with this push command
-#
-#        git push origin HEAD:refs/for/release-1.4
-#
-# > When the build has complete, git pull to update your branch
-# > To tag in gerrit run
-#
-#        ./scripts/gittag.sh
-#
-# > To update the version to a new snapshot leve run the
-#
-#        NEW_SUFFIX=snapshot ./scripts/release.sh
-#
-# > Push these changes as per normal
-
-
 # Exit on first error, print all commands.
 set -e
 set -o pipefail
@@ -80,14 +57,3 @@ done
 jq --arg VERSION "${NEW_VERSION}" '.version = $VERSION'  ${DIR}/package.json  > ".tmp" && mv ".tmp" ${DIR}/package.json
 # This is a optional operation that can be done at any point to update the
 # test to use a specific version of Fabric docker images etc
-#
-
-if [[ ${NEW_TAG} == 'latest' ]]; then
-    echo "Please verify that all is well with the changes, add, comit and push to gerrit with"
-    echo ""
-    echo "git push origin HEAD:refs/for/release-1.4"
-    echo ""
-    echo "Wait for build to happen, which will push NPM modules, then run ./scripts/gittag.sh"
-else
-    echo "Please verify that all is well with the changes, and, commit and push to gerrit as normal"
-fi

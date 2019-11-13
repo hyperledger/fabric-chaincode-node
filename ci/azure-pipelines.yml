@@ -167,15 +167,23 @@ stages:
           steps:
             - script: |
                 env | sort
+                echo "Update the version number"
+                echo "Make sure release notes are present"
+                echo "Make sure change history is present"
+        - job: npm_publish
+          steps:
+            - script: |
+                echo "Setup .npmrc"
+
                 # temporarily use this approach instead of the gittag
-                VERSION=$(jq '.version' ${DIR}/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")                  
+                VERSION=$(jq '.version' $(Build.SourcesDirectory)/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
                 echo Version is :${VERSION}:
                 
                 npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
 
-                # Add or delete modules from here.. 
+                # Add or delete modules from here..
                 for modules in fabric-shim fabric-shim-crypto fabric-contract-api; do
-                    if [ -d "$modules" ]; then                        
+                    if [ -d "$modules" ]; then
                         cd $modules
                         npm shrinkwrap
                         npmPublish $modules
@@ -184,4 +192,8 @@ stages:
                 done
               env:
                 NPM_TOKEN: $(NPM)
+        - job: jsdoc_publish
+          steps:
+            - script: |
+                echo "checkout docs branch"
 
