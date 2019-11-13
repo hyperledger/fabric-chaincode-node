@@ -186,7 +186,7 @@ stages:
                     if [ -d "$modules" ]; then
                         cd $modules
                         npm shrinkwrap
-                        npmPublish $modules
+                        npm publish --tag latest
                         cd -
                     fi
                 done
