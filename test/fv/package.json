@@ -25,7 +25,7 @@
     "chai-things": "^0.2.0",
     "del": "^3.0.0",
     "delay": "4.3.0",
-    "eslint": "4.0.0",
+    "eslint": "6.6.0",
     "fabric-contract-api": "2.0.0-snapshot",
     "fabric-shim": "2.0.0-snapshot",
     "fabric-shim-api": "2.0.0-snapshot",
