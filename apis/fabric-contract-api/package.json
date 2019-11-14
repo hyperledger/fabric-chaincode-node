@@ -59,7 +59,7 @@
     "chai": "^4.1.1",
     "chai-as-promised": "^7.1.1",
     "chai-things": "^0.2.0",
-    "eslint": "4.0.0",
+    "eslint": "6.6.0",
     "gulp": "^4.0.0",
     "gulp-debug": "~4.0.0",
     "gulp-eslint": "~6.0.0",
