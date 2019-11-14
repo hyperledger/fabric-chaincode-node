@@ -30,7 +30,7 @@
     },
     "devDependencies": {
         "mocha": "6.2.2",
-        "eslint": "4.0.0",
+        "eslint": "6.6.0",
         "nyc": "14.1.1",
         "typescript": "3.0.1",
         "chai": "^4.1.1",
