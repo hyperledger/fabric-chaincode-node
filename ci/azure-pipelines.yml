@@ -4,7 +4,7 @@
 # 
 # fabric-chaincode-node azure pipeline configuration.
 # 
-name: RELEASE-$(Date:yyyyMMdd)$(Rev:.rrr)
+name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 
 # Daily build for final quality
 # cf https://crontab.guru/#0_23_*_*_*
@@ -17,14 +17,13 @@ schedules:
     always: true
 
 
-# Trigger on the master and the release-1.4 branches only
-# Stndard Pull Request and Merge builds
+# Trigger on the master branch only
+# Standard Pull Request and Merge builds
 # Any git tag will also trigger a build that should do publishing
 trigger:
   branches:
     include:
       - 'master'
-      - 'release-1.4'
   tags:
     include:
       - '*'
@@ -170,16 +169,16 @@ stages:
                   **/*.build*.log
                   !**/node_modules/**
                 targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
-            - task: PublishBuildArtifacts@1    
+            - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
-                artifactName: 'Test logs'           
+                artifactName: 'Test logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
-                artifactName: nodeenv-docker-image    
+                artifactName: nodeenv-docker-image
 
         # Job to handle the auditing of the code
         # NPM audit is run on a 'fake' installation of the libraries
@@ -196,7 +195,7 @@ stages:
               inputs:
                 artifact: node-tgz 
                 path: $(Build.SourcesDirectory)/build
-            - script: |              
+            - script: |
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
                 mkdir -p $(Build.SourcesDirectory)/audit && cd $(Build.SourcesDirectory)/audit && npm init -y
@@ -205,7 +204,6 @@ stages:
               displayName: 'Run npm audit'
     
         # Publish the snapshot images etc.
-        # Original source of these is https://github.com/hyperledger/ci-management/blob/master/jjb/fabric-chaincode-java/shell/include-raw-publish-docker-jar.sh
         - job: snapshot_publish
           condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
           dependsOn: main
@@ -217,17 +215,14 @@ stages:
             - script: |
                 docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
                 docker images
-                # Publish docker images to nexus repository
                 docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
                 echo "Logged in to docker registry"
-                # tag javaenv image to $PUSH_VERSION
-                docker tag hyperledger/fabric-javaenv ${DOCKER_REGISTRY_URL}/fabric-javaenv:amd64-${MAPPED_VERSION}
-                # push javaenv to nexus repository
-                docker push ${DOCKER_REGISTRY_URL}/fabric-javaenv:amd64-${MAPPED_VERSION}
+                docker tag hyperledger/fabric-nodeenv ${DOCKER_REGISTRY_URL}/fabric-nodeenv:amd64-${MAPPED_VERSION}
+                docker push ${DOCKER_REGISTRY_URL}/fabric-nodeenv:amd64-${MAPPED_VERSION}
               env: 
                 DOCKER_REGISTRY_USERNAME: vsts
                 DOCKER_REGISTRY_PASSWORD: $(GITHUB_PAT)
-                DOCKER_REGISTRY_URL: docker.pkg.github.com/hyperledger/fabric-chaincode-java
+                DOCKER_REGISTRY_URL: docker.pkg.github.com/hyperledger/fabric-chaincode-node
                 MAPPED_VERSION:  $(PUSH_VERSION)
             - script: |
                 node common/scripts/install-run-rush.js install
@@ -256,6 +251,7 @@ stages:
 
     # Publish a new version, triggered by a git tag
     - stage: Publish_tag
+      dependsOn: Build_and_Test
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
         - job: update_version
@@ -269,13 +265,25 @@ stages:
         - job: npm_publish
           steps:
             - script: |
-                set -ev
                 echo "Setup .npmrc"
-                echo "Use pipeline secret to login"
-                echo "publish"
-        - job: jsdoc_publish    
+                # temporarily use this approach instead of the gittag
+                VERSION=$(jq '.version' $(Build.SourcesDirectory)/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
+                echo Version is :${VERSION}:
+                
+                npm config set //registry.npmjs.org/:_authToken=$NPM_TOKEN
+                # Add or delete modules from here..
+                for modules in fabric-shim fabric-shim-crypto fabric-contract-api; do
+                    if [ -d "$modules" ]; then
+                        cd $modules
+                        npm shrinkwrap
+                        npm publish --tag latest
+                        cd -
+                    fi
+                done
+              env:
+                NPM_TOKEN: $(NPM)
+        - job: jsdoc_publish
           steps:
             - script: |
                 set -ev
                 echo "checkout docs branch"
-                echo "checking"
