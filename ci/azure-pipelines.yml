@@ -1,9 +1,9 @@
 # Copyright IBM Corp. All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
-# 
+#
 # fabric-chaincode-node azure pipeline configuration.
-# 
+#
 name: RELEASE-$(Date:yyyyMMdd)$(Rev:.rrr)
 
 # Daily build for final quality
@@ -33,20 +33,20 @@ trigger:
 # These are custom defined variables, the pipeline one is currently used for the build scripts
 # to know to produce tests results in XML format for Azure to consume, for developers
 # this isn't set so command line output is given
-# 
+#
 # Chaincode_Node_Vars is the protected group of keys for publishing
 variables:
   - group: Chaincode_Node_Vars
   - name: component
     value: fabric-chaincode-node
   - name: pipeline
-    value: ci 
+    value: ci
 
 # Build on Ubuntu
 pool:
   vmImage: 'ubuntu-latest'
 
-# 
+#
 # The stages and jobs, potential for rationalization and optimization
 # Keeping it simple and explict whilst we gain experience
 stages:
@@ -68,13 +68,13 @@ stages:
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: '10.x' 
+                versionSpec: '10.x'
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
               displayName: 'Setup the rush environment'
             - script: |
-                set -ev 
+                set -ev
                 node common/scripts/install-run-rush.js rebuild
               displayName: 'Full rebuild'
 
@@ -89,7 +89,7 @@ stages:
               inputs:
                 codeCoverageTool: 'cobertura'
                 summaryFileLocation: '**/cobertura-coverage.xml'
-                artifactName: 'Unit Test Coverage' 
+                artifactName: 'Unit Test Coverage'
             # CopyFiles can follow symlinks hence be careful with node_modules
             - task: CopyFiles@2
               condition: or(succeeded(), failed())   # publish either way
@@ -98,12 +98,12 @@ stages:
                   **/*.build*.log
                   !**/node_modules/**
                 targetFolder: $(Build.ArtifactStagingDirectory)/logs
-            - task: PublishBuildArtifacts@1    
+            - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/logs
                 artifactName: 'Build logs'
-            - task: PublishBuildArtifacts@1    
+            - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish: docs/apidocs/_out
@@ -114,7 +114,7 @@ stages:
                 set -ev
                 node common/scripts/install-run-rush.js publish --include-all --pack --release-folder $(Build.ArtifactStagingDirectory)/tgz --publish
                 docker image save hyperledger/fabric-nodeenv | gzip > $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
-              displayName: 'Package tgz and docker image'    
+              displayName: 'Package tgz and docker image'
             - task: PublishBuildArtifacts@1
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/tgz
@@ -123,22 +123,22 @@ stages:
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
                 artifactName: nodeenv-docker-image
-    
+
         # Run the FV tests but using the built material
         - job: fvt
           displayName: 'FV Tests'
           dependsOn: main
-          steps:         
+          steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: '10.x' 
+                versionSpec: '10.x'
             - task: DownloadPipelineArtifact@2
               inputs:
                 artifact: nodeenv-docker-image
                 path: $(Build.SourcesDirectory)/build
             - task: DownloadPipelineArtifact@2
               inputs:
-                artifact: node-tgz 
+                artifact: node-tgz
                 path: $(Build.SourcesDirectory)/build
             - script: |
                 set -ev
@@ -147,7 +147,7 @@ stages:
                 docker images
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
-              displayName: 'Get the latest master docker images'              
+              displayName: 'Get the latest master docker images'
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js start-fabric
@@ -155,7 +155,7 @@ stages:
                 docker images | grep hyperledger && docker ps -a
                 node common/scripts/install-run-rush.js test:fv
                 node common/scripts/install-run-rush.js test:e2e
-              displayName: 'FV Tests'  
+              displayName: 'FV Tests'
 
             - task: PublishTestResults@2
               condition: or(succeeded(), failed())   # publish either way
@@ -170,16 +170,16 @@ stages:
                   **/*.build*.log
                   !**/node_modules/**
                 targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
-            - task: PublishBuildArtifacts@1    
+            - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
-                artifactName: 'Test logs'           
+                artifactName: 'Test logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
-                artifactName: nodeenv-docker-image    
+                artifactName: nodeenv-docker-image
 
         # Job to handle the auditing of the code
         # NPM audit is run on a 'fake' installation of the libraries
@@ -191,19 +191,19 @@ stages:
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: '10.x' 
+                versionSpec: '10.x'
             - task: DownloadPipelineArtifact@2
               inputs:
-                artifact: node-tgz 
+                artifact: node-tgz
                 path: $(Build.SourcesDirectory)/build
-            - script: |              
+            - script: |
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
                 mkdir -p $(Build.SourcesDirectory)/audit && cd $(Build.SourcesDirectory)/audit && npm init -y
                 npm install --registry http://localhost:4873 fabric-shim fabric-shim-crypto fabric-shim-api fabric-contract-api --save
                 npm audit
               displayName: 'Run npm audit'
-    
+
         # Publish the snapshot images etc.
         # Original source of these is https://github.com/hyperledger/ci-management/blob/master/jjb/fabric-chaincode-java/shell/include-raw-publish-docker-jar.sh
         - job: snapshot_publish
@@ -214,21 +214,12 @@ stages:
               inputs:
                 artifact: nodeenv-docker-image
                 path: $(Build.SourcesDirectory)/build
-            - script: |
-                docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
-                docker images
-                # Publish docker images to nexus repository
-                docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
-                echo "Logged in to docker registry"
-                # tag javaenv image to $PUSH_VERSION
-                docker tag hyperledger/fabric-javaenv ${DOCKER_REGISTRY_URL}/fabric-javaenv:amd64-${MAPPED_VERSION}
-                # push javaenv to nexus repository
-                docker push ${DOCKER_REGISTRY_URL}/fabric-javaenv:amd64-${MAPPED_VERSION}
-              env: 
-                DOCKER_REGISTRY_USERNAME: vsts
-                DOCKER_REGISTRY_PASSWORD: $(GITHUB_PAT)
-                DOCKER_REGISTRY_URL: docker.pkg.github.com/hyperledger/fabric-chaincode-java
+            - script: ./ci/scripts/publish_docker.sh
+              env:
                 MAPPED_VERSION:  $(PUSH_VERSION)
+                NEXUS_USERNAME: $(nexus-user)
+                NEXUS_PASSWORD: $(nexus-password)
+                NEXUS_URL: nexus3.hyperledger.org:10003/hyperledger
             - script: |
                 node common/scripts/install-run-rush.js install
                 cd ${BUILD_SOURCEBRANCH}/docs/apidocs
@@ -273,7 +264,7 @@ stages:
                 echo "Setup .npmrc"
                 echo "Use pipeline secret to login"
                 echo "publish"
-        - job: jsdoc_publish    
+        - job: jsdoc_publish
           steps:
             - script: |
                 set -ev
