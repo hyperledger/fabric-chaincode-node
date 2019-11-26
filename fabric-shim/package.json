@@ -41,8 +41,8 @@
     "jsrsasign": "^8.0.4",
     "reflect-metadata": "^0.1.12",
     "winston": "^3.2.1",
-    "yargs": "^10.0.2",
-    "yargs-parser": "^11.0.0",
+    "yargs": "^13.3.0",
+    "yargs-parser": "^13.1.1",
     "protobufjs": "5.0.3"
   },
   "devDependencies": {
