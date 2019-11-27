@@ -183,6 +183,8 @@ stages:
                 workingFile: '$(Agent.TempDirectory)/.npmrc'
                 customEndpoint: 'fabric-chainode-node-npm' 
             - script: |
+                npm config ls
+                npm login
                 # Add or delete modules from here..
                 for module in fabric-shim fabric-shim-crypto fabric-contract-api; do
                     if [ -d "$module" ]; then
