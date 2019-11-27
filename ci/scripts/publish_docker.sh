@@ -8,5 +8,5 @@ docker image load --input build/fabric-nodeenv.tar.gz         # gets the build i
 docker images
 
 docker login nexus3.hyperledger.org:10003 --username="${NEXUS_USERNAME}" --password="${NEXUS_PASSWORD}"
-docker tag hyperledger/fabric-nodeenv "${NEXUS_URL}/fabric-nodeenv:amd64-${MAPPED_VERSION}-stable"
-docker push "${NEXUS_URL}/fabric-nodeenv:amd64-${MAPPED_VERSION}-stable"
+docker tag hyperledger/fabric-nodeenv "${NEXUS_URL}/fabric-nodeenv:amd64-latest"
+docker push "${NEXUS_URL}/fabric-nodeenv:amd64-latest"

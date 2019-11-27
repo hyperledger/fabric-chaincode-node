@@ -208,7 +208,7 @@ stages:
         # Original source of these is https://github.com/hyperledger/ci-management/blob/master/jjb/fabric-chaincode-java/shell/include-raw-publish-docker-jar.sh
         - job: snapshot_publish
           condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
-          dependsOn: main
+          dependsOn: fvt
           steps:
             - task: DownloadPipelineArtifact@2
               inputs:
@@ -216,7 +216,6 @@ stages:
                 path: $(Build.SourcesDirectory)/build
             - script: ./ci/scripts/publish_docker.sh
               env:
-                MAPPED_VERSION:  $(PUSH_VERSION)
                 NEXUS_USERNAME: $(nexus-user)
                 NEXUS_PASSWORD: $(nexus-password)
                 NEXUS_URL: nexus3.hyperledger.org:10003/hyperledger
