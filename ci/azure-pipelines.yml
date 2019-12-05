@@ -4,7 +4,7 @@
 #
 # fabric-chaincode-node azure pipeline configuration.
 #
-name: RELEASE-$(Date:yyyyMMdd)$(Rev:.rrr)
+name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 
 # Daily build for final quality
 # cf https://crontab.guru/#0_23_*_*_*
@@ -17,14 +17,13 @@ schedules:
     always: true
 
 
-# Trigger on the master and the release-1.4 branches only
-# Stndard Pull Request and Merge builds
+# Trigger on the master branch
+# Standard Pull Request and Merge builds
 # Any git tag will also trigger a build that should do publishing
 trigger:
   branches:
     include:
       - 'master'
-      - 'release-1.4'
   tags:
     include:
       - '*'
@@ -41,6 +40,8 @@ variables:
     value: fabric-chaincode-node
   - name: pipeline
     value: ci
+  - name: node_version_spec
+    value: '12.x'
 
 # Build on Ubuntu
 pool:
@@ -51,24 +52,20 @@ pool:
 # Keeping it simple and explict whilst we gain experience
 stages:
 
-    # output some basic information for reference
-    # Not for use every time, but this can be useful template to keep
-    # - stage: info
-    #   jobs:
-    #     - job: env_info
-    #       steps:
-    #         - script: |
-    #             env | sort
-
     # Primary stage of building, linting and unit tests
     - stage: Build_and_Test
       jobs:
+        # output some basic information for reference
+        - job: displayenv
+          steps:
+            - script: |
+                env | sort
         - job: main
           displayName: 'Build, lint, UT'
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: '10.x'
+                versionSpec: $(node_version_spec)
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
@@ -131,7 +128,7 @@ stages:
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: '10.x'
+                versionSpec: $(node_version_spec)
             - task: DownloadPipelineArtifact@2
               inputs:
                 artifact: nodeenv-docker-image
@@ -191,7 +188,7 @@ stages:
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: '10.x'
+                versionSpec: $(node_version_spec)
             - task: DownloadPipelineArtifact@2
               inputs:
                 artifact: node-tgz
@@ -204,8 +201,7 @@ stages:
                 npm audit
               displayName: 'Run npm audit'
 
-        # Publish the snapshot images etc.
-        # Original source of these is https://github.com/hyperledger/ci-management/blob/master/jjb/fabric-chaincode-java/shell/include-raw-publish-docker-jar.sh
+        # Publish the snapshot images
         - job: snapshot_publish
           condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
           dependsOn: fvt
@@ -219,50 +215,45 @@ stages:
                 NEXUS_USERNAME: $(nexus-user)
                 NEXUS_PASSWORD: $(nexus-password)
                 NEXUS_URL: nexus3.hyperledger.org:10003/hyperledger
-            - script: |
-                node common/scripts/install-run-rush.js install
-                cd ${BUILD_SOURCEBRANCH}/docs/apidocs
-                CHAINCODE_NODE_COMMIT=$(git rev-parse --short HEAD)
-                echo "---------> CHAINCODE_NODE_COMMIT:" $CHAINCODE_NODE_COMMIT
-                TARGET_REPO=$CHAINCODE_NODE_USERNAME.github.io.git
-                git config --global user.email "fabric.shim@gmail.com"
-                git config --global user.name "fabric-shim"
-                git clone https://github.com/$CHAINCODE_NODE_USERNAME/$TARGET_REPO
-
-                # build docs
-                DOCS_ROOT=$CHAINCODE_NODE_USERNAME.github.io gulp -f docs.js docs
-
-                cd $CHAINCODE_NODE_USERNAME.github.io
-                git add .
-                git commit -m "CHAINCODE_NODE commit - $CHAINCODE_NODE_COMMIT"
-                git config remote.gh-pages.url https://$CHAINCODE_NODE_USERNAME:$CHAINCODE_NODE_PASSWORD@github.com/$CHAINCODE_NODE_USERNAME/$TARGET_REPO
-
-                # Push API docs to Target repository
-                git push gh-pages master
-
-              env:
-                CHAINCODE_NODE_USERNAME: fabric-shim
-
+              displayName: 'docker push to nexus'
 
     # Publish a new version, triggered by a git tag
     - stage: Publish_tag
+      dependsOn: Build_and_Test
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
         - job: update_version
           steps:
             - script: |
-                set -ev
                 env | sort
                 echo "Update the version number"
+                VERSION=$(jq '.version' $(Build.SourcesDirectory)/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
+                echo Version is :${VERSION}:
                 echo "Make sure release notes are present"
                 echo "Make sure change history is present"
         - job: npm_publish
+          displayName: 'npm publish'
           steps:
+            - task: NodeTool@0
+              inputs:
+                versionSpec: $(node_version_spec)
+            - download: current
+              artifact: node-tgz
             - script: |
-                set -ev
-                echo "Setup .npmrc"
-                echo "Use pipeline secret to login"
-                echo "publish"
+                touch $(Agent.TempDirectory)/.npmrc
+                echo '##vso[task.setvariable variable=NPM_CONFIG_USERCONFIG]$(Agent.TempDirectory)/.npmrc'
+              displayName: 'create user .npmrc file'
+            - script: |
+                npm config set registry https://registry.npmjs.org/
+                npm config ls
+              displayName: 'set npmjs registry'
+            - task: npmAuthenticate@0
+              inputs:
+                workingFile: '$(Agent.TempDirectory)/.npmrc'
+                customEndpoint: 'fabric-chainode-node-npm'
+            - script: |
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag latest \;
+              displayName: 'npm publish'
         - job: jsdoc_publish
           steps:
             - script: |
