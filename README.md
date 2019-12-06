@@ -2,7 +2,7 @@
 
 This is the project to support the writing of Contracts with the node.js runtime. 
 
-As an application developer, to learn about how to implement **"Smart Contracts"** for Hyperledger Fabric using Node.js, please visit the [API documentation](https://fabric-shim.github.io/) - and follow the tutorial links. A [quick-start tutorial](TUTORIAL.md) is in this repo.
+As an application developer, to learn about how to implement **"Smart Contracts"** for Hyperledger Fabric using Node.js, please visit the [API documentation](https://fabric-shim.github.io/) - and follow the tutorial links. Look in the [Tutorials](https://hyperledger-fabric.readthedocs.io/en/latest/tutorials.html) section of the documentation for a quick-start tutorial.
 
 As a contributor looking to update this repo, please start with the [contributing guide](CONTRIBUTING.md)
 
@@ -21,7 +21,7 @@ As a contributor looking to update this repo, please start with the [contributin
 ## Where to go from here?
 
 - [API documentation](https://fabric-shim.github.io/)
-- [Full Documenation on Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/release-1.4/)
+- [Full Documentation on Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/latest/)
 - [Samples repository](https://github.com/hyperledger/fabric-samples)
 
 ---
