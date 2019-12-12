@@ -15,8 +15,8 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-      "fabric-shim": "unstable",
-      "fabric-contract-api": "unstable",
-      "fabric-shim-crypto": "unstable"
+      "fabric-shim": "2.0.0-beta.1",
+      "fabric-contract-api": "2.0.0-beta.1",
+      "fabric-shim-crypto": "2.0.0-beta.1"
     }
 }

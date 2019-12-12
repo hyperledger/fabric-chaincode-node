@@ -46,11 +46,11 @@ elif [[ ${NEW_SUFFIX} == 'snapshot' ]]; then
   echo new suffix is ${NEW_SUFFIX}
   CURRENT_VERSION=$(jq '.version' ${DIR}/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9])(.)*/\1/")
   NEW_VERSION=$( ${DIR}/node_modules/.bin/semver -i ${CURRENT_VERSION} )-snapshot
-  NEW_TAG="unstable-1.4"
+  NEW_TAG="2.0.0-beta"
 else  # for beta, rc etc releases where the version doesn't change
   echo new suffix is ${NEW_SUFFIX}
   NEW_VERSION=$(jq '.version' ${DIR}/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9])(.)*/\1-${NEW_SUFFIX}/")
-  NEW_TAG="${NEW_SUFFIX}-1.4"
+  NEW_TAG="${NEW_SUFFIX}-2.0"
 fi
 
 echo New version string will be "${NEW_VERSION}"

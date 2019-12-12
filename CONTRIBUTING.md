@@ -6,9 +6,9 @@ Please visit the [contributors guide](http://hyperledger-fabric.readthedocs.io/e
 
 ## Folder Structure
 
-This repo is structured as a monorepo using [Rush](https://rushjs.io/). Why a monorepo? There are multiple npm modules that are published from this repo, including end to end tests, and tooling. It is siginficant easier to manager within one repo - and Rush has proven to provide excellent support for management of issues such as different dependency versions.
+This repo is structured as a monorepo using [Rush](https://rushjs.io/). Why a monorepo? There are multiple npm modules that are published from this repo, including end to end tests, and tooling. It is significantly easier to manage within one repo - and Rush has proven to provide excellent support for management of issues such as different dependency versions.
 
-The standard Rush convetions are followed as much as possible, deviation only (currently) in publishing and broad release version control. This deviation is to fit in with the existing Hyperledger Fabric release process - and some of these features in Rush are still evolving. This current Rush configuration is also not meant to be the final configuration; we are happy to enterain changes to improve the structure
+The standard Rush conventions are followed as much as possible, deviation only (currently) in publishing and broad release version control. This deviation is to fit in with the existing Hyperledger Fabric release process - and some of these features in Rush are still evolving. This current Rush configuration is also not meant to be the final configuration; we are happy to entertain changes to improve the structure
 
 ### Categories
 
@@ -59,7 +59,7 @@ To clean up docker
 
 ## Mechanics of Contributing
 
-The codebase is maintained in [github](https://github.com/hyperledger/fabric-chaincode-node), with a CI pileline run with [Azure Devlops](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_build?definitionId=33&_a=summary). Issues are handling in [Jira](https://jira.hyperledger.org/issues/?jql=project%20%3D%20FAB%20AND%20component%20%3D%20fabric-chaincode-node)   (please use the component `fabric-chaincode-node` in jira as this is shared project with other Fabric components).
+The codebase is maintained in [github](https://github.com/hyperledger/fabric-chaincode-node), with a CI pipeline run with [Azure Devlops](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_build?definitionId=33&_a=summary). Issues are handling in [Jira](https://jira.hyperledger.org/issues/?jql=project%20%3D%20FAB%20AND%20component%20%3D%20fabric-chaincode-node)   (please use the component `fabric-chaincode-node` in jira as this is shared project with other Fabric components).
 
 
 
