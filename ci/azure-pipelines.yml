@@ -58,8 +58,7 @@ stages:
         # output some basic information for reference
         - job: displayenv
           steps:
-            - script: |
-                env | sort
+            - template: templates/build-data.yaml
         - job: main
           displayName: 'Build, lint, UT'
           steps:
@@ -222,15 +221,6 @@ stages:
       dependsOn: Build_and_Test
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
-        - job: update_version
-          steps:
-            - script: |
-                env | sort
-                echo "Update the version number"
-                VERSION=$(jq '.version' $(Build.SourcesDirectory)/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
-                echo Version is :${VERSION}:
-                echo "Make sure release notes are present"
-                echo "Make sure change history is present"
         - job: npm_publish
           displayName: 'npm publish'
           steps:
@@ -260,3 +250,29 @@ stages:
                 set -ev
                 echo "checkout docs branch"
                 echo "checking"
+        - job: dockerhub_publish
+          steps:
+            - template: templates/build-data.yaml
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: nodeenv-docker-image
+                path: $(Build.SourcesDirectory)/build
+            
+            - script: |
+                wget -qO "$PWD/manifest-tool" https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
+                chmod +x ./manifest-tool
+
+                docker image load --input build/fabric-nodeenv.tar.gz
+                docker images
+                # Publish docker images to nexus repository
+                docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
+                echo "Logged in to docker registry"
+                # tag nodeenv image to PACKAGE_VERSION
+                docker tag hyperledger/fabric-nodeenv fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta
+                # push nodeenv to repository
+                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)-beta"
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta" --target "hyperledger/fabric-nodeenv:2.0"
+              env:
+                DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
+                DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)

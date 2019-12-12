@@ -1,4 +1,72 @@
-## v2.0.0
+## v2.0.0-beta
+Thu 12 Dec 11:46:40 GMT 2019
+
+* [bd518a0](https://github.com/hyperledger/fabric-chaincode-node/commit/bd518a0) Prepare v2.0.0-beta.1
+* [8fb3172](https://github.com/hyperledger/fabric-chaincode-node/commit/8fb3172) [FAB-16711](https://jira.hyperledger.org/browse/FAB-16711) Prepare for 2.0 beta
+* [8961457](https://github.com/hyperledger/fabric-chaincode-node/commit/8961457) [FAB-16711](https://jira.hyperledger.org/browse/FAB-16711) Update azure pipeline
+* [ff93c73](https://github.com/hyperledger/fabric-chaincode-node/commit/ff93c73) [FAB-17090](https://jira.hyperledger.org/browse/FAB-17090) Correctly update the dependabot changes.
+* [103214b](https://github.com/hyperledger/fabric-chaincode-node/commit/103214b) correct docker img tag name
+* [09e8994](https://github.com/hyperledger/fabric-chaincode-node/commit/09e8994) Fix typo in docker login cmd
+* [4de28d9](https://github.com/hyperledger/fabric-chaincode-node/commit/4de28d9) Publish images to Nexus
+* [7a689c1](https://github.com/hyperledger/fabric-chaincode-node/commit/7a689c1) Disable stalebot
+* [03ded65](https://github.com/hyperledger/fabric-chaincode-node/commit/03ded65) Fix npm audit warning
+* [5e6c297](https://github.com/hyperledger/fabric-chaincode-node/commit/5e6c297) Fix typos and whitespace
+* [d35c86b](https://github.com/hyperledger/fabric-chaincode-node/commit/d35c86b) [FAB-16711](https://jira.hyperledger.org/browse/FAB-16711) Push JSDoc to the ghpages repo
+* [9683443](https://github.com/hyperledger/fabric-chaincode-node/commit/9683443) [FAB-13051](https://jira.hyperledger.org/browse/FAB-13051) npm audit checks (#20)
+* [6975e81](https://github.com/hyperledger/fabric-chaincode-node/commit/6975e81) Make consistent dependency versions
+* [8ac11db](https://github.com/hyperledger/fabric-chaincode-node/commit/8ac11db) Pick up useful changes delivered under [FAB-15190](https://jira.hyperledger.org/browse/FAB-15190) (manual cherry pick) - Also switch to using pnpm
+* [799bda1](https://github.com/hyperledger/fabric-chaincode-node/commit/799bda1) Add in capture of docker logs
+* [8beda8f](https://github.com/hyperledger/fabric-chaincode-node/commit/8beda8f) request maintainer status
+* [731288d](https://github.com/hyperledger/fabric-chaincode-node/commit/731288d) Clean up jenkins
+* [f821b78](https://github.com/hyperledger/fabric-chaincode-node/commit/f821b78) Rush logs files (#13)
+* [616a26a](https://github.com/hyperledger/fabric-chaincode-node/commit/616a26a) Fix Azure Pipelines
+* [aa91c55](https://github.com/hyperledger/fabric-chaincode-node/commit/aa91c55) Update stale.yml
+* [24afd25](https://github.com/hyperledger/fabric-chaincode-node/commit/24afd25) [FAB-16711](https://jira.hyperledger.org/browse/FAB-16711) Azure pipelines
+* [c7a3ca4](https://github.com/hyperledger/fabric-chaincode-node/commit/c7a3ca4) [FAB-16905](https://jira.hyperledger.org/browse/FAB-16905) Update Node.js to v12.13.0
+* [d90bdfd](https://github.com/hyperledger/fabric-chaincode-node/commit/d90bdfd) [FAB-16101](https://jira.hyperledger.org/browse/FAB-16101) Handle chaincode invoke without args
+* [f7e5b57](https://github.com/hyperledger/fabric-chaincode-node/commit/f7e5b57) [FAB-16839](https://jira.hyperledger.org/browse/FAB-16839) Update Node.js to v12.12.0
+* [a00dd75](https://github.com/hyperledger/fabric-chaincode-node/commit/a00dd75) [FAB-16527](https://jira.hyperledger.org/browse/FAB-16527) Fix logger typescript definitions
+* [2ccc9db](https://github.com/hyperledger/fabric-chaincode-node/commit/2ccc9db) [FAB-16622](https://jira.hyperledger.org/browse/FAB-16622) - remove to.be.ok
+* [cfac81f](https://github.com/hyperledger/fabric-chaincode-node/commit/cfac81f) [FAB-16798](https://jira.hyperledger.org/browse/FAB-16798) Lock step the versions to that of the shim
+* [2f7d43f](https://github.com/hyperledger/fabric-chaincode-node/commit/2f7d43f) [FAB-16798](https://jira.hyperledger.org/browse/FAB-16798) Update dependencies versions
+* [2df3451](https://github.com/hyperledger/fabric-chaincode-node/commit/2df3451) [FAB-16797](https://jira.hyperledger.org/browse/FAB-16797) Typo in pathname
+* [5e471b3](https://github.com/hyperledger/fabric-chaincode-node/commit/5e471b3) [FAB-16635](https://jira.hyperledger.org/browse/FAB-16635) Refactor to RUSH
+* [d4121e1](https://github.com/hyperledger/fabric-chaincode-node/commit/d4121e1) [FAB-16527](https://jira.hyperledger.org/browse/FAB-16527) Split fabric-shim into API and impl
+* [6198f7b](https://github.com/hyperledger/fabric-chaincode-node/commit/6198f7b) [FAB-16714](https://jira.hyperledger.org/browse/FAB-16714) Add build.sh and start.sh scripts
+* [6bd84fa](https://github.com/hyperledger/fabric-chaincode-node/commit/6bd84fa) [IN-68] Add default GitHub SECURITY policy
+* [3d41093](https://github.com/hyperledger/fabric-chaincode-node/commit/3d41093) [FAB-13890](https://jira.hyperledger.org/browse/FAB-13890) Additional Reference info
+* [594ff9e](https://github.com/hyperledger/fabric-chaincode-node/commit/594ff9e) [FAB-13864](https://jira.hyperledger.org/browse/FAB-13864) adding additional logging
+* [67957c5](https://github.com/hyperledger/fabric-chaincode-node/commit/67957c5) [FAB-16602](https://jira.hyperledger.org/browse/FAB-16602) Fix Node.js chaincode event publishing
+* [168c7de](https://github.com/hyperledger/fabric-chaincode-node/commit/168c7de) [FAB-15027](https://jira.hyperledger.org/browse/FAB-15027) Validation fix
+* [42754fb](https://github.com/hyperledger/fabric-chaincode-node/commit/42754fb) [FAB-15990](https://jira.hyperledger.org/browse/FAB-15990) release scripts
+* [d672695](https://github.com/hyperledger/fabric-chaincode-node/commit/d672695) [FAB-15882](https://jira.hyperledger.org/browse/FAB-15882) Typescript corrections
+* [571d1e5](https://github.com/hyperledger/fabric-chaincode-node/commit/571d1e5) [FAB-14260](https://jira.hyperledger.org/browse/FAB-14260) Update jsdoc
+* [6946d91](https://github.com/hyperledger/fabric-chaincode-node/commit/6946d91) [FAB-16527](https://jira.hyperledger.org/browse/FAB-16527) Use Verdaccio in FV/scenario tests
+* [2c39852](https://github.com/hyperledger/fabric-chaincode-node/commit/2c39852) [FAB-16496](https://jira.hyperledger.org/browse/FAB-16496) Clean up exposed protobuf types
+* [f499e22](https://github.com/hyperledger/fabric-chaincode-node/commit/f499e22) [FAB-16496](https://jira.hyperledger.org/browse/FAB-16496) Port to protobufjs 6
+* [94ab998](https://github.com/hyperledger/fabric-chaincode-node/commit/94ab998) [FAB-16496](https://jira.hyperledger.org/browse/FAB-16496) Groundwork for protobufjs 6
+* [8dade07](https://github.com/hyperledger/fabric-chaincode-node/commit/8dade07) [FAB-16521](https://jira.hyperledger.org/browse/FAB-16521) Move Node.js chaincode to Node.js v12
+* [3fe2f76](https://github.com/hyperledger/fabric-chaincode-node/commit/3fe2f76) [FAB-16521](https://jira.hyperledger.org/browse/FAB-16521) Remove dependency on x509 module
+* [84469f8](https://github.com/hyperledger/fabric-chaincode-node/commit/84469f8) FABCI-381 Remove Zbuilds on cc-node for master
+* [65f021a](https://github.com/hyperledger/fabric-chaincode-node/commit/65f021a) [FAB-16473](https://jira.hyperledger.org/browse/FAB-16473) Test updates to reflect [FAB-16303](https://jira.hyperledger.org/browse/FAB-16303)
+* [e71eedd](https://github.com/hyperledger/fabric-chaincode-node/commit/e71eedd) [FAB-16473](https://jira.hyperledger.org/browse/FAB-16473) Copy proto files into source control
+* [4a728fe](https://github.com/hyperledger/fabric-chaincode-node/commit/4a728fe) [FAB-16489](https://jira.hyperledger.org/browse/FAB-16489) Add CODEOWNERS
+* [ef4c7aa](https://github.com/hyperledger/fabric-chaincode-node/commit/ef4c7aa) [FAB-16473](https://jira.hyperledger.org/browse/FAB-16473) Move version/tag back to snapshot/unstable
+* [238f775](https://github.com/hyperledger/fabric-chaincode-node/commit/238f775) [FAB-16473](https://jira.hyperledger.org/browse/FAB-16473) Stop trying to copy token proto files
+* [410f657](https://github.com/hyperledger/fabric-chaincode-node/commit/410f657) [FABCI-397] Remove AnsiColor wrapper
+* [167b53d](https://github.com/hyperledger/fabric-chaincode-node/commit/167b53d) [FAB-15580](https://jira.hyperledger.org/browse/FAB-15580) Update types for async iterators
+* [f09bb43](https://github.com/hyperledger/fabric-chaincode-node/commit/f09bb43) [FAB-15579](https://jira.hyperledger.org/browse/FAB-15579) Fix doc for CommonIterator.next()
+* [08dd598](https://github.com/hyperledger/fabric-chaincode-node/commit/08dd598) [FAB-15433](https://jira.hyperledger.org/browse/FAB-15433) Add argument metadata
+* [4852d22](https://github.com/hyperledger/fabric-chaincode-node/commit/4852d22) [FAB-15330](https://jira.hyperledger.org/browse/FAB-15330) Support Node 10 Async Iterators
+* [5f87412](https://github.com/hyperledger/fabric-chaincode-node/commit/5f87412) [FAB-15312](https://jira.hyperledger.org/browse/FAB-15312) fix s390x builds
+* [aba36b0](https://github.com/hyperledger/fabric-chaincode-node/commit/aba36b0) [FAB-14490](https://jira.hyperledger.org/browse/FAB-14490) Logging from chaincode
+* [017d5c8](https://github.com/hyperledger/fabric-chaincode-node/commit/017d5c8) [FAB-15275](https://jira.hyperledger.org/browse/FAB-15275) Update license statements
+* [5f8e2da](https://github.com/hyperledger/fabric-chaincode-node/commit/5f8e2da) [FAB-15126](https://jira.hyperledger.org/browse/FAB-15126) Disable latest multiarch tag
+* [68c72ec](https://github.com/hyperledger/fabric-chaincode-node/commit/68c72ec) [FAB-14996](https://jira.hyperledger.org/browse/FAB-14996) Release 2.0.0-alpha
+* [a631b51](https://github.com/hyperledger/fabric-chaincode-node/commit/a631b51) [FAB-14996](https://jira.hyperledger.org/browse/FAB-14996) Release 2.0.0-alpha
+* [eaacc1e](https://github.com/hyperledger/fabric-chaincode-node/commit/eaacc1e) [FAB-15081](https://jira.hyperledger.org/browse/FAB-15081) Script to publish multiarch manifest
+
+## v2.0.0-alpha
 Fri  5 Apr 13:38:54 BST 2019
 
 * [00dc003](https://github.com/hyperledger/fabric/commit/00dc003) [FAB-14144](https://jira.hyperledger.org/browse/FAB-14144) Integration test reformat

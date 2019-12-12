@@ -1,0 +1,53 @@
+v2.0.0-beta, 12 December 2019
+-----------------------------
+
+Release Notes
+-------------
+The main change in the v2.0.0 beta is the level of NodeJS runtime has moved up to the latest LTS version of v12.13.0 
+v2.0.0 beta has the fixes from v1.4.4 level.
+
+Migration Notes
+---------------
+Note that a change needed to be made to the metadata schema as it was in error; it had diverged from the JSONSchema standard
+so that it was not possible to validate complex objects.
+
+If you have custom metadata defined in the contract, then for the complex objects defined in the 'components' section
+the properties of this object where previously held as array; they now need to be held as a map with the key as the name
+of the property
+
+Return types on functions where returned as an array of schema objects. this has been modified to be a single object. i.e. 
+the single value array is now just a single value.
+
+There is also a new nodeenv docker image that is used for hosting the chaincode rather than use the baseos image as in V1.4
+
+In v1.4, the fabric-contract-api had a dependency on the fabric-shim.  This has changed in this version to have a dependency
+on the new fabric-shim-api module. This allows the fabric-contract-api to be used client side for annotations. 
+
+For contributors, the v2.0.0 repo is built using rush and is organized as a full mono-repo.
+
+The @Object annotation has been deprecated in favour of the @DataType annotation
+
+The x509 library used for parsing has changed; this should be parse the X509 certificates exactly the same way; this is a note that
+differences are observed in the parsed certificates please raise an issue.
+
+Summary of the programming model
+-------------------------------
+
+This is designed to improve developer productivity and ease of use.
+For more information see https://hyperledger-fabric.readthedocs.io/en/developapps/developing_applications.html
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v2.0.0-beta
