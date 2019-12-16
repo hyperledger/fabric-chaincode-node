@@ -26,7 +26,7 @@ The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required.
   "version": "1.0.0",
   "main": "index.js",
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "fabric-chaincode-api": "^1.4.0",
     "fabric-shim": "^1.4.0"

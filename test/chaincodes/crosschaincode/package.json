@@ -13,7 +13,7 @@
     "engineStrict": true,
     "version": "1.0.0",
     "author": "",
-    "license": "ISC",
+    "license": "Apache-2.0",
     "dependencies": {
       "fabric-shim": "2.0.0-beta.1",
       "fabric-contract-api": "2.0.0-beta.1"

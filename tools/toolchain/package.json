@@ -9,7 +9,7 @@
     "stopfabric": "gulp stopFabric"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "delay": "4.3.0",
     "fs-extra": "8.1.0",
