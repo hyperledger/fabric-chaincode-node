@@ -200,22 +200,6 @@ stages:
                 npm audit
               displayName: 'Run npm audit'
 
-        # Publish the snapshot images
-        - job: snapshot_publish
-          condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
-          dependsOn: fvt
-          steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                artifact: nodeenv-docker-image
-                path: $(Build.SourcesDirectory)/build
-            - script: ./ci/scripts/publish_docker.sh
-              env:
-                NEXUS_USERNAME: $(nexus-user)
-                NEXUS_PASSWORD: $(nexus-password)
-                NEXUS_URL: nexus3.hyperledger.org:10003/hyperledger
-              displayName: 'docker push to nexus'
-
     # Publish a new version, triggered by a git tag
     - stage: Publish_tag
       dependsOn: Build_and_Test
@@ -257,14 +241,13 @@ stages:
               inputs:
                 artifact: nodeenv-docker-image
                 path: $(Build.SourcesDirectory)/build
-            
+
             - script: |
                 wget -qO "$PWD/manifest-tool" https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
                 chmod +x ./manifest-tool
 
                 docker image load --input build/fabric-nodeenv.tar.gz
                 docker images
-                # Publish docker images to nexus repository
                 docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
                 echo "Logged in to docker registry"
                 # tag nodeenv image to PACKAGE_VERSION
