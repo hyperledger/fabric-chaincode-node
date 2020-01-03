@@ -104,7 +104,7 @@ describe('Chaincode', () => {
             sinon.assert.calledOnce(getArgsStub);
             sinon.assert.calledWith(getArgsStub, myYargs);
 
-            expect(chat.calledOnce).to.be.ok;
+            expect(chat.calledOnce).to.be.true;
 
             const args = chat.firstCall.args;
             expect(args.length).to.deep.equal(1);
@@ -217,7 +217,7 @@ describe('Chaincode', () => {
                 sinon.assert.calledOnce(getArgsStub);
                 sinon.assert.calledWith(getArgsStub, myYargs);
 
-                expect(chat.calledOnce).to.be.ok;
+                expect(chat.calledOnce).to.be.true;
 
                 const args = chat.firstCall.args;
                 expect(args.length).to.deep.equal(1);
@@ -352,7 +352,7 @@ describe('Chaincode', () => {
 
             Chaincode.newLogger();
 
-            expect(loggerStub.calledOnce).to.be.ok;
+            expect(loggerStub.calledOnce).to.be.true;
             expect(loggerStub.getCall(0).args[0]).to.deep.equal('shim');
 
             Logger.getLogger.restore();
@@ -363,7 +363,7 @@ describe('Chaincode', () => {
 
             Chaincode.newLogger('testLogger');
 
-            expect(loggerStub.calledOnce).to.be.ok;
+            expect(loggerStub.calledOnce).to.be.true;
             expect(loggerStub.getCall(0).args[0]).to.deep.equal('testLogger');
 
             Logger.getLogger.restore();
