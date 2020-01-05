@@ -414,17 +414,17 @@ describe('Stub', () => {
             });
             expect(stub.binding).to.deep.equal('some proposal binding');
 
-            expect(_proposalProtoProposalDecodeStub.calledOnce).to.be.ok;
+            expect(_proposalProtoProposalDecodeStub.calledOnce).to.be.true;
             expect(_proposalProtoProposalDecodeStub.firstCall.args).to.deep.equal(['some bytes']);
-            expect(_commonProtoHeaderDecodeStub.calledOnce).to.be.ok;
+            expect(_commonProtoHeaderDecodeStub.calledOnce).to.be.true;
             expect(_commonProtoHeaderDecodeStub.firstCall.args).to.deep.equal([decodedProposal.header]);
-            expect(_commonProtoSignatureHeaderDecodeStub.calledOnce).to.be.ok;
+            expect(_commonProtoSignatureHeaderDecodeStub.calledOnce).to.be.true;
             expect(_commonProtoSignatureHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.signatureHeader]);
-            expect(_idProtoSerializedIdentityDecodeStub.calledOnce).to.be.ok;
+            expect(_idProtoSerializedIdentityDecodeStub.calledOnce).to.be.true;
             expect(_idProtoSerializedIdentityDecodeStub.firstCall.args).to.deep.equal([decodedSigHeader.creator]);
-            expect(_commonProtoChannelHeaderDecodeStub.calledOnce).to.be.ok;
+            expect(_commonProtoChannelHeaderDecodeStub.calledOnce).to.be.true;
             expect(_commonProtoChannelHeaderDecodeStub.firstCall.args).to.deep.equal([decodedHeader.channelHeader]);
-            expect(_proposalProtoChaincodeProposalPayloadDecodeStub.calledOnce).to.be.ok;
+            expect(_proposalProtoChaincodeProposalPayloadDecodeStub.calledOnce).to.be.true;
             expect(_proposalProtoChaincodeProposalPayloadDecodeStub.firstCall.args).to.deep.equal([decodedProposal.payload]);
 
             Stub.__set__('computeProposalBinding', saveComputeProposalBinding);
@@ -588,7 +588,7 @@ describe('Stub', () => {
                 const result = await stub.getState('a key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateStub.calledOnce).to.be.ok;
+                expect(handleGetStateStub.calledOnce).to.be.true;
                 expect(handleGetStateStub.firstCall.args).to.deep.equal(['', 'a key', 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -606,7 +606,7 @@ describe('Stub', () => {
                 const result = await stub.putState('a key', 'a value');
 
                 expect(result).to.deep.equal('some state');
-                expect(handlePutStateStub.calledOnce).to.be.ok;
+                expect(handlePutStateStub.calledOnce).to.be.true;
                 expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', Buffer.from('a value'), 'dummyChannelId', 'dummyTxid']);
             });
             it ('should return handler.handlePutState', async () => {
@@ -621,7 +621,7 @@ describe('Stub', () => {
                 const result = await stub.putState('a key', {a:'value'});
 
                 expect(result).to.deep.equal('some state');
-                expect(handlePutStateStub.calledOnce).to.be.ok;
+                expect(handlePutStateStub.calledOnce).to.be.true;
                 expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', {a:'value'}, 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -639,7 +639,7 @@ describe('Stub', () => {
                 const result = await stub.deleteState('a key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleDeleteStateStub.calledOnce).to.be.ok;
+                expect(handleDeleteStateStub.calledOnce).to.be.true;
                 expect(handleDeleteStateStub.firstCall.args).to.deep.equal(['', 'a key', 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -689,7 +689,7 @@ describe('Stub', () => {
                 const result = await stub.getStateByRange('start key', 'end key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'start key', 'end key', 'dummyChannelId', 'dummyTxid']);
             });
 
@@ -707,7 +707,7 @@ describe('Stub', () => {
                 const result = await stub.getStateByRange(null, 'end key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', EMPTY_KEY_SUBSTITUTE, 'end key', 'dummyChannelId', 'dummyTxid']);
             });
 
@@ -760,7 +760,7 @@ describe('Stub', () => {
                 const result = await stub.getStateByRangeWithPagination(null, 'end key', 3);
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 const metadataBuffer = fabprotos.protos.QueryResponseMetadata.encode({
                     bookmark: '',
                     fetchedRecordsCount: 3
@@ -780,7 +780,7 @@ describe('Stub', () => {
                 const result = await stub.getStateByRangeWithPagination('start key', 'end key', 3);
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 const metadataBuffer = fabprotos.protos.QueryResponseMetadata.encode({
                     bookmark: '',
                     fetchedRecordsCount: 3
@@ -800,7 +800,7 @@ describe('Stub', () => {
                 const result = await stub.getStateByRangeWithPagination('start key', 'end key', 3, 'a bookmark');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 const metadataBuffer = fabprotos.protos.QueryResponseMetadata.encode({
                     bookmark: 'a bookmark',
                     fetchedRecordsCount: 3
@@ -822,7 +822,7 @@ describe('Stub', () => {
                 const result = await stub.getQueryResult('a query');
 
                 expect(result).to.deep.equal('some query result');
-                expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+                expect(handleGetQueryResultStub.calledOnce).to.be.true;
                 expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['', 'a query', null, 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -840,7 +840,7 @@ describe('Stub', () => {
                 const result = await stub.getQueryResultWithPagination('a query', 3);
 
                 expect(result).to.deep.equal('some query result');
-                expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+                expect(handleGetQueryResultStub.calledOnce).to.be.true;
                 const metadata = handleGetQueryResultStub.firstCall.args[2];
                 const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(3);
@@ -859,7 +859,7 @@ describe('Stub', () => {
                 const result = await stub.getQueryResultWithPagination('a query', 3, 'a bookmark');
 
                 expect(result).to.deep.equal('some query result');
-                expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+                expect(handleGetQueryResultStub.calledOnce).to.be.true;
                 const metadata = handleGetQueryResultStub.firstCall.args[2];
                 const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(3);
@@ -880,7 +880,7 @@ describe('Stub', () => {
                 const result = await stub.getHistoryForKey('a key');
 
                 expect(result).to.deep.equal('some history');
-                expect(handleGetHistoryForKeyStub.calledOnce).to.be.ok;
+                expect(handleGetHistoryForKeyStub.calledOnce).to.be.true;
                 expect(handleGetHistoryForKeyStub.firstCall.args).to.deep.equal(['a key', 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -903,7 +903,7 @@ describe('Stub', () => {
                 const result = await stub.invokeChaincode('chaincodeName', ['some', 'args'], 'someChannel');
 
                 expect(result).to.deep.equal('invoked');
-                expect(handleInvokeChaincodeStub.calledOnce).to.be.ok;
+                expect(handleInvokeChaincodeStub.calledOnce).to.be.true;
                 expect(handleInvokeChaincodeStub.firstCall.args).to.deep.equal(['chaincodeName/someChannel', ['some', 'args'], 'dummyChannelId', 'dummyTxid']);
             });
 
@@ -911,7 +911,7 @@ describe('Stub', () => {
                 const result = await stub.invokeChaincode('chaincodeName', ['some', 'args']);
 
                 expect(result).to.deep.equal('invoked');
-                expect(handleInvokeChaincodeStub.calledOnce).to.be.ok;
+                expect(handleInvokeChaincodeStub.calledOnce).to.be.true;
                 expect(handleInvokeChaincodeStub.firstCall.args).to.deep.equal(['chaincodeName', ['some', 'args'], 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -966,7 +966,7 @@ describe('Stub', () => {
                 expect(() => {
                     stub.createCompositeKey('some type', 'some attributes');
                 }).to.throw(/attributes must be an array/);
-                expect(mockValidate.calledOnce).to.be.ok;
+                expect(mockValidate.calledOnce).to.be.true;
                 expect(mockValidate.firstCall.args).to.deep.equal(['some type']);
             });
 
@@ -977,7 +977,7 @@ describe('Stub', () => {
                 const result = stub.createCompositeKey('some type', ['attr1', 'attr2']);
 
                 expect(result).to.deep.equal(`${COMPOSITEKEY_NS}some type${MIN_UNICODE_RUNE_VALUE}attr1${MIN_UNICODE_RUNE_VALUE}attr2${MIN_UNICODE_RUNE_VALUE}`);
-                expect(mockValidate.calledThrice).to.be.ok;
+                expect(mockValidate.calledThrice).to.be.true;
                 expect(mockValidate.firstCall.args).to.deep.equal(['some type']);
                 expect(mockValidate.secondCall.args).to.deep.equal(['attr1']);
                 expect(mockValidate.thirdCall.args).to.deep.equal(['attr2']);
@@ -1033,9 +1033,9 @@ describe('Stub', () => {
                 const result = await stub.getStateByPartialCompositeKey('some type', ['attr1', 'attr2']);
 
                 expect(result).to.deep.equal('some state');
-                expect(createCompositeKeyStub.calledOnce).to.be.ok;
+                expect(createCompositeKeyStub.calledOnce).to.be.true;
                 expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['', 'some composite key', `some composite key${MAX_UNICODE_RUNE_VALUE}`, 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -1060,9 +1060,9 @@ describe('Stub', () => {
                 const result = await stub.getStateByPartialCompositeKeyWithPagination('some type', ['attr1', 'attr2'], 3);
 
                 expect(result).to.deep.equal(response);
-                expect(createCompositeKeyStub.calledOnce).to.be.ok;
+                expect(createCompositeKeyStub.calledOnce).to.be.true;
                 expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 const metadata = handleGetStateByRangeStub.firstCall.args[5];
                 const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(3);
@@ -1079,9 +1079,9 @@ describe('Stub', () => {
                 const createCompositeKeyStub = sinon.stub(stub, 'createCompositeKey').returns('some composite key');
                 const result = await stub.getStateByPartialCompositeKeyWithPagination('some type', ['attr1', 'attr2'], 23, 'a bookmark');
                 expect(result).to.deep.equal(response);
-                expect(createCompositeKeyStub.calledOnce).to.be.ok;
+                expect(createCompositeKeyStub.calledOnce).to.be.true;
                 expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['attr1', 'attr2']]);
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 const metadata = handleGetStateByRangeStub.firstCall.args[5];
                 const decoded = fabprotos.protos.QueryMetadata.decode(metadata);
                 expect(decoded.pageSize).to.equal(23);
@@ -1121,7 +1121,7 @@ describe('Stub', () => {
                 const result = await stub.getPrivateData('some collection', 'some key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateStub.calledOnce).to.be.ok;
+                expect(handleGetStateStub.calledOnce).to.be.true;
                 expect(handleGetStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -1158,7 +1158,7 @@ describe('Stub', () => {
                 const result = await stub.getPrivateDataHash('some collection', 'some key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetPrivateDataHashStub.calledOnce).to.be.ok;
+                expect(handleGetPrivateDataHashStub.calledOnce).to.be.true;
                 expect(handleGetPrivateDataHashStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -1204,7 +1204,7 @@ describe('Stub', () => {
             it ('should return handler.handlePutState with string', async () => {
                 const result = await stub.putPrivateData('some collection', 'some key', 'some value');
                 expect(result).to.deep.equal('some state');
-                expect(handlePutStateStub.calledOnce).to.be.ok;
+                expect(handlePutStateStub.calledOnce).to.be.true;
                 expect(handlePutStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', Buffer.from('some value'), 'dummyChannelId', 'dummyTxid']);
             });
 
@@ -1212,7 +1212,7 @@ describe('Stub', () => {
                 const result = await stub.putPrivateData('some collection', 'some key', {some :'value'});
 
                 expect(result).to.deep.equal('some state');
-                expect(handlePutStateStub.calledOnce).to.be.ok;
+                expect(handlePutStateStub.calledOnce).to.be.true;
                 expect(handlePutStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', {some :'value'}, 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -1249,7 +1249,7 @@ describe('Stub', () => {
                 const result = await stub.deletePrivateData('some collection', 'some key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleDeleteStateStub.calledOnce).to.be.ok;
+                expect(handleDeleteStateStub.calledOnce).to.be.true;
                 expect(handleDeleteStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -1325,7 +1325,7 @@ describe('Stub', () => {
                 const result = await stub.getPrivateDataByRange('some collection', null, 'some end key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['some collection', EMPTY_KEY_SUBSTITUTE, 'some end key', 'dummyChannelId', 'dummyTxid']);
             });
 
@@ -1333,7 +1333,7 @@ describe('Stub', () => {
                 const result = await stub.getPrivateDataByRange('some collection', 'some start key', 'some end key');
 
                 expect(result).to.deep.equal('some state');
-                expect(handleGetStateByRangeStub.calledOnce).to.be.ok;
+                expect(handleGetStateByRangeStub.calledOnce).to.be.true;
                 expect(handleGetStateByRangeStub.firstCall.args).to.deep.equal(['some collection', 'some start key', 'some end key', 'dummyChannelId', 'dummyTxid']);
             });
         });
@@ -1376,9 +1376,9 @@ describe('Stub', () => {
                 const result = await stub.getPrivateDataByPartialCompositeKey('some collection', 'some type', ['arg1', 'arg2']);
 
                 expect(result).to.deep.equal('some data by range');
-                expect(createCompositeKeyStub.calledOnce).to.be.ok;
+                expect(createCompositeKeyStub.calledOnce).to.be.true;
                 expect(createCompositeKeyStub.firstCall.args).to.deep.equal(['some type', ['arg1', 'arg2']]);
-                expect(getPrivateDataByRangeStub.calledOnce).to.be.ok;
+                expect(getPrivateDataByRangeStub.calledOnce).to.be.true;
                 expect(getPrivateDataByRangeStub.firstCall.args).to.deep.equal(['some collection', 'some composite key', `some composite key${MAX_UNICODE_RUNE_VALUE}`]);
             });
         });
@@ -1415,7 +1415,7 @@ describe('Stub', () => {
                 const result = await stub.getPrivateDataQueryResult('some collection', 'some query');
 
                 expect(result).to.deep.equal('some query result');
-                expect(handleGetQueryResultStub.calledOnce).to.be.ok;
+                expect(handleGetQueryResultStub.calledOnce).to.be.true;
                 expect(handleGetQueryResultStub.firstCall.args).to.deep.equal(['some collection', 'some query', null, 'dummyChannelId', 'dummyTxid']);
             });
         });
