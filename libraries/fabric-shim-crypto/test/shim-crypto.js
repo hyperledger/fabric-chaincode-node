@@ -71,9 +71,9 @@ describe('enc-sign', () => {
             expect(sc.signKey).to.be.undefined;
             expect(sc._ecdsa).to.be.undefined;
 
-            expect(mockCreateCipher.calledOnce).to.be.ok;
+            expect(mockCreateCipher.calledOnce).to.be.true;
             expect(mockCreateCipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, mapItems.iv.value]);
-            expect(mockCreateDecipher.calledOnce).to.be.ok;
+            expect(mockCreateDecipher.calledOnce).to.be.true;
             expect(mockCreateDecipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, mapItems.iv.value]);
         });
 
@@ -90,11 +90,11 @@ describe('enc-sign', () => {
             expect(sc.signKey).to.be.undefined;
             expect(sc._ecdsa).to.be.undefined;
 
-            expect(mockRandomBytes.calledOnce).to.be.ok;
+            expect(mockRandomBytes.calledOnce).to.be.true;
             expect(mockRandomBytes.firstCall.args).to.deep.equal([16]);
-            expect(mockCreateCipher.calledOnce).to.be.ok;
+            expect(mockCreateCipher.calledOnce).to.be.true;
             expect(mockCreateCipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, 'some random bytes']);
-            expect(mockCreateDecipher.calledOnce).to.be.ok;
+            expect(mockCreateDecipher.calledOnce).to.be.true;
             expect(mockCreateDecipher.firstCall.args).to.deep.equal([ALGORITHM, mapItems.encryptKey.value, 'some random bytes']);
         });
 
@@ -108,9 +108,9 @@ describe('enc-sign', () => {
             expect(sc.signKey).to.deep.equal('some imported signKey');
             expect(sc._ecdsa).to.deep.equal(ecStubInstance);
 
-            expect(mockImportKey.calledOnce).to.be.ok;
+            expect(mockImportKey.calledOnce).to.be.true;
             expect(mockImportKey.firstCall.args).to.deep.equal([mapItems.signKey.value]);
-            expect(mockEC.calledOnce).to.be.ok;
+            expect(mockEC.calledOnce).to.be.true;
             expect(mockEC.firstCall.args).to.deep.equal([elliptic.curves.p256]);
 
             clearSignKeyMocks();
@@ -136,9 +136,9 @@ describe('enc-sign', () => {
 
                 const sc = newShimCrypto(['encryptKey']);
                 expect(sc.encrypt('some message').toString('hex')).to.deep.equal('00000000001111111111');
-                expect(updateStub.calledOnce).to.be.ok;
+                expect(updateStub.calledOnce).to.be.true;
                 expect(updateStub.firstCall.args).to.deep.equal(['some message', null, 'hex']);
-                expect(finalStub.calledOnce).to.be.ok;
+                expect(finalStub.calledOnce).to.be.true;
                 expect(finalStub.firstCall.args).to.deep.equal(['hex']);
             });
         });
@@ -164,9 +164,9 @@ describe('enc-sign', () => {
 
                 const sc = newShimCrypto(['encryptKey']);
                 expect(sc.decrypt('00000000001111111111').toString('utf8')).to.deep.equal('some message');
-                expect(updateStub.calledOnce).to.be.ok;
+                expect(updateStub.calledOnce).to.be.true;
                 expect(updateStub.firstCall.args).to.deep.equal(['00000000001111111111', null, 'utf8']);
-                expect(finalStub.calledOnce).to.be.ok;
+                expect(finalStub.calledOnce).to.be.true;
                 expect(finalStub.firstCall.args).to.deep.equal(['utf8']);
             });
 
@@ -242,13 +242,13 @@ describe('enc-sign', () => {
                 const sc = newShimCrypto(['signKey']);
 
                 expect(sc.sign('some message')).to.deep.equal('some DER');
-                expect(ecStubInstance.keyFromPrivate.calledOnce).to.be.ok;
+                expect(ecStubInstance.keyFromPrivate.calledOnce).to.be.true;
                 expect(ecStubInstance.keyFromPrivate.firstCall.args).to.deep.equal(['some prvKeyHex', 'hex']);
-                expect(hashStub.calledOnce).to.be.ok;
+                expect(hashStub.calledOnce).to.be.true;
                 expect(hashStub.firstCall.args).to.deep.equal(['some message']);
-                expect(ecStubInstance.sign.calledOnce).to.be.ok;
+                expect(ecStubInstance.sign.calledOnce).to.be.true;
                 expect(ecStubInstance.sign.firstCall.args).to.deep.equal(['some hash', 'some key from private']);
-                expect(_preventMalleabilityStub.calledOnce).to.be.ok;
+                expect(_preventMalleabilityStub.calledOnce).to.be.true;
                 expect(_preventMalleabilityStub.firstCall.args).to.deep.equal(['some signed message', 'some params']);
 
                 ShimCrypto.__set__('_preventMalleability', savePreventMalleability);
@@ -340,9 +340,9 @@ describe('enc-sign', () => {
                 const result = sc.verify('some sig', 'some message');
 
                 expect(result.ok).to.deep.equal(false);
-                expect(result.error instanceof Error).to.be.ok;
+                expect(result.error instanceof Error).to.be.true;
                 expect(result.error.message).to.deep.equal('Invalid S value in signature. Must be smaller than half of the order.');
-                expect(_checkMalleabilityStub.calledOnce).to.be.ok;
+                expect(_checkMalleabilityStub.calledOnce).to.be.true;
                 expect(_checkMalleabilityStub.firstCall.args).to.deep.equal(['some sig', 'some params']);
 
                 ShimCrypto.__set__('_checkMalleability', saveCheckMalleability);
@@ -366,11 +366,11 @@ describe('enc-sign', () => {
 
                 expect(result.ok).to.deep.equal(true);
                 expect(result.error).to.deep.equal(null);
-                expect(_checkMalleabilityStub.calledOnce).to.be.ok;
+                expect(_checkMalleabilityStub.calledOnce).to.be.true;
                 expect(_checkMalleabilityStub.firstCall.args).to.deep.equal(['some sig', 'some params']);
-                expect(ecStubInstance.keyFromPublic.calledOnce).to.be.ok;
+                expect(ecStubInstance.keyFromPublic.calledOnce).to.be.true;
                 expect(ecStubInstance.keyFromPublic.firstCall.args).to.deep.equal(['some pubKeyHex', 'hex']);
-                expect(mockVerifyStub.calledOnce).to.be.ok;
+                expect(mockVerifyStub.calledOnce).to.be.true;
                 expect(mockVerifyStub.firstCall.args).to.deep.equal(['some hash', 'some sig']);
 
                 ShimCrypto.__set__('_checkMalleability', saveCheckMalleability);
@@ -403,13 +403,13 @@ describe('enc-sign', () => {
                 const result = sc.verify('some sig', 'some message');
 
                 expect(result.ok).to.deep.equal(false);
-                expect(result.error instanceof Error).to.be.ok;
+                expect(result.error instanceof Error).to.be.true;
                 expect(result.error.message).to.deep.equal('Signature failed to verify');
-                expect(_checkMalleabilityStub.calledOnce).to.be.ok;
+                expect(_checkMalleabilityStub.calledOnce).to.be.true;
                 expect(_checkMalleabilityStub.firstCall.args).to.deep.equal(['some sig', 'some params']);
-                expect(ecStubInstance.keyFromPublic.calledOnce).to.be.ok;
+                expect(ecStubInstance.keyFromPublic.calledOnce).to.be.true;
                 expect(ecStubInstance.keyFromPublic.firstCall.args).to.deep.equal(['some pubKeyHex', 'hex']);
-                expect(mockVerifyStub.calledOnce).to.be.ok;
+                expect(mockVerifyStub.calledOnce).to.be.true;
                 expect(mockVerifyStub.firstCall.args).to.deep.equal(['some hash', 'some sig']);
 
                 ShimCrypto.__set__('_checkMalleability', saveCheckMalleability);
@@ -431,11 +431,11 @@ describe('enc-sign', () => {
             const result = ShimCrypto.__get__('hash')('some message');
 
             expect(result).to.deep.equal('some digest');
-            expect(createHashStub.calledOnce).to.be.ok;
+            expect(createHashStub.calledOnce).to.be.true;
             expect(createHashStub.firstCall.args).to.deep.equal(['sha256']);
-            expect(updateStub.calledOnce).to.be.ok;
+            expect(updateStub.calledOnce).to.be.true;
             expect(updateStub.firstCall.args).to.deep.equal(['some message']);
-            expect(digestStub.calledOnce).to.be.ok;
+            expect(digestStub.calledOnce).to.be.true;
             expect(digestStub.firstCall.args).to.deep.equal(['hex']);
 
             createHashStub.restore();
@@ -503,8 +503,9 @@ describe('enc-sign', () => {
 
             sinon.stub(KEYUTIL, 'getKey').returns(mockKey);
 
-            expect(importKey('some raw content') instanceof ECDSAKey).to.be.ok;
-            expect(mockECDSAKey.calledWithNew).to.be.ok;
+            expect(importKey('some raw content') instanceof ECDSAKey).to.be.true;
+            expect(mockECDSAKey.calledWithNew).to.be.ok;  // Believe wrong
+            expect(mockECDSAKey.calledWithNew()).to.be.false;
             expect(mockECDSAKey.firstCall.args).to.deep.equal([mockKey]);
 
             ShimCrypto.__set__('ECDSAKey', ECDSAKey);
@@ -580,7 +581,7 @@ i6dOfok=
             });
 
             expect(result).to.deep.equal(sig);
-            expect(sig.s.cmp.calledOnce).to.be.ok;
+            expect(sig.s.cmp.calledOnce).to.be.true;
             expect(sig.s.cmp.firstCall.args).to.deep.equal([halfOrdersForCurve.secp256r1]);
         });
 
@@ -612,9 +613,10 @@ i6dOfok=
             const result = _preventMalleability(sig, curveParams);
 
             expect(result.s).to.deep.equal('some sub');
-            expect(mockBN.calledWithNew).to.be.ok;
+            expect(mockBN.calledWithNew).to.be.ok;  // Believe wrong
+            expect(mockBN.calledWithNew()).to.be.false;
             expect(mockBN.firstCall.args).to.deep.equal(['some string', 16]);
-            expect(curveParams.n.toString.calledOnce).to.be.ok;
+            expect(curveParams.n.toString.calledOnce).to.be.true;
             expect(curveParams.n.toString.firstCall.args).to.deep.equal([16]);
 
             ShimCrypto.__set__('BN', saveBN);
@@ -690,7 +692,7 @@ i6dOfok=
             expect(_checkMalleability('some sig', {
                 name: 'secp256r1'
             })).to.deep.equal(false);
-            expect(cmpStub.calledOnce).to.be.ok;
+            expect(cmpStub.calledOnce).to.be.true;
             expect(cmpStub.firstCall.args).to.deep.equal([halfOrdersForCurve.secp256r1]);
 
             ShimCrypto.__set__('Signature', saveSig);
@@ -716,7 +718,7 @@ i6dOfok=
             expect(_checkMalleability('some sig', {
                 name: 'secp256r1'
             })).to.deep.equal(true);
-            expect(cmpStub.calledOnce).to.be.ok;
+            expect(cmpStub.calledOnce).to.be.true;
             expect(cmpStub.firstCall.args).to.deep.equal([halfOrdersForCurve.secp256r1]);
 
             ShimCrypto.__set__('Signature', saveSig);
