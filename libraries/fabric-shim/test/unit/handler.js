@@ -90,7 +90,7 @@ describe('Handler', () => {
             it ('should call the resolve function', () => {
                 qMsg.success('response');
 
-                expect(resolve.calledOnce).to.be.ok;
+                expect(resolve.calledOnce).to.be.true;
                 expect(resolve.firstCall.args).to.deep.equal(['response']);
             });
         });
@@ -99,7 +99,7 @@ describe('Handler', () => {
             it ('should call the reject function', () => {
                 qMsg.fail('err');
 
-                expect(reject.calledOnce).to.be.ok;
+                expect(reject.calledOnce).to.be.true;
                 expect(reject.firstCall.args).to.deep.equal(['err']);
             });
         });
@@ -138,7 +138,7 @@ describe('Handler', () => {
             it ('should add message to the queue and call sendMsg and handle when txContentId not in txQueues', () => {
                 qHandler.queueMsg(qMsg);
 
-                expect(mockSendMsg.calledOnce).to.be.ok;
+                expect(mockSendMsg.calledOnce).to.be.true;
                 expect(mockSendMsg.firstCall.args).to.deep.equal([txContextId]);
                 expect(qHandler.txQueues[txContextId]).to.deep.equal([qMsg]);
             });
@@ -148,7 +148,7 @@ describe('Handler', () => {
 
                 qHandler.queueMsg(qMsg);
 
-                expect(mockSendMsg.calledOnce).to.be.ok;
+                expect(mockSendMsg.calledOnce).to.be.true;
                 expect(mockSendMsg.firstCall.args).to.deep.equal([txContextId]);
                 expect(qHandler.txQueues[txContextId]).to.deep.equal([qMsg]);
             });
@@ -158,7 +158,7 @@ describe('Handler', () => {
 
                 qHandler.queueMsg(qMsg);
 
-                expect(mockSendMsg.notCalled).to.be.ok;
+                expect(mockSendMsg.notCalled).to.be.true;
                 expect(qHandler.txQueues[txContextId]).to.deep.equal(['some qMsg', qMsg]);
             });
         });
@@ -204,12 +204,12 @@ describe('Handler', () => {
 
                 qHandler.handleMsgResponse(response);
 
-                expect(mockGetCurrMsg.calledOnce).to.be.ok;
+                expect(mockGetCurrMsg.calledOnce).to.be.true;
                 expect(mockGetCurrMsg.firstCall.args).to.deep.equal([response.channel_id + response.txid]);
-                expect(mockParseResponse.notCalled).to.be.ok;
-                expect(qMsg.success.notCalled).to.be.ok;
-                expect(qMsg.fail.notCalled).to.be.ok;
-                expect(mockRemoveCurrentAndSendNextMsg.notCalled).to.be.ok;
+                expect(mockParseResponse.notCalled).to.be.true;
+                expect(qMsg.success.notCalled).to.be.true;
+                expect(qMsg.fail.notCalled).to.be.true;
+                expect(mockRemoveCurrentAndSendNextMsg.notCalled).to.be.true;
             });
 
             it ('should call qMsg success when parseResponse does not throw an error _removeCurrentAndSendNextMsg', () => {
@@ -218,14 +218,14 @@ describe('Handler', () => {
 
                 qHandler.handleMsgResponse(response);
 
-                expect(mockGetCurrMsg.calledOnce).to.be.ok;
+                expect(mockGetCurrMsg.calledOnce).to.be.true;
                 expect(mockGetCurrMsg.firstCall.args).to.deep.equal([response.channel_id + response.txid]);
-                expect(mockParseResponse.calledOnce).to.be.ok;
+                expect(mockParseResponse.calledOnce).to.be.true;
                 expect(mockParseResponse.firstCall.args).to.deep.equal([mockHandler, response, 'some method']);
-                expect(qMsg.success.calledOnce).to.be.ok;
+                expect(qMsg.success.calledOnce).to.be.true;
                 expect(qMsg.success.firstCall.args).to.deep.equal(['parsed response']);
-                expect(qMsg.fail.notCalled).to.be.ok;
-                expect(mockRemoveCurrentAndSendNextMsg.calledOnce).to.be.ok;
+                expect(qMsg.fail.notCalled).to.be.true;
+                expect(mockRemoveCurrentAndSendNextMsg.calledOnce).to.be.true;
                 expect(mockRemoveCurrentAndSendNextMsg.firstCall.args).to.deep.equal([response.channel_id + response.txid]);
             });
 
@@ -236,14 +236,14 @@ describe('Handler', () => {
 
                 qHandler.handleMsgResponse(response);
 
-                expect(mockGetCurrMsg.calledOnce).to.be.ok;
+                expect(mockGetCurrMsg.calledOnce).to.be.true;
                 expect(mockGetCurrMsg.firstCall.args).to.deep.equal([response.channel_id + response.txid]);
-                expect(mockParseResponse.calledOnce).to.be.ok;
+                expect(mockParseResponse.calledOnce).to.be.true;
                 expect(mockParseResponse.firstCall.args).to.deep.equal([mockHandler, response, 'some method']);
-                expect(qMsg.success.notCalled).to.be.ok;
-                expect(qMsg.fail.calledOnce).to.be.ok;
+                expect(qMsg.success.notCalled).to.be.true;
+                expect(qMsg.fail.calledOnce).to.be.true;
                 expect(qMsg.fail.firstCall.args).to.deep.equal([err]);
-                expect(mockRemoveCurrentAndSendNextMsg.calledOnce).to.be.ok;
+                expect(mockRemoveCurrentAndSendNextMsg.calledOnce).to.be.true;
                 expect(mockRemoveCurrentAndSendNextMsg.firstCall.args).to.deep.equal([response.channel_id + response.txid]);
             });
         });
@@ -287,7 +287,7 @@ describe('Handler', () => {
 
                 qHandler._removeCurrentAndSendNextMsg(txContextId);
 
-                expect(sendMsg.calledOnce).to.be.ok;
+                expect(sendMsg.calledOnce).to.be.true;
                 expect(qHandler.txQueues[txContextId]).to.deep.equal(['message2']);
                 expect(qHandler.txQueues[alternateTxContextId]).to.deep.equal(['message3', 'message4']);
             });
@@ -297,7 +297,7 @@ describe('Handler', () => {
 
                 qHandler._removeCurrentAndSendNextMsg(txContextId);
 
-                expect(sendMsg.notCalled).to.be.ok;
+                expect(sendMsg.notCalled).to.be.true;
                 expect(qHandler.txQueues[txContextId]).to.be.undefined;
                 expect(qHandler.txQueues[alternateTxContextId]).to.deep.equal(['message3', 'message4']);
             });
@@ -307,7 +307,7 @@ describe('Handler', () => {
 
                 qHandler._removeCurrentAndSendNextMsg(txContextId);
 
-                expect(sendMsg.notCalled).to.be.ok;
+                expect(sendMsg.notCalled).to.be.true;
                 expect(qHandler.txQueues[txContextId]).to.be.null;
                 expect(qHandler.txQueues[alternateTxContextId]).to.deep.equal(['message3', 'message4']);
             });
@@ -326,10 +326,10 @@ describe('Handler', () => {
 
                 qHandler._sendMsg(txContextId);
 
-                expect(getCurrStub.calledOnce).to.be.ok;
+                expect(getCurrStub.calledOnce).to.be.true;
                 expect(getCurrStub.firstCall.args).to.deep.equal([txContextId]);
-                expect(qHandler.stream.write.notCalled).to.be.ok;
-                expect(mockQMsg.fail.notCalled).to.be.ok;
+                expect(qHandler.stream.write.notCalled).to.be.true;
+                expect(mockQMsg.fail.notCalled).to.be.true;
             });
 
             it ('should write to the stream the current message', () => {
@@ -337,11 +337,11 @@ describe('Handler', () => {
 
                 qHandler._sendMsg(txContextId);
 
-                expect(getCurrStub.calledOnce).to.be.ok;
+                expect(getCurrStub.calledOnce).to.be.true;
                 expect(getCurrStub.firstCall.args).to.deep.equal([txContextId]);
-                expect(qHandler.stream.write.calledOnce).to.be.ok;
+                expect(qHandler.stream.write.calledOnce).to.be.true;
                 expect(qHandler.stream.write.firstCall.args).to.deep.equal(['some message']);
-                expect(mockQMsg.fail.notCalled).to.be.ok;
+                expect(mockQMsg.fail.notCalled).to.be.true;
             });
 
             it ('should call fail on the QMsg if stream write errors', () => {
@@ -352,9 +352,9 @@ describe('Handler', () => {
 
                 qHandler._sendMsg(txContextId);
 
-                expect(getCurrStub.calledOnce).to.be.ok;
+                expect(getCurrStub.calledOnce).to.be.true;
                 expect(getCurrStub.firstCall.args).to.deep.equal([txContextId]);
-                expect(mockQMsg.fail.calledOnce).to.be.ok;
+                expect(mockQMsg.fail.calledOnce).to.be.true;
                 expect(mockQMsg.fail.firstCall.args).to.deep.equal([err]);
             });
         });
@@ -400,7 +400,7 @@ describe('Handler', () => {
 
             expect(handler._request_timeout).to.deep.equal(30000);
             expect(handler._endpoint.addr).to.deep.equal(mockPeerAddress.base);
-            expect(credsSpy.calledOnce).to.be.ok;
+            expect(credsSpy.calledOnce).to.be.true;
             expect(handler._endpoint.creds.constructor.name).to.deep.equal('ChannelCredentials');
             expect(handler._client.constructor.name).to.deep.equal('ServiceClient');
 
@@ -472,8 +472,8 @@ describe('Handler', () => {
             expect(handler._options.cert).to.deep.equal(mockOpts.cert);
             expect(handler._request_timeout).to.deep.equal(30000);
             expect(handler._endpoint.addr).to.deep.equal(mockPeerAddress.base);
-            expect(credsSpy.calledOnce).to.be.ok;
-            expect(credsSpy.calledWith(Buffer.from(mockOpts.pem), Buffer.from(mockOpts.key, 'base64'), Buffer.from(mockOpts.cert, 'base64'))).to.be.ok;
+            expect(credsSpy.calledOnce).to.be.true;
+            expect(credsSpy.calledWith(Buffer.from(mockOpts.pem), Buffer.from(mockOpts.key, 'base64'), Buffer.from(mockOpts.cert, 'base64'))).to.be.true;
             expect(handler._endpoint.creds.constructor.name).to.deep.equal('ChannelCredentials');
             expect(handler._client.constructor.name).to.deep.equal('ServiceClient');
         });
@@ -495,7 +495,7 @@ describe('Handler', () => {
 
                 handler.close();
 
-                expect(handler._stream.end.calledOnce).to.be.ok;
+                expect(handler._stream.end.calledOnce).to.be.true;
             });
         });
 
@@ -518,12 +518,13 @@ describe('Handler', () => {
 
                 handler.chat('some starter message');
 
-                expect(handler._client.register.calledOnce).to.be.ok;
-                expect(mockMsgQueueHandler.calledWithNew).to.been.ok;
+                expect(handler._client.register.calledOnce).to.be.true;
+                expect(mockMsgQueueHandler.calledWithNew).to.be.ok;  // believe wrong
+                expect(mockMsgQueueHandler.calledWithNew()).to.be.false;
                 expect(handler._stream).to.deep.equal(mockStream);
                 expect(handler.msgQueueHandler).to.deep.equal(new mockMsgQueueHandler(handler));
 
-                expect(mockStream.write.calledOnce).to.be.ok;
+                expect(mockStream.write.calledOnce).to.be.true;
                 expect(mockStream.write.firstCall.args).to.deep.equal(['some starter message']);
                 expect(mockStream.on.callCount).to.deep.equal(3);
                 expect(mockStream.on.firstCall.args[0]).to.deep.equal('data');
@@ -595,8 +596,8 @@ describe('Handler', () => {
 
                     eventReg.data(badRegisteredMsg);
 
-                    expect(mockStream.write.calledTwice).to.be.ok;
-                    expect(mockNewErrorMsg.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledTwice).to.be.true;
+                    expect(mockNewErrorMsg.calledOnce).to.be.true;
                     expect(mockStream.write.secondCall.args).to.deep.equal(['some error']);
                     expect(mockNewErrorMsg.firstCall.args).to.deep.equal([badRegisteredMsg, 'created']);
                 });
@@ -609,8 +610,8 @@ describe('Handler', () => {
                     eventReg.data(registeredMsg);
                     eventReg.data(badEstablishedMsg);
 
-                    expect(mockStream.write.calledTwice).to.be.ok;
-                    expect(mockNewErrorMsg.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledTwice).to.be.true;
+                    expect(mockNewErrorMsg.calledOnce).to.be.true;
                     expect(mockStream.write.secondCall.args).to.deep.equal(['some error']);
                     expect(mockNewErrorMsg.firstCall.args).to.deep.equal([badEstablishedMsg, 'established']);
                 });
@@ -620,11 +621,11 @@ describe('Handler', () => {
                     eventReg.data(establishedMsg);
                     eventReg.data(registeredMsg);
 
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockNewErrorMsg.notCalled).to.be.ok;
-                    expect(handleMsgResponseSpy.notCalled).to.be.ok;
-                    expect(handleInitSpy.notCalled).to.be.ok;
-                    expect(handleTransactionSpy.notCalled).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.notCalled).to.be.true;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
                 });
 
                 it ('should do nothing when in state ready and MSG_TYPE equals READY', () => {
@@ -632,11 +633,11 @@ describe('Handler', () => {
                     eventReg.data(establishedMsg);
                     eventReg.data(establishedMsg);
 
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockNewErrorMsg.notCalled).to.be.ok;
-                    expect(handleMsgResponseSpy.notCalled).to.be.ok;
-                    expect(handleInitSpy.notCalled).to.be.ok;
-                    expect(handleTransactionSpy.notCalled).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.notCalled).to.be.true;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
                 });
 
                 it ('should call handleMsgResponse when in state ready and MSG_TYPE equals RESPONSE', () => {
@@ -651,12 +652,12 @@ describe('Handler', () => {
 
                     eventReg.data(readyMsg);
 
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockNewErrorMsg.notCalled).to.be.ok;
-                    expect(handleMsgResponseSpy.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.calledOnce).to.be.true;
                     expect(handleMsgResponseSpy.firstCall.args).to.deep.equal([readyMsg]);
-                    expect(handleInitSpy.notCalled).to.be.ok;
-                    expect(handleTransactionSpy.notCalled).to.be.ok;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
                 });
 
                 it ('should call handleMsgResponse when in state ready and MSG_TYPE equals ERROR', () => {
@@ -671,12 +672,12 @@ describe('Handler', () => {
 
                     eventReg.data(readyMsg);
 
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockNewErrorMsg.notCalled).to.be.ok;
-                    expect(handleMsgResponseSpy.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.calledOnce).to.be.true;
                     expect(handleMsgResponseSpy.firstCall.args).to.deep.equal([readyMsg]);
-                    expect(handleInitSpy.notCalled).to.be.ok;
-                    expect(handleTransactionSpy.notCalled).to.be.ok;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
                 });
 
                 it ('should call handleInit when in state ready and MSG_TYPE equals INIT', () => {
@@ -690,12 +691,12 @@ describe('Handler', () => {
                     };
 
                     eventReg.data(readyMsg);
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockNewErrorMsg.notCalled).to.be.ok;
-                    expect(handleMsgResponseSpy.notCalled).to.be.ok;
-                    expect(handleInitSpy.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.notCalled).to.be.true;
+                    expect(handleInitSpy.calledOnce).to.be.true;
                     expect(handleInitSpy.firstCall.args).to.deep.equal([readyMsg]);
-                    expect(handleTransactionSpy.notCalled).to.be.ok;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
                 });
 
                 it ('should call handleTransaction when in state ready and MSG_TYPE equals TRANSACTION', () => {
@@ -709,11 +710,11 @@ describe('Handler', () => {
                     };
 
                     eventReg.data(readyMsg);
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockNewErrorMsg.notCalled).to.be.ok;
-                    expect(handleMsgResponseSpy.notCalled).to.be.ok;
-                    expect(handleInitSpy.notCalled).to.be.ok;
-                    expect(handleTransactionSpy.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.notCalled).to.be.true;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.calledOnce).to.be.true;
                     expect(handleTransactionSpy.firstCall.args).to.deep.equal([readyMsg]);
                 });
 
@@ -730,12 +731,12 @@ describe('Handler', () => {
                     };
 
                     eventReg.data(readyMsg);
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockNewErrorMsg.notCalled).to.be.ok;
-                    expect(handleMsgResponseSpy.notCalled).to.be.ok;
-                    expect(handleInitSpy.notCalled).to.be.ok;
-                    expect(handleTransactionSpy.notCalled).to.be.ok;
-                    expect(processStub.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.notCalled).to.be.true;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
+                    expect(processStub.calledOnce).to.be.true;
                     expect(processStub.firstCall.args).to.deep.equal([1]);
 
                     processStub.restore();
@@ -757,8 +758,8 @@ describe('Handler', () => {
 
                     eventReg.end();
 
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockStream.cancel.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockStream.cancel.calledOnce).to.be.true;
                 });
             });
 
@@ -777,8 +778,8 @@ describe('Handler', () => {
 
                     eventReg.error({});
 
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockStream.end.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockStream.end.calledOnce).to.be.true;
                 });
                 it ('should end the  with error', () => {
                     const eventReg = {};
@@ -794,8 +795,8 @@ describe('Handler', () => {
                     const error = new Error();
                     eventReg.error(error);
 
-                    expect(mockStream.write.calledOnce).to.be.ok;
-                    expect(mockStream.end.calledOnce).to.be.ok;
+                    expect(mockStream.write.calledOnce).to.be.true;
+                    expect(mockStream.end.calledOnce).to.be.true;
                 });
             });
         });
@@ -810,7 +811,7 @@ describe('Handler', () => {
                 const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
                 handler.handleInit('some message');
 
-                expect(handleMessage.calledOnce).to.be.ok;
+                expect(handleMessage.calledOnce).to.be.true;
                 expect(handleMessage.firstCall.args).to.deep.equal(['some message', handler, 'init']);
 
                 Handler.__set__('handleMessage', savedHandleMessage);
@@ -827,7 +828,7 @@ describe('Handler', () => {
                 const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
                 handler.handleTransaction('some message');
 
-                expect(handleMessage.calledOnce).to.be.ok;
+                expect(handleMessage.calledOnce).to.be.true;
                 expect(handleMessage.firstCall.args).to.deep.equal(['some message', handler, 'invoke']);
 
                 Handler.__set__('handleMessage', savedHandleMessage);
@@ -1545,8 +1546,8 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'init');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
 
@@ -1558,8 +1559,8 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'init');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
 
@@ -1568,13 +1569,13 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'init');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler.chaincode.Init.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
 
                 const text = '[theChannelID-aTX] Calling chaincode Init() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
@@ -1584,12 +1585,12 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'invoke');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler.chaincode.Invoke.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
                 const text = '[theChannelID-aTX] Calling chaincode Invoke() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
 
                 expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
@@ -1600,13 +1601,13 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'init');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler.chaincode.Init.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
                 const text = '[theChannelID-aTX] Calling chaincode Init() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
 
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
 
                 expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
@@ -1617,13 +1618,13 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'invoke');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler.chaincode.Invoke.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
                 const text = '[theChannelID-aTX] Calling chaincode Invoke() has not called success or error.';
                 expectedResponse.payload = Buffer.from(text);
 
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
                 expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
             });
@@ -1647,10 +1648,10 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'init');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler.chaincode.Init.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler.chaincode.Init.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
 
@@ -1659,10 +1660,10 @@ describe('Handler', () => {
 
                 await handleMessage(msg, mockHandler, 'invoke');
 
-                expect(decodeStub.calledOnce).to.be.ok;
-                expect(mockHandler.chaincode.Invoke.calledOnce).to.be.ok;
+                expect(decodeStub.calledOnce).to.be.true;
+                expect(mockHandler.chaincode.Invoke.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
-                expect(mockHandler._stream.write.calledOnce).to.be.ok;
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
         });
@@ -1680,7 +1681,8 @@ describe('Handler', () => {
             const createStub = Handler.__get__('createStub');
             createStub({}, 'channelID', 'txID', 'some input', 'some proposal');
 
-            expect(mockStub.calledWithNew).to.be.ok;
+            expect(mockStub.calledWithNew).to.be.ok;   //believe wrong
+            expect(mockStub.calledWithNew()).to.be.false;
             expect(mockStub.firstCall.args[0]).to.deep.equal({});
             expect(mockStub.firstCall.args[1]).to.deep.equal('channelID');
             expect(mockStub.firstCall.args[2]).to.deep.equal('txID');
@@ -1851,7 +1853,8 @@ describe('Handler', () => {
 
             parseResponse(handler, res, 'GetStateByRange');
 
-            expect(mockStateQueryIterator.calledWithNew).to.be.ok;
+            expect(mockStateQueryIterator.calledWithNew).to.be.ok;  // believe wrong
+            expect(mockStateQueryIterator.calledWithNew()).to.be.false;
             expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
         });
 
@@ -1869,7 +1872,8 @@ describe('Handler', () => {
 
             const result = parseResponse(handler, res, 'GetStateByRange');
 
-            expect(mockStateQueryIterator.calledWithNew).to.be.ok;
+            expect(mockStateQueryIterator.calledWithNew).to.be.ok;  // believe wrong
+            expect(mockStateQueryIterator.calledWithNew()).to.be.false;
             expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, pagedQrPayload]);
 
             expect(result.metadata).to.eql(mdDecodedPayload);
@@ -1884,7 +1888,8 @@ describe('Handler', () => {
 
             parseResponse(handler, res, 'GetQueryResult');
 
-            expect(mockStateQueryIterator.calledWithNew).to.be.ok;
+            expect(mockStateQueryIterator.calledWithNew).to.be.ok;  // believe wrong
+            expect(mockStateQueryIterator.calledWithNew()).to.be.false;
             expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
         });
 
@@ -1896,7 +1901,8 @@ describe('Handler', () => {
 
             parseResponse(handler, res, 'GetHistoryForKey');
 
-            expect(mockHistoryQueryIterator.calledWithNew).to.be.ok;
+            expect(mockHistoryQueryIterator.calledWithNew).to.be.ok;  // believe wrong
+            expect(mockHistoryQueryIterator.calledWithNew()).to.be.false;
             expect(mockHistoryQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
         });
 
