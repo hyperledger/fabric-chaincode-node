@@ -16,6 +16,7 @@ const installDir = (commands) =>{
 
     const npm_packages = [{ category: 'apis', name: 'fabric-contract-api' },
     { category: 'apis', name: 'fabric-shim-api' },
+    { category: 'libraries', name: 'fabric-ledger' },
     { category: 'libraries', name: 'fabric-shim' },
     { category: 'libraries', name: 'fabric-shim-crypto' }];
   

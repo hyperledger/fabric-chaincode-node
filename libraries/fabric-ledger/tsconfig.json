@@ -1,0 +1,27 @@
+/*
+ * Copyright 2020 IBM All Rights Reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+{
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"module": "commonjs",
+		"declaration": true,
+		"outDir": "lib",
+		"rootDir": "src",
+		"sourceMap": true,
+		"strict": true,
+		"target": "es2017",
+		"lib": [
+			"esnext",
+			"esnext.asynciterable"
+		]
+	},
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"node_modules/**/*"
+  ]
+}
