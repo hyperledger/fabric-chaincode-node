@@ -2,6 +2,7 @@
     "source": {
         "include": [
             "./_jsdoc/index.md",
+            "../libraries/fabric-ledger/lib/Ledger.js",
             "../libraries/fabric-shim/lib/chaincode.js",
             "../libraries/fabric-shim/lib/stub.js",
             "../libraries/fabric-shim/lib/iterators.js",
