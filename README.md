@@ -24,6 +24,10 @@ As a contributor looking to update this repo, please start with the [contributin
 - [Full Documenation on Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/release-1.4/)
 - [Samples repository](https://github.com/hyperledger/fabric-samples)
 
+## Compatibility
+
+For details on what Nodejs runtime and versions of Hyperledger Fabric can be used please see the [compatibility document](COMPATIBILITY.md).
+
 ---
 
 ## License <a name="license"></a>
