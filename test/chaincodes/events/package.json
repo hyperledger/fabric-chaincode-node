@@ -2,7 +2,7 @@
   "name": "chaincode",
   "description": "Chaincode testing events functionality",
   "engines": {
-    "node": ">=8.4.0",
+    "node": "^12.13.0",
     "npm": ">=5.3.0"
   },
   "scripts": {

@@ -29,7 +29,7 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": "^10.15.2",
+    "node": "^12.13.0",
     "npm": "^6.4.1"
   },
   "yargs": {
