@@ -4,7 +4,7 @@
   "description": "",
   "main": "docker.js",
   "scripts": {
-    "build": "",
+    "build": "echo doesitbuild",
     "test:e2e": "gulp -f ./scenario.js --reporter azure-mocha-reporter 2>&1"
   },
   "keywords": [],

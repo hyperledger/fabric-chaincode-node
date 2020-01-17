@@ -14,7 +14,7 @@
   "scripts": {
     "hello": "echo test fv project",
     "test:fv": "mocha *.js --reporter azure-mocha-reporter 2>&1",
-    "build": ""
+    "build": "echo doesitbuild"
   },
   "dependencies": {
     "@sinonjs/referee-sinon": "~5.0.0",
