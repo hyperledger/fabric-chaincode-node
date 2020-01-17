@@ -30,6 +30,10 @@ As an application developer, to learn about how to implement **"Smart Contracts"
 - docker images
     - [fabric-nodeenv](https://hub.docker.com/r/hyperledger/fabric-nodeenv)
 
+## Compatibility
+
+For details on what Nodejs runtime and versions of Hyperledger Fabric can be used please see the [compatibility document](COMPATIBILITY.md).
+
 ---
 
 ## License <a name="license"></a>
