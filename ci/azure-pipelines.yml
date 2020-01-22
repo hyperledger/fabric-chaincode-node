@@ -13,7 +13,7 @@ schedules:
     displayName: 'Chaincode Node Nightly Driver'
     branches:
       include:
-        - master
+        - release-2.0
     always: true
 
 
@@ -23,7 +23,7 @@ schedules:
 trigger:
   branches:
     include:
-      - 'master'
+      - 'release-2.0'
   tags:
     include:
       - '*'
@@ -226,7 +226,7 @@ stages:
                 workingFile: '$(Agent.TempDirectory)/.npmrc'
                 customEndpoint: 'fabric-chainode-node-npm'
             - script: |
-                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag beta \;
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag latest \;
               displayName: 'npm publish'
         - job: jsdoc_publish
           steps:
@@ -251,11 +251,11 @@ stages:
                 docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
                 echo "Logged in to docker registry"
                 # tag nodeenv image to PACKAGE_VERSION
-                docker tag hyperledger/fabric-nodeenv fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta
+                docker tag hyperledger/fabric-nodeenv fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
                 # push nodeenv to repository
-                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)-beta"
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta" --target "hyperledger/fabric-nodeenv:2.0"
+                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)"
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:2.0"
               env:
                 DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
                 DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)

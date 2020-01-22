@@ -1,3 +1,13 @@
+## v2.0.0
+Wed 22 Jan 2020 16:03:50 GMT
+
+* [6ef0042](https://github.com/hyperledger/fabric-chaincode-node/commit/6ef0042) [FABCI-482](https://jira.hyperledger.org/browse/FABCI-482) Update Nexus URL's to Artifactory
+* [b296d0a](https://github.com/hyperledger/fabric-chaincode-node/commit/b296d0a) [FABCN-241](https://jira.hyperledger.org/browse/FABCN-241) - Remove to.be.ok (#55)
+* [b345925](https://github.com/hyperledger/fabric-chaincode-node/commit/b345925) Update maintainers list
+* [81eb5a9](https://github.com/hyperledger/fabric-chaincode-node/commit/81eb5a9) Update rush node.js version (#54)
+* [084c595](https://github.com/hyperledger/fabric-chaincode-node/commit/084c595) [FABCN-355](https://jira.hyperledger.org/browse/FABCN-355) Added READMEs
+* [6b60a98](https://github.com/hyperledger/fabric-chaincode-node/commit/6b60a98) [FABCN-353](https://jira.hyperledger.org/browse/FABCN-353) License updates (#50)
+
 ## v2.0.0-beta
 Thu 12 Dec 11:46:40 GMT 2019
 
