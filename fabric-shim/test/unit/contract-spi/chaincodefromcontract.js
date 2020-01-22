@@ -64,20 +64,20 @@ function log(...e) {
 }
 
 const certWithoutAttrs = '-----BEGIN CERTIFICATE-----' +
-'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
-'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
-'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
-'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
-'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
-'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
-'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
-'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
-'1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
-'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
-'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
-'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
-'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
-'-----END CERTIFICATE-----';
+    'MIICXTCCAgSgAwIBAgIUeLy6uQnq8wwyElU/jCKRYz3tJiQwCgYIKoZIzj0EAwIw' +
+    'eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+    'biBGcmFuY2lzY28xGTAXBgNVBAoTEEludGVybmV0IFdpZGdldHMxDDAKBgNVBAsT' +
+    'A1dXVzEUMBIGA1UEAxMLZXhhbXBsZS5jb20wHhcNMTcwOTA4MDAxNTAwWhcNMTgw' +
+    'OTA4MDAxNTAwWjBdMQswCQYDVQQGEwJVUzEXMBUGA1UECBMOTm9ydGggQ2Fyb2xp' +
+    'bmExFDASBgNVBAoTC0h5cGVybGVkZ2VyMQ8wDQYDVQQLEwZGYWJyaWMxDjAMBgNV' +
+    'BAMTBWFkbWluMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFq/90YMuH4tWugHa' +
+    'oyZtt4Mbwgv6CkBSDfYulVO1CVInw1i/k16DocQ/KSDTeTfgJxrX1Ree1tjpaodG' +
+    '1wWyM6OBhTCBgjAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4E' +
+    'FgQUhKs/VJ9IWJd+wer6sgsgtZmxZNwwHwYDVR0jBBgwFoAUIUd4i/sLTwYWvpVr' +
+    'TApzcT8zv/kwIgYDVR0RBBswGYIXQW5pbHMtTWFjQm9vay1Qcm8ubG9jYWwwCgYI' +
+    'KoZIzj0EAwIDRwAwRAIgCoXaCdU8ZiRKkai0QiXJM/GL5fysLnmG2oZ6XOIdwtsC' +
+    'IEmCsI8Mhrvx1doTbEOm7kmIrhQwUVDBNXCWX1t3kJVN' +
+    '-----END CERTIFICATE-----';
 
 describe('chaincodefromcontract', () => {
 
@@ -445,8 +445,10 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(_checkSuppliedStub);
 
 
-            const mockStub = {getBufferArgs: sandbox.stub().returns([Buffer.from('arg1'), Buffer.from('args2')]),
-                getTxID: sandbox.stub().returns(12345)};
+            const mockStub = {
+                getBufferArgs: sandbox.stub().returns([Buffer.from('arg1'), Buffer.from('args2')]),
+                getTxID: sandbox.stub().returns(12345)
+            };
             cc.invokeFunctionality = sandbox.stub();
             return cc.Invoke(mockStub);
 
@@ -458,7 +460,7 @@ describe('chaincodefromcontract', () => {
                     return new Buffer(certWithoutAttrs);
                 }
             };
-            const tempClass =  class  extends Contract {
+            const tempClass = class extends Contract {
                 constructor() {
                     super('logging');
                 }
@@ -478,14 +480,14 @@ describe('chaincodefromcontract', () => {
                     'org.hyperledger.fabric': {
                         contractInstance: systemContract
                     },
-                    'logging':{
+                    'logging': {
                         contractInstance: appClass,
                         transactions: [
                             {
-                                name:'alpha'
+                                name: 'alpha'
                             }
                         ],
-                        dataMarshall:{
+                        dataMarshall: {
                             handleParameters: sandbox.stub().returns([]),
                             toWireBuffer: sandbox.stub()
                         }
@@ -499,7 +501,8 @@ describe('chaincodefromcontract', () => {
                 getIdBytes: sinon.stub().returns(idBytes)
             };
             const cc = new ChaincodeFromContract([tempClass], defaultSerialization);
-            const mockStub = {getBufferArgs: sandbox.stub().returns(['logging:alpha']),
+            const mockStub = {
+                getBufferArgs: sandbox.stub().returns(['logging:alpha']),
                 getTxID: sandbox.stub().returns('12345897asd7a7a77v7b77'),
                 getChannelID: sandbox.stub().returns('channel-id-fake'),
                 getCreator: sandbox.stub().returns(mockSigningId)
@@ -531,7 +534,7 @@ describe('chaincodefromcontract', () => {
         });
     });
 
-    describe ('#_splitFunctionName', () => {
+    describe('#_splitFunctionName', () => {
         it('should handle the usual case of ns:fn', () => {
             const result = ChaincodeFromContract.prototype._splitFunctionName('name:function');
             result.should.deep.equal({contractName: 'name', function: 'function'});
@@ -619,7 +622,7 @@ describe('chaincodefromcontract', () => {
 
         });
 
-        it ('should handle valid contract name, but missing function', async () => {
+        it('should handle valid contract name, but missing function', async () => {
 
             const idBytes = {
                 toBuffer: () => {
@@ -904,7 +907,7 @@ describe('chaincodefromcontract', () => {
         };
 
 
-        it ('should return empty array when no issue', () => {
+        it('should return empty array when no issue', () => {
             const cc = ChaincodeFromContract.prototype;
             cc.contractImplementations = contractImpls;
 
@@ -918,7 +921,7 @@ describe('chaincodefromcontract', () => {
             cc._checkAgainstSuppliedMetadata(metadata).should.deep.equal([]);
         });
 
-        it ('should return empty array when metadata has no field contracts', () => {
+        it('should return empty array when metadata has no field contracts', () => {
             const cc = ChaincodeFromContract.prototype;
             cc.contractImplementations = contractImpls;
 
@@ -927,7 +930,7 @@ describe('chaincodefromcontract', () => {
             cc._checkAgainstSuppliedMetadata(metadata).should.deep.equal([]);
         });
 
-        it ('should return empty array when missing a contract', () => {
+        it('should return empty array when missing a contract', () => {
             const cc = ChaincodeFromContract.prototype;
             cc.contractImplementations = contractImpls;
 
@@ -942,7 +945,7 @@ describe('chaincodefromcontract', () => {
     });
 
     describe('#_processContractInfo', () => {
-        it ('should be able to handle no annotations suppled', () => {
+        it('should be able to handle no annotations suppled', () => {
             mockery.registerMock('SCAlpha', SCDelta);
             SCDelta.prototype.foo = 'foo';
             sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata').returns([]);
@@ -954,28 +957,30 @@ describe('chaincodefromcontract', () => {
 
             sinon.assert.called(getMetadataStub);
             data.should.deep.equal({
-                title:'',
-                version:''
+                title: '',
+                version: ''
             });
         });
-        it ('should be able to handle no annotations suppled', () => {
+        it('should be able to handle no annotations suppled', () => {
             mockery.registerMock('SCAlpha', SCDelta);
             SCDelta.prototype.foo = 'foo';
             sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata').returns([]);
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata');
-            getMetadataStub.returns({SCAlpha:{
-                title:'contract info',
-                version:'3333'
-            }});
+            getMetadataStub.returns({
+                SCAlpha: {
+                    title: 'contract info',
+                    version: '3333'
+                }
+            });
             const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
             const data = cc._processContractInfo(cc.contractImplementations.alpha.contractInstance);
 
             sinon.assert.called(getMetadataStub);
             data.should.deep.equal({
-                title:'contract info',
-                version:'3333'
+                title: 'contract info',
+                version: '3333'
             });
         });
     });
@@ -992,12 +997,12 @@ describe('chaincodefromcontract', () => {
             cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
         });
 
-        it ('should handle no transaction annotations used, ignoring functions that match in name to ignore array', () => {
+        it('should handle no transaction annotations used, ignoring functions that match in name to ignore array', () => {
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(null);
 
             const ci = cc.contractImplementations.alpha.contractInstance;
             Object.getPrototypeOf(ci).property = 'value';
-            Object.getPrototypeOf(ci).ignoreMe = () => {};
+            Object.getPrototypeOf(ci).ignoreMe = () => { };
 
             const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci, ['ignoreMe']);
 
@@ -1005,6 +1010,22 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
             transactions.should.deep.equal([{
                 name: 'alpha',
+                parameters: [
+                    {
+                        description: 'Argument 0',
+                        name: 'arg0',
+                        schema: {
+                            type: 'string'
+                        }
+                    },
+                    {
+                        description: 'Argument 1',
+                        name: 'arg1',
+                        schema: {
+                            type: 'string'
+                        }
+                    }
+                ],
                 tags: ['submitTx']
             }]);
 
@@ -1012,12 +1033,12 @@ describe('chaincodefromcontract', () => {
             delete Object.getPrototypeOf(ci).ignoreMe;
         });
 
-        it ('should handle no transaction annotations used, ignoring functions that start with _', () => {
+        it('should handle no transaction annotations used, ignoring functions that start with _', () => {
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(null);
 
             const ci = cc.contractImplementations.alpha.contractInstance;
             Object.getPrototypeOf(ci).property = 'value';
-            Object.getPrototypeOf(ci)._ignoreMe = () => {};
+            Object.getPrototypeOf(ci)._ignoreMe = () => { };
 
             const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci, []);
 
@@ -1025,6 +1046,22 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
             transactions.should.deep.equal([{
                 name: 'alpha',
+                parameters: [
+                    {
+                        description: 'Argument 0',
+                        name: 'arg0',
+                        schema: {
+                            type: 'string'
+                        }
+                    },
+                    {
+                        description: 'Argument 1',
+                        name: 'arg1',
+                        schema: {
+                            type: 'string'
+                        }
+                    }
+                ],
                 tags: ['submitTx']
             }]);
 
@@ -1032,7 +1069,7 @@ describe('chaincodefromcontract', () => {
             delete Object.getPrototypeOf(ci).ignoreMe;
         });
 
-        it ('should not add submitTx to the system contract functions', () => {
+        it('should not add submitTx to the system contract functions', () => {
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(null);
 
             const ci = cc.contractImplementations.alpha.contractInstance;
@@ -1045,11 +1082,28 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
             transactions.should.deep.equal([{
-                name: 'alpha'
+                name: 'alpha',
+                'parameters': [
+                    {
+                        'description': 'Argument 0',
+                        'name': 'arg0',
+                        'schema': {
+                            'type': 'string'
+                        }
+                    },
+                    {
+                        'description': 'Argument 1',
+                        'name': 'arg1',
+                        'schema': {
+                            'type': 'string'
+                        }
+                    }
+                ]
+
             }]);
         });
 
-        it ('should handle transaction annotations being used', () => {
+        it('should handle transaction annotations being used', () => {
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns([{some: 'transaction'}]);
 
             const ci = cc.contractImplementations.alpha.contractInstance;
@@ -1062,9 +1116,50 @@ describe('chaincodefromcontract', () => {
                 some: 'transaction'
             }]);
         });
+
+        it('should handle transactions with no arguments', () => {
+            const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns(null);
+
+            const ci = cc.contractImplementations.alpha.contractInstance;
+            Object.getPrototypeOf(ci).conga = (api) => { };
+
+            const transactions = ChaincodeFromContract.prototype._processContractTransactions(ci, []);
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledWith(getMetadataStub, 'fabric:transactions', ci);
+            transactions.should.deep.equal([
+                {
+                    name: 'alpha',
+                    parameters: [
+                        {
+                            description: 'Argument 0',
+                            name: 'arg0',
+                            schema: {
+                                type: 'string'
+                            }
+                        },
+                        {
+                            description: 'Argument 1',
+                            name: 'arg1',
+                            schema: {
+                                type: 'string'
+                            }
+                        }
+                    ],
+                    tags: ['submitTx']
+                },
+                {
+                    name: 'conga',
+                    tags: ['submitTx']
+                }
+            ]);
+
+            delete Object.getPrototypeOf(ci).conga;
+        });
+
     });
 
-    describe ('#_augmentMetadataFromCode', () => {
+    describe('#_augmentMetadataFromCode', () => {
         const exampleMetadata = {
             $schema: 'my schema link',
             contracts: {
@@ -1143,7 +1238,7 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledOnce(fakeCcfc._processContractInfo);
         });
 
-        it ('should handle contracts and remove underscore lead properties of contractInstance', () => {
+        it('should handle contracts and remove underscore lead properties of contractInstance', () => {
             const metadataToSend = {
                 info: exampleMetadata.info,
                 components: exampleMetadata.components
@@ -1211,7 +1306,7 @@ describe('chaincodefromcontract', () => {
             metadata.components.should.deep.equal(metadataToSend.components);
         });
 
-        it ('should fill in components field when not set', () => {
+        it('should fill in components field when not set', () => {
             const metadataToSend = {
                 contracts: exampleMetadata.contracts,
                 info: exampleMetadata.info
@@ -1227,7 +1322,7 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledWith(reflectStub, 'fabric:objects', global);
         });
 
-        it ('should fill in components field when not set and reflect fails', () => {
+        it('should fill in components field when not set and reflect fails', () => {
             const metadataToSend = {
                 contracts: exampleMetadata.contracts,
                 info: exampleMetadata.info
@@ -1243,7 +1338,7 @@ describe('chaincodefromcontract', () => {
             sinon.assert.calledWith(reflectStub, 'fabric:objects', global);
         });
 
-        it ('should fill in schema when not set', () => {
+        it('should fill in schema when not set', () => {
             const metadataToSend = {
                 components: exampleMetadata.components,
                 contracts: exampleMetadata.contracts,
