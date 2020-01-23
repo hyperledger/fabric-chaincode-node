@@ -15,7 +15,7 @@ version: '2'
 
 services:
   ca0:
-    image: hyperledger/fabric-ca${DOCKER_IMG_TAG}
+    image: hyperledger/fabric-ca${CA_IMG_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org1
@@ -29,7 +29,7 @@ services:
     container_name: ca_peerOrg1
 
   ca1:
-    image: hyperledger/fabric-ca${DOCKER_IMG_TAG}
+    image: hyperledger/fabric-ca${CA_IMG_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org2
@@ -92,7 +92,7 @@ services:
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=node_default
-      - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.0.0
+      - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.0.1
       # Allow more time for chaincode container to build on install.
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
