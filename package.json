@@ -1,9 +1,10 @@
 {
   "name": "fabric-shim-test",
-  "version": "2.0.0-beta.1",
-  "tag": "beta",
+  "version": "2.1.0-unstable",
+  "tag": "unstable",
   "description": "fabric-shim, fabric-shim-crypto",
   "testFabricVersion": "master",
+  "testFabricCAVersion": "1.4.4",
   "testFabricThirdParty": "0.4.15",
   "docsLatestVersion": "release-1.4",
   "engines": {
