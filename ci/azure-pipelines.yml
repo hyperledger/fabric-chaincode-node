@@ -247,7 +247,7 @@ stages:
                 git config --global user.name "Hyperledger Bot"
                 git add -A
                 git commit -m "Publishing GitHub Pages"
-                git push https://$(GITHUB-PAT)@github.com/hyperledger/fabric-chaincode-java.git gh-pages
+                git push https://$(GITHUB-PAT)@github.com/hyperledger/fabric-chaincode-node.git gh-pages
               displayName: 'Commit gh-pages changes'
 
     # Publish a new version, triggered by a git tag
