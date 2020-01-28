@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Hyperledger Fabric SDK for node.js Tutorial: Using the Chaincode Interface</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cosmo.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Hyperledger Fabric SDK for node.js</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="fabric-contract-api.Context.html">fabric-contract-api.Context</a></li><li><a href="fabric-contract-api.Contract.html">fabric-contract-api.Contract</a></li><li><a href="fabric-shim.ChaincodeInterface.html">fabric-shim.ChaincodeInterface</a></li><li><a href="fabric-shim.ChaincodeProposalPayload.html">fabric-shim.ChaincodeProposalPayload</a></li><li><a href="fabric-shim.ChaincodeStub.html">fabric-shim.ChaincodeStub</a></li><li><a href="fabric-shim.ChannelHeader.html">fabric-shim.ChannelHeader</a></li><li><a href="fabric-shim.ClientIdentity.html">fabric-shim.ClientIdentity</a></li><li><a href="fabric-shim.CommonIterator.html">fabric-shim.CommonIterator</a></li><li><a href="fabric-shim.ErrorResponse.html">fabric-shim.ErrorResponse</a></li><li><a href="fabric-shim.FunctionAndParameters.html">fabric-shim.FunctionAndParameters</a></li><li><a href="fabric-shim.Header.html">fabric-shim.Header</a></li><li><a href="fabric-shim.HistoryQueryIterator.html">fabric-shim.HistoryQueryIterator</a></li><li><a href="fabric-shim.PaginationQueryResponse.html">fabric-shim.PaginationQueryResponse</a></li><li><a href="fabric-shim.PrivateQueryResponse.html">fabric-shim.PrivateQueryResponse</a></li><li><a href="fabric-shim.Proposal.html">fabric-shim.Proposal</a></li><li><a href="fabric-shim.ProposalCreator.html">fabric-shim.ProposalCreator</a></li><li><a href="fabric-shim.QueryResponseMetadata.html">fabric-shim.QueryResponseMetadata</a></li><li><a href="fabric-shim.Response.html">fabric-shim.Response</a></li><li><a href="fabric-shim.Shim.html">fabric-shim.Shim</a></li><li><a href="fabric-shim.SignatureHeader.html">fabric-shim.SignatureHeader</a></li><li><a href="fabric-shim.SignedProposal.html">fabric-shim.SignedProposal</a></li><li><a href="fabric-shim.StateQueryIterator.html">fabric-shim.StateQueryIterator</a></li><li><a href="fabric-shim.SuccessResponse.html">fabric-shim.SuccessResponse</a></li><li><a href="module.exports.html">module.exports</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-annotated-contract-metadata.html">Walkthrough of annotated metadata.json</a></li><li><a href="tutorial-data-types-and-contracts.html">data-types-and-contracts</a></li><li><a href="tutorial-deep-dive-contract-interface.html">Deep dive on Contract Interface</a></li><li><a href="tutorial-using-chaincodeinterface.html">Using the Chaincode Interface</a></li><li><a href="tutorial-using-contractinterface.html">Using the Contract Interface</a></li><li><a href="tutorial-using-iterators.html">Working with apis that return iterators</a></li><li><a href="tutorial-using-typescript-decorators.html">Using TypeScript Decorators</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			<section class="tutorial-section">
+
+<header>
+    
+
+    <h2>Using the Chaincode Interface</h2>
+</header>
+
+<article>
+    <h4>Writing your own chaincode</h4>
+<p>To write your own chaincode is very easy. Create a file named <code>mychaincode.js</code> anywhere in the file system.</p>
+<pre class="prettyprint source"><code>cd ~
+mkdir mycc
+cd mycc
+// create a new node project
+npm init
+// install fabric-shim at master branch
+npm install 2.1.0-unstable
+// or using the released version
+npm install fabric-shim
+touch mychaincode.js
+</code></pre>
+<p>Put the following minimum implementation to <code>mychaincode.js</code>:</p>
+<pre class="prettyprint source"><code>const shim = require('fabric-shim');
+const util = require('util');
+
+var Chaincode = class {
+        Init(stub) {
+                return stub.putState('dummyKey', Buffer.from('dummyValue'))
+                        .then(() => {
+                                console.info('Chaincode instantiation is successful');
+                                return shim.success();
+                        }, () => {
+                                return shim.error();
+                        });
+        }
+
+        Invoke(stub) {
+                console.info('Transaction ID: ' + stub.getTxID());
+                console.info(util.format('Args: %j', stub.getArgs()));
+
+                let ret = stub.getFunctionAndParameters();
+                console.info('Calling function: ' + ret.fcn);
+
+                return stub.getState('dummyKey')
+                .then((value) => {
+                        if (value.toString() === 'dummyValue') {
+                                console.info(util.format('successfully retrieved value &quot;%j&quot; for the key &quot;dummyKey&quot;', value ));
+                                return shim.success();
+                        } else {
+                                console.error('Failed to retrieve dummyKey or the retrieved value is not expected: ' + value);
+                                return shim.error();
+                        }
+                });
+        }
+};
+
+shim.start(new Chaincode());
+</code></pre>
+<p>Finally, update the &quot;start&quot; script in package.json to &quot;node mychaincode.js&quot;:</p>
+<pre class="prettyprint source"><code>{
+	&quot;name&quot;: &quot;mychaincode&quot;,
+	&quot;version&quot;: &quot;1.0.0&quot;,
+	&quot;description&quot;: &quot;My first exciting chaincode implemented in node.js&quot;,
+	&quot;engines&quot;: {
+		&quot;node&quot;: &quot;>=8.4.0&quot;,
+		&quot;npm&quot;: &quot;>=5.3.0&quot;
+	},
+        &quot;scripts&quot;: { &quot;start&quot; : &quot;node mychaincode.js&quot; },
+	&quot;engine-strict&quot;: true,
+	&quot;engineStrict&quot;: true,
+	&quot;license&quot;: &quot;Apache-2.0&quot;,
+	&quot;dependencies&quot;: {
+		&quot;fabric-shim&quot;: &quot;2.1.0-unstable&quot;
+	}
+}
+</code></pre>
+<p>Now you need to restart the peer in &quot;network&quot; mode instead of &quot;dev&quot; mode.</p>
+<h4>Using Docker</h4>
+<p>If you used 'gulp channel-init', change directory to the fabric-chaincode-node, set an environment variable &quot;DEVMODE=false&quot; and run the command again.</p>
+<pre class="prettyprint source"><code>cd fabric-chaincode-node
+DEVMODE=false gulp channel-init
+</code></pre>
+<p>Next, copy a chaincode to the folder mounted on CLI container and enter the CLI container.</p>
+<pre class="prettyprint source"><code>cp -r ~/mycc /tmp/fabric-shim/chaincode
+docker exec -it cli bash
+</code></pre>
+<p>Install the chaincode. The peer CLI will package the node.js chaincode source, without the &quot;node_modules&quot; folder, and send to the peer to install.</p>
+<pre class="prettyprint source"><code>peer chaincode install -l node -n mycc -p /opt/gopath/src/github.com/mycc -v v0
+</code></pre>
+<p>Upon successful response, instantiate the chaincode on the &quot;mychannel&quot; channel created above:</p>
+<pre class="prettyprint source"><code>peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -l node -n mycc -v v0 -c '{&quot;Args&quot;:[&quot;init&quot;]}' -P 'OR (&quot;Org1MSP.member&quot;)'
+</code></pre>
+<p>This will take a while to complete as the peer must perform npm install in order to build a custom docker image to launch the chaincode. When successfully completed, you should see in peer's log message confirmation of committing a new block. This new block contains the transaction to instantiate the chaincode &quot;mycc:v0&quot;.</p>
+<p>To further inspect the result of the chaincode instantiate command, run <code>docker images</code> and you will see a new image listed at the top of the list with the name starting with <code>dev-</code>. You can inspect the content of this image by running the following command:</p>
+<pre class="prettyprint source"><code>docker exec -it dev-peer0.org1.example.com-mycc-v0 bash
+root@c188ae089ee5:/# ls /usr/local/src
+chaincode.js  fabric-shim  node_modules  package.json
+root@c188ae089ee5:/#
+</code></pre>
+<p>Once the chaincode instantiation has completely successfully, you can send transaction proposals to it with the following commands.</p>
+<pre class="prettyprint source"><code>peer chaincode invoke -o orderer.example.com:7050 -C mychannel -c '{&quot;Args&quot;:[&quot;dummy&quot;]}' -n mycc
+</code></pre>
+</article>
+
+</section>
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a>
+	
+		on 2020-01-28T15:33:15+00:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : false,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
