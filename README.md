@@ -1,28 +1,34 @@
 # Hyperledger Fabric - Node.js Contracts
 
+[![Build Status](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_apis/build/status/Fabric-Chaincode-Node?branchName=master)](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_build/latest?definitionId=33&branchName=master)
+[![fabric-contract-api npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-contract-api)](https://www.npmjs.com/package/fabric-contract-api)
+[![fabric-shim npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim)](https://www.npmjs.com/package/fabric-shim)
+[![fabric-shim-api npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim-api)](https://www.npmjs.com/package/fabric-shim-api)
+[![fabric-shim-crypto npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim-crypto)](https://www.npmjs.com/package/fabric-shim-crypto)
+[![Rocket.Chat](https://chat.hyperledger.org/images/join-chat.svg)](https://chat.hyperledger.org/channel/fabric-chaincode-dev)
+
 This is the project to support the writing of Contracts with the node.js runtime. 
 
-As an application developer, to learn about how to implement **"Smart Contracts"** for Hyperledger Fabric using Node.js, please visit the [API documentation](https://fabric-shim.github.io/) - and follow the tutorial links. A [quick-start tutorial](TUTORIAL.md) is in this repo.
-
 As a contributor looking to update this repo, please start with the [contributing guide](CONTRIBUTING.md)
+
+## Documentation
+
+As an application developer, to learn about how to implement **"Smart Contracts"** for Hyperledger Fabric using Node.js, please visit the [API documentation](https://hyperledger.github.io/fabric-chaincode-node/) and follow the tutorial links.
+
+- [API documentation](https://hyperledger.github.io/fabric-chaincode-node/)
+- [Full Documenation on Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/)
+- [Samples repository](https://github.com/hyperledger/fabric-samples)
+- [Quick-start tutorial](TUTORIAL.md)
 
 ## Artifacts published from this repo
 
 - npm modules
-    - [fabric-chaincode-shim](https://www.npmjs.com/package/fabric-chaincode-shim)
     - [fabric-contract-api](https://www.npmjs.com/package/fabric-contract-api)
+    - [fabric-shim](https://www.npmjs.com/package/fabric-shim)
     - [fabric-shim-api](https://www.npmjs.com/package/fabric-shim-api)
     - [fabric-shim-crypto](https://www.npmjs.com/package/fabric-shim-crypto)
 - docker images
     - [fabric-nodeenv](https://hub.docker.com/r/hyperledger/fabric-nodeenv)
-- api documentation
-    - [API docs](https://fabric-shim.github.io/)    
-
-## Where to go from here?
-
-- [API documentation](https://fabric-shim.github.io/)
-- [Full Documenation on Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/release-1.4/)
-- [Samples repository](https://github.com/hyperledger/fabric-samples)
 
 ## Compatibility
 
