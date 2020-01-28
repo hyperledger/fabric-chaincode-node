@@ -223,6 +223,8 @@ stages:
                   **/?(*.md|*.html)
                   !_jsdoc.json
                   !_jsdoc/**
+                  !gen/**
+                  !node_modules/**
                 sourceFolder: '$(Build.SourcesDirectory)/docs'
                 targetFolder: $(Build.ArtifactStagingDirectory)/gh-pages
                 cleanTargetFolder: true
@@ -236,7 +238,7 @@ stages:
 
                 mkdir -p $(Build.SourceBranchName)/api
                 rm -rf $(Build.SourceBranchName)/api/*
-                cp -r $(Build.ArtifactStagingDirectory)/jsdoc/* $(Build.SourceBranchName)/api
+                cp -r $(Build.ArtifactStagingDirectory)/jsdoc/gen/* $(Build.SourceBranchName)/api
                 if [ -d $(Build.ArtifactStagingDirectory)/gh-pages ]; then
                   find . -maxdepth 1 ! \( -name [.]* -o -name 'gh-pages' -o -name 'master' -o -name 'release-*' \) -exec rm -rf {} \;
                   cp -r $(Build.ArtifactStagingDirectory)/gh-pages/* .
