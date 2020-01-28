@@ -214,7 +214,7 @@ stages:
                 sourceFolder: '$(Build.SourcesDirectory)/docs'
                 targetFolder: $(Build.ArtifactStagingDirectory)/jsdoc
                 cleanTargetFolder: true
-              displayName: 'Copy jsdoc'
+              displayName: 'Copy JSDoc'
             - task: CopyFiles@2
               condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
               inputs:
