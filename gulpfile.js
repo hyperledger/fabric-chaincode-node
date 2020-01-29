@@ -12,7 +12,6 @@ const {startFabric} = require('./build/test/setup');
 const {series, task} = require('gulp');
 const {testfvshim} = require('./build/test/e2e');
 const {testScenario} = require('./build/test/scenario');
-const {docs} = require('./build/docs');
 
 // gulp.task('test-devmode-cli', (done) => {
 //     const tasks = ['test-devmode'];
@@ -25,7 +24,6 @@ exports.test_schema = test_schema;
 exports.startFabric = startFabric;
 exports.fvtest = testfvshim;
 exports.scenario = testScenario;
-exports.docs = docs;
 exports.protos = protos;
 exports.default = series(lint, test_schema, unittest);
 
