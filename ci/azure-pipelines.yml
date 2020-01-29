@@ -99,11 +99,6 @@ stages:
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/logs
                 artifactName: 'Build logs'
-            - task: PublishBuildArtifacts@1
-              condition: or(succeeded(), failed())   # publish either way
-              inputs:
-                pathToPublish: docs/apidocs/_out
-                artifactName: 'JS API Doc'
 
             # Copy the built artifacts to the staging directory, tgz, and the docker image
             - script: |
@@ -199,6 +194,63 @@ stages:
                 npm install --registry http://localhost:4873 fabric-shim fabric-shim-crypto fabric-shim-api fabric-contract-api --save
                 npm audit
               displayName: 'Run npm audit'
+
+        # Build and publish API docs on every merge build
+        - job: jsdoc
+          condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
+          steps:
+            - script: |
+                set -ev
+                node common/scripts/install-run-rush.js install
+              displayName: 'Setup the rush environment'
+            - script: |
+                set -ev
+                node common/scripts/install-run-rush.js rebuild --to fabric-shim-docs
+              displayName: 'Build JSDoc'
+            - task: CopyFiles@2
+              inputs:
+                contents: |
+                  gen/**
+                sourceFolder: '$(Build.SourcesDirectory)/docs'
+                targetFolder: $(Build.ArtifactStagingDirectory)/jsdoc
+                cleanTargetFolder: true
+              displayName: 'Copy JSDoc'
+            - task: CopyFiles@2
+              condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+              inputs:
+                contents: |
+                  _config.yml
+                  **/?(*.md|*.html)
+                  !_jsdoc.json
+                  !_jsdoc/**
+                  !gen/**
+                  !node_modules/**
+                sourceFolder: '$(Build.SourcesDirectory)/docs'
+                targetFolder: $(Build.ArtifactStagingDirectory)/gh-pages
+                cleanTargetFolder: true
+              displayName: 'Copy gh-pages doc (master branch only)'
+            - script: |
+                git reset --hard HEAD
+                git clean -xdf
+                git fetch origin
+                git checkout -b gh-pages origin/gh-pages
+                git clean -xdf
+
+                mkdir -p $(Build.SourceBranchName)/api
+                rm -rf $(Build.SourceBranchName)/api/*
+                cp -r $(Build.ArtifactStagingDirectory)/jsdoc/gen/* $(Build.SourceBranchName)/api
+                if [ -d $(Build.ArtifactStagingDirectory)/gh-pages ]; then
+                  find . -maxdepth 1 ! \( -name [.]* -o -name 'gh-pages' -o -name 'master' -o -name 'release-*' \) -exec rm -rf {} \;
+                  cp -r $(Build.ArtifactStagingDirectory)/gh-pages/* .
+                fi
+              displayName: 'Update gh-pages branch'
+            - script: |
+                git config --global user.email "hlfdev.azp@gmail.com"
+                git config --global user.name "Hyperledger Bot"
+                git add -A
+                git commit -m "Publishing GitHub Pages"
+                git push https://$(GITHUB-PAT)@github.com/hyperledger/fabric-chaincode-node.git gh-pages
+              displayName: 'Commit gh-pages changes'
 
     # Publish a new version, triggered by a git tag
     - stage: Publish_tag
