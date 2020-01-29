@@ -21,8 +21,6 @@ tools/toolchain/network/crypto-material/*.tx
 tools/toolchain/network/crypto-material/crypto-config
 tools/toolchain/network/crypto-material/core.yaml
 
-docs/**/_out
-
 # Rush files
 common/temp/**
 **/.rush/temp/**
@@ -32,3 +30,6 @@ common/temp/**
 package-deps.json
 test-results.xml
 docker.log
+
+# jsdoc output
+docs/gen

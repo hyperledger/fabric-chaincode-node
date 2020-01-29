@@ -1,12 +1,11 @@
-[![NPM](https://nodei.co/npm/fabric-contract-api.svg?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/fabric-contract-api/)
-[![Version](https://badge.fury.io/js/fabric-contract-api.svg)](http://badge.fury.io/js/fabric-contract-api)
+[![Build Status](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_apis/build/status/Fabric-Chaincode-Node?branchName=master)](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_build/latest?definitionId=33&branchName=master)
+[![fabric-contract-api npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-contract-api)](https://www.npmjs.com/package/fabric-contract-api)
+[![fabric-shim npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim)](https://www.npmjs.com/package/fabric-shim)
+[![fabric-shim-api npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim-api)](https://www.npmjs.com/package/fabric-shim-api)
+[![fabric-shim-crypto npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim-crypto)](https://www.npmjs.com/package/fabric-shim-crypto)
+[![Rocket.Chat](https://chat.hyperledger.org/images/join-chat.svg)](https://chat.hyperledger.org/channel/fabric-chaincode-dev)
 
-
-
-[![NPM](https://nodei.co/npm/fabric-shim.svg?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/fabric-shim/)
-[![Version](https://badge.fury.io/js/fabric-shim.svg)](http://badge.fury.io/js/fabric-shim)
-
-## Introduction
+## Overview
 
 The `fabric-contract-api` provides the *contract interface*. a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#smart-contract). Within Hyperledger Fabric, Smart Contracts are also known as [Chaincode](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#chaincode). Working with this API provides a high level entry point to writing business logic.
 
@@ -15,11 +14,6 @@ The `fabric-shim` provides the *chaincode interface*, a lower level API for impl
 To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
 Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
-
-
-## API documentation versions
-
-[Release 1.3](../release-1.3) | [Release 1.2](../release-1.2) | [Release 1.1](../release-1.1) | [Master branch](../master)
 
 ## Contract Interface
 
@@ -91,6 +85,7 @@ module.exports.contracts = ['UpdateValues'];
 ## Chaincode Interface
 
 ### Installation
+
 ```sh
 npm install --save fabric-shim
 ```
@@ -129,11 +124,6 @@ Start the chaincode process and listen for incoming endorsement requests:
 ```javascript
 shim.start(new Chaincode());
 ```
-
-### API Reference
-Visit [fabric-shim.github.io](https://fabric-shim.github.io/) and click on "Classes" link in the navigation bar on the top to view the list of class APIs.
-
-
 
 ## Support
 Tested with node.js 8.9.0 (LTS).
