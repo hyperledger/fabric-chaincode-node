@@ -1,4 +1,4 @@
-# Support and Compatibility for fabric-chaincode-java
+# Support and Compatibility for fabric-chaincode-node
 
 Github is used for code base management, issues should reported in the [FABCN](https://jira.hyperledger.org/projects/FABCN/issues/) component in JIRA.
 
@@ -47,5 +47,5 @@ When using Fabric 2.0.0, the default docker image that is used to run the Node c
 When using Fabric 1.4.4, the docker image that is used to run the Node chaincode is node v8.16.1. It is installed with npm install --production
 
 ### Supported Runtime communication with the Peer
- 
+
 Subject to a suitable runtime environment, the 1.4.4 Node modules and 2.0.0 Node modules can used to communicate with a Fabric 2.0.0 or 1.4.4 Peer - with the level of functionality that is implied by the Fabric version in use. 
