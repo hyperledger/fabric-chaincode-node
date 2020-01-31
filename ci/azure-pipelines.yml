@@ -86,19 +86,16 @@ stages:
                 codeCoverageTool: 'cobertura'
                 summaryFileLocation: '**/cobertura-coverage.xml'
                 artifactName: 'Unit Test Coverage'
-            # CopyFiles can follow symlinks hence be careful with node_modules
-            - task: CopyFiles@2
-              condition: or(succeeded(), failed())   # publish either way
-              inputs:
-                contents: |
-                  **/*.build*.log
-                  !**/node_modules/**
-                targetFolder: $(Build.ArtifactStagingDirectory)/logs
+            - script: |
+                mkdir -p $(Build.ArtifactStagingDirectory)/logs
+                find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/logs \;
+              displayName: 'Copy build logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/logs
                 artifactName: 'Build logs'
+              displayName: 'Publish build logs'
 
             # Copy the built artifacts to the staging directory, tgz, and the docker image
             - script: |
@@ -161,11 +158,16 @@ stages:
                   **/*.build*.log
                   !**/node_modules/**
                 targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
+            - script: |
+                mkdir -p $(Build.ArtifactStagingDirectory)/testlogs
+                find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/testlogs \;
+              displayName: 'Copy test logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
                 artifactName: 'Test logs'
+              displayName: 'Publish test logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
