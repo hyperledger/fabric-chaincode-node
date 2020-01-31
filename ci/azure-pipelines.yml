@@ -111,7 +111,7 @@ stages:
             - task: PublishBuildArtifacts@1
               inputs:
                 pathToPublish: $(Build.ArtifactStagingDirectory)/tgz
-                artifactName: MyBuildOutputs
+                artifactName: node-tgz
 
         # Build and publish API docs on every merge build
         - job: jsdoc
@@ -231,17 +231,11 @@ stages:
               inputs:
                 workingFile: '$(Agent.TempDirectory)/.npmrc'
                 customEndpoint: 'fabric-chainode-node-npm' 
+            - download: current
+              artifact: node-tgz
             - script: |
-                # Add or delete modules from here..
-                for module in fabric-shim fabric-shim-crypto fabric-contract-api; do
-                    if [ -d "$module" ]; then
-                        cd $module
-                        npm shrinkwrap
-                        npm publish --tag latest
-                        cd -
-                    fi
-                done
-              displayName: 'npm shrinkwrap & publish'
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable-1.4 \;
+              displayName: 'npm publish'
         - job: jsdoc_publish
           steps:
             - script: |

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "nyc mocha --recursive 'test/**/*.js'",
-    "tgzpack": "npm pack"
+    "tgzpack": "../ci/tgzpack.sh"
   },
   "keywords": [
     "fabric-shim",
