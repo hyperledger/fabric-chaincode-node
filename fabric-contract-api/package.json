@@ -11,7 +11,7 @@
   "scripts": {
     "compile": "tsc --project test/typescript",
     "test": "nyc mocha --recursive 'test/unit/**/*.js'",
-    "tgzpack": "npm pack"
+    "tgzpack": "../ci/tgzpack.sh"
   },
   "keywords": [
     "fabric-shim",

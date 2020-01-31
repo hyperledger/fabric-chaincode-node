@@ -15,6 +15,8 @@ export NPM_MODULES="fabric-shim fabric-shim-crypto fabric-contract-api"
 cd "${SRC_ROOT}"
 
 for j in ${NPM_MODULES}; do
+    npm prune --production
+    npm shrinkwrap
     npm pack "${DIR}/../../${j}"
 done 
 
