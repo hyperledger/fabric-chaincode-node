@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Hyperledger Fabric SDK for node.js Class: SuccessResponse</title>
+	<title>Hyperledger Fabric SDK for node.js Class: Ledger</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,14 +72,16 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: SuccessResponse</h1>
+	<h1 class="page-title">Class: Ledger</h1>
 <section>
 
 <header>
     
         <h2>
-        SuccessResponse
+        Ledger
         </h2>
+        
+            <div class="class-description">Entrypoint for the Ledger API.</div>
         
     
 </header>
@@ -91,7 +93,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="SuccessResponse"><span class="type-signature"></span>new SuccessResponse()</h4>
+    <h4 class="name" id="Ledger"><span class="type-signature"></span>new Ledger()</h4>
     
     
 </dt>
@@ -108,83 +110,6 @@
 
     
 <dl class="details">
-    
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    <dl>
-
-<table class="props table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>status</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Value is always set to 200 to indicate success</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>payload</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Optional custom content returned by the chaincode</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-</dl>
-
     
 
 	
@@ -253,6 +178,416 @@
 
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id=".getLedger"><span class="type-signature">&lt;async, static> </span>getLedger(ctx)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get a Ledger instance which represents the current ledger state.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ctx</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Context</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The transaction context</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A new Ledger instance
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Ledger></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getCollection"><span class="type-signature">&lt;async> </span>getCollection(collectionName)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get a Collection instance for the named collection.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collectionName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The name of the collection</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A new Collection instance
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Collection></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getDefaultCollection"><span class="type-signature">&lt;async> </span>getDefaultCollection()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Get a Collection instance representing the default world state.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A new Collection instance
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Collection></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        </dl>
     
 
     
