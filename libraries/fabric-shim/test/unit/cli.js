@@ -38,13 +38,16 @@ describe('fabric-chaincode-node cli', () => {
 
     afterEach(() => {
         sandbox.restore();
+        delete require.cache[require.resolve('../../cli.js')];
     });
 
     describe('Main test', () => {
         it('should setup yargs correctly', () => {
             sandbox.stub(yargs, 'describe').returns(yargs);
             sandbox.stub(yargs, 'env').returns(yargs);
+
             require('../../cli.js');
+
             sinon.assert.calledOnce(yargs.commandDir);
             sinon.assert.calledWith(yargs.commandDir, './lib/cmds');
             sinon.assert.calledOnce(yargs.demandCommand);
@@ -64,9 +67,8 @@ describe('fabric-chaincode-node cli', () => {
                     thePromise: Promise.resolve()
                 }
             });
-            delete require.cache[require.resolve('../../cli.js')];
+            
             require('../../cli.js');
-
         });
 
         it('should handle rejected promise  correctly', () => {
@@ -76,9 +78,8 @@ describe('fabric-chaincode-node cli', () => {
                     thePromise: Promise.reject()
                 }
             });
-            delete require.cache[require.resolve('../../cli.js')];
-            require('../../cli.js');
 
+            require('../../cli.js');
         });
     });
 });
