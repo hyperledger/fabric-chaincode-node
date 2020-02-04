@@ -95,25 +95,3 @@ let results = await getAllResults(iterator);
 let response = await ctx.stub.getPrivateDataByRange(collection, startKey, endKey);
 let results = await getAllResults(response.iterator);
 ```
-
-## example of getHistoryForKey
-All the functions that return a set of data, except one, return data in the KV structure format. The exception is getHistoryForKey whose dataset is of the form KeyModification. Below is a simple example of using getHistoryForKey.
-
-```javascript
-const promiseOfIterator = ctx.stub.getHistoryForKey(key);
-
-const results = [];
-for await (const keyMod of promiseOfIterator) {
-    const resp = {
-        timestamp: keyMod.timestamp,
-        txid: keyMod.tx_id
-    }
-    if (keyMod.is_delete) {
-        resp.data = 'KEY DELETED';
-    } else {
-        resp.data = keyMod.value.toString('utf8');
-    }
-    results.push(resp);
-}
-// results array contains the key history
-```
