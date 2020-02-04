@@ -11,8 +11,8 @@ An example of these apis (but may not be a complete list) is given here
   -	getPrivateDataQueryResult
 - Rich query
   - getQueryResult
-  - getQueryResultWithPagination 
-- Range queries 
+  - getQueryResultWithPagination
+- Range queries
   - getStateByPartialCompositeKey
   -	getStateByPartialCompositeKeyWithPagination
   - getStateByRange
@@ -44,7 +44,7 @@ async function getAllResults(iterator) {
 
         // check to see if we have reached then end
         if (res.done) {
-            // explicitly close the iterator            
+            // explicitly close the iterator
             await iterator.close();
             return allResults;
         }
@@ -141,26 +141,3 @@ Lets note the differences
 1. You do not use `await` when invoking the stub function. This means it will return a promise
 2. You don't have to worry about whether the promise will resolve to an iterator or an object containing the iterator. The returned value is handled in the same way in all cases
 3. In the case of pagination apis it's still easy to get the required metadata response.
-
-## example of getHistoryForKey
-All the functions that return a set of data, except one, return data in the KV structure format. The exception is getHistoryForKey whose dataset is of the form KeyModification. Below is a simple example of using getHistoryForKey.
-
-```javascript
-const promiseOfIterator = ctx.stub.getHistoryForKey(key);
-
-const results = [];
-for await (const keyMod of promiseOfIterator) {
-    const resp = {
-        timestamp: keyMod.timestamp,
-        txid: keyMod.tx_id
-    }
-    if (keyMod.is_delete) {
-        resp.data = 'KEY DELETED';
-    } else {
-        resp.data = keyMod.value.toString('utf8');
-    }
-    results.push(resp);
-}
-// results array contains the key history
-```
-
