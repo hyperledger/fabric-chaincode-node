@@ -257,7 +257,7 @@ describe('Chaincode', () => {
                     expect(typeof testOpts[attr]).to.deep.equal('string');
 
                     const json = JSON.parse(testOpts[attr]);
-                    expect(json.name).to.deep.equal('fabric-shim-test');
+                    expect(json.name).to.deep.equal('fabric-chaincode-node');
                 });
 
                 Chaincode.__set__('Handler', handlerClass);

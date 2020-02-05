@@ -1,8 +1,8 @@
 {
   "name": "chaincode",
-  "description": "My first exciting chaincode implemented in node.js",
+  "description": "Chaincode testing ledger functionality",
   "engines": {
-    "node": "^12.13.0",
+    "node": ">=8.4.0",
     "npm": ">=5.3.0"
   },
   "scripts": {
@@ -16,6 +16,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "fabric-shim": "2.1.0-unstable",
-    "fabric-contract-api": "2.1.0-unstable"
+    "fabric-contract-api": "2.1.0-unstable",
+    "fabric-ledger": "2.1.0-unstable"
   }
 }

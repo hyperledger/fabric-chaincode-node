@@ -86,24 +86,17 @@ stages:
                 codeCoverageTool: 'cobertura'
                 summaryFileLocation: '**/cobertura-coverage.xml'
                 artifactName: 'Unit Test Coverage'
-            # CopyFiles can follow symlinks hence be careful with node_modules
-            - task: CopyFiles@2
+            - script: |
+                mkdir -p $(Build.ArtifactStagingDirectory)/logs
+                find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/logs \;
               condition: or(succeeded(), failed())   # publish either way
-              inputs:
-                contents: |
-                  **/*.build*.log
-                  !**/node_modules/**
-                targetFolder: $(Build.ArtifactStagingDirectory)/logs
+              displayName: 'Copy build logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/logs
                 artifactName: 'Build logs'
-            - task: PublishBuildArtifacts@1
-              condition: or(succeeded(), failed())   # publish either way
-              inputs:
-                pathToPublish: docs/apidocs/_out
-                artifactName: 'JS API Doc'
+              displayName: 'Publish build logs'
 
             # Copy the built artifacts to the staging directory, tgz, and the docker image
             - script: |
@@ -166,11 +159,16 @@ stages:
                   **/*.build*.log
                   !**/node_modules/**
                 targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
+            - script: |
+                mkdir -p $(Build.ArtifactStagingDirectory)/testlogs
+                find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/testlogs \;
+              displayName: 'Copy test logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
                 artifactName: 'Test logs'
+              displayName: 'Publish test logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
@@ -200,21 +198,62 @@ stages:
                 npm audit
               displayName: 'Run npm audit'
 
-        # Publish the snapshot images
-        - job: snapshot_publish
+        # Build and publish API docs on every merge build
+        - job: jsdoc
           condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
-          dependsOn: fvt
           steps:
-            - task: DownloadPipelineArtifact@2
+            - script: |
+                set -ev
+                node common/scripts/install-run-rush.js install
+              displayName: 'Setup the rush environment'
+            - script: |
+                set -ev
+                node common/scripts/install-run-rush.js rebuild --to fabric-shim-docs
+              displayName: 'Build JSDoc'
+            - task: CopyFiles@2
               inputs:
-                artifact: nodeenv-docker-image
-                path: $(Build.SourcesDirectory)/build
-            - script: ./ci/scripts/publish_docker.sh
-              env:
-                NEXUS_USERNAME: $(nexus-user)
-                NEXUS_PASSWORD: $(nexus-password)
-                NEXUS_URL: nexus3.hyperledger.org:10003/hyperledger
-              displayName: 'docker push to nexus'
+                contents: |
+                  gen/**
+                sourceFolder: '$(Build.SourcesDirectory)/docs'
+                targetFolder: $(Build.ArtifactStagingDirectory)/jsdoc
+                cleanTargetFolder: true
+              displayName: 'Copy JSDoc'
+            - task: CopyFiles@2
+              condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+              inputs:
+                contents: |
+                  _config.yml
+                  **/?(*.md|*.html)
+                  !_jsdoc.json
+                  !_jsdoc/**
+                  !gen/**
+                  !node_modules/**
+                sourceFolder: '$(Build.SourcesDirectory)/docs'
+                targetFolder: $(Build.ArtifactStagingDirectory)/gh-pages
+                cleanTargetFolder: true
+              displayName: 'Copy gh-pages doc (master branch only)'
+            - script: |
+                git reset --hard HEAD
+                git clean -xdf
+                git fetch origin
+                git checkout -b gh-pages origin/gh-pages
+                git clean -xdf
+
+                mkdir -p $(Build.SourceBranchName)/api
+                rm -rf $(Build.SourceBranchName)/api/*
+                cp -r $(Build.ArtifactStagingDirectory)/jsdoc/gen/* $(Build.SourceBranchName)/api
+                if [ -d $(Build.ArtifactStagingDirectory)/gh-pages ]; then
+                  find . -maxdepth 1 ! \( -name [.]* -o -name 'gh-pages' -o -name 'master' -o -name 'release-*' \) -exec rm -rf {} \;
+                  cp -r $(Build.ArtifactStagingDirectory)/gh-pages/* .
+                fi
+              displayName: 'Update gh-pages branch'
+            - script: |
+                git config --global user.email "hlfdev.azp@gmail.com"
+                git config --global user.name "Hyperledger Bot"
+                git add -A
+                git commit -m "Publishing GitHub Pages"
+                git push https://$(GITHUB-PAT)@github.com/hyperledger/fabric-chaincode-node.git gh-pages
+              displayName: 'Commit gh-pages changes'
 
     # Publish a new version, triggered by a git tag
     - stage: Publish_tag
@@ -242,7 +281,7 @@ stages:
                 workingFile: '$(Agent.TempDirectory)/.npmrc'
                 customEndpoint: 'fabric-chainode-node-npm'
             - script: |
-                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag beta \;
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable \;
               displayName: 'npm publish'
         - job: jsdoc_publish
           steps:
@@ -257,22 +296,21 @@ stages:
               inputs:
                 artifact: nodeenv-docker-image
                 path: $(Build.SourcesDirectory)/build
-            
+
             - script: |
                 wget -qO "$PWD/manifest-tool" https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
                 chmod +x ./manifest-tool
 
                 docker image load --input build/fabric-nodeenv.tar.gz
                 docker images
-                # Publish docker images to nexus repository
                 docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
                 echo "Logged in to docker registry"
                 # tag nodeenv image to PACKAGE_VERSION
-                docker tag hyperledger/fabric-nodeenv fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta
+                docker tag hyperledger/fabric-nodeenv fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable
                 # push nodeenv to repository
-                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)-beta"
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-beta" --target "hyperledger/fabric-nodeenv:2.0"
+                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)-unstable"
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable" --target "hyperledger/fabric-nodeenv:2.0-unstable"
               env:
                 DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
                 DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)

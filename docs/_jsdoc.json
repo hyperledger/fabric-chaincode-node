@@ -1,0 +1,30 @@
+{
+    "source": {
+        "include": [
+            "./_jsdoc/index.md",
+            "../libraries/fabric-ledger/lib/Ledger.js",
+            "../libraries/fabric-shim/lib/chaincode.js",
+            "../libraries/fabric-shim/lib/stub.js",
+            "../libraries/fabric-shim/lib/iterators.js",
+            "../apis/fabric-contract-api/lib"
+        ]
+    },
+    "sourceType": "module",
+    "opts": {
+        "destination": "./gen",
+        "recurse": true,
+        "template": "./node_modules/ink-docstrap/template",
+        "tutorials": "./_jsdoc/tutorials"
+    },
+    "templates": {
+        "systemName": "Hyperledger Fabric SDK for node.js",
+        "theme": "cosmo",
+        "default": {
+            "staticFiles": {
+                "include": [
+                    "./_jsdoc/static"
+                ]
+            }
+        }
+    }
+}

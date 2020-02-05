@@ -1,0 +1,75 @@
+{
+  "name": "fabric-ledger",
+  "version": "2.1.0-unstable",
+  "tag": "unstable",
+  "description": "A node.js implementation of Hyperledger Fabric ledger api, to allow access to ledger data from smart contracts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "npm run test",
+    "compile": "tsc",
+    "precompile": "npm run eslint",
+    "pretest": "npm run compile",
+    "test": "nyc mocha --require ts-node/register --recursive 'test/unit/**/*.spec.ts' --reporter azure-mocha-reporter",
+    "eslint": "eslint src --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperledger/fabric-chaincode-node"
+  },
+  "keywords": [
+    "fabric-ledger",
+    "Hyperledger Fabric",
+    "Fabric Ledger"
+  ],
+  "engines": {
+    "node": "^12.13.0",
+    "npm": "^6.4.1"
+  },
+  "license": "Apache-2.0",
+  "nyc": {
+    "exclude": [
+      "coverage/**",
+      "test/**",
+      ".eslintrc.js"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "reporter": [
+      "text-summary",
+      "cobertura",
+      "html"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100
+  },
+  "dependencies": {
+    "fabric-contract-api": "2.1.0-unstable",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.0",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/mocha": "^5.2.7",
+    "@rushstack/eslint-config": "^0.5.1",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "cpx": "^1.5.0",
+    "eslint": "^6.6.0",
+    "mocha": "6.2.2",
+    "mockery": "^2.1.0",
+    "nyc": "14.1.1",
+    "rewire": "4.0.1",
+    "rimraf": "^3.0.0",
+    "sinon": "7.5.0",
+    "ts-node": "^8.3.0",
+    "ts-mockito": "^2.5.0",
+    "typescript": "3.4.5",
+    "azure-mocha-reporter": "1.0.0"
+  }
+}

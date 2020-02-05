@@ -25,9 +25,11 @@ const tls = require('./utils').tls;
 
 const arch = process.arch;
 const release = require(path.join(__dirname, '../../package.json')).testFabricVersion;
+const ca_release = require(path.join(__dirname, '../../package.json')).testFabricCAVersion;
 const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
 
 let dockerImageTag = '';
+let caImageTag = '';
 let thirdpartyImageTag = '';
 let docker_arch = '';
 
@@ -43,6 +45,9 @@ if (arch.indexOf('x64') === 0) {
     throw new Error('Unknown architecture: ' + arch);
 }
 
+// always use specific published version of CA image 
+caImageTag = docker_arch + '-' + ca_release;
+
 // release check, if master is specified then we are using a fabric that has been
 // built from source, otherwise we are using specific published versions.
 
@@ -55,6 +60,7 @@ if (!/master/.test(release)) {
 }
 // these environment variables would be read at test/fixtures/docker-compose.yaml
 process.env.DOCKER_IMG_TAG = dockerImageTag;
+process.env.CA_IMG_TAG = caImageTag;
 process.env.THIRDPARTY_IMG_TAG = thirdpartyImageTag;
 process.env.DOCKER_DEVMODE = process.env.DEVMODE ? process.env.DEVMODE : 'true';
 
