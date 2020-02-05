@@ -1,3 +1,12 @@
+## v1.4.5
+Wed  5 Feb 16:47:56 GMT 2020
+
+* [e36b8eb](https://github.com/hyperledger/fabric-chaincode-node/commit/e36b8eb) [FABCN-384](https://jira.hyperledger.org/browse/FABCN-384) Dev Dependencies
+* [5a3dcad](https://github.com/hyperledger/fabric-chaincode-node/commit/5a3dcad) [FABCN-378](https://jira.hyperledger.org/browse/FABCN-378) Publish jsdoc
+* [1406aaa](https://github.com/hyperledger/fabric-chaincode-node/commit/1406aaa) [FAB-15433](https://jira.hyperledger.org/browse/FAB-15433) Parameter number (#64)
+* [9e25a25](https://github.com/hyperledger/fabric-chaincode-node/commit/9e25a25) [FABCN-375](https://jira.hyperledger.org/browse/FABCN-375) Update x509 library (#59)
+* [90cb3f4](https://github.com/hyperledger/fabric-chaincode-node/commit/90cb3f4) [FABCN-355](https://jira.hyperledger.org/browse/FABCN-355) README.md for shim-crypto
+
 ## v1.4.4
 Tue 12 Nov 10:10:48 GMT 2019
 

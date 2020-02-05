@@ -174,49 +174,10 @@ stages:
                 git push https://$(GITHUB-PAT)@github.com/hyperledger/fabric-chaincode-node.git gh-pages
               displayName: 'Commit gh-pages changes'
 
-        # Publish the snapshot images etc.
-        # Original source of these is https://github.com/hyperledger/ci-management/blob/master/jjb/fabric-chaincode-java/shell/include-raw-publish-docker-jar.sh
-        # - job: snapshot_publish
-        #   condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
-        #   dependsOn: main
-        #   steps:
-            # Outline of what the docs publishing would look like
-            # - script: |
-            #     cd ${BUILD_SOURCEBRANCH}/docs/apidocs
-            #     CHAINCODE_NODE_COMMIT=$(git rev-parse --short HEAD)
-            #     echo "---------> CHAINCODE_NODE_COMMIT:" $CHAINCODE_NODE_COMMIT
-            #     TARGET_REPO=$CHAINCODE_NODE_USERNAME.github.io.git
-            #     git config --global user.email "fabric.shim@gmail.com"
-            #     git config --global user.name "fabric-shim"
-            #     git clone https://github.com/$CHAINCODE_NODE_USERNAME/$TARGET_REPO
-
-            #     # build docs
-            #     DOCS_ROOT=$CHAINCODE_NODE_USERNAME.github.io gulp -f docs.js docs
-
-            #     cd $CHAINCODE_NODE_USERNAME.github.io
-            #     git add .
-            #     git commit -m "CHAINCODE_NODE commit - $CHAINCODE_NODE_COMMIT"
-            #     git config remote.gh-pages.url https://$CHAINCODE_NODE_USERNAME:$CHAINCODE_NODE_PASSWORD@github.com/$CHAINCODE_NODE_USERNAME/$TARGET_REPO
-
-            #     # Push API docs to Target repository
-            #     git push gh-pages master
-
-            #   env:
-            #     CHAINCODE_NODE_USERNAME: fabric-shim
-
     - stage: Publish_tag
       dependsOn: Build_and_Test
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
-        - job: update_version
-          steps:
-            - script: |
-                env | sort
-                echo "Update the version number"
-                VERSION=$(jq '.version' $(Build.SourcesDirectory)/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
-                echo Version is :${VERSION}:
-                echo "Make sure release notes are present"
-                echo "Make sure change history is present"
         - job: npm_publish
           steps:
             - script: |
@@ -234,10 +195,7 @@ stages:
             - download: current
               artifact: node-tgz
             - script: |
-                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable-1.4 \;
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag latest-1.4 \;
               displayName: 'npm publish'
-        - job: jsdoc_publish
-          steps:
-            - script: |
-                echo "checkout docs branch"
+
 

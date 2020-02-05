@@ -1,0 +1,36 @@
+v1.4.5 5th February 2020
+-----------------------------
+
+Release Notes
+-------------
+This is a maintence release and contains bug fixes, and minor updates. 
+
+- The version of the x509 library has been updated so the library can now
+  be built with NodeJS v12
+- The checks on the number of parameters passed to a Java Script contract are
+  enforced
+- previously the npm modules were shrinkwrapped; with the devDependencies
+  this has been changed so the final module size is smaller
+
+  Note that contract and chaincode implementations are strongly advised to 
+  shrinkwrap their own code
+
+Migration Notes
+---------------
+None known
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v145
