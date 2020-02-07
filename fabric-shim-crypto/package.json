@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim-crypto",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "tag": "latest-1.4",
   "description": "A node.js implementation of encryption library for Hyperledger Fabric chaincode shim",
   "main": "index.js",
