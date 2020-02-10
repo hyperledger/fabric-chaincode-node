@@ -18,7 +18,7 @@ npm install --save fabric-shim
 ```
 
 ### Usage
-The [chaincode interface](https://fabric-shim.github.io/ChaincodeInterface.html) contains two methods to be implemented:
+The [chaincode interface](https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/tutorial-using-chaincodeinterface.html) contains two methods to be implemented:
 ```javascript
 const shim = require('fabric-shim');
 
@@ -53,7 +53,7 @@ shim.start(new Chaincode());
 ```
 
 ### API Reference
-Visit [fabric-shim.github.io](https://fabric-shim.github.io/) and click on "Classes" link in the navigation bar on the top to view the list of class APIs.
+Visit [fabric-shim.github.io](https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/) and click on "Classes" link in the navigation bar on the top to view the list of class APIs.
 
 ## Support
 Tested with node.js 8.9.0 (LTS).
