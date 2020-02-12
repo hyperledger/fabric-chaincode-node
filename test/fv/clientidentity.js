@@ -28,4 +28,11 @@ describe('Chaincode clientidentity', () => {
         expect(payload.id).to.equal('x509::/C=US/ST=California/L=San Francisco/CN=Admin@org2.example.com::/C=US/ST=California/L=San Francisco/O=org2.example.com/CN=ca.org2.example.com', 'Test getID()');
     });
 
+    it('should be able to check the peer MSPID', async function () {
+        this.timeout(MED_STEP);
+
+        const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.clientidentity:localMspID', []));
+        expect(payload.localMspID).to.equal('Org2MSP', 'Test stub.getMspID()');
+    });
+
 });

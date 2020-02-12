@@ -37,5 +37,10 @@ class ClientIdentityChaincode extends Contract {
         return {mspId: cid.mspId, id: cid.id};
     }
 
+    async localMspID({stub}) {
+        const localMspID = stub.getMspID();
+        return {localMspID};
+    }
+
 }
 module.exports = ClientIdentityChaincode;
