@@ -527,6 +527,43 @@ describe('Stub', () => {
             });
         });
 
+        describe('getMspID', () => {
+            let mspID;
+
+            beforeEach(() => {
+                if ('CORE_PEER_LOCALMSPID' in process.env) {
+                    mspID = process.env.CORE_PEER_LOCALMSPID;
+                }
+            });
+    
+            afterEach(() => {
+                delete process.env.CORE_PEER_LOCALMSPID;
+                if (mspID) {
+                    process.env.CORE_PEER_LOCALMSPID = mspID;
+                }
+            });
+
+            it ('should return MSPID', () => {
+                process.env.CORE_PEER_LOCALMSPID = 'some MSPID';
+
+                const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+                    args: []
+                });
+
+                expect(stub.getMspID()).to.deep.equal('some MSPID');
+            });
+
+            it ('should throw Error if MSPID is not available', () => {
+                const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+                    args: []
+                });
+
+                expect(() => {
+                    stub.getMspID()
+                }).to.throw('CORE_PEER_LOCALMSPID is unset in chaincode process');
+            });
+        });
+
         describe('getTransient', () => {
             it ('should return transient map', () => {
                 const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
