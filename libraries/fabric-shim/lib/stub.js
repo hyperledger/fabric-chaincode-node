@@ -297,6 +297,18 @@ class ChaincodeStub {
     }
 
     /**
+     * Returns the MSPID of the peer that started this chaincode
+     * @returns {string} MSPID
+     */
+    getMspID() {
+        if ('CORE_PEER_LOCALMSPID' in process.env) {
+            return process.env.CORE_PEER_LOCALMSPID;
+        } else {
+            throw new Error('CORE_PEER_LOCALMSPID is unset in chaincode process');
+        }
+    }
+
+    /**
 	 * Returns the transient map that can be used by the chaincode but not
 	 * saved in the ledger, such as cryptographic information for encryption and decryption
 	 * @returns {Map<string:Buffer>}
