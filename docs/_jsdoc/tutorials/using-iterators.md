@@ -35,7 +35,7 @@ async function getAllResults(iterator) {
         const res = await iterator.next();
         if (res.value) {
             // if not a getHistoryForKey iterator then key is contained in res.value.key
-            allResults.push(res.value.value.toString('utf8'););
+            allResults.push(res.value.value.toString('utf8'));
         }
 
         // check to see if we have reached then end
