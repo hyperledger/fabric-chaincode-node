@@ -41,7 +41,7 @@ variables:
   - name: pipeline
     value: ci
   - name: node_version_spec
-    value: '12.15.0'
+    value: '12.x'
 
 # Build on Ubuntu
 pool:
