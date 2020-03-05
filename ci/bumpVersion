@@ -1,0 +1,48 @@
+#!/usr/bin/env node
+const path = require('path');
+const fs = require('fs');
+
+let modules = ['fabric-contract-api', 'fabric-shim', 'fabric-shim-api', 'fabric-shim-crypto']
+
+const regex = new RegExp('package.json');
+const regexModules = new RegExp('node_modules');
+
+const getAllPackageJson = (dir, files, result) => {
+    files = files || fs.readdirSync(dir);
+    result = result || []
+    for (let i = 0; i < files.length; i++) {
+        let file = path.join(dir, files[i]);
+
+        if (fs.statSync(file).isDirectory() && !regexModules.test(file)) {
+            result = getAllPackageJson(file, fs.readdirSync(file), result);
+        } else {
+            // console.log(`Is file ${file}`);
+            if (regex.test(file)) {
+                result.push(file);
+            }
+        }
+    }
+
+    return result;
+}
+
+const updateVersion = (file,version) => {
+    const json = JSON.parse(fs.readFileSync(file));
+    json.version = version;
+    modules.forEach((m) => {
+        if (json.dependencies && json.dependencies.hasOwnProperty(m)) {
+            json.dependencies[m] = version;
+        }
+        
+    });
+    fs.writeFileSync(file, JSON.stringify(json));
+}
+
+const updatedVersion = process.argv[2];
+let marker = updatedVersion.lastIndexOf('.');
+let newSnapshot = parseInt(updatedVersion.substring(marker+1))
+let newVersion = `${updatedVersion.substring(0,marker)}.${newSnapshot+1}`;
+
+getAllPackageJson(path.join(__dirname, '..', 'apis')).forEach((f) => { updateVersion(f,newVersion); });
+getAllPackageJson(path.join(__dirname,'..','libraries')).forEach((f) => { updateVersion(f,newVersion); });
+getAllPackageJson(path.join(__dirname,'..','test')).forEach((f) => { updateVersion(f,newVersion); });

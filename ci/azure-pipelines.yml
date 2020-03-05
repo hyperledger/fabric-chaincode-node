@@ -7,6 +7,7 @@
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 
 # Daily build for final quality
+# Only build if there's a change to the source
 # cf https://crontab.guru/#0_23_*_*_*
 schedules:
   - cron: "0 23 * * *"
@@ -14,7 +15,7 @@ schedules:
     branches:
       include:
         - release-2.0
-    always: true
+    always: false
 
 
 # Trigger on the master branch
@@ -65,6 +66,11 @@ stages:
             - task: NodeTool@0
               inputs:
                 versionSpec: $(node_version_spec)
+            - script: |
+               set -ev
+               ./ci/bumpVersion $(npm dist-tags ls fabric-contract-api | awk '/unstable:/ {print $2}')
+               node common/scripts/install-run-rush.js update
+              # conditions: and(succeeded(),eq(variables['Build.Reason'], 'Schedule'))                
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
