@@ -195,7 +195,7 @@ stages:
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
                 mkdir -p $(Build.SourcesDirectory)/audit && cd $(Build.SourcesDirectory)/audit && npm init -y
                 npm install --registry http://localhost:4873 fabric-shim fabric-shim-crypto fabric-shim-api fabric-contract-api --save
-                npm audit
+                npm audit --audit-level=moderate
               displayName: 'Run npm audit'
 
         # Build and publish API docs on every merge build
