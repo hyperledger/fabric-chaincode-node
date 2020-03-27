@@ -7,14 +7,14 @@ Github is used for code base management, issues should reported in the [FABCN](h
 
 This table shows the summary of the compatibility of the Node modules at versions 1.4 and 2.0, together with the Nodejs runtime they require and the Fabric Peer versions they can communicate with.
 
-|                       | Peer Connectivity v1.4 | NodeJS 8 | Peer Connectivity v2.0 | NodeJS12 |
-| --------------------- | ---------------------- | -------- | ---------------------- | -------- |
-| Node modules **v1.4** | Yes                    | Yes      | Yes                    | Yes      |
-| Node modules **v2.0** | Yes                    | No       | Yes                    | Yes      |
+|                       | Peer Connectivity v1.4 | NodeJS | Peer Connectivity v2.0 |
+| --------------------- | ---------------------- | -------| ---------------------- |
+| Node modules **v1.4** | Yes                    | 8.x    | Yes                    |
+| Node modules **v2.0** | Yes                    | 10.x   | Yes                    |
 
 By default a Fabric Peer v1.4 will create a Nodejs v8 , and a Fabric Peer v2.0 will create a Nodejs v12 runtime. Whilst is the default, the docker image used to host the chaincode and contracts can be altered.  Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image. For example `CORE_CHAINCODE_NODE_RUNTIME=example/customNodeRuntime:latest`
 
-The Node modules will connect to the peer whilst running; this is referred to as 'Fabric Peer Connectivity' in the table. For example, whilst the Fabric Peer v1.4 will create a Nodejs 8 fruntime, if a Nodejs 12 runtime was configured, the Node modules at v2.0.0 still function when connecting to the Fabric Peer v1.4.
+The Node modules will connect to the peer whilst running; this is referred to as 'Fabric Peer Connectivity' in the table. For example, whilst the Fabric Peer v1.4 will create a Nodejs 8 runtime, if a Nodejs 12 runtime was configured, the Node modules at v2.0.0 still function when connecting to the Fabric Peer v1.4.
 
 ## Compatibility
 

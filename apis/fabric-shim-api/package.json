@@ -17,7 +17,7 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": "^12.13.0",
+    "node": "^10.15.2",
     "npm": "^6.4.1",
     "eslint": "6.6.0"
   },

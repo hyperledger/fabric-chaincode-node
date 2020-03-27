@@ -10,8 +10,8 @@ echo "Fetching images from Artifactory"
 ARTIFACTORY_URL=hyperledger-fabric.jfrog.io
 ORG_NAME="hyperledger"
 
-VERSION=2.0.0
-CA_VERSION=1.4.4
+VERSION=2.1
+CA_VERSION=1.4
 ARCH="amd64"
 MASTER_TAG=$ARCH-master
 
@@ -40,7 +40,7 @@ dockerTag() {
     docker tag $ARTIFACTORY_URL/fabric-$IMAGES:$STABLE_TAG $ORG_NAME/fabric-$IMAGES
     docker tag $ARTIFACTORY_URL/fabric-$IMAGES:$STABLE_TAG $ORG_NAME/fabric-$IMAGES:$MASTER_TAG
     echo "$ORG_NAME/fabric-$IMAGES:$MASTER_TAG"
-    echo "Deleting Artifcatory docker images: $IMAGES"
+    echo "Deleting Artifactory docker images: $IMAGES"
     docker rmi -f $ARTIFACTORY_URL/fabric-$IMAGES:$STABLE_TAG
   done
 }
