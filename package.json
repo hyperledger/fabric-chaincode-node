@@ -1,23 +1,11 @@
 {
-  "name": "fabric-shim-test",
-  "version": "2.0.1",
-  "tag": "latest",
-  "description": "fabric-shim, fabric-shim-crypto",
+  "name": "fabric-chaincode-node",
+  "version": "2.1.0-unstable",
+  "tag": "unstable",
+  "description": "fabric-chaincode-node monorepo, built with rush",
   "testFabricVersion": "master",
   "testFabricCAVersion": "1.4.4",
   "testFabricThirdParty": "0.4.15",
   "docsLatestVersion": "release-1.4",
-  "engines": {
-    "node": "^10.15.2",
-    "npm": "^6.4.1"
-  },
-  "engineStrict": true,
-  "license": "Apache-2.0",
-  "scripts": {
-  },
-  "dependencies": {
-  },
-  "devDependencies": {
-
-  }
+  "license": "Apache-2.0"
 }
