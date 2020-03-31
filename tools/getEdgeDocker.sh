@@ -10,8 +10,8 @@ echo "Fetching images from Artifactory"
 ARTIFACTORY_URL=hyperledger-fabric.jfrog.io
 ORG_NAME="hyperledger"
 
-VERSION=2.0.0
-CA_VERSION=1.4.4
+VERSION=2.1
+CA_VERSION=1.4
 ARCH="amd64"
 MASTER_TAG=$ARCH-master
 
