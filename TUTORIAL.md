@@ -15,8 +15,8 @@ The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required.
   "name": "chaincode",
   "description": "My first exciting chaincode implemented in node.js",
   "engines": {
-    "node": ">=8.4.0",
-    "npm": ">=5.3.0"
+    "node": "^10.15.2",
+    "npm": "^6.4.1"
   },
   "scripts": {
 	  "test":"mocha.....
@@ -28,8 +28,8 @@ The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required.
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-chaincode-api": "^1.4.0",
-    "fabric-shim": "^1.4.0"
+    "fabric-chaincode-api": "2.1.0-unstable",
+    "fabric-shim": "2.1.0-unstable"
   }
 }
 
