@@ -125,9 +125,6 @@ Start the chaincode process and listen for incoming endorsement requests:
 shim.start(new Chaincode());
 ```
 
-## Support
-Tested with node.js 8.9.0 (LTS).
-
 ## License
 
 This package is distributed under the
