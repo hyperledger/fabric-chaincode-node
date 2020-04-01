@@ -1,7 +1,7 @@
 {
   "name": "fabric-chaincode-node",
-  "version": "2.1.0-unstable",
-  "tag": "unstable",
+  "version": "2.1.0",
+  "tag": "latest",
   "description": "fabric-chaincode-node monorepo, built with rush",
   "testFabricVersion": "master",
   "testFabricCAVersion": "1.4.4",
