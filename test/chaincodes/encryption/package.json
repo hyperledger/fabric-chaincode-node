@@ -2,7 +2,7 @@
     "name": "chaincode",
     "description": "Chaincode testing encryption functionality",
     "engines": {
-      "node": "^10.15.2",
+      "node": "^12.16.1",
       "npm": ">=5.3.0"
     },
     "scripts": {

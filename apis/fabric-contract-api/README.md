@@ -129,7 +129,7 @@ Visit [fabric-shim.github.io](https://fabric-shim.github.io/) and click on "Clas
 
 
 ## Support
-Tested with node.js 8.9, and also the v10 LTS release.
+Tested with Node v12  LTS release.
 
 ## License
 

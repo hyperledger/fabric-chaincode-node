@@ -6,7 +6,7 @@
   "testFabricThirdParty": "0.4.15",
   "docsLatestVersion": "release-1.4",
   "engines": {
-    "node": "^10.15.2",
+    "node": "^12.16.1",
     "npm": "^6.4.1"
   },
   "engineStrict": true,

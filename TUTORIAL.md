@@ -15,8 +15,8 @@ The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required.
   "name": "chaincode",
   "description": "My first exciting chaincode implemented in node.js",
   "engines": {
-    "node": "^10.15.2",
-    "npm": "^6.4.1"
+    "node": "^12.16.1",
+    "npm": "^6.13.4"
   },
   "scripts": {
 	  "test":"mocha.....

@@ -2,7 +2,7 @@
   "name": "ts_chaincode",
   "description": "Chaincode testing typescript functionality and annotations",
   "engines": {
-    "node": "^10.15.2",
+    "node": "^12.16.1",
     "npm": ">=5.3.0"
   },
   "scripts": {
