@@ -62,7 +62,7 @@
      * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
      * for your repo.
      */
-    "nodeSupportedVersionRange": ">=10.13.0 <13.0.0",
+    "nodeSupportedVersionRange": ">=12.15.0 <13.0.0",
     /**
      * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
      * spend six months in a stabilization period before the first Long Term Support (LTS) version.

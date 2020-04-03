@@ -33,7 +33,7 @@ async function install(ccName) {
     try {
         fs.writeFileSync(npmrc, `registry=http://${ip.address()}:4873`);
         const folderName = '/opt/gopath/src/github.com/chaincode/' + ccName;
-        const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName} --connTimeout 60s`;       
+        const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName} --connTimeout 180s`;
         await exec(util.format(cmd, 'org1_cli'));
         await exec(util.format(cmd, 'org2_cli'));
 
@@ -44,7 +44,7 @@ async function install(ccName) {
 
 async function instantiate(ccName, func, args) {
     const cmd = `docker exec org1_cli peer chaincode instantiate ${getTLSArgs()} -o orderer.example.com:7050 -l node -C mychannel -n ${ccName} -v v0 -c '${printArgs(func, args)}' -P 'OR ("Org1MSP.member")'`;
-    console.log(cmd)
+    console.log(cmd);
     const res = await exec(cmd);
     await new Promise(resolve => setTimeout(resolve, 5000));
     return res;
