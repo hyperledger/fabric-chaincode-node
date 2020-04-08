@@ -1,8 +1,13 @@
 steps:
 - script: |
     env | sort
+    # handle full version number
     VERSION=$(jq '.version' $(Build.SourcesDirectory)/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
     echo Current version in code is :${VERSION}:
     echo "##vso[task.setvariable variable=PACKAGE_VERSION;isOutput=true]${VERSION}"
+    # handle minor version
+    MINOR_VERSION=$(jq '.version' $(Build.SourcesDirectory)/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9])\.[0-9]?[0-9].*/\1/")
+    echo Current minor version in code is :${MINOR_VERSION}:
+    echo "##vso[task.setvariable variable=MINOR_PACKAGE_VERSION;isOutput=true]${MINOR_VERSION}"
   name: BuildData
   displayName: 'Build data'

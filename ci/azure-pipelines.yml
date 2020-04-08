@@ -199,7 +199,13 @@ stages:
 
         # Build and publish API docs on every merge build
         - job: jsdoc
+          dependsOn: displayenv
           condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
+          variables:
+            ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+              jsdoc_release: master
+            ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+              jsdoc_release: release-$(BuildData.MINOR_PACKAGE_VERSION)
           steps:
             - script: |
                 set -ev
@@ -238,9 +244,9 @@ stages:
                 git checkout -b gh-pages origin/gh-pages
                 git clean -xdf
 
-                mkdir -p $(Build.SourceBranchName)/api
-                rm -rf $(Build.SourceBranchName)/api/*
-                cp -r $(Build.ArtifactStagingDirectory)/jsdoc/gen/* $(Build.SourceBranchName)/api
+                mkdir -p $(jsdoc_release)/api
+                rm -rf $(jsdoc_release)/api/*
+                cp -r $(Build.ArtifactStagingDirectory)/jsdoc/gen/* $(jsdoc_release)/api
                 if [ -d $(Build.ArtifactStagingDirectory)/gh-pages ]; then
                   find . -maxdepth 1 ! \( -name [.]* -o -name 'gh-pages' -o -name 'master' -o -name 'release-*' \) -exec rm -rf {} \;
                   cp -r $(Build.ArtifactStagingDirectory)/gh-pages/* .
