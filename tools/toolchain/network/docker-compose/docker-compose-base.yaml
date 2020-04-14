@@ -109,7 +109,7 @@ services:
     environment:
       - GOPATH=/opt/gopath
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_CHAINCODE_KEEPALIVE=10
+      - CORE_CHAINCODE_KEEPALIVE=120
       - FABRIC_CFG_PATH=/etc/hyperledger/config
 
       # LOGGING SETTINGS
