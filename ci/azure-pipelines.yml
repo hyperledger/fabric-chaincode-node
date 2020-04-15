@@ -311,13 +311,13 @@ stages:
                 docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
                 echo "Logged in to docker registry"
                 # tag nodeenv image to PACKAGE_VERSION
-                docker tag hyperledger/fabric-nodeenv hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-latest
+                docker tag hyperledger/fabric-nodeenv hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
                 # push nodeenv to repository
-                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-latest
+                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
                 # publish patch version (3-digit) image
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-latest" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)-latest"
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)"
                 # publish minor version (2-digit) image
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-latest" --target "hyperledger/fabric-nodeenv:$(BuildData.MINOR_PACKAGE_VERSION)-latest"
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:$(BuildData.MINOR_PACKAGE_VERSION)"
               env:
                 DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
                 DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)
