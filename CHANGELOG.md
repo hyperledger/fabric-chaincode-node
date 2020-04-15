@@ -1,3 +1,16 @@
+## v2.1.0
+Wed  1 Apr 2020 16:12:36 BST
+
+* [644213a](https://github.com/hyperledger/fabric-chaincode-node/commit/644213a) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Remove references to 2.0 and 2.0.0 - replace with 2.x
+* [de8c29c](https://github.com/hyperledger/fabric-chaincode-node/commit/de8c29c) [FABCN-241](https://jira.hyperledger.org/browse/FABCN-241) Change to.be.ok test calls
+* [a3ff93c](https://github.com/hyperledger/fabric-chaincode-node/commit/a3ff93c) Add readme to redirect to site
+* [659d36d](https://github.com/hyperledger/fabric-chaincode-node/commit/659d36d) Improve build reliability
+* [d62ecae](https://github.com/hyperledger/fabric-chaincode-node/commit/d62ecae) [FABCN-373](https://jira.hyperledger.org/browse/FABCN-373) Compatibility Matrix
+* [c09385c](https://github.com/hyperledger/fabric-chaincode-node/commit/c09385c) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Use version 2.1 of fabric docker images
+* [78f8cf8](https://github.com/hyperledger/fabric-chaincode-node/commit/78f8cf8) Expand node engine version range
+* [c9e9e5b](https://github.com/hyperledger/fabric-chaincode-node/commit/c9e9e5b) Update audit level
+* [dd51dfa](https://github.com/hyperledger/fabric-chaincode-node/commit/dd51dfa) [FABCN-381](https://jira.hyperledger.org/browse/FABCN-381) Access localmspid
+
 ## v2.0.0
 Wed 22 Jan 2020 16:03:50 GMT
 
