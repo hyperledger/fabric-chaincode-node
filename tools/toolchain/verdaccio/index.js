@@ -71,7 +71,7 @@ const verdaccioStart = async () => {
     } else {
         commands = installDir(commands);
     }
-    
+    commands.push(util.format('npm install --prefix %s --registry http://localhost:4873',path.join(__dirname,'fake-module-cache')));
     await runcmds(commands);
 };
 
