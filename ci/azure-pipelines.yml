@@ -205,7 +205,7 @@ stages:
             ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
               jsdoc_release: master
             ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-              jsdoc_release: release-$(BuildData.MINOR_PACKAGE_VERSION)
+              jsdoc_release: $[format('release-{0}',dependencies.displayenv.outputs['BuildData.MINOR_PACKAGE_VERSION'])]
           steps:
             - script: |
                 set -ev
@@ -288,12 +288,6 @@ stages:
             - script: |
                 find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable \;
               displayName: 'npm publish'
-        - job: jsdoc_publish
-          steps:
-            - script: |
-                set -ev
-                echo "checkout docs branch"
-                echo "checking"
         - job: dockerhub_publish
           steps:
             - template: templates/build-data.yaml
