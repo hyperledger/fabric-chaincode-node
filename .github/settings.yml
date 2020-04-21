@@ -1,0 +1,15 @@
+repository:
+  name: fabric-chaincode-node
+  description: Hyperledger Fabric Node.js Smart Contracts issues in JIRA please
+    https://jira.hyperledger.org
+  homepage: https://wiki.hyperledger.org/display/fabric
+  default_branch: master
+  has_downloads: true
+  has_issues: false
+  has_projects: false
+  has_wiki: false
+  archived: false
+  private: false
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
