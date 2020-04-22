@@ -1,3 +1,10 @@
+## v2.1.1
+Wed 22 Apr 2020 10:31:05 BST
+
+* [3e67b8c](https://github.com/hyperledger/fabric-chaincode-node/commit/3e67b8c) [FABCN-394](https://jira.hyperledger.org/browse/FABCN-394) Update typescript interface file (#128)
+* [61c253a](https://github.com/hyperledger/fabric-chaincode-node/commit/61c253a) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) fix directory for api doc publish (#125)
+* [c753261](https://github.com/hyperledger/fabric-chaincode-node/commit/c753261) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Bump to 2.1.1 and fix docker tag (#122)
+
 ## v2.1.0
 Wed  1 Apr 2020 16:12:36 BST
 
