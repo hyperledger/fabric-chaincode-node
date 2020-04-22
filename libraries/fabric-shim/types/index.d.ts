@@ -76,6 +76,7 @@ declare module 'fabric-shim' {
         getTxID(): string;
         getChannelID(): string;
         getCreator(): SerializedIdentity;
+        getMSPID(): string;
         getTransient(): Map<string, Uint8Array>;
 
         getSignedProposal(): ChaincodeProposal.SignedProposal;
