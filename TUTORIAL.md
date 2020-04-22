@@ -28,8 +28,8 @@ The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required.
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-chaincode-api": "2.1.1",
-    "fabric-shim": "2.1.1"
+    "fabric-chaincode-api": "2.1.2-unstable",
+    "fabric-shim": "2.1.2-unstable"
   }
 }
 
