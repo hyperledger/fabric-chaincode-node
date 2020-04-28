@@ -10,7 +10,6 @@ const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
 
-
 const delay = require('delay');
 const getTLSArgs = require('./utils').getTLSArgs;
 
@@ -22,51 +21,6 @@ const dockerCfgPath = '/etc/hyperledger/config';
 const dockerCfgTxPath = '/etc/hyperledger/configtx';
 const channelName = 'mychannel';
 const tls = require('./utils').tls;
-
-const arch = process.arch;
-const release = require(path.join(__dirname, '../../package.json')).testFabricVersion;
-const ca_release = require(path.join(__dirname, '../../package.json')).testFabricCAVersion;
-const thirdparty_release = require(path.join(__dirname, '../../package.json')).testFabricThirdParty;
-
-let dockerImageTag = '';
-let caImageTag = '';
-let thirdpartyImageTag = '';
-let docker_arch = '';
-
-// this is a release build, need to build the proper docker image tag
-// to run the tests against the corresponding fabric released docker images
-if (arch.indexOf('x64') === 0) {
-    docker_arch = ':amd64';
-} else if (arch.indexOf('s390') === 0) {
-    docker_arch = ':s390x';
-} else if (arch.indexOf('ppc64') === 0) {
-    docker_arch = ':ppc64le';
-} else {
-    throw new Error('Unknown architecture: ' + arch);
-}
-
-// always use specific published version of CA image 
-caImageTag = docker_arch + '-' + ca_release;
-
-// release check, if master is specified then we are using a fabric that has been
-// built from source, otherwise we are using specific published versions.
-
-// prepare thirdpartyImageTag (currently using couchdb image in tests)
-if (!/master/.test(thirdparty_release)) {
-    thirdpartyImageTag = docker_arch + '-' + thirdparty_release;
-}
-if (!/master/.test(release)) {
-    dockerImageTag = docker_arch + '-' + release;
-}
-// these environment variables would be read at test/fixtures/docker-compose.yaml
-process.env.DOCKER_IMG_TAG = dockerImageTag;
-process.env.CA_IMG_TAG = caImageTag;
-process.env.THIRDPARTY_IMG_TAG = thirdpartyImageTag;
-process.env.DOCKER_DEVMODE = process.env.DEVMODE ? process.env.DEVMODE : 'true';
-
-console.log(`Docker Image Tag = ${dockerImageTag}`);
-console.log(`3rd party Image Tag = ${thirdpartyImageTag}`);
-console.log(`Docker Devmode = ${process.env.DOCKER_DEVMODE}`);
 
 // This and other usage of the gulp-shell module cannot use the
 // short-hand style because we must delay the use of the testDir
