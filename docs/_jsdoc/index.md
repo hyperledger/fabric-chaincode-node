@@ -13,7 +13,7 @@ The `fabric-shim` provides the *chaincode interface*, a lower level API for impl
 
 To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
-Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
+A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/latest/developapps/smartcontract.html).
 
 ## Contract Interface
 
@@ -25,7 +25,7 @@ npm install --save fabric-contract-api
 
 ### Usage
 
-Implement a class that ends the `contract` class, a constructor is needed. 
+Implement a class that ends the `contract` class, a constructor is needed.
 The other functions will be invokable functions of your Smart Contract
 
 ```javascript
