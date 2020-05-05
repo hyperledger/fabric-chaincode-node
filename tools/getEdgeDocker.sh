@@ -1,52 +1,22 @@
-#!/bin/bash -e
+#!/bin/bash
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 set -euo pipefail
 
-echo "======== PULL DOCKER IMAGES ========"
+version=${FABRIC_VERSION:-2.1}
+artifactory_url=hyperledger-fabric.jfrog.io
 
-###############################################################
-# Pull and Tag the fabric and fabric-ca images from Artifactory
-###############################################################
-echo "Fetching images from Artifactory"
-ARTIFACTORY_URL=hyperledger-fabric.jfrog.io
-ORG_NAME="hyperledger"
+for image in peer orderer ca baseos ccenv tools; do
+    artifactory_image="${artifactory_url}/fabric-${image}:amd64-${version}-stable"
+    docker pull -q "${artifactory_image}"
+    docker tag "${artifactory_image}" "hyperledger/fabric-${image}"
+    docker rmi -f "${artifactory_image}" >/dev/null
+done
 
-VERSION=2.1
-CA_VERSION=1.4
-ARCH="amd64"
-MASTER_TAG=$ARCH-master
-
-# Specifically not pulling down javaenv nodeenv
-# javaenv not needed and we've just rebuilt the nodeenv
-
-dockerTag() {
-  for IMAGES in peer orderer ca baseos ccenv tools; do
-    echo "Images: $IMAGES"
-    echo
-
-    if [ "${IMAGES}" = "ca" ]; then
-      STABLE_TAG=$ARCH-$CA_VERSION-stable
-    else
-      STABLE_TAG=$ARCH-$VERSION-stable
-    fi
-    echo "---------> STABLE_TAG:" $STABLE_TAG
-    echo
-
-    docker pull $ARTIFACTORY_URL/fabric-$IMAGES:$STABLE_TAG
-    if [[ $? != 0 ]]; then
-      echo  "FAILED: Docker Pull Failed on $IMAGES"
-      exit 1
-    fi
-
-    docker tag $ARTIFACTORY_URL/fabric-$IMAGES:$STABLE_TAG $ORG_NAME/fabric-$IMAGES
-    docker tag $ARTIFACTORY_URL/fabric-$IMAGES:$STABLE_TAG $ORG_NAME/fabric-$IMAGES:$MASTER_TAG
-    echo "$ORG_NAME/fabric-$IMAGES:$MASTER_TAG"
-    echo "Deleting Artifcatory docker images: $IMAGES"
-    docker rmi -f $ARTIFACTORY_URL/fabric-$IMAGES:$STABLE_TAG
-  done
-}
-
-dockerTag
-
-echo
-docker images | grep "hyperledger"
-echo
+docker pull -q hyperledger/fabric-couchdb
+docker pull -q hyperledger/fabric-ca:1.4
+docker tag hyperledger/fabric-ca:1.4 hyperledger/fabric-ca
+docker rmi hyperledger/fabric-ca:1.4 >/dev/null
