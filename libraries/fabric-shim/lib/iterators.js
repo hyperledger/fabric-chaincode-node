@@ -20,6 +20,10 @@ class CommonIterator {
 
     /**
 	 * constructor
+     *
+     * Note that the decoded payload will be a protobuf of type
+     * fabprotos.protos.QueryResponse
+     *
 	 * @param {ChaincodeSupportClient} handler client handler
 	 * @param {string} channel_id channel id
 	 * @param {string} txID transaction id
@@ -66,9 +70,8 @@ class CommonIterator {
         const queryResult = {};
         queryResult.value = this._getResultFromBytes(this.response.results[this.currentLoc]);
         this.currentLoc++;
-        // TODO: potential breaking change if it's assumed that if done == true then it has a valid value
+
         queryResult.done = false;
-        // queryResult.done = !(this.currentLoc < this.response.results.length || this.response.has_more);
         return queryResult;
     }
 
@@ -85,7 +88,7 @@ class CommonIterator {
             return this._createAndEmitResult();
         } else {
             // check to see if there is more and go fetch it
-            if (this.response.has_more) {
+            if (this.response.hasMore) {
                 try {
                     const response = await this.handler.handleQueryStateNext(this.response.id, this.channel_id, this.txID);
                     this.currentLoc = 0;
