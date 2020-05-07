@@ -7,14 +7,18 @@ Github is used for code base management, issues should reported in the [FABCN](h
 
 This table shows the summary of the compatibility of the Node modules at versions 1.4 and 2.x, together with the Nodejs runtime they require and the Fabric Peer versions they can communicate with.
 
-|                       | Peer Connectivity v1.4 | NodeJS | Peer Connectivity v2.x |
-| --------------------- | ---------------------- | ------ | ---------------------- |
-| Node modules **v1.4** | Yes                    | 8      | Yes                    |
-| Node modules **v2.x** | Yes                    | 12     | Yes                    |
+|                         | Peer Connectivity v1.4 | NodeJS | Peer Connectivity v2.x |
+| ----------------------- | ---------------------- | ------ | ---------------------- |
+| Node modules **v1.4.5** | Yes                    | 8      | Yes                    |
+| Node modules **v2.x.x** | Yes                    | 12     | Yes                    |
 
-By default a Fabric Peer v1.4 will create a Nodejs v8 runtime, and a Fabric Peer v2.x will create a Nodejs 12 runtime. Whilst this is the default, the docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image. For example `CORE_CHAINCODE_NODE_RUNTIME=example/customNodeRuntime:latest`
+By default a Fabric Peer v1.4 will create a Nodejs v8 runtime, and a Fabric Peer v2.x will create a Nodejs 12 runtime. Whilst this is the default, the docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image. 
+
+For example `CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.1` will allow the use of the latest Node 12 runtime to be used within a Peer v1.4.
 
 The Node modules will connect to the peer whilst running; this is referred to as 'Fabric Peer Connectivity' in the table. For example, whilst the Fabric Peer v1.4 will create a Nodejs 8 runtime, if a Nodejs 12 runtime was configured, the node modules at v2.x still function when connecting to the Fabric Peer v1.4.
+
+Note that the `fabric-contract-api` & `fabric-shim` node modules must be at v1.4.5 or greater to work with Node version 12. If you therefore use a contract originally written to work with Fabric 1.4, check the node modules before deploying on Fabric v2.
 
 ## Compatibility
 
