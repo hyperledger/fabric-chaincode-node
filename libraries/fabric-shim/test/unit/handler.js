@@ -21,7 +21,9 @@ const StateQueryIterator = require('../../../fabric-shim/lib/iterators.js').Stat
 const HistoryQueryIterator = require('../../../fabric-shim/lib/iterators.js').HistoryQueryIterator;
 
 const fabprotos = require('../../bundle');
-const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
+const fs = require('fs');
+const path = require('path');
 
 const sandbox = sinon.createSandbox();
 
@@ -30,10 +32,14 @@ const mockChaincodeImpl = {
     Invoke: function() {}
 };
 
+const ca = fs.readFileSync(path.join(__dirname, 'test-ca.pem'), 'utf8');
+const key = fs.readFileSync(path.join(__dirname, 'test-key.pem'), 'utf8');
+const cert = fs.readFileSync(path.join(__dirname, 'test-cert.pem'), 'utf8');
+
 const mockOpts = {
-    pem: 'dummy pem string',
-    key: 'dummy key',
-    cert: 'dummy cert'
+    pem: ca,
+    key: key,
+    cert: cert
 };
 
 const mockPeerAddress = {
@@ -401,8 +407,8 @@ describe('Handler', () => {
             expect(handler._request_timeout).to.deep.equal(30000);
             expect(handler._endpoint.addr).to.deep.equal(mockPeerAddress.base);
             expect(credsSpy.calledOnce).to.be.true;
-            expect(handler._endpoint.creds.constructor.name).to.deep.equal('ChannelCredentials');
-            expect(handler._client.constructor.name).to.deep.equal('ServiceClient');
+            expect(handler._endpoint.creds.constructor.name).to.deep.equal('InsecureChannelCredentialsImpl');
+            expect(handler._client.constructor.name).to.deep.equal('ServiceClientImpl');
 
             credsSpy.restore();
         });
@@ -450,7 +456,7 @@ describe('Handler', () => {
         it ('should throw an error if connection secure encoded private key not passed as opt', () => {
             expect(() => {
                 new Handler(mockChaincodeImpl, mockPeerAddress.secure, {
-                    pem: 'dummy pem string'
+                    pem: ca
                 });
             }).to.throw(/encoded Private key is required./);
         });
@@ -458,8 +464,8 @@ describe('Handler', () => {
         it ('should throw an error if connection secure encoded private key not passed as opt', () => {
             expect(() => {
                 new Handler(mockChaincodeImpl, mockPeerAddress.secure, {
-                    pem: 'dummy pem string',
-                    key: 'dummy key'
+                    pem: ca,
+                    key: key
                 });
             }).to.throw(/encoded client certificate is required./);
         });
@@ -474,8 +480,8 @@ describe('Handler', () => {
             expect(handler._endpoint.addr).to.deep.equal(mockPeerAddress.base);
             expect(credsSpy.calledOnce).to.be.true;
             expect(credsSpy.calledWith(Buffer.from(mockOpts.pem), Buffer.from(mockOpts.key, 'base64'), Buffer.from(mockOpts.cert, 'base64'))).to.be.true;
-            expect(handler._endpoint.creds.constructor.name).to.deep.equal('ChannelCredentials');
-            expect(handler._client.constructor.name).to.deep.equal('ServiceClient');
+            expect(handler._endpoint.creds.constructor.name).to.deep.equal('SecureChannelCredentialsImpl');
+            expect(handler._client.constructor.name).to.deep.equal('ServiceClientImpl');
         });
 
         it ('should set grpc ssl options when ssl-target-name-override passed', () => {
@@ -1681,7 +1687,7 @@ describe('Handler', () => {
             const createStub = Handler.__get__('createStub');
             createStub({}, 'channelID', 'txID', 'some input', 'some proposal');
 
-            expect(mockStub.calledWithNew).to.be.ok;   //believe wrong
+            expect(mockStub.calledWithNew).to.be.ok;   // believe wrong
             expect(mockStub.calledWithNew()).to.be.false;
             expect(mockStub.firstCall.args[0]).to.deep.equal({});
             expect(mockStub.firstCall.args[1]).to.deep.equal('channelID');
