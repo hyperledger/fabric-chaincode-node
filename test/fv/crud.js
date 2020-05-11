@@ -154,6 +154,13 @@ describe('Chaincode CRUD', () => {
             expect(JSON.parse(payload)).to.deep.equal(['annblack', 'annred', 'annyellow']);
         });
 
+
+        it('should return the bulk states from a partial composite key using the old iterator style', async function() {
+            this.timeout(MED_STEP);
+            const payload = await utils.query(suite, 'org.mynamespace.crud:getStateByPartialCompositeKey', ['bulk-data','bulk']);
+            expect(JSON.parse(payload)).to.have.lengthOf(229);
+        });
+
         it('should return a state from a partial composite key using the new iterator style', async function() {
             this.timeout(SHORT_STEP);
             const payload = await utils.query(suite, 'org.mynamespace.crud:getStateByPartialCompositeKeyUsingAsyncIterator', ['name~color', 'ann']);
