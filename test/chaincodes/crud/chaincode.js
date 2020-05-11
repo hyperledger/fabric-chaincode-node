@@ -63,6 +63,13 @@ class CrudChaincode extends Contract {
             await stub.putState(`key${i}`, Buffer.from(`value${i}`));
             await stub.putState(`jsonkey${i}`, Buffer.from(JSON.stringify({key: `k${i}`, value: `value${i}`})));
         }
+
+        // add a large set of keys for testing pagination and larger data sets
+        const DATA_SET_SIZE=229;
+        for (let i = 0; i < DATA_SET_SIZE;i++){
+            const compositeKey = stub.createCompositeKey('bulk-data',['bulk',i.toString().padStart(3,'0')]);
+            await stub.putState(compositeKey, Buffer.from(i.toString().padStart(3,'0')));
+        }
     }
 
     async getKey({stub}) {
