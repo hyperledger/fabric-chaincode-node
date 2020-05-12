@@ -62,8 +62,8 @@
     "@grpc/proto-loader": "^0.5.4",
     "@types/node": "^8.9.4",
     "ajv": "^6.5.5",
-    "fabric-contract-api": "3.0.0-unstable",
-    "fabric-shim-api": "3.0.0-unstable",
+    "fabric-contract-api": "file:../../apis/fabric-contract-api",
+    "fabric-shim-api": "file:../../apis/fabric-shim-api",
     "fs-extra": "8.1.0",
     "reflect-metadata": "^0.1.12",
     "winston": "^3.2.1",
@@ -82,6 +82,6 @@
     "rewire": "4.0.1",
     "rimraf": "^3.0.0",
     "sinon": "7.5.0",
-    "azure-mocha-reporter": "1.0.0"
+    "azure-mocha-reporter": "file:../../tools/azure-mocha-reporter"
   }
 }

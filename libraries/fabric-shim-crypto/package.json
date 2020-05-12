@@ -38,7 +38,7 @@
         "rewire": "4.0.1",
         "sinon": "7.5.0",
         "chai-things": "^0.2.0",
-        "azure-mocha-reporter": "1.0.0"
+        "azure-mocha-reporter": "file:../../tools/azure-mocha-reporter"
     },
     "nyc": {
         "exclude": [

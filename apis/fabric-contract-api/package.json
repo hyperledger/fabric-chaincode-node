@@ -46,7 +46,7 @@
     "lines": 100
   },
   "dependencies": {
-    "fabric-shim-api": "3.0.0-unstable",
+    "fabric-shim-api": "file:../fabric-shim-api",
     "class-transformer": "^0.2.2",
     "fast-safe-stringify": "~2.0.7",
     "get-params": "^0.1.2",
