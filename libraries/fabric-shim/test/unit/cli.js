@@ -25,6 +25,7 @@ describe('fabric-chaincode-node cli', () => {
 
     beforeEach(() => {
         sandbox = sinon.createSandbox();
+        sandbox.stub(yargs, 'parserConfiguration').returns(yargs);
         sandbox.stub(yargs, 'commandDir').returns(yargs);
         sandbox.stub(yargs, 'demandCommand').returns(yargs);
 
