@@ -32,9 +32,6 @@
     "node": "^12.13.0",
     "npm": "^6.4.1"
   },
-  "yargs": {
-    "dot-notation": false
-  },
   "types": "./types/index.d.ts",
   "license": "Apache-2.0",
   "nyc": {
