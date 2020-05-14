@@ -107,9 +107,9 @@ describe('Iterator', () => {
                 getResultFromBytesStub.restore();
             });
 
-            it ('should return value of first element of results converted from bytes and done false when has_more false and results has no more elements after currentLoc', () => {
+            it ('should return value of first element of results converted from bytes and done false when hasMore false and results has no more elements after currentLoc', () => {
                 mockResponse.results = ['some result bytes'];
-                mockResponse.has_more = false;
+                mockResponse.hasMore = false;
 
                 const result = ci._createAndEmitResult();
 
@@ -121,9 +121,9 @@ describe('Iterator', () => {
                 });
             });
 
-            it ('should return value of first element of results converted from bytes and done false when has_more true and results has no more elements after currentLoc', () => {
+            it ('should return value of first element of results converted from bytes and done false when hasMore true and results has no more elements after currentLoc', () => {
                 mockResponse.results = ['some result bytes'];
-                mockResponse.has_more = true;
+                mockResponse.hasMore = true;
 
                 const result = ci._createAndEmitResult();
 
@@ -136,9 +136,9 @@ describe('Iterator', () => {
                 });
             });
 
-            it ('should return value of first element of results converted from bytes and done false when has_more false and results has elements after currentLoc', () => {
+            it ('should return value of first element of results converted from bytes and done false when hasMore false and results has elements after currentLoc', () => {
                 mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.has_more = false;
+                mockResponse.hasMore = false;
 
                 const result = ci._createAndEmitResult();
 
@@ -151,9 +151,9 @@ describe('Iterator', () => {
                 });
             });
 
-            it ('should return value of first element of results converted from bytes and done false when has_more true and results has elements after currentLoc', () => {
+            it ('should return value of first element of results converted from bytes and done false when hasMore true and results has elements after currentLoc', () => {
                 mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.has_more = true;
+                mockResponse.hasMore = true;
 
                 const result = ci._createAndEmitResult();
 
@@ -168,7 +168,7 @@ describe('Iterator', () => {
 
             it ('should return as expected with non-zero currentLoc', () => {
                 mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.has_more = true;
+                mockResponse.hasMore = true;
 
                 ci.currentLoc = 1;
 
@@ -185,7 +185,7 @@ describe('Iterator', () => {
 
             it ('should return value of first element of results converted from bytes and done false', () => {
                 mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.has_more = false;
+                mockResponse.hasMore = false;
 
                 const expectedResult = {
                     value: 'some result',
@@ -222,13 +222,13 @@ describe('Iterator', () => {
                 expect(result).to.deep.equal('some result');
             });
 
-            it ('should return _createAndEmitResult when response has_more and no error occurs', async () => {
+            it ('should return _createAndEmitResult when response hasMore and no error occurs', async () => {
                 mockResponse.results = [];
-                mockResponse.has_more = true;
+                mockResponse.hasMore = true;
 
                 const nextResponse = {
                     results: ['some result bytes', 'some more result bytes'],
-                    has_more: false
+                    hasMore: false
                 };
 
                 mockHandler.handleQueryStateNext = sinon.stub().resolves(nextResponse);
@@ -242,36 +242,9 @@ describe('Iterator', () => {
                 expect(ci.response).to.deep.equal(nextResponse);
             });
 
-            /*
-            it ('should emit an error if error occurs when has_more and listenerCount for data > 0', async () => {
+            it ('should throw an error if error occurs when hasMore and listenerCount for data = 0', async () => {
                 mockResponse.results = [];
-                mockResponse.has_more = true;
-
-                const err = new Error('some error');
-
-                mockHandler.handleQueryStateNext = sinon.stub().rejects(err);
-                const emitStub = sinon.stub(ci, 'emit');
-                const listenerCountStub = sinon.stub(ci, 'listenerCount').returns(1);
-
-                ci.currentLoc = 1;
-
-                const result = await ci.next();
-
-                expect(result).to.be.undefined;
-                expect(createAndEmitResultStub.notCalled).to.be.ok;
-                expect(listenerCountStub.calledOnce).to.be.ok;
-                expect(listenerCountStub.firstCall.args).to.deep.equal(['data']);
-                expect(emitStub.calledOnce).to.be.ok;
-                expect(emitStub.firstCall.args).to.deep.equal(['error', ci, err]);
-
-                listenerCountStub.restore();
-                emitStub.restore();
-            });
-            */
-
-            it ('should throw an error if error occurs when has_more and listenerCount for data = 0', async () => {
-                mockResponse.results = [];
-                mockResponse.has_more = true;
+                mockResponse.hasMore = true;
 
                 const err = new Error('some error');
 
@@ -285,9 +258,9 @@ describe('Iterator', () => {
                 expect(createAndEmitResultStub.notCalled).to.be.true;
             });
 
-            it ('should return done if response does not has_more and listenerCount for end > 0', async () => {
+            it ('should return done if response does not hasMore and listenerCount for end > 0', async () => {
                 mockResponse.results = [];
-                mockResponse.has_more = false;
+                mockResponse.hasMore = false;
 
                 const result = await ci.next();
 
@@ -295,9 +268,9 @@ describe('Iterator', () => {
                 expect(createAndEmitResultStub.notCalled).to.be.true;
             });
 
-            it ('should return done if response does not has_more and listenerCount for end = 0', async () => {
+            it ('should return done if response does not hasMore and listenerCount for end = 0', async () => {
                 mockResponse.results = [];
-                mockResponse.has_more = false;
+                mockResponse.hasMore = false;
 
                 const result = await ci.next();
 

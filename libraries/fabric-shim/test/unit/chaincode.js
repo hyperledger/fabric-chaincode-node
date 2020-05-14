@@ -12,12 +12,21 @@ const expect = chai.expect;
 const rewire = require('rewire');
 const fabprotos = require('../../bundle');
 const path = require('path');
+const fs = require('fs');
 
 const Logger = require('../../lib/logger');
 
 const Stub = require('../../lib/stub');
 const chaincodePath = '../../lib/chaincode.js';
 const StartCommand = require('../../lib/cmds/startCommand.js');
+
+const caPath = path.join(__dirname, 'test-ca.pem');
+const certPath = path.join(__dirname, 'test-cert.pem');
+const keyPath = path.join(__dirname, 'test-key.pem');
+
+const ca = fs.readFileSync(caPath, 'utf8');
+const key = fs.readFileSync(keyPath, 'utf8');
+const cert = fs.readFileSync(certPath, 'utf8');
 
 describe('Chaincode', () => {
     let Chaincode;
@@ -159,15 +168,13 @@ describe('Chaincode', () => {
         });
 
         describe ('TLS handling', () => {
-            const testfile = path.join(__dirname, '../../../../package.json');
-
             const myYargs = {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc'}};
 
             let getArgsStub;
 
             before(() => {
                 process.env.CORE_PEER_TLS_ENABLED = true;
-                process.env.CORE_PEER_TLS_ROOTCERT_FILE = testfile;
+                process.env.CORE_PEER_TLS_ROOTCERT_FILE = caPath;
             });
 
             beforeEach(() => {
@@ -198,7 +205,7 @@ describe('Chaincode', () => {
             });
 
             it ('should throw an error when CORE_TLS_CLIENT_KEY_PATH env var set but CORE_TLS_CLIENT_CERT_PATH env var not set', () => {
-                process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
+                process.env.CORE_TLS_CLIENT_KEY_PATH = keyPath;
                 expect(() => {
                     Chaincode.start({Init: function() {}, Invoke: function() {}});
                 }).to.throw(/The client key and cert are needed when TLS is enabled, but environment variables specifying the paths to these files are missing/);
@@ -209,8 +216,8 @@ describe('Chaincode', () => {
                 const handlerClass = Chaincode.__get__('Handler');
                 const chat = sandbox.stub(handlerClass.prototype, 'chat');
 
-                process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
-                process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
+                process.env.CORE_TLS_CLIENT_KEY_PATH = keyPath;
+                process.env.CORE_TLS_CLIENT_CERT_PATH = certPath;
 
                 Chaincode.start({Init: function() {}, Invoke: function() {}});
 
@@ -243,22 +250,17 @@ describe('Chaincode', () => {
                 const handlerClass = Chaincode.__get__('Handler');
                 Chaincode.__set__('Handler', MockHandler);
 
-                process.env.CORE_TLS_CLIENT_KEY_PATH = testfile;
-                process.env.CORE_TLS_CLIENT_CERT_PATH = testfile;
+                process.env.CORE_TLS_CLIENT_KEY_PATH = keyPath;
+                process.env.CORE_TLS_CLIENT_CERT_PATH = certPath;
 
                 Chaincode.start({Init: function() {}, Invoke: function() {}});
 
                 sinon.assert.calledOnce(getArgsStub);
                 sinon.assert.calledWith(getArgsStub, myYargs);
 
-                const attributes = ['pem', 'cert', 'key'];
-
-                attributes.forEach((attr) => {
-                    expect(typeof testOpts[attr]).to.deep.equal('string');
-
-                    const json = JSON.parse(testOpts[attr]);
-                    expect(json.name).to.deep.equal('fabric-chaincode-node');
-                });
+                testOpts.pem.should.equal(ca);
+                testOpts.cert.should.equal(cert);
+                testOpts.key.should.equal(key);
 
                 Chaincode.__set__('Handler', handlerClass);
             });

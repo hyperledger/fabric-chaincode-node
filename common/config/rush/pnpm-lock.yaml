@@ -1,6 +1,7 @@
 dependencies:
   '@fidm/x509': 1.2.1
-  '@grpc/proto-loader': 0.5.3
+  '@grpc/grpc-js': 1.0.3
+  '@grpc/proto-loader': 0.5.4
   '@rush-temp/azure-mocha-reporter': 'file:projects/azure-mocha-reporter.tgz'
   '@rush-temp/fabric-contract-api': 'file:projects/fabric-contract-api.tgz'
   '@rush-temp/fabric-e2e-tests': 'file:projects/fabric-e2e-tests.tgz'
@@ -27,12 +28,10 @@ dependencies:
   del: 3.0.0
   delay: 4.3.0
   elliptic: 6.5.2
-  fabric-contract-api: 2.0.0-beta.1
   fast-safe-stringify: 2.0.7
   fs-extra: 8.1.0
   get-params: 0.1.2
   git-rev-sync: 1.12.0
-  grpc: 1.24.2
   gulp: 4.0.2
   gulp-debug: 4.0.0_gulp@4.0.2
   gulp-eslint: 6.0.0
@@ -158,7 +157,15 @@ packages:
       node: '>= 8'
     resolution:
       integrity: sha512-nwc2iesjyc9hkuzcrMCBXQRn653XuAUKorfWM8PZyJawiy1QzLj4vahwzaI25+pfpwOLvMzbJ0uKpWLDNmo16w==
-  /@grpc/proto-loader/0.5.3:
+  /@grpc/grpc-js/1.0.3:
+    dependencies:
+      semver: 6.3.0
+    dev: false
+    engines:
+      node: ^8.13.0 || >=10.10.0
+    resolution:
+      integrity: sha512-JKV3f5Bv2TZxK6eJSB9EarsZrnLxrvcFNwI9goq0YRXa3S6NNoCSnI3cG3lkXVIJ03Wng1WXe76kc2JQtRe7AQ==
+  /@grpc/proto-loader/0.5.4:
     dependencies:
       lodash.camelcase: 4.3.0
       protobufjs: 6.8.8
@@ -166,7 +173,7 @@ packages:
     engines:
       node: '>=6'
     resolution:
-      integrity: sha512-8qvUtGg77G2ZT2HqdqYoM/OY97gQd/0crSG34xNmZ4ZOsv3aQT/FQV9QfZPazTGna6MIoyUd+u6AxsoZjJ/VMQ==
+      integrity: sha512-HTM4QpI9B2XFkPz7pjwMyMgZchJ93TVkL3kWPW8GDMDKYxsMnmf4w2TNMJK7+KNiYHS5cJrCEAFlF+AwtXWVPA==
   /@microsoft/tsdoc-config/0.13.0:
     dependencies:
       '@microsoft/tsdoc': 0.12.16
@@ -8235,7 +8242,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-contract-api'
     resolution:
-      integrity: sha512-oJinNLqUWgxBfAAw4F0KPybMqhVRLdsj+2oWIDsIeRQT318SMNCn73L8McPUskv+0BaN+eomC18DAgA4CiLzIA==
+      integrity: sha512-GqgR8guDZQRqll57LRZm/tuaa+fmjBkWABeRiDGmzaKtmK9qwZgcwROzMoYu7U+M7tOrmc2KEJxHrD/LtOsysw==
       tarball: 'file:projects/fabric-contract-api.tgz'
     version: 0.0.0
   'file:projects/fabric-e2e-tests.tgz':
@@ -8277,7 +8284,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-ledger'
     resolution:
-      integrity: sha512-pmQuZaQ4W/swt4KzeeMhse2NjeGjgnQXs4qAY4I3qobFIdkOkJZ1NqsTJQlBYXpfSAqtZI1CwGsFzRSn3FbzNA==
+      integrity: sha512-wO3G9J9EOgdzxib0bfhOiLk2oXmIpQbz21Ohb2Vs0wm53R3E8CJBeVRgbw9wTx94dW+mPzSbrS5DEorom6DNBQ==
       tarball: 'file:projects/fabric-ledger.tgz'
     version: 0.0.0
   'file:projects/fabric-nodeenv.tgz':
@@ -8324,13 +8331,14 @@ packages:
     dev: false
     name: '@rush-temp/fabric-shim-docs'
     resolution:
-      integrity: sha512-cDXaZSoeWlDSDxoEgEM9B4HI6f2ivsttzl+HI8jwhcUHZ5B5Fa0bSbenb4IIBimVUbpWHpc5GMBgSRdGPH3oyA==
+      integrity: sha512-g6TbBb1mqAw14C8YOZ+DvMOPzk2OYVnlTCGNjZjRX5fgCg4LWJ9/+XYnc8ba/Tv3lnSbhfFv6oRziBLKsvNGFw==
       tarball: 'file:projects/fabric-shim-docs.tgz'
     version: 0.0.0
   'file:projects/fabric-shim.tgz':
     dependencies:
       '@fidm/x509': 1.2.1
-      '@grpc/proto-loader': 0.5.3
+      '@grpc/grpc-js': 1.0.3
+      '@grpc/proto-loader': 0.5.4
       '@types/node': 8.10.59
       ajv: 6.11.0
       chai: 4.2.0
@@ -8353,7 +8361,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-shim'
     resolution:
-      integrity: sha512-1moPZW9l4xnkPjvgwAjGjjcPXsfdxG/77C9r+18Cfb28RpXl6CnEtdccy92xnKaJtJgnMrZC1jusUA9YR6zAyQ==
+      integrity: sha512-YZ3DqzDKCOZkg+396zM8ugOzMMTLItlVfTJN3/KOLGRx6uAhW6UVZPdQMVCA5aZGDqkUjjhqEEHAKkqpLvvOsA==
       tarball: 'file:projects/fabric-shim.tgz'
     version: 0.0.0
   'file:projects/fvtests.tgz':
@@ -8381,7 +8389,7 @@ packages:
     dev: false
     name: '@rush-temp/fvtests'
     resolution:
-      integrity: sha512-sqFhNVP3ENwnKx3H4F9mQX3qOBOtn5dZf5jLwUnPnCnsvnSa1xThwHCF/F0bUcp8fMocboOflLd5iIxr53Jq0A==
+      integrity: sha512-xCNpv9Q1W5WfzLCET7Hbvlfw1EyqOGCnSwEnoBJElXdD7IHDzEtPG+lelPWKBFKUCeuc3lmO0Tb8kZKuvU5kqg==
       tarball: 'file:projects/fvtests.tgz'
     version: 0.0.0
   'file:projects/toolchain.tgz':
@@ -8405,7 +8413,8 @@ packages:
 registry: ''
 specifiers:
   '@fidm/x509': ^1.2.1
-  '@grpc/proto-loader': ^0.5.1
+  '@grpc/grpc-js': ^1.0.3
+  '@grpc/proto-loader': ^0.5.4
   '@rush-temp/azure-mocha-reporter': 'file:./projects/azure-mocha-reporter.tgz'
   '@rush-temp/fabric-contract-api': 'file:./projects/fabric-contract-api.tgz'
   '@rush-temp/fabric-e2e-tests': 'file:./projects/fabric-e2e-tests.tgz'
@@ -8432,12 +8441,10 @@ specifiers:
   del: ^3.0.0
   delay: 4.3.0
   elliptic: ^6.4.0
-  fabric-contract-api: 2.0.0-beta.1
   fast-safe-stringify: ~2.0.7
   fs-extra: 8.1.0
   get-params: ^0.1.2
   git-rev-sync: 1.12.0
-  grpc: ^1.23.3
   gulp: ^4.0.0
   gulp-debug: ~4.0.0
   gulp-eslint: ~6.0.0
