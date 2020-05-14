@@ -17,7 +17,7 @@
         "tutorials": "./_jsdoc/tutorials"
     },
     "templates": {
-        "systemName": "Hyperledger Fabric SDK for node.js",
+        "systemName": "Hyperledger Fabric Contract API",
         "theme": "cosmo",
         "default": {
             "staticFiles": {
