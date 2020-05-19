@@ -1,3 +1,13 @@
+## v2.1.2
+Mon 18 May 2020 17:06:23 BST
+
+* [3d3264d](https://github.com/hyperledger/fabric-chaincode-node/commit/3d3264d) Fix broken tutorials link (#137) (#138)
+* [ac5b009](https://github.com/hyperledger/fabric-chaincode-node/commit/ac5b009) [FABCN-401](https://jira.hyperledger.org/browse/FABCN-401) Correct use of Yargs api (#145)
+* [a81935a](https://github.com/hyperledger/fabric-chaincode-node/commit/a81935a) [FABCN-395](https://jira.hyperledger.org/browse/FABCN-395): Use @grpc/grpc-js for Node.js chaincode (#143) (#144)
+* [8de8a6e](https://github.com/hyperledger/fabric-chaincode-node/commit/8de8a6e) [FABCN-396](https://jira.hyperledger.org/browse/FABCN-396) Add notes on minimum 1.4 module version for node 12 (#139)
+* [00fab0a](https://github.com/hyperledger/fabric-chaincode-node/commit/00fab0a) [FABCN-397](https://jira.hyperledger.org/browse/FABCN-397) State queries limited to 100 results (#141)
+* [b1f992d](https://github.com/hyperledger/fabric-chaincode-node/commit/b1f992d) Bump version (#134)
+
 ## v2.1.1
 Wed 22 Apr 2020 10:31:05 BST
 
