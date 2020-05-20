@@ -1,6 +1,6 @@
 
 
-This outlines the theory of the how the new node module works; with the fabric samples project you will find scenario-based approaches. 
+This outlines the theory of the how the new node module works; with the fabric samples project you will find scenario-based approaches.
 
 ## Writing the chaincode
 
@@ -8,7 +8,7 @@ This outlines the theory of the how the new node module works; with the fabric s
 
 An initial `package.json` is as follows;
 
-The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required. 
+The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required.
 
 ```
 {
@@ -34,7 +34,7 @@ The dependencies of `fabric-chaincode-api` and `fabric-shim` will be required.
 }
 
 ```
-Remember to add in any additional business logic, and testing libraries needed 
+Remember to add in any additional business logic, and testing libraries needed
 
 Adding `fabric-shim` as a dependency, gives a command `fabric-chaincode-node` that is the script to run for `npm start`.
 
@@ -65,7 +65,7 @@ Within the class you can defined as many or functions as you wish. These transac
 
 Node states that module exports are defined in `index.js`
 
-In this example we have a single value that can be queried and updated. This has been split into to parts for demonstration purposes. 
+In this example we have a single value that can be queried and updated. This has been split into to parts for demonstration purposes.
 
 ```
 // index.js
@@ -77,7 +77,7 @@ const RemoveValues = require('./removevalues')
 module.exports.contracts = [UpdateValues,RemoveValues];
 ```
 
-This exports two classes that together form the Contract. There can be other code that within the model that is used in a support role. 
+This exports two classes that together form the Contract. There can be other code that within the model that is used in a support role.
 *Note that the 'contracts' word is mandatory.*
 
 ### 4: What do these classes need to contain?
@@ -124,7 +124,7 @@ Note that ALL the functions defined in these modules will be called by the clien
 
 - There are 3 functions `setup` `setNewAssetValue` and `doubleAssetValue` that can be called by issuing the appropriate invoke client side
 - The `ctx` in the function is a transaction context; each time a invoke is called this will be a new instance that can be used by the function implementation to access apis such as the world state of information on invoking identity.
-- The arguments are split out from the array passed on the invoke. 
+- The arguments are split out from the array passed on the invoke.
 - The constructor contains a 'name' to help identify the sets of functions
 
 ## Running chaincode in development mode
@@ -158,21 +158,21 @@ Will get things working...
 Then you can invoke the chaincode via this command.
 
 ```
-$ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Args":["UpdateValuesContract:getAssetValue"]}' -n mycontract4  
+$ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Args":["UpdateValuesContract:getAssetValue"]}' -n mycontract4
 ```
 
 
 ## Additional support provided by the SmartContract class
 
-In the case where you ask for a function to be executed, it could be the case that this doesn't exist. 
-You can provide you own function to be executed in this case, the default is to throw and error but you're able to customise this if you wish. 
+In the case where you ask for a function to be executed, it could be the case that this doesn't exist.
+You can provide you own function to be executed in this case, the default is to throw and error but you're able to customise this if you wish.
 
 For example
 
 
 ```
-	/** 
-	 * Sets a name so that the functions in this particular class can 
+	/**
+	 * Sets a name so that the functions in this particular class can
 	 * be separated from others.
 	 */
 	constructor() {
@@ -180,7 +180,7 @@ For example
 	}
 
 	/** The function to invoke if something unkown comes in.
-	 * 
+	 *
 	 */
 	async unknownTransaction(ctx){		
         throw new Error('a custom error message')
@@ -199,15 +199,15 @@ For example
 
 ### Structure of the Transaction Context
 
-In Fabric, there is a *stub* api that provides chaincode with functionality. 
+In Fabric, there is a *stub* api that provides chaincode with functionality.
 No functionality has been removed, but a new approach to providing abstractions on this to facilitate programming.
 
 *user additions*:  additional properties can be added to the object to support for example common handling of the data serialization.
 
-The context object contains 
+The context object contains
 
 - `ctx.stub`  the same stub instance as in earlier versions for compatibility
-- `ctx.identity` and instance of the Client Identity object 
+- `ctx.identity` and instance of the Client Identity object
 
 You are at liberty to create a subclass of the Context to provide additional functions, or per-transaction context storage. For example
 
@@ -220,7 +220,7 @@ You are at liberty to create a subclass of the Context to provide additional fun
 	}
 ```
 
-and the Context class itself is 
+and the Context class itself is
 
 ```
 const { Context } = require('fabric-contract-api');
@@ -255,7 +255,7 @@ Definitions as per https://www.ietf.org/rfc/rfc2119.txt
 	- as per node.js language standard
 - Duplicate function names in a single class is an error
 - Any function that is dynamically added will not be registered as an invokable function
-- There are no specific function that is invoked per Fabric's *init* chaincode spi. The instantiate flow can pass function name and parameters; therefore consider 
+- There are no specific function that is invoked per Fabric's *init* chaincode spi. The instantiate flow can pass function name and parameters; therefore consider
 a dedicated function that will be called for new chaincode deployments, and for upgrade deployments.
 
 ## Restrictions on programming in side a Contract function
@@ -263,9 +263,9 @@ a dedicated function that will be called for new chaincode deployments, and for 
 Hyperledger Fabric's consensus algorithm permits the ability to use general purpose languages; rather than a more restrictive language. But the following restrictions apply
 
 - Functions should not create random variables, or use any function whose return values are functions of the current time or location of execution
-  - i.e. the function will be executed in another context (i.e. peer process).  This could potentially be in a different time zone in a different locale. 
+  - i.e. the function will be executed in another context (i.e. peer process).  This could potentially be in a different time zone in a different locale.
 - Functions should be away that they may read state, and write state. But they are producing a set of changes that will be applied to the state. The implication is that updates to the state
-may not be read back.  
+may not be read back.
 
 ```
 let v1 = getState("key")
@@ -276,9 +276,9 @@ let v2 = getState("key")
 v2=="world" // is false,  v2 is "hello"
 ```
 
-In any subsequent invocation, the value would be seen to be updated. 
+In any subsequent invocation, the value would be seen to be updated.
 
-Note that if you have use any Flux architecture implications such as Redux, the above restrictions will be familiar. 
+Note that if you have use any Flux architecture implications such as Redux, the above restrictions will be familiar.
 
 
 
