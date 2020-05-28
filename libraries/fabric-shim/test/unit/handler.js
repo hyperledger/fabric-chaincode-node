@@ -369,19 +369,19 @@ describe('Handler', () => {
     describe('ChaincodeSupportClient', () => {
         it ('should throw an error when chaincode not passed', () => {
             expect(() => {
-                new Handler();
+                new Handler.ChaincodeSupportClient();
             }).to.throw(/Missing required argument: chaincode/);
         });
 
         it ('should throw an error if argument does not match chaincode format', () => {
             expect(() => {
-                new Handler({});
+                new Handler.ChaincodeSupportClient({});
             }).to.throw(/The chaincode argument must implement the mandatory "Init\(\)" method/);
         });
 
         it ('should throw an error if argument only part matches chaincode format', () => {
             expect(() => {
-                new Handler({
+                new Handler.ChaincodeSupportClient({
                     Init: function() {}
                 });
             }).to.throw(/The chaincode argument must implement the mandatory "Invoke\(\)" method/);
@@ -389,20 +389,20 @@ describe('Handler', () => {
 
         it ('should throw an error if argument missing URL argument', () => {
             expect(() => {
-                new Handler(mockChaincodeImpl);
+                new Handler.ChaincodeSupportClient(mockChaincodeImpl);
             }).to.throw(/Invalid URL: undefined/);
         });
 
         it ('should throw an error if URL argument does not use grpc as protocol', () => {
             expect(() => {
-                new Handler(mockChaincodeImpl, 'https://' + mockPeerAddress.base);
+                new Handler.ChaincodeSupportClient(mockChaincodeImpl, 'https://' + mockPeerAddress.base);
             }).to.throw(/Invalid protocol: https. {2}URLs must begin with grpc:\/\/ or grpcs:\/\//);
         });
 
         it ('should set endpoint, client and default timeout', () => {
             const credsSpy = sinon.spy(grpc.credentials, 'createInsecure');
 
-            const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+            const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.unsecure);
 
             expect(handler._request_timeout).to.deep.equal(30000);
             expect(handler._endpoint.addr).to.deep.equal(mockPeerAddress.base);
@@ -414,7 +414,7 @@ describe('Handler', () => {
         });
 
         it ('should override the default request timeout if value passed', () => {
-            const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure, {
+            const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.unsecure, {
                 'request-timeout': 123456
             });
 
@@ -422,7 +422,7 @@ describe('Handler', () => {
         });
 
         it ('should store additional grpc options', () => {
-            const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure, {
+            const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.unsecure, {
                 'grpc.max_send_message_length': 1,
                 'grpc.max_receive_message_length': 2,
                 'grpc.keepalive_time_ms': 3,
@@ -442,20 +442,20 @@ describe('Handler', () => {
         });
 
         it ('should preserve casing in handler addr', () => {
-            const handler = new Handler(mockChaincodeImpl, 'grpc://' + mockPeerAddress.base.toUpperCase());
+            const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, 'grpc://' + mockPeerAddress.base.toUpperCase());
 
             expect(handler._endpoint.addr).to.deep.equal(mockPeerAddress.base.toUpperCase());
         });
 
         it ('should throw an error if connection secure and certificate not passed', () => {
             expect(() => {
-                new Handler(mockChaincodeImpl, mockPeerAddress.secure);
+                new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.secure);
             }).to.throw(/PEM encoded certificate is required./);
         });
 
         it ('should throw an error if connection secure encoded private key not passed as opt', () => {
             expect(() => {
-                new Handler(mockChaincodeImpl, mockPeerAddress.secure, {
+                new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.secure, {
                     pem: ca
                 });
             }).to.throw(/encoded Private key is required./);
@@ -463,7 +463,7 @@ describe('Handler', () => {
 
         it ('should throw an error if connection secure encoded private key not passed as opt', () => {
             expect(() => {
-                new Handler(mockChaincodeImpl, mockPeerAddress.secure, {
+                new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.secure, {
                     pem: ca,
                     key: key
                 });
@@ -473,7 +473,7 @@ describe('Handler', () => {
         it ('should set endpoint, client and default timeout for a secure connection', () => {
             const credsSpy = sinon.spy(grpc.credentials, 'createSsl');
 
-            const handler = new Handler(mockChaincodeImpl, mockPeerAddress.secure, mockOpts);
+            const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.secure, mockOpts);
 
             expect(handler._options.cert).to.deep.equal(mockOpts.cert);
             expect(handler._request_timeout).to.deep.equal(30000);
@@ -488,7 +488,7 @@ describe('Handler', () => {
             const opts = Object.assign({}, mockOpts);
             opts['ssl-target-name-override'] = 'dummy override';
 
-            const handler = new Handler(mockChaincodeImpl, mockPeerAddress.secure, opts);
+            const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.secure, opts);
 
             expect(handler._options['grpc.ssl_target_name_override']).to.deep.equal('dummy override');
             expect(handler._options['grpc.default_authority']).to.deep.equal('dummy override');
@@ -496,7 +496,7 @@ describe('Handler', () => {
 
         describe('close', () => {
             it ('should call end on the stream', () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.unsecure);
                 handler._stream = {end: sinon.stub()};
 
                 handler.close();
@@ -505,6 +505,43 @@ describe('Handler', () => {
             });
         });
 
+        describe('chat', () => {
+            afterEach(() => {
+                Handler = rewire('../../../fabric-shim/lib/handler.js');
+            });
+
+            it ('should create an instance of ChaincodeMessageHandler and pass the argument', () => {
+                const mockChaincodeMessageHandler = sinon.spy(() => {
+                    return sinon.createStubInstance(Handler.ChaincodeMessageHandler);
+                });
+                Handler.__set__('ChaincodeMessageHandler', mockChaincodeMessageHandler);
+
+                const mockStream = {write: sinon.stub(), on: sinon.stub()};
+                const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.unsecure);
+                handler._client.register = sinon.stub().returns(mockStream);
+
+                handler.chat('starter message example');
+
+                expect(handler._client.register.calledOnce).to.be.true;
+                expect(mockChaincodeMessageHandler.calledWithNew).to.be.ok;  // believe wrong
+                expect(mockChaincodeMessageHandler.calledWithNew()).to.be.false;
+                expect(handler._stream).to.deep.equal(mockStream);
+                expect(handler._handler).to.deep.equal(new mockChaincodeMessageHandler(mockStream, mockChaincodeImpl));
+                expect(handler._handler.chat.calledOnce).to.be.true;
+                expect(handler._handler.chat.firstCall.args).to.deep.equal(['starter message example']);
+            });
+        });
+
+        describe('toString', () => {
+            it ('should return ChaincodeSupportClient object as a string with the URL', () => {
+                const handler = new Handler.ChaincodeSupportClient(mockChaincodeImpl, mockPeerAddress.unsecure);
+
+                expect(handler.toString()).to.deep.equal(`ChaincodeSupportClient : {url:${mockPeerAddress.unsecure}}`);
+            });
+        });
+    });
+
+    describe('ChaincodeMessageHandler', () => {
         describe('chat', () => {
             afterEach(() => {
                 Handler = rewire('../../../fabric-shim/lib/handler.js');
@@ -519,12 +556,9 @@ describe('Handler', () => {
 
                 const mockStream = {write: sinon.stub(), on: sinon.stub()};
 
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                handler._client.register = sinon.stub().returns(mockStream);
-
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 handler.chat('some starter message');
 
-                expect(handler._client.register.calledOnce).to.be.true;
                 expect(mockMsgQueueHandler.calledWithNew).to.be.ok;  // believe wrong
                 expect(mockMsgQueueHandler.calledWithNew()).to.be.false;
                 expect(handler._stream).to.deep.equal(mockStream);
@@ -584,8 +618,7 @@ describe('Handler', () => {
 
                     mockStream = {write: (sinon.stub()), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
 
-                    handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                    handler._client.register = sinon.stub().returns(mockStream);
+                    handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                     handler.chat('some starter message');
 
                     handleInitSpy = sinon.spy();
@@ -758,8 +791,7 @@ describe('Handler', () => {
 
                     const mockStream = {write: sinon.stub(), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
 
-                    const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                    handler._client.register = sinon.stub().returns(mockStream);
+                    const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                     handler.chat('some starter message');
 
                     eventReg.end();
@@ -778,8 +810,7 @@ describe('Handler', () => {
 
                     const mockStream = {write: sinon.stub(), on: mockEventEmitter, end: sinon.stub()};
 
-                    const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                    handler._client.register = sinon.stub().returns(mockStream);
+                    const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                     handler.chat('some starter message');
 
                     eventReg.error({});
@@ -795,8 +826,7 @@ describe('Handler', () => {
 
                     const mockStream = {write: sinon.stub(), on: mockEventEmitter, end: sinon.stub()};
 
-                    const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
-                    handler._client.register = sinon.stub().returns(mockStream);
+                    const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                     handler.chat('some starter message');
                     const error = new Error();
                     eventReg.error(error);
@@ -814,7 +844,8 @@ describe('Handler', () => {
                 const handleMessage = sinon.spy();
                 Handler.__set__('handleMessage', handleMessage);
 
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 handler.handleInit('some message');
 
                 expect(handleMessage.calledOnce).to.be.true;
@@ -831,7 +862,8 @@ describe('Handler', () => {
                 const handleMessage = sinon.spy();
                 Handler.__set__('handleMessage', handleMessage);
 
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 handler.handleTransaction('some message');
 
                 expect(handleMessage.calledOnce).to.be.true;
@@ -861,7 +893,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleGetState(collection, key, 'theChannelID', 'theTxID');
@@ -873,7 +906,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleGetState(collection, key, 'theChannelID', 'theTxID');
@@ -907,7 +941,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handlePutState(collection, key, value, 'theChannelID', 'theTxID');
@@ -919,7 +954,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handlePutState(collection, key, value, 'theChannelID', 'theTxID');
@@ -952,7 +988,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleDeleteState(collection, key, 'theChannelID', 'theTxID');
@@ -964,7 +1001,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen rejects', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleDeleteState(collection, key, 'theChannelID', 'theTxID');
@@ -1005,7 +1043,8 @@ describe('Handler', () => {
             });
 
             it('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handlePutStateMetadata(collection, key, metadataKey, ep, 'theChannelID', 'theTxID');
@@ -1017,7 +1056,8 @@ describe('Handler', () => {
             });
 
             it('should reject when _askPeerAndListen rejects', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handlePutStateMetadata(collection, key, metadataKey, ep, 'theChannelID', 'theTxID');
@@ -1049,7 +1089,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleGetPrivateDataHash(collection, key, 'theChannelID', 'theTxID');
@@ -1061,7 +1102,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen rejects', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleGetPrivateDataHash(collection, key, 'theChannelID', 'theTxID');
@@ -1093,7 +1135,8 @@ describe('Handler', () => {
             });
 
             it('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleGetStateMetadata(collection, key, 'theChannelID', 'theTxID');
@@ -1105,7 +1148,8 @@ describe('Handler', () => {
             });
 
             it('should reject when _askPeerAndListen rejects', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleGetStateMetadata(collection, key, 'theChannelID', 'theTxID');
@@ -1138,7 +1182,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleGetStateByRange(collection, startKey, endKey, 'theChannelID', 'theTxID');
@@ -1150,7 +1195,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleGetStateByRange(collection, startKey, endKey, 'theChannelID', 'theTxID');
@@ -1162,7 +1208,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve with metadata when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
                 const metadata = Buffer.from('metadata');
 
@@ -1201,7 +1248,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleQueryStateNext(id, 'theChannelID', 'theTxID');
@@ -1213,7 +1261,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleQueryStateNext(id, 'theChannelID', 'theTxID');
@@ -1244,7 +1293,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleQueryStateClose(id, 'theChannelID', 'theTxID');
@@ -1256,7 +1306,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleQueryStateClose(id, 'theChannelID', 'theTxID');
@@ -1288,7 +1339,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleGetQueryResult(collection, query, null, 'theChannelID', 'theTxID');
@@ -1300,7 +1352,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen rejects', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleGetQueryResult(collection, query, null, 'theChannelID', 'theTxID');
@@ -1312,7 +1365,8 @@ describe('Handler', () => {
             });
 
             it ('handleGetQueryResult with metadata should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
                 const metadata = Buffer.from('some metadata');
 
@@ -1351,7 +1405,8 @@ describe('Handler', () => {
             });
 
             it ('should resolve when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
 
                 const result = await handler.handleGetHistoryForKey(key, 'theChannelID', 'theTxID');
@@ -1363,7 +1418,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
 
                 const result = handler.handleGetHistoryForKey(key, 'theChannelID', 'theTxID');
@@ -1404,7 +1460,8 @@ describe('Handler', () => {
             });
 
             it ('should return decoded response when chaincode message type COMPLETED', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: fabprotos.protos.ChaincodeMessage.Type.COMPLETED, payload: 'some payload'});
                 const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
@@ -1419,7 +1476,8 @@ describe('Handler', () => {
             });
 
             it ('should throw an error when _askPeerAndListen resolves with an error', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: fabprotos.protos.ChaincodeMessage.Type.ERROR, payload: 'some payload'});
                 const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
@@ -1433,7 +1491,8 @@ describe('Handler', () => {
             });
 
             it ('should reject when _askPeerAndListen resolves', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
                 const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
@@ -1447,7 +1506,8 @@ describe('Handler', () => {
             });
 
             it ('should return nothing chaincode message type not COMPLETED or ERROR', async () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves({type: fabprotos.protos.ChaincodeMessage.Type.SOMETHING_ELSE, payload: 'some payload'});
                 const decodeStub = sandbox.stub(fabprotos.protos.Response, 'decode').returns('some response');
 
@@ -1466,7 +1526,8 @@ describe('Handler', () => {
                 const msg = 'some message';
                 const method = 'SomeMethod';
 
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
 
                 handler.msgQueueHandler = sinon.createStubInstance(MsgQueueHandler);
                 handler.msgQueueHandler.queueMsg.callsFake((qMsg) => {
@@ -1484,9 +1545,10 @@ describe('Handler', () => {
 
         describe('toString', () => {
             it ('should return ChaincodeSupportClient object as a string with the URL', () => {
-                const handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
 
-                expect(handler.toString()).to.deep.equal(`ChaincodeSupportClient : {url:${mockPeerAddress.unsecure}}`);
+                expect(handler.toString()).to.deep.equal('ChaincodeMessageHandler : {}');
             });
         });
     });
@@ -1767,6 +1829,7 @@ describe('Handler', () => {
 
         let saveStateQueryIterator;
         let saveHistoryQueryIterator;
+        let mockStream;
 
         before(() => {
             saveStateQueryIterator = Handler.__get__('StateQueryIterator');
@@ -1789,7 +1852,8 @@ describe('Handler', () => {
                 txid: 'aTx'
             };
 
-            handler = new Handler(mockChaincodeImpl, mockPeerAddress.unsecure);
+            mockStream = {write: sinon.stub(), end: sinon.stub()};
+            handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
         });
 
         after(() => {

@@ -205,7 +205,7 @@ class MsgQueueHandler {
 
 
 /*
- * The ChaincodeSupportClient class represents a the base class for all remote nodes, Peer, Orderer , and MemberServicespeer.
+ * The ChaincodeSupportClient class represents a chaincode gRPC client to the peer.
  */
 class ChaincodeSupportClient {
 
@@ -269,11 +269,37 @@ class ChaincodeSupportClient {
         this._stream.end();
     }
 
+    chat(convStarterMsg) {
+        this._stream = this._client.register();
+
+        this._handler = new ChaincodeMessageHandler(this._stream, this.chaincode);
+        this._handler.chat(convStarterMsg);
+    }
+
+    /*
+     return a printable representation of this object
+     */
+    toString() {
+        return 'ChaincodeSupportClient : {' +
+         'url:' +
+          this._url +
+           '}';
+    }
+}
+
+/**
+ * The ChaincodeMessageHandler class handles messages between peer and chaincode both in the chaincode server and client model.
+ */
+class ChaincodeMessageHandler {
+    constructor (stream, chaincode) {
+        this._stream = stream;
+        this.chaincode = chaincode;
+    }
+
     // this is a long-running method that does not return until
     // the conversation b/w the chaincode program and the target
     // peer has been completed
     chat(convStarterMsg) {
-        this._stream = this._client.register();
         this.msgQueueHandler = new MsgQueueHandler(this);
 
         const stream = this._stream;
@@ -528,15 +554,11 @@ class ChaincodeSupportClient {
         });
     }
 
-
     /*
-	 * return a printable representation of this object
-	 */
+     return a printable representation of this object
+     */
     toString() {
-        return 'ChaincodeSupportClient : {' +
-         'url:' +
-          this._url +
-           '}';
+        return 'ChaincodeMessageHandler : {}';
     }
 }
 
@@ -723,7 +745,10 @@ function parseResponse(handler, res, method) {
     }
 }
 
-module.exports = ChaincodeSupportClient;
+module.exports = {
+    ChaincodeSupportClient,
+    ChaincodeMessageHandler
+};
 
 //
 // The Endpoint class represents a remote grpc or grpcs target
