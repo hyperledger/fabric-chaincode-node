@@ -12,7 +12,7 @@ const util = require('util');
 const fs = require('fs-extra');
 const path = require('path');
 
-const { shell: runcmds , getTLSArgs } = require('toolchain');
+const { shell: runcmds , getTLSArgs, getPeerAddresses } = require('toolchain');
 const Ajv = require('ajv');
 const ip = require('ip');
 
@@ -66,32 +66,115 @@ const queryFunctions = async () => {
 
 
 const instantiateChaincode = async () => {
+    const endorsementPolicy = '"OR (\'Org1MSP.member\', \'Org2MSP.member\')"';
+    const queryInstalled = util.format(
+        'peer lifecycle chaincode queryinstalled --output json'
+    );
+    const sequence = 1;
+
+    const approveChaincode = util.format(
+        'peer lifecycle chaincode approveformyorg -o %s %s -C %s -n %s -v %s --init-required --package-id %s --sequence %d --signature-policy %s',
+        'orderer.example.com:7050',
+        getTLSArgs(),
+        CHANNEL_NAME,
+        'mysmartcontract',
+        'v0',
+        '%s', // To be filled in for each org
+        sequence,
+        endorsementPolicy
+    );
+
+    const outputs = await runcmds([
+        util.format(
+            'docker exec %s %s',
+            'org1_cli',
+            queryInstalled
+        ),
+        util.format(
+            'docker exec %s %s',
+            'org2_cli',
+            queryInstalled
+        ),
+    ]);
+
+    const packageIdOrg1 = findPackageId(outputs[0], 'mysmartcontract_v0');
+    const packageIdOrg2 = findPackageId(outputs[1], 'mysmartcontract_v0');
+
+    // Approve the chaincode and commit
     await runcmds([
-        util.format('docker exec org1_cli peer chaincode instantiate -o %s %s -l node -C %s -n %s -v v0 -c %s -P %s',
+        util.format('docker exec %s %s',
+            'org1_cli',
+            util.format(approveChaincode, packageIdOrg1)
+        ),
+        util.format('docker exec %s %s',
+            'org2_cli',
+            util.format(approveChaincode, packageIdOrg2)
+        ),
+        util.format('docker exec org1_cli peer lifecycle chaincode commit -o %s %s -C %s -n %s -v %s --init-required --sequence %d --signature-policy %s %s',
             'orderer.example.com:7050',
             getTLSArgs(),
             CHANNEL_NAME,
             'mysmartcontract',
-            '\'{"Args":["UpdateValues:setup"]}\'',
-            '\'OR ("Org1MSP.member")\'')
+            'v0',
+            sequence,
+            endorsementPolicy,
+            getPeerAddresses()
+        )
     ]);
     await delay(3000);
+
+    // Invoke init function
+    await runcmds([
+        util.format('docker exec org1_cli peer chaincode invoke %s -C %s -n %s -c %s --isInit --waitForEvent',
+            getTLSArgs(),
+            CHANNEL_NAME,
+            'mysmartcontract',
+            '\'{"Args":["UpdateValues:setup"]}\''
+        )
+    ]);
+};
+
+const findPackageId = (queryOutput, label) => {
+    const output = JSON.parse(queryOutput);
+
+    const cc = output.installed_chaincodes.filter((chaincode) => chaincode.label === label);
+    if (cc.length !== 1) {
+        throw new Error('Failed to find installed chaincode');
+    }
+
+    return cc[0].package_id;
 };
 
 const installChaincode = async () => {
-    const peerInstall = util.format(
-        'peer chaincode install -l node -n %s -v v0 -p %s',
+    const packageChaincode = util.format(
+        'peer lifecycle chaincode package %s -l node --label %s_v0 -p %s',
+        '/tmp/scenario.tar.gz',
         'mysmartcontract',
         // the test folder containing scenario is mapped to /opt/gopath/src/github.com/chaincode
         '/opt/gopath/src/github.com/chaincode/scenario'
     );
+    const peerInstall = util.format(
+        'peer lifecycle chaincode install %s',
+        '/tmp/scenario.tar.gz'
+    );
     const npmrc = path.join(__dirname, '..', '..', 'test', 'chaincodes','scenario', '.npmrc');
+
     await runcmds([
         `echo "registry=http://${ip.address()}:4873" > ${npmrc}`,
         util.format(
             'docker exec %s %s',
             'org1_cli',
+            packageChaincode
+        ),
+        util.format(
+            'docker exec %s %s',
+            'org1_cli',
             peerInstall
+        ),
+        util.format(
+            'docker exec %s %s',
+            'org2_cli',
+            packageChaincode
         ),
         util.format(
             'docker exec %s %s',
