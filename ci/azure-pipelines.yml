@@ -52,11 +52,11 @@ stages:
                 npm install
                 npm install -g gulp-cli
               displayName: 'Setup the node environment'
-            - script: cd $(Build.SourcesDirectory)/fabric-contract-api && ../ci/npmAudit.sh
+            - script: cd $(Build.SourcesDirectory)/fabric-contract-api && npm audit --audit-level=moderate
               displayName: 'Run npm audit in fabric-contract-api'
-            - script: cd $(Build.SourcesDirectory)/fabric-shim && ../ci/npmAudit.sh
+            - script: cd $(Build.SourcesDirectory)/fabric-shim && npm audit --audit-level=moderate
               displayName: 'Run npm audit in fabric-shim'
-            - script: cd $(Build.SourcesDirectory)/fabric-shim-crypto && ../ci/npmAudit.sh
+            - script: cd $(Build.SourcesDirectory)/fabric-shim-crypto && npm audit --audit-level=moderate
               displayName: 'Run npm audit in fabric-shim-crypto'
             - script: gulp test-headless
               displayName: 'Unit tests'
