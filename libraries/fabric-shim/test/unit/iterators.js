@@ -14,7 +14,7 @@ const rewire = require('rewire');
 const Iterator = rewire('../../../fabric-shim/lib/iterators.js');
 const StateQueryIterator = Iterator.StateQueryIterator;
 const HistoryQueryIterator = Iterator.HistoryQueryIterator;
-const handler = require('../../../fabric-shim/lib/handler.js');
+const {ChaincodeMessageHandler} = require('../../../fabric-shim/lib/handler.js');
 const fabprotos = require('../../bundle');
 
 const channel_id = 'theChannelId';
@@ -26,7 +26,7 @@ describe('Iterator', () => {
     let sandbox;
     beforeEach(() => {
         sandbox = sinon.createSandbox();
-        mockHandler = sandbox.createStubInstance(handler);
+        mockHandler = sandbox.createStubInstance(ChaincodeMessageHandler);
         mockResponse = {};
     });
 
