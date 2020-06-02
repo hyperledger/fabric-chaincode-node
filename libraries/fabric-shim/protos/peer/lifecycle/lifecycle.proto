@@ -9,7 +9,7 @@ option go_package = "github.com/hyperledger/fabric-protos-go/peer/lifecycle";
 
 package lifecycle;
 
-import "common/collection.proto";
+import "peer/collection.proto";
 
 // InstallChaincodeArgs is the message used as the argument to
 // '_lifecycle.InstallChaincode'.
@@ -97,7 +97,7 @@ message ApproveChaincodeDefinitionForMyOrgArgs {
     string endorsement_plugin = 4;
     string validation_plugin = 5;
     bytes validation_parameter = 6;
-    common.CollectionConfigPackage collections = 7;
+    protos.CollectionConfigPackage collections = 7;
     bool init_required = 8;
     ChaincodeSource source = 9;
 }
@@ -130,7 +130,7 @@ message CommitChaincodeDefinitionArgs {
     string endorsement_plugin = 4;
     string validation_plugin = 5;
     bytes validation_parameter = 6;
-    common.CollectionConfigPackage collections = 7;
+    protos.CollectionConfigPackage collections = 7;
     bool init_required = 8;
 }
 
@@ -149,7 +149,7 @@ message CheckCommitReadinessArgs {
     string endorsement_plugin = 4;
     string validation_plugin = 5;
     bytes validation_parameter = 6;
-    common.CollectionConfigPackage collections = 7;
+    protos.CollectionConfigPackage collections = 7;
     bool init_required = 8;
 }
 
@@ -159,6 +159,26 @@ message CheckCommitReadinessArgs {
 // supplied as args.
 message CheckCommitReadinessResult{
     map<string, bool> approvals = 1;
+}
+
+// QueryApprovedChaincodeDefinitionArgs is the message used as arguments to
+// `_lifecycle.QueryApprovedChaincodeDefinition`.
+message QueryApprovedChaincodeDefinitionArgs {
+    string name = 1;
+    int64 sequence = 2;
+}
+
+// QueryApprovedChaincodeDefinitionResult is the message returned by
+// `_lifecycle.QueryApprovedChaincodeDefinition`.
+message QueryApprovedChaincodeDefinitionResult {
+    int64 sequence = 1;
+    string version = 2;
+    string endorsement_plugin = 3;
+    string validation_plugin = 4;
+    bytes validation_parameter = 5;
+    protos.CollectionConfigPackage collections = 6;
+    bool init_required = 7;
+    ChaincodeSource source = 8;
 }
 
 // QueryChaincodeDefinitionArgs is the message used as arguments to
@@ -175,7 +195,7 @@ message QueryChaincodeDefinitionResult {
     string endorsement_plugin = 3;
     string validation_plugin = 4;
     bytes validation_parameter = 5;
-    common.CollectionConfigPackage collections = 6;
+    protos.CollectionConfigPackage collections = 6;
     bool init_required = 7;
     map<string,bool> approvals = 8;
 }
@@ -194,7 +214,7 @@ message QueryChaincodeDefinitionsResult {
         string endorsement_plugin = 4;
         string validation_plugin = 5;
         bytes validation_parameter = 6;
-        common.CollectionConfigPackage collections = 7;
+        protos.CollectionConfigPackage collections = 7;
         bool init_required = 8;
     }
     repeated ChaincodeDefinition chaincode_definitions = 1;
