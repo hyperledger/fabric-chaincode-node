@@ -97,7 +97,7 @@ describe('Chaincode', () => {
         });
 
         it ('should start when passed init and invoke', () => {
-            const handlerClass = Chaincode.__get__('Handler');
+            const handlerClass = Chaincode.__get__('ChaincodeSupportClient');
             const chat = sandbox.stub(handlerClass.prototype, 'chat');
 
             const myYargs = {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc'}};
@@ -140,8 +140,8 @@ describe('Chaincode', () => {
             const myYargs = {'argv': {'$0': 'fabric-chaincode-node', 'peer.address': 'localhost:7051', 'chaincode-id-name': 'mycc', 'some-other-arg': 'another-arg', 'yet-another-bad-arg': 'arg'}};
             Chaincode.__set__('yargs', myYargs);
 
-            const handlerClass = Chaincode.__get__('Handler');
-            Chaincode.__set__('Handler', MockHandler);
+            const handlerClass = Chaincode.__get__('ChaincodeSupportClient');
+            Chaincode.__set__('ChaincodeSupportClient', MockHandler);
 
             const getArgsStub = sandbox.stub(StartCommand, 'getArgs').returns({
                 'peer.address': 'localhost:7051',
@@ -162,7 +162,7 @@ describe('Chaincode', () => {
             expect(testOpts.hasOwnProperty('module-path')).to.be.false;
             expect(testOpts.hasOwnProperty('peer.address')).to.be.true;
 
-            Chaincode.__set__('Handler', handlerClass);
+            Chaincode.__set__('ChaincodeSupportClient', handlerClass);
 
             getArgsStub.restore();
         });
@@ -213,7 +213,7 @@ describe('Chaincode', () => {
 
             it ('should call handler.chat() with the correct object and output a message', () => {
 
-                const handlerClass = Chaincode.__get__('Handler');
+                const handlerClass = Chaincode.__get__('ChaincodeSupportClient');
                 const chat = sandbox.stub(handlerClass.prototype, 'chat');
 
                 process.env.CORE_TLS_CLIENT_KEY_PATH = keyPath;
@@ -247,8 +247,8 @@ describe('Chaincode', () => {
                     }
                 }
 
-                const handlerClass = Chaincode.__get__('Handler');
-                Chaincode.__set__('Handler', MockHandler);
+                const handlerClass = Chaincode.__get__('ChaincodeSupportClient');
+                Chaincode.__set__('ChaincodeSupportClient', MockHandler);
 
                 process.env.CORE_TLS_CLIENT_KEY_PATH = keyPath;
                 process.env.CORE_TLS_CLIENT_CERT_PATH = certPath;
@@ -262,7 +262,7 @@ describe('Chaincode', () => {
                 testOpts.cert.should.equal(cert);
                 testOpts.key.should.equal(key);
 
-                Chaincode.__set__('Handler', handlerClass);
+                Chaincode.__set__('ChaincodeSupportClient', handlerClass);
             });
         });
     });

@@ -14,7 +14,7 @@ const Logger = require('./logger');
 const utils = require('./utils/utils');
 
 const logger = Logger.getLogger('lib/chaincode.js');
-const Handler = require('./handler');
+const {ChaincodeSupportClient} = require('./handler');
 const Iterators = require('./iterators');
 const ChaincodeStub = require('./stub');
 const KeyEndorsementPolicy = require('./utils/statebased');
@@ -122,7 +122,7 @@ class Shim {
         }
 
         const chaincodeName = opts['chaincode-id-name'];
-        const client = new Handler(chaincode, url, optsCpy);
+        const client = new ChaincodeSupportClient(chaincode, url, optsCpy);
         const chaincodeID = {
             name: chaincodeName
         };
