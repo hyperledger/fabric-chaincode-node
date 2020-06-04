@@ -22,7 +22,25 @@ const getTLSArgs = () => {
 
     return '';
 };
+const getPeerAddresses = () => {
+    if (tls) {
+        return '--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFile ' + org1CA +
+            ' --peerAddresses peer0.org2.example.com:8051 --tlsRootCertFile ' + org2CA;
+    } else {
+        return '--peerAddresses peer0.org1.example.com:7051' +
+            ' --peerAddresses peer0.org2.example.com:8051';
+    }
+};
+const findPackageId = (queryOutput, label) => {
+    const output = JSON.parse(queryOutput);
 
+    const cc = output.installed_chaincodes.filter((chaincode) => chaincode.label === label);
+    if (cc.length !== 1) {
+        throw new Error('Failed to find installed chaincode');
+    }
+
+    return cc[0].package_id;
+};
 
 // Increase the timeouts on zLinux!
 const arch = require('os').arch();
@@ -33,20 +51,42 @@ async function install(ccName) {
     try {
         fs.writeFileSync(npmrc, `registry=http://${ip.address()}:4873`);
         const folderName = '/opt/gopath/src/github.com/chaincode/' + ccName;
-        const cmd = `docker exec %s peer chaincode install -l node -n ${ccName} -v v0 -p ${folderName} --connTimeout 180s`;
-        await exec(util.format(cmd, 'org1_cli'));
-        await exec(util.format(cmd, 'org2_cli'));
+        const packageCmd = `docker exec %s peer lifecycle chaincode package -l node /tmp/${ccName}.tar.gz -p ${folderName} --label ${ccName}_v0`;
+        await exec(util.format(packageCmd, 'org1_cli'));
+        await exec(util.format(packageCmd, 'org2_cli'));
 
+        const installCmd = `docker exec %s peer lifecycle chaincode install /tmp/${ccName}.tar.gz --connTimeout 60s`;
+        await exec(util.format(installCmd, 'org1_cli'));
+        await exec(util.format(installCmd, 'org2_cli'));
     } finally {
         fs.unlinkSync(npmrc);
     }
 }
 
 async function instantiate(ccName, func, args) {
-    const cmd = `docker exec org1_cli peer chaincode instantiate ${getTLSArgs()} -o orderer.example.com:7050 -l node -C mychannel -n ${ccName} -v v0 -c '${printArgs(func, args)}' -P 'OR ("Org1MSP.member")'`;
-    console.log(cmd);
-    const res = await exec(cmd);
+    const orgs = ['org1', 'org2'];
+    const endorsementPolicy = '\'OR ("Org1MSP.member")\'';
+
+    for (const org of orgs) {
+        const queryInstalledCmd = `docker exec ${org}_cli peer lifecycle chaincode queryinstalled --output json`;
+        const res = await exec(queryInstalledCmd);
+        const pkgId = findPackageId(res.stdout.toString(), ccName + '_v0');
+        const approveCmd = `docker exec ${org}_cli peer lifecycle chaincode approveformyorg ${getTLSArgs()} -o orderer.example.com:7050` +
+            ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --package-id ${pkgId} --signature-policy ${endorsementPolicy}`;
+
+        await exec(approveCmd);
+    }
+
+    const commitCmd = `docker exec org1_cli peer lifecycle chaincode commit ${getTLSArgs()} -o orderer.example.com:7050` +
+        ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --signature-policy ${endorsementPolicy} ${getPeerAddresses()}`;
+
+    console.log(commitCmd);
+    await exec(commitCmd);
     await new Promise(resolve => setTimeout(resolve, 5000));
+
+    const initCmd = `docker exec org1_cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} --isInit -c '${printArgs(func, args)}' --waitForEvent`;
+    const res = await exec(initCmd);
+
     return res;
 }
 
