@@ -371,4 +371,23 @@ describe('Chaincode', () => {
             Logger.getLogger.restore();
         });
     });
+
+    describe('server()', () => {
+        before(() => {
+            Chaincode = rewire(chaincodePath);
+        });
+
+        it ('should create a ChaincodeServer instance', () => {
+            const mockObj = {_chaincode: {}, _serverOpts: {}};
+            const serverStub = sinon.stub().returns(mockObj);
+            Chaincode.__set__('ChaincodeServer', serverStub);
+
+            const mockChaincode = new Chaincode.ChaincodeInterface();
+            const serverOpts = {ccid: 'example-cc-id:1', address: '0.0.0.0:9999'};
+
+            expect(Chaincode.server(mockChaincode, serverOpts)).to.deep.equal(mockObj);
+            expect(serverStub.calledOnce).to.be.true;
+            expect(serverStub.firstCall.args).to.deep.equal([mockChaincode, serverOpts]);
+        });
+    });
 });
