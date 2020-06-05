@@ -59,6 +59,7 @@ describe('bootstrap.js', () => {
 
     let sandbox;
     let mockShim;
+    let mockServer;
     let mockCmd;
     let readFileStub;
     let pathExistsStub;
@@ -73,7 +74,8 @@ describe('bootstrap.js', () => {
             useCleanCache: true
         });
         sandbox = sinon.createSandbox();
-        mockShim = {start : sandbox.stub()};
+        mockServer = {start: sandbox.stub()};
+        mockShim = {start : sandbox.stub(), server: sandbox.stub().returns(mockServer)};
         getArgsStub = sandbox.stub();
 
         mockCmd = {getArgs : getArgsStub};
@@ -84,6 +86,7 @@ describe('bootstrap.js', () => {
         mockery.registerMock('yargs', {});
         mockery.registerMock('../chaincode', mockShim);
         mockery.registerMock('../cmds/startCommand.js', mockCmd);
+        mockery.registerMock('../cmds/serverCommand.js', mockCmd);
         mockery.registerMock('./chaincodefromcontract', MockChaincodeFromContract);
         mockery.registerMock('fs-extra', {pathExists:pathExistsStub, readFileSync : readFileStub});
 
@@ -101,6 +104,16 @@ describe('bootstrap.js', () => {
         it('should pass on the register to the shim', async () => {
             await Bootstrap.register([sc], {}, {}, 'some title', 'some version');
             sinon.assert.calledOnce(mockShim.start);
+        });
+
+        it('should pass on the register to the shim in the server mode', async () => {
+            const opts = {ccid: 'abcdef', address: '0.0.0.0:9999'};
+            await Bootstrap.register([sc], {}, {}, 'some title', 'some version', opts, true);
+
+            sinon.assert.calledOnce(mockShim.server);
+            sinon.assert.calledOnce(mockServer.start);
+
+            expect(mockShim.server.getCall(0).args[1]).to.deep.equal(opts);
         });
 
     });
@@ -129,8 +142,24 @@ describe('bootstrap.js', () => {
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledOnce(getInfoFromContractStub);
             sinon.assert.calledOnce(registerStub);
-            sinon.assert.calledWith(registerStub, [sc], {}, {}, 'some title', 'some version');
+            sinon.assert.calledWith(registerStub, [sc], {}, {}, 'some title', 'some version', {'module-path':'fakepath'}, false);
         });
+
+        it ('should correctly call the register method in the server mode', async () => {
+            getMetadataStub.resolves({});
+            mockery.registerMock(path.resolve(process.cwd(), 'fakepath', 'entrypoint'), {contracts: [sc]});
+            const registerStub = sandbox.stub();
+            Bootstrap.register = registerStub;
+            getInfoFromContractStub.returns({contracts: [sc], serializers : {}, title: 'some title', version: 'some version'});
+
+            await Bootstrap.bootstrap(true);
+
+            sinon.assert.calledOnce(getMetadataStub);
+            sinon.assert.calledOnce(getInfoFromContractStub);
+            sinon.assert.calledOnce(registerStub);
+            sinon.assert.calledWith(registerStub, [sc], {}, {}, 'some title', 'some version', {'module-path':'fakepath'}, true);
+        });
+
     });
 
     describe('#getInfoFromContract', () => {
