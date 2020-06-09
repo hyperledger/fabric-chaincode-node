@@ -197,20 +197,26 @@ class Shim {
     }
 
     /**
+     * @interface ChaincodeServerTLSProperties
+     * @property {Buffer} key Private key for TLS
+     * @property {Buffer} cert Certificate for TLS
+     * @property {Buffer} [clientCACerts] CA certificate for client certificates if mutual TLS is used.
+     */
+    /**
+     * @interface ChaincodeServerOpts
+     * @property {string} ccid Chaincode ID
+     * @property {string} address Listen address for the server
+     * @property {ChaincodeServerTLSProperties} [tlsProps] TLS properties if TLS is required.
+     */
+    /**
      * Returns a new Chaincode server. Should be called when the chaincode is launched in a server mode.
      * @static
      * @param {ChaincodeInterface} chaincode User-provided object that must implement <code>ChaincodeInterface</code>
-     * @param {ChaincodeSeverOpts} serverOpts Chaincode server options
+     * @param {ChaincodeServerOpts} serverOpts Chaincode server options
      */
     static server(chaincode, serverOpts) {
         return new ChaincodeServer(chaincode, serverOpts);
     }
-    /**
-     * @typedef {Object} ChaincodeServerOpts
-     * @property {string} ccid Chaincode ID
-     * @property {string} address Listen address for the server
-     * @property {Object} tlsProps TLS properties. To be implemented. Should be null if TLS is not used.
-     */
 }
 
 // special OID used by Fabric to save attributes in X.509 certificates
