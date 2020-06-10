@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Copyright Hitachi America, Ltd. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -e
+
+BUILD="$1"
+RELEASE="$2"
+
+if [ -d "${BUILD}/metadata" ]; then
+    cp -a "${BUILD}/metadata/*" "${RELEASE}/"
+fi
+
+if [ -f "${BUILD}/connection.json" ]; then
+    mkdir -p "${RELEASE}/chaincode/server"
+    cp "${BUILD}/connection.json" "${RELEASE}/chaincode/server"
+
+    # TODO: TLS
+
+    exit 0
+fi

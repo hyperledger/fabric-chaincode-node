@@ -99,6 +99,8 @@ services:
     command: peer node start --peer-chaincodedev=${DOCKER_DEVMODE}
     volumes:
         - /var/run/:/host/var/run/
+        - ../external:/opt/chaincode/bin:ro
+        - ../crypto-material/core.yaml:/etc/hyperledger/fabric/core.yaml:ro
 
   clibase:
     extends:
