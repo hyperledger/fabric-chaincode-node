@@ -32,9 +32,12 @@ const _docker_clean = async () => {
         // stop and remove chaincode docker instances
         'docker kill $(docker ps | grep "dev-peer0.org[12].example.com" | awk \'{print $1}\') || echo ok',
         'docker rm $(docker ps -a | grep "dev-peer0.org[12].example.com" | awk \'{print $1}\') || echo ok',
+        'docker kill $(docker ps | grep "cc-server" | awk \'{print $1}\') || echo ok',
+        'docker rm $(docker ps -a | grep "cc-server" | awk \'{print $1}\') || echo ok',
 
         // remove chaincode images so that they get rebuilt during test
         'docker rmi $(docker images | grep "^dev-peer0.org[12].example.com" | awk \'{print $3}\') || echo ok',
+        'docker rmi $(docker images | grep "^chaincode-e2e-server" | awk \'{print $3}\') || echo ok',
 
         // clean up all the containers created by docker-compose
         util.format('docker-compose -f %s down --volumes', fs.realpathSync(path.join(dockerComposeDir, 'docker-compose-cli.yaml'))),
@@ -95,6 +98,10 @@ const _generate_config = async () => {
             dockerCfgPath
         ),
         util.format(
+            'docker exec cli sed -i \'s/externalBuilders: \\[\\]/externalBuilders: [{path: \\/opt\\/chaincode, name: test}]/\' %s/core.yaml',
+            dockerCfgPath
+        ),
+        util.format(
             'docker exec cli sh %s/rename_sk.sh',
             dockerCfgPath
         ),
@@ -151,10 +158,18 @@ async function _channel_create() {
     ]);
 }
 
+async function _peer_setup() {
+    // Install the 'jq' command in the peer containers to run external builder scripts.
+    await runcmds([
+        'docker exec peer0.org1.example.com apk add jq',
+        'docker exec peer0.org2.example.com apk add jq',
+    ]);
+}
+
 const channelSetup = series(_channel_create, _channel_init);
 
 // --
-const startFabric = series(dockerReady, channelSetup);
+const startFabric = series(dockerReady, _peer_setup, channelSetup);
 exports.default = startFabric;
 
 exports.stopFabric = series(_docker_clean);

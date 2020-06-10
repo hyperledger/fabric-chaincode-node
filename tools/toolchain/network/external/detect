@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# Copyright Hitachi America, Ltd. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -e
+
+METADIR="$2"
+
+if [ `jq -r .type "${METADIR}/metadata.json"` = "external" ]; then
+    exit 0
+fi
+
+exit 1
