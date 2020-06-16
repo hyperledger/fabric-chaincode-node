@@ -33,8 +33,8 @@ const mockChaincodeImpl = {
 };
 
 const ca = fs.readFileSync(path.join(__dirname, 'test-ca.pem'), 'utf8');
-const key = fs.readFileSync(path.join(__dirname, 'test-key.pem'), 'utf8');
-const cert = fs.readFileSync(path.join(__dirname, 'test-cert.pem'), 'utf8');
+const key = fs.readFileSync(path.join(__dirname, 'test-key.base64'), 'utf8');
+const cert = fs.readFileSync(path.join(__dirname, 'test-cert.base64'), 'utf8');
 
 const mockOpts = {
     pem: ca,

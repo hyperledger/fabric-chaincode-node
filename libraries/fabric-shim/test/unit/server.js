@@ -10,7 +10,10 @@ const sinon = require('sinon');
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
+const fs = require('fs');
+const path = require('path');
 const rewire = require('rewire');
+
 const fabprotos = require('../../bundle');
 const grpc = require('@grpc/grpc-js');
 
@@ -20,21 +23,53 @@ let ChaincodeServer = rewire(serverPath);
 const mockChaincode = {Init: () => {}, Invoke: () => {}};
 
 describe('ChaincodeServer', () => {
-    const mockGrpcServerInstance = {
-        addService: sinon.stub()
-    };
+    const tlsKey = Buffer.from(fs.readFileSync(path.join(__dirname, 'test-key.pem')).toString(), 'base64');
+    const tlsCert = Buffer.from(fs.readFileSync(path.join(__dirname, 'test-cert.pem')).toString(), 'base64');
+    const tlsClientCA = fs.readFileSync(path.join(__dirname, 'test-ca.pem'));
+
     let grpcServerStub;
     const serverOpts = {
         ccid: 'example-chaincode-id',
-        address: '0.0.0.0:9999',
-        serverOpts: {}
+        address: '0.0.0.0:9999'
     };
+    const serverTLSOpts = {
+        ccid: 'example-chaincode-id',
+        address: '0.0.0.0:9999',
+        tlsProps: {
+            // test-cert.pem and test-key.pem are base64-encoded and need to decode to make Buffer
+            key: tlsKey,
+            cert: tlsCert
+        }
+    };
+    const serverMutualTLSOpts = {
+        ccid: 'example-chaincode-id',
+        address: '0.0.0.0:9999',
+        tlsProps: {
+            key: tlsKey,
+            cert: tlsCert,
+            clientCACerts: tlsClientCA
+        }
+    };
+    const mockCredentials = {type: 'insecure'};
+    const mockTLSCredentials = {type: 'secure'};
+    let insecureCredentialsStub;
+    let sslCredentialsStub;
+
+    let mockGrpcServerInstance;
 
     beforeEach(() => {
+        mockGrpcServerInstance = {
+            addService: sinon.stub()
+        };
+
         grpcServerStub = sinon.stub(grpc, 'Server').returns(mockGrpcServerInstance);
+        insecureCredentialsStub = sinon.stub(grpc.ServerCredentials, 'createInsecure').returns(mockCredentials);
+        sslCredentialsStub = sinon.stub(grpc.ServerCredentials, 'createSsl').returns(mockTLSCredentials);
     });
     afterEach(() => {
         grpcServerStub.restore();
+        insecureCredentialsStub.restore();
+        sslCredentialsStub.restore();
     });
 
     describe('constructor', () => {
@@ -46,6 +81,45 @@ describe('ChaincodeServer', () => {
             expect(server._server.addService.calledOnce).to.be.ok;
             expect(server._chaincode).to.deep.equal(mockChaincode);
             expect(server._serverOpts).to.deep.equal(serverOpts);
+            expect(server._credentials).to.deep.equal(mockCredentials);
+
+            expect(insecureCredentialsStub.calledOnce).to.be.ok;
+        });
+        it('should create a gRPC server instance with TLS credentials and call addService in the constructor', () => {
+            const server = new ChaincodeServer(mockChaincode, serverTLSOpts);
+
+            expect(grpcServerStub.calledOnce).to.be.ok;
+            expect(server._server).to.deep.equal(mockGrpcServerInstance);
+            expect(server._server.addService.calledOnce).to.be.ok;
+            expect(server._chaincode).to.deep.equal(mockChaincode);
+            expect(server._serverOpts).to.deep.equal(serverTLSOpts);
+            expect(server._credentials).to.deep.equal(mockTLSCredentials);
+
+            expect(sslCredentialsStub.calledOnce).to.be.ok;
+            expect(sslCredentialsStub.firstCall.args[0]).to.be.null;
+            expect(sslCredentialsStub.firstCall.args[1]).to.deep.equal([{
+                private_key: tlsKey,
+                cert_chain: tlsCert
+            }]);
+            expect(sslCredentialsStub.firstCall.args[2]).to.be.false;
+        });
+        it('should create a gRPC server instance with mutual TLS credentials and call addService in the constructor', () => {
+            const server = new ChaincodeServer(mockChaincode, serverMutualTLSOpts);
+
+            expect(grpcServerStub.calledOnce).to.be.ok;
+            expect(server._server).to.deep.equal(mockGrpcServerInstance);
+            expect(server._server.addService.calledOnce).to.be.ok;
+            expect(server._chaincode).to.deep.equal(mockChaincode);
+            expect(server._serverOpts).to.deep.equal(serverMutualTLSOpts);
+            expect(server._credentials).to.deep.equal(mockTLSCredentials);
+
+            expect(sslCredentialsStub.calledOnce).to.be.ok;
+            expect(sslCredentialsStub.firstCall.args[0]).to.deep.equal(tlsClientCA);
+            expect(sslCredentialsStub.firstCall.args[1]).to.deep.equal([{
+                private_key: tlsKey,
+                cert_chain: tlsCert,
+            }]);
+            expect(sslCredentialsStub.firstCall.args[2]).to.be.true;
         });
 
         it('should throw an error when chaincode is missing', () => {
@@ -63,29 +137,27 @@ describe('ChaincodeServer', () => {
             expect(() => new ChaincodeServer(mockChaincode)).to.throw('Missing required argument: serverOpts');
         });
         it('should throw an error when serverOpts.ccid is missing', () => {
-            expect(() => new ChaincodeServer(mockChaincode, {})).to.throw('Missing required property in severOpts: ccid');
+            expect(() => new ChaincodeServer(mockChaincode, {})).to.throw('Missing required property in serverOpts: ccid');
         });
         it('should throw an error when serverOpts.address is missing', () => {
-            expect(() => new ChaincodeServer(mockChaincode, {ccid: 'some id'})).to.throw('Missing required property in severOpts: address');
+            expect(() => new ChaincodeServer(mockChaincode, {ccid: 'some id'})).to.throw('Missing required property in serverOpts: address');
+        });
+        it('should throw an error when serverOpts.tlsProps.key is missing', () => {
+            expect(() => new ChaincodeServer(mockChaincode, {ccid: 'some id', address: '0.0.0.0:9999', tlsProps: {}})).
+                to.throw('Missing required property in serverOpts.tlsProps: key');
+        });
+        it('should throw an error when serverOpts.tlsProps.cert is missing', () => {
+            expect(() => new ChaincodeServer(mockChaincode, {ccid: 'some id', address: '0.0.0.0:9999', tlsProps: {key: Buffer.from('a')}})).
+                to.throw('Missing required property in serverOpts.tlsProps: cert');
         });
     });
 
     describe('start()', () => {
-        const mockCredential = {};
-        let insecureCredentialStub;
-
-        beforeEach(() => {
-            insecureCredentialStub = sinon.stub(grpc.ServerCredentials, 'createInsecure').returns(mockCredential);
-        });
-        afterEach(() => {
-            insecureCredentialStub.restore();
-        });
-
         it('should call bindAsync and start', async () => {
             const server = new ChaincodeServer(mockChaincode, serverOpts);
 
             server._server = {
-                bindAsync: sinon.stub().callsFake((address, credential, callback) => {
+                bindAsync: sinon.stub().callsFake((address, credentials, callback) => {
                     callback(null, 9999);
                 }),
                 start: sinon.stub()
@@ -94,7 +166,7 @@ describe('ChaincodeServer', () => {
             expect(await server.start()).not.to.throw;
             expect(server._server.bindAsync.calledOnce).to.be.ok;
             expect(server._server.bindAsync.firstCall.args[0]).to.equal(serverOpts.address);
-            expect(server._server.bindAsync.firstCall.args[1]).to.equal(mockCredential);
+            expect(server._server.bindAsync.firstCall.args[1]).to.equal(mockCredentials);
             expect(server._server.start.calledOnce).to.be.ok;
         });
 
@@ -102,7 +174,7 @@ describe('ChaincodeServer', () => {
             const server = new ChaincodeServer(mockChaincode, serverOpts);
 
             server._server = {
-                bindAsync: sinon.stub().callsFake((address, credential, callback) => {
+                bindAsync: sinon.stub().callsFake((address, credentials, callback) => {
                     callback('failed to bind', 9999);
                 }),
                 start: sinon.stub()

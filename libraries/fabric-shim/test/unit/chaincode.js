@@ -21,8 +21,8 @@ const chaincodePath = '../../lib/chaincode.js';
 const StartCommand = require('../../lib/cmds/startCommand.js');
 
 const caPath = path.join(__dirname, 'test-ca.pem');
-const certPath = path.join(__dirname, 'test-cert.pem');
-const keyPath = path.join(__dirname, 'test-key.pem');
+const certPath = path.join(__dirname, 'test-cert.base64');
+const keyPath = path.join(__dirname, 'test-key.base64');
 
 const ca = fs.readFileSync(caPath, 'utf8');
 const key = fs.readFileSync(keyPath, 'utf8');
