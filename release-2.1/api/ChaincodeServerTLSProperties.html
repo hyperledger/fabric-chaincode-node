@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Hyperledger Fabric SDK for node.js Class: StateQueryIterator</title>
+	<title>Hyperledger Fabric SDK for node.js Interface: ChaincodeServerTLSProperties</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -79,17 +79,14 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: StateQueryIterator</h1>
+	<h1 class="page-title">Interface: ChaincodeServerTLSProperties</h1>
 <section>
 
 <header>
     
         <h2>
-        StateQueryIterator
+        ChaincodeServerTLSProperties
         </h2>
-        
-            <div class="class-description">A State Query iterator allows a chaincode to iterate over a
-set of key/value pairs returned by range and execute queries</div>
         
     
 </header>
@@ -99,25 +96,132 @@ set of key/value pairs returned by range and execute queries</div>
     <div class="container-overview">
     
         
-<hr>
-<dt>
-    <h4 class="name" id="StateQueryIterator"><span class="type-signature"></span>new StateQueryIterator()</h4>
-    
-    
-</dt>
-<dd>
 
-    
-
-    
-
-    
-
-    
-    
-
-    
+        
 <dl class="details">
+    
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Argument</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Private key for TLS</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cert</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Certificate for TLS</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>clientCACerts</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">CA certificate for client certificates if mutual TLS is used.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
     
 
 	
@@ -156,34 +260,9 @@ set of key/value pairs returned by range and execute queries</div>
 </dl>
 
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
+        
     
     </div>
-
-    
-        <h3 class="subsection-title">Extends</h3>
-
-        
-
-
-    <ul>
-        <li>CommonIterator</li>
-    </ul>
-
 
     
 
