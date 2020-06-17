@@ -14,7 +14,8 @@ const Logger = require('./logger');
 const utils = require('./utils/utils');
 
 const logger = Logger.getLogger('lib/chaincode.js');
-const Handler = require('./handler');
+const {ChaincodeSupportClient} = require('./handler');
+const ChaincodeServer = require('./server');
 const Iterators = require('./iterators');
 const ChaincodeStub = require('./stub');
 const KeyEndorsementPolicy = require('./utils/statebased');
@@ -122,7 +123,7 @@ class Shim {
         }
 
         const chaincodeName = opts['chaincode-id-name'];
-        const client = new Handler(chaincode, url, optsCpy);
+        const client = new ChaincodeSupportClient(chaincode, url, optsCpy);
         const chaincodeID = {
             name: chaincodeName
         };
@@ -193,6 +194,28 @@ class Shim {
         }
 
         return Logger.getLogger(name);
+    }
+
+    /**
+     * @interface ChaincodeServerTLSProperties
+     * @property {Buffer} key Private key for TLS
+     * @property {Buffer} cert Certificate for TLS
+     * @property {Buffer} [clientCACerts] CA certificate for client certificates if mutual TLS is used.
+     */
+    /**
+     * @interface ChaincodeServerOpts
+     * @property {string} ccid Chaincode ID
+     * @property {string} address Listen address for the server
+     * @property {ChaincodeServerTLSProperties} [tlsProps] TLS properties if TLS is required.
+     */
+    /**
+     * Returns a new Chaincode server. Should be called when the chaincode is launched in a server mode.
+     * @static
+     * @param {ChaincodeInterface} chaincode User-provided object that must implement <code>ChaincodeInterface</code>
+     * @param {ChaincodeServerOpts} serverOpts Chaincode server options
+     */
+    static server(chaincode, serverOpts) {
+        return new ChaincodeServer(chaincode, serverOpts);
     }
 }
 

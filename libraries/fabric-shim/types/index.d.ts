@@ -45,6 +45,24 @@ declare module 'fabric-shim' {
         static newLogger(name: string): Logger;
         static start(chaincode: ChaincodeInterface): any;
         static success(payload?: Uint8Array): ChaincodeResponse;
+        static server(chaincode: ChaincodeInterface, serverOpts: ChaincodeServerOpts): ChaincodeServer;
+    }
+
+    export class ChaincodeServer {
+        constructor(chaincode: ChaincodeInterface, serverOpts: ChaincodeServerOpts);
+        start(): Promise<void>;
+    }
+
+    export interface ChaincodeServerOpts {
+        ccid: string;
+        address: string;
+        tlsProps: ChaincodeServerTLSProperties;
+    }
+
+    export interface ChaincodeServerTLSProperties {
+        key: Buffer;
+        cert: Buffer;
+        clientCACerts: Buffer;
     }
 
     export class ClientIdentity implements IClientIdentity {

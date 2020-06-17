@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Copyright Hitachi America, Ltd. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -e
+
+SOURCE="$1"
+OUTPUT="$3"
+
+if [ ! -f "${SOURCE}/connection.json" ]; then
+    echo "Error: ${SOURCE}/connection.json not found" 1>&2
+    exit 1
+fi
+
+cp "${SOURCE}/connection.json" "${OUTPUT}/connection.json"
+
+if [ -d "${SOURCE}/metadata" ]; then
+    cp -a ${SOURCE}/metadata ${OUTPUT}/metadata
+fi
+
+exit 0
