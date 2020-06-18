@@ -91,7 +91,7 @@ npm install --save fabric-shim
 ```
 
 ### Usage
-The [chaincode interface](https://fabric-shim.github.io/ChaincodeInterface.html) contains two methods to be implemented:
+The [chaincode interface](https://hyperledger.github.io/fabric-chaincode-node/master/api/fabric-shim.ChaincodeInterface.html) contains two methods to be implemented:
 ```javascript
 const shim = require('fabric-shim');
 
