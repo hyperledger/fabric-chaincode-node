@@ -117,7 +117,7 @@ A correctly specified metadata file, at the top level has this structure
 
 ```json
 {
-    "$schema" : "https://fabric-shim.github.io/release-1.4/contract-schema.json",
+    "$schema" : "https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/contract-schema.json",
     "info" : {
 
     },

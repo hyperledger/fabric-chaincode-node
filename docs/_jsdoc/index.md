@@ -6,7 +6,7 @@ The `fabric-shim` provides the *chaincode interface*, a lower level API for impl
 
 To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
-Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
+Detailed explanation on the concept and programming model can be found here: [https://hyperledger-fabric.readthedocs.io/en/release-1.4/chaincode.html](https://hyperledger-fabric.readthedocs.io/en/release-1.4/chaincode.html).
 
 ## Release Notes
 
@@ -87,7 +87,7 @@ npm install --save fabric-shim
 ```
 
 ### Usage
-The [chaincode interface](https://fabric-shim.github.io/ChaincodeInterface.html) contains two methods to be implemented:
+The [chaincode interface](https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/fabric-shim.ChaincodeInterface.html) contains two methods to be implemented:
 ```javascript
 const shim = require('fabric-shim');
 

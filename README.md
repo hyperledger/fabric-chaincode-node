@@ -1,7 +1,7 @@
 ## Hyperledger Fabric Shim for node.js chaincodes
 
 This is the project to support the writing of Chaincode within the node.js runtime. The following instructions are orientated to a contributor or an early adopter and therefore describes the steps to build and test the library.
-As an application developer, to learn about how to implement **"Smart Contracts"** for Hyperledger Fabric using Node.js, please visit the [documentation](https://fabric-shim.github.io/).
+As an application developer, to learn about how to implement **"Smart Contracts"** for Hyperledger Fabric using Node.js, please visit the [documentation](https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/).
 
 This project publishes `fabric-shim` public npm package for developers consumption.
 
