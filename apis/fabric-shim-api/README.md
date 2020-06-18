@@ -5,7 +5,7 @@
 
 This `fabric-shim-api` library provides type definitions for the `fabric-shim` module. It is also a dependency of the `fabric-contract-api`  As this is a pure interface module it allows the `fabric-contract-api` annotations to be used in client application without the need to pull in unneeded required dependencies.
 
-Detailed explanation on the concepts and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
+Detailed explanation on the concepts and programming model can be found here: [https://hyperledger-fabric.readthedocs.io/en/release-2.1/smartcontract/smartcontract.html](https://hyperledger-fabric.readthedocs.io/en/release-2.1/smartcontract/smartcontract.html).
 
 
 ## License
