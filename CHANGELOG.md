@@ -1,3 +1,11 @@
+## v2.1.3
+Fri 19 Jun 15:26:50 BST 2020
+
+* [cb4afae](https://github.com/hyperledger/fabric-chaincode-node/commit/cb4afae) [FABCN-410](https://jira.hyperledger.org/browse/FABCN-410) Use new lifecycle for fv/e2e tests (#160)
+* [e02abf4](https://github.com/hyperledger/fabric-chaincode-node/commit/e02abf4) [FABCN-407](https://jira.hyperledger.org/browse/FABCN-407) Update protos (#154) (#157)
+* [f4643f4](https://github.com/hyperledger/fabric-chaincode-node/commit/f4643f4) [FABCN-405](https://jira.hyperledger.org/browse/FABCN-405) Fix tutorial reference (#150) (#152)
+* [c1979e3](https://github.com/hyperledger/fabric-chaincode-node/commit/c1979e3) Bump version to 2.1.3 (#149)
+
 ## v2.1.2
 Mon 18 May 2020 17:06:23 BST
 
