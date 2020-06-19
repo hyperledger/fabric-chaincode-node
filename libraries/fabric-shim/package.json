@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@fidm/x509": "^1.2.1",
-    "@grpc/grpc-js": "^1.0.3",
+    "@grpc/grpc-js": "1.0.3",
     "@grpc/proto-loader": "^0.5.4",
     "@types/node": "^8.9.4",
     "ajv": "^6.5.5",
