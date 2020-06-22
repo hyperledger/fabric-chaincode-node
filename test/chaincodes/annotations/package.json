@@ -18,8 +18,8 @@
   "author": "",
   "license": "APACHE-2.0",
   "dependencies": {
-    "fabric-shim": "2.1.4",
-    "fabric-contract-api": "2.1.4",
+    "fabric-shim": "2.1.5-unstable",
+    "fabric-contract-api": "2.1.5-unstable",
     "@types/node": "^10.3.6",
     "ts-node": "^3.3.0",
     "tslint": "^5.6.0",
