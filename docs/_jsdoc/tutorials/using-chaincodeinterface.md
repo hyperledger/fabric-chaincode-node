@@ -8,7 +8,7 @@ cd mycc
 // create a new node project
 npm init
 // install fabric-shim at master branch
-npm install fabric-shim@2.1.3-unstable
+npm install fabric-shim@2.1.4
 // or using the released version
 npm install fabric-shim
 touch mychaincode.js
@@ -68,7 +68,7 @@ Finally, update the "start" script in package.json to "node mychaincode.js":
 	"engineStrict": true,
 	"license": "Apache-2.0",
 	"dependencies": {
-		"fabric-shim": "2.1.3"
+		"fabric-shim": "2.1.4"
 	}
 }
 ```
