@@ -92,7 +92,7 @@ services:
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=node_default
-      - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.1.3
+      - CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.1.4
       # Allow more time for chaincode container to build on install.
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric

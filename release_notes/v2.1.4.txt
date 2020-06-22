@@ -1,0 +1,20 @@
+v2.1.4
+------
+
+Release Notes
+-------------
+
+- FABCN-418 Dependency unable to use git
+
+  Locks the version of the winston library to 3.2.1
+  The updated winston library after 3.3.0 prevents chaincode installing due to
+  a new requirement for git which is not available in the
+  hyperledger/fabric-nodeenv docker image.
+
+The release-2.0 branch has been renamed to release-2.x; the v2.1.0 release supercedes v2.0.0.
+The release-1.4 branch is currently LTS, please see the proposed Fabric LTS strategy for more information:
+https://github.com/hyperledger/fabric-rfcs/pull/23
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-2.x/CHANGELOG.md#v2.1.4

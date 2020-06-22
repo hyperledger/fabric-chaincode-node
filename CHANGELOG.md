@@ -1,3 +1,8 @@
+## v2.1.4
+Mon 22 Jun 2020 14:51:02 BST
+
+* [81e1123](https://github.com/hyperledger/fabric-chaincode-node/commit/81e1123) Specify exact version of winston dependency
+
 ## v2.1.3
 Fri 19 Jun 15:26:50 BST 2020
 
