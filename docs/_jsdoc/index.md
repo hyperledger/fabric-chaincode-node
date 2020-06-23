@@ -7,13 +7,13 @@
 
 ## Overview
 
-The `fabric-contract-api` provides the *contract interface*. a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#smart-contract). Within Hyperledger Fabric, Smart Contracts are also known as [Chaincode](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#chaincode). Working with this API provides a high level entry point to writing business logic.
+The `fabric-contract-api` provides the *contract interface*. a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/release-2.1/glossary.html#smart-contract). Within Hyperledger Fabric, Smart Contracts are also known as [Chaincode](https://hyperledger-fabric.readthedocs.io/en/release-2.1/glossary.html#chaincode). Working with this API provides a high level entry point to writing business logic.
 
 The `fabric-shim` provides the *chaincode interface*, a lower level API for implementing "Smart Contracts". It also provides the implementation to support communication with Hyperledger Fabric peers for Smart Contracts written using the `fabric-contract-api` together with the `fabric-chaincode-node` cli to launch Chaincode or Smart Contracts.
 
 To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
-A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/latest/developapps/smartcontract.html).
+A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/release-2.1/developapps/smartcontract.html).
 
 ## Contract Interface
 
@@ -91,7 +91,7 @@ npm install --save fabric-shim
 ```
 
 ### Usage
-The [chaincode interface](https://fabric-shim.github.io/ChaincodeInterface.html) contains two methods to be implemented:
+The [chaincode interface](https://hyperledger.github.io/fabric-chaincode-node/release-2.1/api/fabric-shim.ChaincodeInterface.html) contains two methods to be implemented:
 ```javascript
 const shim = require('fabric-shim');
 

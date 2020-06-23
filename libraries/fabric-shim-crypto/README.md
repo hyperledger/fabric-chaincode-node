@@ -5,7 +5,7 @@
 
 This `fabric-shim-crypto` library provides supporting encryption and decryption functions that might be useful for developers.
 
-Detailed explanation on the concepts and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
+Detailed explanation on the concepts and programming model can be found here: [https://hyperledger-fabric.readthedocs.io/en/release-2.1/smartcontract/smartcontract.html](https://hyperledger-fabric.readthedocs.io/en/release-2.1/smartcontract/smartcontract.html).
 
 
 ## License
