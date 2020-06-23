@@ -5,9 +5,9 @@ The Contract Metadata can be supplied either by the Contract developer or it can
 
 ## Metadata Schema
 
-The metadata itself is in JSON, and there is a JSON-Schema definition that defines the contents; this schema is available online at http://fabric-shim.github.io/contract-schema.json 
+The metadata itself is in JSON, and there is a JSON-Schema definition that defines the contents; this schema is available online at https://hyperledger.github.io/fabric-chaincode-node/master/api/contract-schema.json
 
-This is the latest ga copy of the schema. Specific version can be obtained using urls http://fabric-shim.github.io/{release}/contract-schema.json where releases matches the release name, for example
+This is the latest ga copy of the schema. Specific version can be obtained using urls https://hyperledger.github.io/fabric-chaincode-node/{release}/api/contract-schema.json where releases matches the release name, for example
 `master` `release-1.4`. Note that metadata was first introduced at v1.4.
 
 A lot of the elements of this metadata are heavily inspired from the [OpenAPI v3.0 specification](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md) and [JSON Schema](http://json-schema.org/)
@@ -16,7 +16,7 @@ Adding a reference at the top of the metadata file to this schema, permits edito
 
 ```json
 {
-    "$schema": "http://fabric-shim.github.io/contract-schema.json",
+    "$schema": "https://hyperledger.github.io/fabric-chaincode-node/master/api/contract-schema.json",
 
 }
 ```

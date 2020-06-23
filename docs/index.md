@@ -10,7 +10,7 @@ in various programming languages. There are two other smart contract SDKs availa
 
 ## Documentation
 
-Detailed explanation on the concepts and programming model for smart contracts can be found in the [Chaincode for developers tutorial in the Hyperledger Fabric documentation](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
+Detailed explanation on the concepts and programming model for smart contracts can be found in the [Smart Contracts and Chaincode section in the Hyperledger Fabric documentation](https://hyperledger-fabric.readthedocs.io/en/latest/smartcontract/smartcontract.html).
 
 API documentation is available for each release:
 
