@@ -15,7 +15,7 @@
      * path segment in the "$schema" field for all your Rush config files.  This will ensure
      * correct error-underlining and tab-completion for editors such as VS Code.
      */
-     "rushVersion": "5.16.0",
+     "rushVersion": "5.27.0",
     /**
      * The next field selects which package manager should be installed and determines its version.
      * Rush installs its own local copy of the package manager to ensure that your build process
@@ -39,7 +39,7 @@
          * The default value is false to avoid legacy compatibility issues.
          * It is strongly recommended to set strictPeerDependencies=true.
          */
-        // "strictPeerDependencies": true,
+        // "strictPeerDependencies": true, 
         /**
          * Configures the strategy used to select versions during installation.
          *
