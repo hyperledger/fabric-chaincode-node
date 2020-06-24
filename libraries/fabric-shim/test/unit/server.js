@@ -76,9 +76,6 @@ describe('ChaincodeServer', () => {
         it('should create a gRPC server instance and call addService in the constructor', () => {
             const server = new ChaincodeServer(mockChaincode, serverOpts);
 
-            expect(grpcServerStub.calledOnce).to.be.ok;
-            expect(server._server).to.deep.equal(mockGrpcServerInstance);
-            expect(server._server.addService.calledOnce).to.be.ok;
             expect(server._chaincode).to.deep.equal(mockChaincode);
             expect(server._serverOpts).to.deep.equal(serverOpts);
             expect(server._credentials).to.deep.equal(mockCredentials);
@@ -88,9 +85,6 @@ describe('ChaincodeServer', () => {
         it('should create a gRPC server instance with TLS credentials and call addService in the constructor', () => {
             const server = new ChaincodeServer(mockChaincode, serverTLSOpts);
 
-            expect(grpcServerStub.calledOnce).to.be.ok;
-            expect(server._server).to.deep.equal(mockGrpcServerInstance);
-            expect(server._server.addService.calledOnce).to.be.ok;
             expect(server._chaincode).to.deep.equal(mockChaincode);
             expect(server._serverOpts).to.deep.equal(serverTLSOpts);
             expect(server._credentials).to.deep.equal(mockTLSCredentials);
@@ -106,9 +100,6 @@ describe('ChaincodeServer', () => {
         it('should create a gRPC server instance with mutual TLS credentials and call addService in the constructor', () => {
             const server = new ChaincodeServer(mockChaincode, serverMutualTLSOpts);
 
-            expect(grpcServerStub.calledOnce).to.be.ok;
-            expect(server._server).to.deep.equal(mockGrpcServerInstance);
-            expect(server._server.addService.calledOnce).to.be.ok;
             expect(server._chaincode).to.deep.equal(mockChaincode);
             expect(server._serverOpts).to.deep.equal(serverMutualTLSOpts);
             expect(server._credentials).to.deep.equal(mockTLSCredentials);
@@ -192,11 +183,10 @@ describe('ChaincodeServer', () => {
             ChaincodeServer.__set__('ChaincodeMessageHandler', mockHandlerStub);
 
             const server = new ChaincodeServer(mockChaincode, serverOpts);
-
-            const serviceImpl = server._server.addService.firstCall.args[1];
             const mockStream = {on: sinon.stub(), write: sinon.stub()};
+            
+            server.connect(mockStream);
 
-            expect(serviceImpl.connect(mockStream)).not.to.throw;
             expect(mockHandlerStub.calledOnce).to.be.ok;
             expect(mockHandler.chat.calledOnce).to.be.ok;
             expect(mockHandler.chat.firstCall.args).to.deep.equal([{
@@ -214,12 +204,10 @@ describe('ChaincodeServer', () => {
             const mockHandlerStub = sinon.stub().returns(mockHandler);
             ChaincodeServer.__set__('ChaincodeMessageHandler', mockHandlerStub);
 
-            const server = new ChaincodeServer(mockChaincode, serverOpts);
-
-            const serviceImpl = server._server.addService.firstCall.args[1];
+            const server = new ChaincodeServer(mockChaincode, serverOpts);           
             const mockStream = {on: sinon.stub(), write: sinon.stub()};
 
-            expect(serviceImpl.connect(mockStream)).not.to.throw;
+            server.connect(mockStream);
             expect(mockHandlerStub.calledOnce).to.be.ok;
             expect(mockHandler.chat.calledOnce).to.be.ok;
         });

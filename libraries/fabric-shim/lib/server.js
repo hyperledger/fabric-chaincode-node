@@ -79,13 +79,7 @@ class ChaincodeServer {
 
         // Create GRPC Server and register RPC handler
         this._server = new grpc.Server();
-        const self = this;
-
-        this._server.addService(protoDescriptor.protos.Chaincode.service, {
-            connect: (stream) => {
-                self.connect(stream);
-            }
-        });
+        this._server.addService(protoDescriptor.protos.Chaincode.service, this);
 
         this._serverOpts = serverOpts;
         this._chaincode = chaincode;
