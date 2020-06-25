@@ -73,7 +73,9 @@ stages:
                 set -ev
                 node common/scripts/install-run-rush.js rebuild
               displayName: 'Full rebuild'
-
+            - script: |
+                npx cobertura-merge -o merged_coverage.xml shimcrypto=./libraries/fabric-shim-crypto/coverage/cobertura-coverage.xml shim=./libraries/fabric-shim/coverage/cobertura-coverage.xml contractapi=./apis/fabric-contract-api/coverage/cobertura-coverage.xml -p
+              condition: or(succeeded(), failed())
             - task: PublishTestResults@2
               condition: or(succeeded(), failed())   # publish either way
               inputs:
@@ -84,7 +86,7 @@ stages:
               condition: or(succeeded(), failed())   # publish either way
               inputs:
                 codeCoverageTool: 'cobertura'
-                summaryFileLocation: '**/cobertura-coverage.xml'
+                summaryFileLocation: 'merged_coverage.xml'
                 artifactName: 'Unit Test Coverage'
             - script: |
                 mkdir -p $(Build.ArtifactStagingDirectory)/logs
@@ -102,7 +104,6 @@ stages:
                 set -ev
                 node common/scripts/install-run-rush.js publish --include-all --pack --release-folder $(Build.ArtifactStagingDirectory)/tgz --publish
                 docker image save hyperledger/fabric-nodeenv | gzip > $(Build.ArtifactStagingDirectory)/fabric-nodeenv.tar.gz
-              displayName: 'Package tgz and docker image'
             - task: PublishBuildArtifacts@1
               inputs:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/tgz
@@ -161,6 +162,7 @@ stages:
             - script: |
                 mkdir -p $(Build.ArtifactStagingDirectory)/testlogs
                 find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/testlogs \;
+              condition: or(succeeded(), failed())
               displayName: 'Copy test logs'
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
@@ -173,6 +175,7 @@ stages:
               inputs:
                 pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
                 artifactName: nodeenv-docker-image
+
 
         # Job to handle the auditing of the code
         # NPM audit is run on a 'fake' installation of the libraries
