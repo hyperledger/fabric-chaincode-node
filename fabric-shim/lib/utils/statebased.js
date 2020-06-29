@@ -26,7 +26,7 @@ const ROLE_TYPE_PEER = 'PEER';
  * into validation parameter byte arrays, the shim provides convenience functions
  * that allow the chaincode developer to deal with endorsement policies in terms
  * of the MSP identifiers of organizations.
- * For more informations, please read the [documents]{@link https://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html#setting-key-level-endorsement-policies}
+ * For more informations, please read the [documents]{@link https://hyperledger-fabric.readthedocs.io/en/release-1.4/endorsement-policies.html#setting-key-level-endorsement-policies}
  *
  * @class
  */

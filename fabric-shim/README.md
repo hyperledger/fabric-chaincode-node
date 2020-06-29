@@ -7,7 +7,7 @@
 
 The `fabric-shim` provides the *chaincode interface*, a lower level API for implementing "Smart Contracts". To confirm that this is the same as the `fabric-shim` in previous versions of Hyperledger Fabric.
 
-Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/latest/chaincode.html).
+Detailed explanation on the concept and programming model can be found here: [http://hyperledger-fabric.readthedocs.io/en/release-1.4/chaincode.html](http://hyperledger-fabric.readthedocs.io/en/release-1.4/chaincode.html).
 
 
 ## Chaincode Interface
@@ -53,7 +53,7 @@ shim.start(new Chaincode());
 ```
 
 ### API Reference
-Visit [fabric-shim.github.io](https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/) and click on "Classes" link in the navigation bar on the top to view the list of class APIs.
+Visit [API Reference](https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/) and click on "Classes" link in the navigation bar on the top to view the list of class APIs.
 
 ## Support
 Tested with node.js 8.9.0 (LTS).

@@ -182,7 +182,7 @@ class ChaincodeFromContract {
     _augmentMetadataFromCode(metadata) {
 
         if (!metadata.$schema) {
-            metadata.$schema = 'https://fabric-shim.github.io/release-1.4/contract-schema.json';
+            metadata.$schema = 'https://hyperledger.github.io/fabric-chaincode-node/release-1.4/api/contract-schema.json';
         }
 
         if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
