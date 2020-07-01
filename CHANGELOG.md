@@ -1,3 +1,12 @@
+## v2.2.0
+Thu  2 Jul 11:40:02 BST 2020
+
+* [0f1b616](https://github.com/hyperledger/fabric-chaincode-node/commit/0f1b616) [FABCN-421](https://jira.hyperledger.org/browse/FABCN-421) release: 2.2.0 LTS release
+* [9f30e90](https://github.com/hyperledger/fabric-chaincode-node/commit/9f30e90) Use Official CouchDB 3.1 Image (#180)
+* [eeca625](https://github.com/hyperledger/fabric-chaincode-node/commit/eeca625) [FABCN-420](https://jira.hyperledger.org/browse/FABCN-420) Remove Azure pipeline warnings (#177)
+* [cc7fee7](https://github.com/hyperledger/fabric-chaincode-node/commit/cc7fee7) [FABCN-319](https://jira.hyperledger.org/browse/FABCN-319) Update dependnency versions (#176)
+* [8966eed](https://github.com/hyperledger/fabric-chaincode-node/commit/8966eed) [FABCN-393](https://jira.hyperledger.org/browse/FABCN-393) Fix broken links in documents (#169)
+
 ## v2.1.4
 Mon 22 Jun 2020 14:51:02 BST
 
