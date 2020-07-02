@@ -41,7 +41,9 @@ variables:
   - name: pipeline
     value: ci
   - name: node_version_spec
-    value: '12.16.1'
+    value: '12.18.2'
+  - name: FABRIC_VERSION
+    value: 2.2
 
 # Build on Ubuntu
 pool:
