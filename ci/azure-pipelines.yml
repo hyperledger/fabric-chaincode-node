@@ -43,7 +43,7 @@ variables:
   - name: node_version_spec
     value: '12.15.0'
   - name: FABRIC_VERSION
-    value: 2.1
+    value: 2.2
 
 # Build on Ubuntu
 pool:

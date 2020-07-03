@@ -34,6 +34,12 @@ As an application developer, to learn about how to implement **"Smart Contracts"
 
 For details on what Nodejs runtime and versions of Hyperledger Fabric can be used please see the [compatibility document](COMPATIBILITY.md).
 
+## npm Shrinkwrap
+
+In line with the advice from [npm on shrinkwrap](https://docs.npmjs.com/files/shrinkwrap.json#description) the modules published do not contain a `npm-shrinkwrap.json` file. 
+
+It is **STRONGLY** recommended therefore that after testing, and before putting your contract into production a `npm-shrinkwrap.json` file is created. When the chaincode is install it will be via a `npm install --production` command. 
+
 ---
 
 ## License <a name="license"></a>

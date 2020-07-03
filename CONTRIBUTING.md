@@ -35,6 +35,7 @@ They also need to have the `nodeenv` image present - this is build as part of th
 
 * Clone the repo, and ensure you are using node v10, and have rush installed
 * `rush update` is needed to ensure everything is correctly linked and updated.
+* `rush edge-docker` will pull down and tag the very latest docker images for the peers, orderes etc to test against
 
 At this point the repo is fully ready for use and running tests, etc. A full sequence of build-test that is equivalent to the CI pipeline is
 
