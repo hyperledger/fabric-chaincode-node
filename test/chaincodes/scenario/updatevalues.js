@@ -30,6 +30,9 @@ class UpdateValues extends Contract {
     async beforeTransaction(ctx) {
         this._log(`Transaction ID: ${ctx.stub.getTxID()}`);
     }
+    async aroundTransaction(ctx,tx, ...params) {
+        this._log(`Transaction ID: ${ctx.stub.getTxID()},tx: ${tx}. params: ${params} `);
+    }
 
     /**
 	 * Custom context for use within this contract
