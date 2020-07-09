@@ -40,6 +40,11 @@ export default class TestContractOne extends Contract {
 		// return type of Promise<void>
 		return Promise.resolve();
 	}
+	aroundTransaction(ctx: ScenarioContext,tx: any, params: any){
+		// This proves that typescript is enforcing the
+		// return type of Promise<void>
+		return Promise.resolve();
+	}
 
 	unknownTransaction(ctx: ScenarioContext){
 		// This proves that typescript is enforcing the

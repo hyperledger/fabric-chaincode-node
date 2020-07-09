@@ -59,6 +59,7 @@ let betaStub;
 
 let beforeFnStubA;
 let afterFnStubA;
+let aroundFnStubA;
 let unknownStub;
 let privateStub;
 let ctxStub;
@@ -137,6 +138,10 @@ describe('chaincodefromcontract', () => {
 
         async beforeTransaction(ctx) {
             return beforeFnStubA(ctx);
+        }
+
+        async aroundTransaction(ctx) {
+            return aroundFnStubA(ctx);
         }
 
         async unknownTransaction(ctx) {
@@ -800,6 +805,7 @@ describe('chaincodefromcontract', () => {
                     createContext: sandbox.stub().returns(ctx),
                     unknownTransaction: sandbox.stub(),
                     beforeTransaction: sandbox.stub(),
+                    aroundTransaction: sandbox.stub(),
                     afterTransaction: sandbox.stub(),
                     fn: sandbox.stub().resolves('hello world')
                 },
@@ -867,6 +873,7 @@ describe('chaincodefromcontract', () => {
                     createContext: sandbox.stub().returns(ctx),
                     unknownTransaction: sandbox.stub(),
                     beforeTransaction: sandbox.stub(),
+                    aroundTransaction: sandbox.stub(),
                     afterTransaction: sandbox.stub(),
                     fn: sandbox.stub().resolves('hello world')
                 },

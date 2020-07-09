@@ -72,6 +72,15 @@ class Contract {
     async afterTransaction(ctx, result) {
         // default implementation is do nothing
     }
+    /**
+     * 'aroundTransaction is used to wrap a transaction into a single block. Examples of waht you may wish to code
+     * are Logging, carching and rethrow errors at global level
+     * @param {Function} txn - The transaction function to execute.
+     */
+    async aroundTransaction(ctx,txn, ...params) {
+        // default implementation
+        return await txn(...params)
+    } 
 
     /**
 	 * 'unknownTransaction' will be called if the required transaction function requested does not exist

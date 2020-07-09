@@ -31,6 +31,7 @@ const Context = require(path.join(pathToRoot, 'fabric-contract-api/lib/context')
 let beforeStub;
 let afterStub;
 let unknownStub;
+let aroundStub
 let createContextStub;
 
 /*
@@ -54,6 +55,9 @@ class SCAlpha extends Contract {
 
     async afterTransaction(ctx, result) {
         afterStub(ctx, result);
+    }
+    async aroundTransaction(ctx, tx, ...parmas) {
+        await aroundStub(ctx, tx, ...parmas);
     }
 
     createContext() {
@@ -127,13 +131,14 @@ describe('contract.js', () => {
             expect(sc3.getName()).to.equal('SCBeta');
         });
 
-        it ('should call the default before/after functions', () => {
+        it ('should call the default before/after and around functions', () => {
             const sc0 = new Contract();
 
 
             return Promise.all([
                 sc0.beforeTransaction().should.be.fulfilled,
-                sc0.afterTransaction().should.be.fulfilled]);
+                sc0.afterTransaction().should.be.fulfilled,
+                sc0.aroundTransaction().should.be.fulfilled]);
         });
 
         it ('should call the default createContext functions', () => {
@@ -172,6 +177,7 @@ describe('contract.js', () => {
         beforeEach('setup the stubs', () => {
             beforeStub = sandbox.stub().resolves();
             afterStub = sandbox.stub().resolves();
+            aroundStub = sandbox.stub().resolves();
             unknownStub = sandbox.stub().resolves();
             createContextStub = sandbox.stub().returns();
         });
@@ -195,6 +201,11 @@ describe('contract.js', () => {
             sc.unknownTransaction(ctx);
             sinon.assert.calledOnce(unknownStub);
             sinon.assert.calledWith(unknownStub, ctx);
+
+            sc.aroundTransaction(ctx);
+            sinon.assert.calledOnce(aroundStub);
+            sinon.assert.calledWith(aroundStub, ctx,tx, ...params);
+
 
             sc.createContext();
             sinon.assert.calledOnce(createContextStub);
