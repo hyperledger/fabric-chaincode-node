@@ -54,7 +54,7 @@ declare module 'fabric-shim-api' {
         getTxID(): string;
         getChannelID(): string;
         getCreator(): SerializedIdentity;
-        getMSPID(): string;
+        getMspID(): string;
         getTransient(): Map<string, Uint8Array>;
 
         getSignedProposal(): ChaincodeProposal.SignedProposal;
