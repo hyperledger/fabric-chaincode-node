@@ -269,3 +269,8 @@ chaincode.js  fabric-shim  node_modules  package.json
 root@c188ae089ee5:/#
 ```
 
+## Contributing
+
+If you are interested in contributing updates to this project, please start with the [contributing guide](CONTRIBUTING.md).
+
+There is also a [release guide](RELEASING.md) describing the process for publishing new versions.
