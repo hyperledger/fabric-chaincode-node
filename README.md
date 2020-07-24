@@ -9,8 +9,6 @@
 
 This is the project to support the writing of Contracts with the node.js runtime. 
 
-As a contributor looking to update this repo, please start with the [contributing guide](CONTRIBUTING.md)
-
 ## Documentation
 
 As an application developer, to learn about how to implement **"Smart Contracts"** for Hyperledger Fabric using Node.js, please visit the [API documentation](https://hyperledger.github.io/fabric-chaincode-node/) and follow the tutorial links.
@@ -19,16 +17,6 @@ As an application developer, to learn about how to implement **"Smart Contracts"
 - [Full Documenation on Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/)
 - [Samples repository](https://github.com/hyperledger/fabric-samples)
 - [Quick-start tutorial](TUTORIAL.md)
-
-## Artifacts published from this repo
-
-- npm modules
-    - [fabric-contract-api](https://www.npmjs.com/package/fabric-contract-api)
-    - [fabric-shim](https://www.npmjs.com/package/fabric-shim)
-    - [fabric-shim-api](https://www.npmjs.com/package/fabric-shim-api)
-    - [fabric-shim-crypto](https://www.npmjs.com/package/fabric-shim-crypto)
-- docker images
-    - [fabric-nodeenv](https://hub.docker.com/r/hyperledger/fabric-nodeenv)
 
 ## Compatibility
 
@@ -39,6 +27,12 @@ For details on what Nodejs runtime and versions of Hyperledger Fabric can be use
 In line with the advice from [npm on shrinkwrap](https://docs.npmjs.com/files/shrinkwrap.json#description) the modules published do not contain a `npm-shrinkwrap.json` file. 
 
 It is **STRONGLY** recommended therefore that after testing, and before putting your contract into production a `npm-shrinkwrap.json` file is created. When the chaincode is install it will be via a `npm install --production` command. 
+
+## Contributing
+
+If you are interested in contributing updates to this project, please start with the [contributing guide](CONTRIBUTING.md).
+
+There is also a [release guide](RELEASING.md) describing the process for publishing new versions.
 
 ---
 
