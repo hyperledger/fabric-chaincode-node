@@ -37,7 +37,7 @@
     "@types/node": "^8.9.4",
     "ajv": "^6.5.5",
     "fs-extra": "^7.0.1",
-    "grpc": "1.23.3",
+    "grpc": "1.24.3",
     "jsrsasign": "^8.0.4",
     "reflect-metadata": "^0.1.12",
     "winston": "^3.2.1",
