@@ -48,6 +48,7 @@ stages:
               inputs:
                 versionSpec: '8.x' 
             - script: |
+                wibble
                 npm -v
                 npm install
                 npm install -g gulp-cli
