@@ -75,11 +75,13 @@ class Contract {
     /**
      * 'aroundTransaction is used to wrap a transaction into a single block. Examples of waht you may wish to code
      * are Logging, carching and rethrow errors at global level
+     * @param {Context} ctx the transactional context
      * @param {Function} txn - The transaction function to execute.
+     * @param {Function} params - The transaction params
      */
-    async aroundTransaction(ctx,txn, ...params) {
+    async aroundTransaction(ctx,tx, ...params) {
         // default implementation
-        return await txn(...params)
+        return await tx(...params)
     } 
 
     /**

@@ -375,7 +375,7 @@ class ChaincodeFromContract {
                 await contractInstance.beforeTransaction(ctx);
 
                 // around tx
-                await contractInstance.aroundTransaction(ctx,tx, ...params);
+                await contractInstance.aroundTransaction(ctx,functionExists, txArgs);
 
                 // use the spread operator to make this pass the arguments seperately not as an array
                 // this is the point at which control is handed to the tx function
