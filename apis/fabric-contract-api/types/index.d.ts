@@ -24,7 +24,8 @@ declare module 'fabric-contract-api' {
         static _isContract(): boolean;
 
         beforeTransaction(ctx : Context): Promise<void>;
-        afterTransaction(ctx : Context,result: any): Promise<void>;
+        afterTransaction(ctx : Context, result: any): Promise<void>;
+        aroundTransaction(ctx : Context, fn : Function, parameters: any): Promise<void>;
 
         unknownTransaction(ctx : Context): Promise<void>;
 

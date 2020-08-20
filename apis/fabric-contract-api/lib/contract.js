@@ -14,7 +14,7 @@ const Context = require('./context');
 /**
  * The main Contact class that all code working within a Chaincode Container must be extending.
  *
- * Overriding of the `beforeTransaction` `afterTransaction` `unknownTransaction` and `createContext` are all optional
+ * Overriding of the `beforeTransaction`, `afterTransaction`, `aroundTransaction`, `unknownTransaction` and `createContext` are all optional
  * Supplying a name within the constructor is also option and will default to ''
  *
  * @memberof fabric-contract-api
@@ -56,7 +56,7 @@ class Contract {
 	 * @param {Context} ctx the transactional context
 	 */
     async beforeTransaction(ctx) {
-    // default implementation is do nothing
+        // default implementation is do nothing
     }
 
     /**
@@ -71,6 +71,26 @@ class Contract {
 	 */
     async afterTransaction(ctx, result) {
         // default implementation is do nothing
+    }
+
+    /**
+	 * 'aroundTransaction' wraps the call to the transaction function within your contract, allowing you
+     *  to encapsulate it into a code block. Examples of what you could do overriding this include, but
+     *  are not limited to: catching exceptions, logging, use a thread-store.
+	 *
+     * When overriding this function, remember to call `super.aroundTransaction(ctx, fn, parameters)`!
+     * If you don't, the contract won't be able to run any transaction.
+     *
+	 * If an error is thrown, the whole transaction will be rejected
+	 *
+	 * @param {Context} ctx the transactional context
+     * @param {Function} fn the contract function to invoke
+     * @param {any} paramters the parameters for the function to invoke
+	 */
+    async aroundTransaction(ctx, fn, parameters) {
+        // use the spread operator to make this pass the arguments seperately not as an array
+        // this is the point at which control is handed to the tx function
+        return this[fn](ctx, ...parameters);
     }
 
     /**

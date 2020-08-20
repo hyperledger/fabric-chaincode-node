@@ -59,6 +59,7 @@ let betaStub;
 
 let beforeFnStubA;
 let afterFnStubA;
+let aroundFnStubA;
 let unknownStub;
 let privateStub;
 let ctxStub;
@@ -131,12 +132,16 @@ describe('chaincodefromcontract', () => {
             betaStub(api);
         }
 
+        async beforeTransaction(ctx) {
+            return beforeFnStubA(ctx);
+        }
+
         async afterTransaction(ctx) {
             return afterFnStubA(ctx);
         }
 
-        async beforeTransaction(ctx) {
-            return beforeFnStubA(ctx);
+        async aroundTransaction(ctx) {
+            return aroundFnStubA(ctx);
         }
 
         async unknownTransaction(ctx) {
@@ -178,6 +183,7 @@ describe('chaincodefromcontract', () => {
 
         beforeFnStubA = sandbox.stub().named('beforeFnStubA');
         afterFnStubA = sandbox.stub().named('afterFnStubA');
+        aroundFnStubA = sandbox.stub().named('aroundFnStubA');
         alphaStub = sandbox.stub().named('alphaStub');
         betaStub = sandbox.stub().named('betaStub');
         getSchemaMock = sandbox.stub();
@@ -756,9 +762,7 @@ describe('chaincodefromcontract', () => {
         });
 
         it('should handle valid contract name, with valid function', async () => {
-
             const idBytes = Buffer.from(certWithoutAttrs);
-
 
             const systemContract = new SystemContract();
             sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
@@ -811,6 +815,10 @@ describe('chaincodefromcontract', () => {
                     {name: 'fn'}
                 ]
             };
+
+            // alias fn with aroundTransaction as Contract instance is not accessible
+            const contractInstance = cc.contractImplementations.name.contractInstance;
+            contractInstance.aroundTransaction = contractInstance.fn;
 
             cc.metadata.contracts = {
                 name: {
@@ -883,6 +891,10 @@ describe('chaincodefromcontract', () => {
                     },
                 ]
             };
+
+            // alias fn with aroundTransaction as Contract instance is not accessible
+            const contractInstance = cc.contractImplementations.name.contractInstance;
+            contractInstance.aroundTransaction = contractInstance.fn;
 
             cc.metadata.contracts = {
                 name: {

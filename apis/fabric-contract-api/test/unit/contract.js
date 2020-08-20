@@ -30,6 +30,7 @@ const Context = require(path.join(pathToRoot, 'fabric-contract-api/lib/context')
 
 let beforeStub;
 let afterStub;
+let aroundStub;
 let unknownStub;
 let createContextStub;
 
@@ -37,11 +38,9 @@ let createContextStub;
 * A fake  contract class;
 */
 class SCAlpha extends Contract {
-
     /** */
     constructor() {
         super('alpha.beta.delta');
-
     }
 
     async unknownTransaction(ctx) {
@@ -56,19 +55,20 @@ class SCAlpha extends Contract {
         afterStub(ctx, result);
     }
 
+    async aroundTransaction(ctx, fn, parameters) {
+        aroundStub(ctx, fn, ...parameters);
+    }
+
     createContext() {
         createContextStub();
     }
 }
 
 class SCBeta extends Contract {
-
     /** */
     constructor() {
         super();
-
     }
-
 }
 
 describe('contract.js', () => {
@@ -127,13 +127,13 @@ describe('contract.js', () => {
             expect(sc3.getName()).to.equal('SCBeta');
         });
 
-        it ('should call the default before/after functions', () => {
+        it ('should call the default before/after/around functions', () => {
             const sc0 = new Contract();
-
 
             return Promise.all([
                 sc0.beforeTransaction().should.be.fulfilled,
-                sc0.afterTransaction().should.be.fulfilled]);
+                sc0.afterTransaction().should.be.fulfilled,
+                sc0.aroundTransaction(null, 'afterTransaction', [null]).should.be.fulfilled]);
         });
 
         it ('should call the default createContext functions', () => {
@@ -172,6 +172,7 @@ describe('contract.js', () => {
         beforeEach('setup the stubs', () => {
             beforeStub = sandbox.stub().resolves();
             afterStub = sandbox.stub().resolves();
+            aroundStub = sandbox.stub().resolves();
             unknownStub = sandbox.stub().resolves();
             createContextStub = sandbox.stub().returns();
         });
@@ -191,6 +192,11 @@ describe('contract.js', () => {
             sc.afterTransaction(ctx, 'result');
             sinon.assert.calledOnce(afterStub);
             sinon.assert.calledWith(afterStub, ctx, 'result');
+
+            const params = ['param1', 'param2']
+            sc.aroundTransaction(ctx, 'function', params);
+            sinon.assert.calledOnce(aroundStub);
+            sinon.assert.calledWith(aroundStub, ctx, 'function', 'param1', 'param2');
 
             sc.unknownTransaction(ctx);
             sinon.assert.calledOnce(unknownStub);
