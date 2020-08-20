@@ -20,7 +20,6 @@ export default class TestContractOne extends Contract {
     }
 
 	beforeTransaction(ctx: ScenarioContext) {
-
 		// test that the context super class properties are available
     const stubApi: ChaincodeStub = ctx.stub;
 		const clientIdentity: ClientIdentity = ctx.clientIdentity;
@@ -56,22 +55,22 @@ export default class TestContractOne extends Contract {
 	}
 
 	async Transaction(ctx: ScenarioContext) {
-			// test that the context super class properties are available
-			const stubApi: ChaincodeStub = ctx.stub;
-			const clientIdentity: ClientIdentity = ctx.clientIdentity;
+		// test that the context super class properties are available
+		const stubApi: ChaincodeStub = ctx.stub;
+		const clientIdentity: ClientIdentity = ctx.clientIdentity;
 
-			// test that the name returns a string
-			const ns: string = this.getName();
+		// test that the name returns a string
+		const ns: string = this.getName();
 	}
 }
 
 export class TestContractTwo extends Contract {
   constructor() {
-      super();
+		super();
 	}
 
 	async Transaction(ctx: Context)  {
-			const stubApi: ChaincodeStub = ctx.stub;
-			const clientIdentity: ClientIdentity = ctx.clientIdentity;
+		const stubApi: ChaincodeStub = ctx.stub;
+		const clientIdentity: ClientIdentity = ctx.clientIdentity;
 	}
 }
