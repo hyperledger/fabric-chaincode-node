@@ -77,7 +77,7 @@ class Contract {
 	 * 'aroundTransaction' wraps the call to the transaction function within your contract, allowing you
      *  to encapsulate it into a code block. Examples of what you could do overriding this include, but
      *  are not limited to: catching exceptions, logging, use a thread-store.
-	 *
+     *
      * When overriding this function, remember to call `super.aroundTransaction(ctx, fn, parameters)`!
      * If you don't, the contract won't be able to run any transaction.
      *
@@ -109,15 +109,15 @@ class Contract {
     }
 
     /**
-	 * 'createContext' is called before any after, before, unknown or user defined transaction function. This permits contracts
-	 * to use their own subclass of context to add additinal processing.
-	 *
-	 * After this function returns, the chaincodeStub and client identity objects will be injected.
-	 * No chaincode apis are available for calling directly within this function. Nor should the constructor of the subclasses context assume
-	 * any other setup.
-	 *
-	 * @return {Context} a context implementation that must subclass context
-	 */
+     * 'createContext' is called before any after, before, unknown or user defined transaction function. This permits contracts
+     * to use their own subclass of context to add additinal processing.
+     *
+     * After this function returns, the chaincodeStub and client identity objects will be injected.
+     * No chaincode apis are available for calling directly within this function. Nor should the constructor of the subclasses context assume
+     * any other setup.
+     *
+     * @return {Context} a context implementation that must subclass context
+     */
     createContext() {
         return new Context();
     }
