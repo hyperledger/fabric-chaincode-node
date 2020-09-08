@@ -18,11 +18,11 @@
   "author": "",
   "license": "APACHE-2.0",
   "dependencies": {
-    "fabric-shim": "3.0.0-unstable",
+    "@types/node": "14.6.4",
     "fabric-contract-api": "3.0.0-unstable",
-    "@types/node": "^10.3.6",
-    "ts-node": "^3.3.0",
-    "tslint": "^5.6.0",
-    "typescript": "3.4.5"
+    "fabric-shim": "3.0.0-unstable",
+    "ts-node": "3.3.0",
+    "tslint": "5.6.0",
+    "typescript": "4.0.2"
   }
 }
