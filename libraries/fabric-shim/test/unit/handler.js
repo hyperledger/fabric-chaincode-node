@@ -523,7 +523,6 @@ describe('Handler', () => {
                 handler.chat('starter message example');
 
                 expect(handler._client.register.calledOnce).to.be.true;
-                expect(mockChaincodeMessageHandler.calledWithNew).to.be.ok;  // believe wrong
                 expect(mockChaincodeMessageHandler.calledWithNew()).to.be.false;
                 expect(handler._stream).to.deep.equal(mockStream);
                 expect(handler._handler).to.deep.equal(new mockChaincodeMessageHandler(mockStream, mockChaincodeImpl));
@@ -559,7 +558,6 @@ describe('Handler', () => {
                 const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                 handler.chat('some starter message');
 
-                expect(mockMsgQueueHandler.calledWithNew).to.be.ok;  // believe wrong
                 expect(mockMsgQueueHandler.calledWithNew()).to.be.false;
                 expect(handler._stream).to.deep.equal(mockStream);
                 expect(handler.msgQueueHandler).to.deep.equal(new mockMsgQueueHandler(handler));
@@ -1749,7 +1747,6 @@ describe('Handler', () => {
             const createStub = Handler.__get__('createStub');
             createStub({}, 'channelID', 'txID', 'some input', 'some proposal');
 
-            expect(mockStub.calledWithNew).to.be.ok;   // believe wrong
             expect(mockStub.calledWithNew()).to.be.false;
             expect(mockStub.firstCall.args[0]).to.deep.equal({});
             expect(mockStub.firstCall.args[1]).to.deep.equal('channelID');
@@ -1923,7 +1920,6 @@ describe('Handler', () => {
 
             parseResponse(handler, res, 'GetStateByRange');
 
-            expect(mockStateQueryIterator.calledWithNew).to.be.ok;  // believe wrong
             expect(mockStateQueryIterator.calledWithNew()).to.be.false;
             expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
         });
@@ -1942,7 +1938,6 @@ describe('Handler', () => {
 
             const result = parseResponse(handler, res, 'GetStateByRange');
 
-            expect(mockStateQueryIterator.calledWithNew).to.be.ok;  // believe wrong
             expect(mockStateQueryIterator.calledWithNew()).to.be.false;
             expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, pagedQrPayload]);
 
@@ -1958,7 +1953,6 @@ describe('Handler', () => {
 
             parseResponse(handler, res, 'GetQueryResult');
 
-            expect(mockStateQueryIterator.calledWithNew).to.be.ok;  // believe wrong
             expect(mockStateQueryIterator.calledWithNew()).to.be.false;
             expect(mockStateQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
         });
@@ -1971,7 +1965,6 @@ describe('Handler', () => {
 
             parseResponse(handler, res, 'GetHistoryForKey');
 
-            expect(mockHistoryQueryIterator.calledWithNew).to.be.ok;  // believe wrong
             expect(mockHistoryQueryIterator.calledWithNew()).to.be.false;
             expect(mockHistoryQueryIterator.firstCall.args).to.deep.equal([handler, res.channel_id, res.txid, qrDecodedPayload]);
         });
