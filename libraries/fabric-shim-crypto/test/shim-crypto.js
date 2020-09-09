@@ -504,7 +504,6 @@ describe('enc-sign', () => {
             sinon.stub(KEYUTIL, 'getKey').returns(mockKey);
 
             expect(importKey('some raw content') instanceof ECDSAKey).to.be.true;
-            expect(mockECDSAKey.calledWithNew).to.be.ok;  // Believe wrong
             expect(mockECDSAKey.calledWithNew()).to.be.false;
             expect(mockECDSAKey.firstCall.args).to.deep.equal([mockKey]);
 
@@ -613,7 +612,6 @@ i6dOfok=
             const result = _preventMalleability(sig, curveParams);
 
             expect(result.s).to.deep.equal('some sub');
-            expect(mockBN.calledWithNew).to.be.ok;  // Believe wrong
             expect(mockBN.calledWithNew()).to.be.false;
             expect(mockBN.firstCall.args).to.deep.equal(['some string', 16]);
             expect(curveParams.n.toString.calledOnce).to.be.true;
