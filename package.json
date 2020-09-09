@@ -2,7 +2,7 @@
   "name": "fabric-shim-test",
   "version": "1.4.6",
   "description": "fabric-shim, fabric-shim-crypto",
-  "testFabricVersion": "1.4.0",
+  "testFabricVersion": "1.4.8",
   "testFabricThirdParty": "0.4.15",
   "docsLatestVersion": "release-1.4",
   "engines": {
