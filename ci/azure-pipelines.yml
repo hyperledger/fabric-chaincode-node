@@ -6,6 +6,17 @@
 # 
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 
+# Daily build for final quality
+# cf https://crontab.guru/#0_23_*_*_*
+schedules:
+  - cron: "0 23 * * *"
+    displayName: 'Chaincode Node Nightly Driver'
+    branches:
+      include:
+        - release-1.4
+    always: true
+
+
 trigger:
   branches:
     include:
