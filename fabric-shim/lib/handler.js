@@ -281,7 +281,7 @@ class ChaincodeSupportClient {
         let state = 'created';
 
         stream.on('data', function (msg) {
-            logger.debug('Received chat message from peer: %j, state: %s', msg, state);
+            logger.debug('Received chat message from peer: %s, state: %s', msg.txid, state);
 
             if (state === STATES.Ready) {
                 const type = msg.type;
