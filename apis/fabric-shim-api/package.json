@@ -22,5 +22,8 @@
     "eslint": "6.6.0"
   },
   "types": "./types/index.d.ts",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/long": "^4.0.1"
+  }
 }

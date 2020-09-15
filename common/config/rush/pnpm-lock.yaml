@@ -13,9 +13,12 @@ dependencies:
   '@rush-temp/fvtests': 'file:projects/fvtests.tgz'
   '@rush-temp/toolchain': 'file:projects/toolchain.tgz'
   '@sinonjs/referee-sinon': 5.0.0
-  '@types/node': 14.0.13
-  chai: 4.2.0
-  chai-as-promised: 7.1.1_chai@4.2.0
+  '@types/chai': 4.2.11
+  '@types/chai-as-promised': 7.1.2
+  '@types/long': 4.0.1
+  '@types/mocha': 5.2.7
+  '@types/node': 14.0.14
+  chai-as-promised: 7.1.1
   chai-things: 0.2.0
   class-transformer: 0.2.3
   cpx: 1.5.0
@@ -8226,10 +8229,12 @@ packages:
       tarball: 'file:projects/fabric-nodeenv.tgz'
     version: 0.0.0
   'file:projects/fabric-shim-api.tgz':
+    dependencies:
+      '@types/long': 4.0.1
     dev: false
     name: '@rush-temp/fabric-shim-api'
     resolution:
-      integrity: sha512-RhCwa6ZEGj0wSQAsW2Lw7LoN+EyUFA13itX0jCX39t1vIty7NWzemqxt5cI1FuqmcxRbhu0J4E3mfjNAxsJ/tA==
+      integrity: sha512-XTqk3nknIzx9XDjIwPAqxlcbyVyZuoETwf8eWxffKlp5MOfZWy+IknQAHB23AdOuUtpAg94QVefEIkO1B2NREg==
       tarball: 'file:projects/fabric-shim-api.tgz'
     version: 0.0.0
   'file:projects/fabric-shim-crypto.tgz':
@@ -8354,6 +8359,10 @@ specifiers:
   '@rush-temp/fvtests': 'file:./projects/fvtests.tgz'
   '@rush-temp/toolchain': 'file:./projects/toolchain.tgz'
   '@sinonjs/referee-sinon': ~5.0.0
+  '@types/chai': ^4.2.0
+  '@types/chai-as-promised': ^7.1.2
+  '@types/long': ^4.0.1
+  '@types/mocha': ^5.2.7
   '@types/node': ^14.0.13
   chai: ^4.1.1
   chai-as-promised: ^7.1.1

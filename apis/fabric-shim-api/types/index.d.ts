@@ -5,9 +5,10 @@
 
 */
 declare module 'fabric-shim-api' {
+    import Long = require("long");
 
     interface Timestamp {
-        seconds: number;
+        seconds: Long;
         nanos: number;
     }
 
