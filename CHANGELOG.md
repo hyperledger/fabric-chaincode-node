@@ -1,3 +1,10 @@
+## v1.4.6
+Wed 16 Sep 15:22:12 BST 2020
+
+* [0a83abd](https://github.com/hyperledger/fabric-chaincode-node/commit/0a83abd) [FABCN-435](https://jira.hyperledger.org/browse/FABCN-435) OOM on large arg size
+* [3642a26](https://github.com/hyperledger/fabric-chaincode-node/commit/3642a26) Update to grpc 12.24.3 (#190)
+
+
 ## v1.4.5
 Wed  5 Feb 16:47:56 GMT 2020
 

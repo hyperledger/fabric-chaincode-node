@@ -1,0 +1,29 @@
+v1.4.5 5th February 2020
+-----------------------------
+
+Release Notes
+-------------
+This is a maintence release and contains bug fixes, and minor updates. 
+
+- With large messages, an Out of Memory error can occur, this has been fixed
+- The grpc library used has been updated
+
+Migration Notes
+---------------
+None known
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v145
