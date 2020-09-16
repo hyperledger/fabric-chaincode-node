@@ -24,7 +24,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "class-transformer": "^0.2.2",
+    "class-transformer": "^0.3.1",
     "fast-safe-stringify": "^2.0.6",
     "get-params": "^0.1.2",
     "reflect-metadata": "^0.1.12",
