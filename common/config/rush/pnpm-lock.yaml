@@ -17,7 +17,7 @@ dependencies:
   chai: 4.2.0
   chai-as-promised: 7.1.1_chai@4.2.0
   chai-things: 0.2.0
-  class-transformer: 0.2.3
+  class-transformer: 0.3.1
   cpx: 1.5.0
   del: 3.0.0
   delay: 4.3.0
@@ -1481,10 +1481,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-UZK3NBx2Mca+b5LsG7bY183pHWt5Y1xts4P3Pz7ENTwGVnJOUWbRb3ocjvX7hx9tq/yTAdclXm9sZ38gNuem4A==
-  /class-transformer/0.2.3:
+  /class-transformer/0.3.1:
     dev: false
     resolution:
-      integrity: sha512-qsP+0xoavpOlJHuYsQJsN58HXSl8Jvveo+T37rEvCEeRfMWoytAyR0Ua/YsFgpM6AZYZ/og2PJwArwzJl1aXtQ==
+      integrity: sha512-cKFwohpJbuMovS8xVLmn8N2AUbAuc8pVo4zEfsUVo8qgECOogns1WVk/FkOZoxhOPTyTYFckuoH+13FO+MQ8GA==
   /class-utils/0.3.6:
     dependencies:
       arr-union: 3.1.0
@@ -8180,7 +8180,7 @@ packages:
       chai: 4.2.0
       chai-as-promised: 7.1.1_chai@4.2.0
       chai-things: 0.2.0
-      class-transformer: 0.2.3
+      class-transformer: 0.3.1
       eslint: 6.6.0
       fast-safe-stringify: 2.0.7
       get-params: 0.1.2
@@ -8197,7 +8197,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-contract-api'
     resolution:
-      integrity: sha512-8HUd54wBQ9Q9rGcnyiJOOeydUqJqsULo8+mPx48/zOfvDjfOO4hNTq7pN+R0z8l9U8skD1DhPUrHySZtHPlI3Q==
+      integrity: sha512-kKYoSHGXDFtWjHBtvQft3Q0QTGud4arhz7S7J8AZF6Klux3Yb7xa9mepWixW42vS2qJdhUy4mczIlpaEVpcaiA==
       tarball: 'file:projects/fabric-contract-api.tgz'
     version: 0.0.0
   'file:projects/fabric-e2e-tests.tgz':
@@ -8289,7 +8289,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-shim'
     resolution:
-      integrity: sha512-hzhRnIxsa+ac4K44tRdRNnCmZn2OZCEsAi1soYRmNVoECi4Pv0MLyrQsVrQGghAIKyOKS7oMXVVMqQGVjFwCCw==
+      integrity: sha512-I6I83arr4SPEG8T9zH1KJbNph6kQ20g3muTzRTCAfD/emARSmRDFF4lsQ7tp0pR9AvAn1GHE/shDBenpjH2vRw==
       tarball: 'file:projects/fabric-shim.tgz'
     version: 0.0.0
   'file:projects/fvtests.tgz':
@@ -8317,7 +8317,7 @@ packages:
     dev: false
     name: '@rush-temp/fvtests'
     resolution:
-      integrity: sha512-CJYd7AQxwOLQfKLfUJyC98zWuTEZDwmqT83C9/VB9paZuMT4GqwJchV6Rl+80NJP61wMk+b+HQS13r6T9eEGEA==
+      integrity: sha512-q+HqErGmlBXrEhtQshz9aTpfCUAsBr6kSz2i3TPaaD9+Qrg3PTJD3IgirvjUYD8MDxXx6hwzxKiiAPlcVBjEKQ==
       tarball: 'file:projects/fvtests.tgz'
     version: 0.0.0
   'file:projects/toolchain.tgz':
@@ -8341,7 +8341,7 @@ packages:
 registry: ''
 specifiers:
   '@fidm/x509': ^1.2.1
-  '@grpc/grpc-js': 1.1.1
+  '@grpc/grpc-js': ^1.1.1
   '@grpc/proto-loader': ^0.5.4
   '@rush-temp/azure-mocha-reporter': 'file:./projects/azure-mocha-reporter.tgz'
   '@rush-temp/fabric-contract-api': 'file:./projects/fabric-contract-api.tgz'
@@ -8358,7 +8358,7 @@ specifiers:
   chai: ^4.1.1
   chai-as-promised: ^7.1.1
   chai-things: ^0.2.0
-  class-transformer: ^0.2.2
+  class-transformer: ^0.3.1
   cpx: ^1.5.0
   del: ^3.0.0
   delay: 4.3.0
