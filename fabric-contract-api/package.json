@@ -1,6 +1,6 @@
 {
   "name": "fabric-contract-api",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "tag": "latest-1.4",
   "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
   "main": "index.js",
