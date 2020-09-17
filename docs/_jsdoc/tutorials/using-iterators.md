@@ -25,12 +25,12 @@ These api's are a request to return a set of data for which you need to iterate 
 
 These iterators were essentially asynchronous iterators (the next and close methods returned promises) but you couldn't use standard iterator capabilities such as for/of constructs in node because node could not work with the concept of asynchronous iterators.
 
-From fabric v2.0 onwards, node chaincode will be using node 10 as the node version and this has added support for asynchronous iterators. Also in fabric v2.0 onwards fabric-shim has added support to enable it's asynchronous iterators so that `for/of` can now be used, but note that they don't have full support so should not be used in generator functions.
+From fabric v2.0 onwards, node chaincode will be using node 12 as the node version and this has added support for asynchronous iterators. Also in fabric v2.0 onwards, fabric-shim has added support to enable it's asynchronous iterators so that `for/of` can now be used, but note that they don't have full support, so should not be used in generator functions.
 
-As a comparison lets present first how you would use iterators in previous releases and then show the new way.
+As a comparison, let's present first how you would use iterators in previous releases and then show the new way.
 
 ## How to use, the old way
-In the past, you might have coded something like this to process an iterator
+In the past, you might have coded something like this to process an iterator:
 
 ```javascript
 async function getAllResults(iterator) {
