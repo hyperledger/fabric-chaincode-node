@@ -208,7 +208,7 @@ describe('ChaincodeServer', () => {
             const mockStream = {on: sinon.stub(), write: sinon.stub()};
 
             server.connect(mockStream);
-            expect(mockHandlerStub.calledOnce).to.be.true
+            expect(mockHandlerStub.calledOnce).to.be.true;
             expect(mockHandler.chat.calledOnce).to.be.true;
         });
     });
