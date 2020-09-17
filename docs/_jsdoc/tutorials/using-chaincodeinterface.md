@@ -1,6 +1,20 @@
 #### Writing your own chaincode
 
-To write your own chaincode is very easy. Create a file named `mychaincode.js` anywhere in the file system, and put in it the following minimum implementation:
+To write your own chaincode is very easy. Create a file named `mychaincode.js` anywhere in the file system.
+```
+cd ~
+mkdir mycc
+cd mycc
+// create a new node project
+npm init
+// install fabric-shim at master branch
+npm install fabric-shim@2.2.1-unstable
+// or using the released version
+npm install fabric-shim
+touch mychaincode.js
+```
+
+Put the following minimum implementation to `mychaincode.js`:
 ```
 const shim = require('fabric-shim');
 const util = require('util');
