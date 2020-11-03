@@ -1,3 +1,11 @@
+## v1.4.7
+Tue  3 Nov 15:28:38 GMT 2020
+
+* [018a747](https://github.com/hyperledger/fabric-chaincode-node/commit/018a747) [FABCN-1623](https://jira.hyperledger.org/browse/FABCN-1623)-Update class transporter dependency (#214)
+* [6598b4e](https://github.com/hyperledger/fabric-chaincode-node/commit/6598b4e) v1.4 tutorials updated (#216)
+* [3aa9ece](https://github.com/hyperledger/fabric-chaincode-node/commit/3aa9ece) [FABCN-436](https://jira.hyperledger.org/browse/FABCN-436) Prepare 1.4.7 (#219)
+
+
 ## v1.4.6
 Wed 16 Sep 15:22:12 BST 2020
 

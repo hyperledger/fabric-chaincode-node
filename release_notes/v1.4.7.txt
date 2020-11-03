@@ -1,0 +1,29 @@
+v1.4.7 3rd November 2020
+-----------------------------
+
+Release Notes
+-------------
+This is a maintence release and contains bug fixes, and minor updates. 
+
+- Tutorials updated
+- Updated class transporter dependency
+
+Migration Notes
+---------------
+None known
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v145
