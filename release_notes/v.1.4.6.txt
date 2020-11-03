@@ -1,0 +1,35 @@
+v1.4.6 3rd November 2020
+-----------------------------
+
+Release Notes
+-------------
+This is a maintence release and contains bug fixes, and minor updates. 
+
+- OOM on large arg size
+- Add release-1.4 to nightly Azure pipelines
+- Updated typescrtip and @types/node
+- Add release guide
+- Fix broken links in documents
+- Update to grpc 12.24.3
+- fixed version problem
+- Correct npm audit command
+
+Migration Notes
+---------------
+None known
+
+Known Vulnerabilities
+---------------------
+none
+
+Resolved Vulnerabilities
+------------------------
+none
+
+Known Issues & Workarounds
+--------------------------
+none
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-1.4/CHANGELOG.md#v146

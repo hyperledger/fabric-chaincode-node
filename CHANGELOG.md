@@ -1,3 +1,16 @@
+## v1.4.6
+Tue  3 Nov 15:05:37 GMT 2020
+
+* [0a83abd](https://github.com/hyperledger/fabric-chaincode-node/commit/0a83abd) [FABCN-435](https://jira.hyperledger.org/browse/FABCN-435) OOM on large arg size
+* [fc5896e](https://github.com/hyperledger/fabric-chaincode-node/commit/fc5896e) [FABCN-434](https://jira.hyperledger.org/browse/FABCN-434) Add release-1.4 to nightly Azure pipelines (#205)
+* [bb6c3dc](https://github.com/hyperledger/fabric-chaincode-node/commit/bb6c3dc) [FABCN-433](https://jira.hyperledger.org/browse/FABCN-433) Updated typescrtip and @types/node
+* [3642a26](https://github.com/hyperledger/fabric-chaincode-node/commit/3642a26) Update to grpc 12.24.3 (#190)
+* [d91195e](https://github.com/hyperledger/fabric-chaincode-node/commit/d91195e) [FABCN-422](https://jira.hyperledger.org/browse/FABCN-422) Add release guide
+* [a897117](https://github.com/hyperledger/fabric-chaincode-node/commit/a897117) [FABCN-393](https://jira.hyperledger.org/browse/FABCN-393) Fix broken links in documents (#167)
+* [feba165](https://github.com/hyperledger/fabric-chaincode-node/commit/feba165) fixed version problem (#153)
+* [a62c2f9](https://github.com/hyperledger/fabric-chaincode-node/commit/a62c2f9) [FABCN-188](https://jira.hyperledger.org/browse/FABCN-188) Correct npm audit command
+* [ae04618](https://github.com/hyperledger/fabric-chaincode-node/commit/ae04618) [FABCN-386](https://jira.hyperledger.org/browse/FABCN-386) Prepare next release 1.4.6 (#89)
+
 ## v1.4.5
 Wed  5 Feb 16:47:56 GMT 2020
 
