@@ -1,3 +1,16 @@
+## v2.3.0
+Tue  3 Nov 15:40:46 GMT 2020
+
+* [f71eb0c](https://github.com/hyperledger/fabric-chaincode-node/commit/f71eb0c) [FABCN-432](https://jira.hyperledger.org/browse/FABCN-432) - Update class transformer dependency (#213)
+* [fc32346](https://github.com/hyperledger/fabric-chaincode-node/commit/fc32346) [FABCN-430](https://jira.hyperledger.org/browse/FABCN-430) Fix type for timestamp.second (#194) (#209)
+* [85188f5](https://github.com/hyperledger/fabric-chaincode-node/commit/85188f5) v2.x tutorials updated (#217)
+* [05df03f](https://github.com/hyperledger/fabric-chaincode-node/commit/05df03f) [FABCN-435](https://jira.hyperledger.org/browse/FABCN-435) OOM on Large Arg Size (#207)
+* [58387e8](https://github.com/hyperledger/fabric-chaincode-node/commit/58387e8) [FABCN-241](https://jira.hyperledger.org/browse/FABCN-241) Remove to.be.ok (#204)
+* [c9a1f5d](https://github.com/hyperledger/fabric-chaincode-node/commit/c9a1f5d) [FABCN-433](https://jira.hyperledger.org/browse/FABCN-433) Update typescript and @types/node (#199)
+* [eb39270](https://github.com/hyperledger/fabric-chaincode-node/commit/eb39270) [FABCN-422](https://jira.hyperledger.org/browse/FABCN-422) Add release guide (#187)
+* [be2ef68](https://github.com/hyperledger/fabric-chaincode-node/commit/be2ef68) Fix: ChaincodeStub.getMspID should be in lowerCamelCASE
+* [7de3c12](https://github.com/hyperledger/fabric-chaincode-node/commit/7de3c12) Bump version to 2.2.1 (#184)
+
 ## v2.2.0
 Thu  2 Jul 11:40:02 BST 2020
 
