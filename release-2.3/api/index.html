@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Hyperledger Fabric SDK for node.js Index</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cosmo.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Hyperledger Fabric SDK for node.js</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="fabric-contract-api.Context.html">fabric-contract-api.Context</a></li><li><a href="fabric-contract-api.Contract.html">fabric-contract-api.Contract</a></li><li><a href="fabric-shim.ChaincodeInterface.html">fabric-shim.ChaincodeInterface</a></li><li><a href="fabric-shim.ChaincodeProposalPayload.html">fabric-shim.ChaincodeProposalPayload</a></li><li><a href="fabric-shim.ChaincodeStub.html">fabric-shim.ChaincodeStub</a></li><li><a href="fabric-shim.ChannelHeader.html">fabric-shim.ChannelHeader</a></li><li><a href="fabric-shim.ClientIdentity.html">fabric-shim.ClientIdentity</a></li><li><a href="fabric-shim.CommonIterator.html">fabric-shim.CommonIterator</a></li><li><a href="fabric-shim.ErrorResponse.html">fabric-shim.ErrorResponse</a></li><li><a href="fabric-shim.FunctionAndParameters.html">fabric-shim.FunctionAndParameters</a></li><li><a href="fabric-shim.Header.html">fabric-shim.Header</a></li><li><a href="fabric-shim.HistoryQueryIterator.html">fabric-shim.HistoryQueryIterator</a></li><li><a href="fabric-shim.PaginationQueryResponse.html">fabric-shim.PaginationQueryResponse</a></li><li><a href="fabric-shim.PrivateQueryResponse.html">fabric-shim.PrivateQueryResponse</a></li><li><a href="fabric-shim.Proposal.html">fabric-shim.Proposal</a></li><li><a href="fabric-shim.ProposalCreator.html">fabric-shim.ProposalCreator</a></li><li><a href="fabric-shim.QueryResponseMetadata.html">fabric-shim.QueryResponseMetadata</a></li><li><a href="fabric-shim.Response.html">fabric-shim.Response</a></li><li><a href="fabric-shim.Shim.html">fabric-shim.Shim</a></li><li><a href="fabric-shim.SignatureHeader.html">fabric-shim.SignatureHeader</a></li><li><a href="fabric-shim.SignedProposal.html">fabric-shim.SignedProposal</a></li><li><a href="fabric-shim.StateQueryIterator.html">fabric-shim.StateQueryIterator</a></li><li><a href="fabric-shim.SuccessResponse.html">fabric-shim.SuccessResponse</a></li><li><a href="module.exports.html">module.exports</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="interfaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Interfaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="ChaincodeServerOpts.html">ChaincodeServerOpts</a></li><li><a href="ChaincodeServerTLSProperties.html">ChaincodeServerTLSProperties</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-annotated-contract-metadata.html">Walkthrough of annotated metadata.json</a></li><li><a href="tutorial-data-types-and-contracts.html">Details of type handling</a></li><li><a href="tutorial-deep-dive-contract-interface.html">Deep dive on Contract Interface</a></li><li><a href="tutorial-using-chaincodeinterface.html">Using the Chaincode Interface</a></li><li><a href="tutorial-using-contractinterface.html">Using the Contract Interface</a></li><li><a href="tutorial-using-iterators.html">Working with apis that return iterators</a></li><li><a href="tutorial-using-typescript-decorators.html">Using TypeScript Decorators</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+    <section class="readme-section">
+        <article><p><a href="https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_build/latest?definitionId=33&amp;branchName=master"><img src="https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_apis/build/status/Fabric-Chaincode-Node?branchName=master" alt="Build Status"></a>
+<a href="https://www.npmjs.com/package/fabric-contract-api"><img src="https://img.shields.io/npm/v/fabric-shim?label=fabric-contract-api" alt="fabric-contract-api npm module"></a>
+<a href="https://www.npmjs.com/package/fabric-shim"><img src="https://img.shields.io/npm/v/fabric-shim?label=fabric-shim" alt="fabric-shim npm module"></a>
+<a href="https://www.npmjs.com/package/fabric-shim-api"><img src="https://img.shields.io/npm/v/fabric-shim?label=fabric-shim-api" alt="fabric-shim-api npm module"></a>
+<a href="https://www.npmjs.com/package/fabric-shim-crypto"><img src="https://img.shields.io/npm/v/fabric-shim?label=fabric-shim-crypto" alt="fabric-shim-crypto npm module"></a>
+<a href="https://chat.hyperledger.org/channel/fabric-chaincode-dev"><img src="https://chat.hyperledger.org/images/join-chat.svg" alt="Rocket.Chat"></a></p>
+<h2>Overview</h2>
+<p>The <code>fabric-contract-api</code> provides the <em>contract interface</em>. a high level API for application developers to implement <a href="https://hyperledger-fabric.readthedocs.io/en/release-2.1/glossary.html#smart-contract">Smart Contracts</a>. Within Hyperledger Fabric, Smart Contracts are also known as <a href="https://hyperledger-fabric.readthedocs.io/en/release-2.1/glossary.html#chaincode">Chaincode</a>. Working with this API provides a high level entry point to writing business logic.</p>
+<p>The <code>fabric-shim</code> provides the <em>chaincode interface</em>, a lower level API for implementing &quot;Smart Contracts&quot;. It also provides the implementation to support communication with Hyperledger Fabric peers for Smart Contracts written using the <code>fabric-contract-api</code> together with the <code>fabric-chaincode-node</code> cli to launch Chaincode or Smart Contracts.</p>
+<p>To confirm that the <code>fabric-shim</code> maintains API and functional compatibility with previous versions of Hyperledger Fabric.</p>
+<p>A more detailed explanation on the concept and programming model can be found in the <a href="https://hyperledger-fabric.readthedocs.io/en/release-2.1/developapps/smartcontract.html">smart contract processing topic</a>.</p>
+<h2>Contract Interface</h2>
+<h3>Installation</h3>
+<pre class="prettyprint source lang-sh"><code>npm install --save fabric-contract-api
+</code></pre>
+<h3>Usage</h3>
+<p>Implement a class that ends the <code>contract</code> class, a constructor is needed.
+The other functions will be invokable functions of your Smart Contract</p>
+<pre class="prettyprint source lang-javascript"><code>// updatevalues.js
+'use strict';
+
+// SDK Library to asset with writing the logic
+const { Contract } = require('fabric-contract-api');
+
+// Business logic (well just util but still it's general purpose logic)
+const util = require('util');
+
+/**
+ * Support the Updating of values within the SmartContract
+ */
+class UpdateValuesContract extends Contract
+
+    constructor(){
+		super('UpdateValuesContract');
+	}
+
+	async transactionA(ctx, newValue) {
+		// retrieve existing chaincode states
+		let oldValue = await ctx.stub.getState(key);
+
+		await ctx.stub.putState(key, Buffer.from(newValue));
+
+		return Buffer.from(newValue.toString());
+	}
+
+	async transactionB(ctx) {
+	  //  .....
+	}
+
+};
+
+module.exports = UpdateValuesContract
+</code></pre>
+<p>As with standard node modules make sure that this class is exported as follows.</p>
+<pre class="prettyprint source lang-javascript"><code>// index.js
+'use strict';
+
+const UpdateValues = require('./updatevalues')
+module.exports.contracts = ['UpdateValues'];
+</code></pre>
+<p><strong>Note:</strong> In order to make this contract runnable in version 1.4, also install the <code>fabric-shim</code> module as below, and ensure that the 'start' script in <code>package.json</code> refers to <code>fabric-chaincode-node</code></p>
+<pre class="prettyprint source lang-json"><code>  &quot;scripts&quot;: {
+	&quot;start&quot;: &quot;fabric-chaincode-node start&quot;
+  }
+</code></pre>
+<h2>Chaincode Interface</h2>
+<h3>Installation</h3>
+<pre class="prettyprint source lang-sh"><code>npm install --save fabric-shim
+</code></pre>
+<h3>Usage</h3>
+<p>The <a href="https://hyperledger.github.io/fabric-chaincode-node/release-2.1/api/fabric-shim.ChaincodeInterface.html">chaincode interface</a> contains two methods to be implemented:</p>
+<pre class="prettyprint source lang-javascript"><code>const shim = require('fabric-shim');
+
+const Chaincode = class {
+	async Init(stub) {
+		// use the instantiate input arguments to decide initial chaincode state values
+
+		// save the initial states
+		await stub.putState(key, Buffer.from(aStringValue));
+
+		return shim.success(Buffer.from('Initialized Successfully!'));
+	}
+
+	async Invoke(stub) {
+		// use the invoke input arguments to decide intended changes
+
+		// retrieve existing chaincode states
+		let oldValue = await stub.getState(key);
+
+		// calculate new state values and saves them
+		let newValue = oldValue + delta;
+		await stub.putState(key, Buffer.from(newValue));
+
+		return shim.success(Buffer.from(newValue.toString()));
+	}
+};
+</code></pre>
+<p>Start the chaincode process and listen for incoming endorsement requests:</p>
+<pre class="prettyprint source lang-javascript"><code>shim.start(new Chaincode());
+</code></pre>
+<h2>License</h2>
+<p>This package is distributed under the
+<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>,
+see LICENSE.txt for more information.</p></article>
+    </section>
+
+
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a>
+	
+		on 2020-11-04T14:20:07+00:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : false,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

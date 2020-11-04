@@ -1,0 +1,6108 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Hyperledger Fabric SDK for node.js Class: ChaincodeStub</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cosmo.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Hyperledger Fabric SDK for node.js</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="fabric-contract-api.Context.html">fabric-contract-api.Context</a></li><li><a href="fabric-contract-api.Contract.html">fabric-contract-api.Contract</a></li><li><a href="fabric-shim.ChaincodeInterface.html">fabric-shim.ChaincodeInterface</a></li><li><a href="fabric-shim.ChaincodeProposalPayload.html">fabric-shim.ChaincodeProposalPayload</a></li><li><a href="fabric-shim.ChaincodeStub.html">fabric-shim.ChaincodeStub</a></li><li><a href="fabric-shim.ChannelHeader.html">fabric-shim.ChannelHeader</a></li><li><a href="fabric-shim.ClientIdentity.html">fabric-shim.ClientIdentity</a></li><li><a href="fabric-shim.CommonIterator.html">fabric-shim.CommonIterator</a></li><li><a href="fabric-shim.ErrorResponse.html">fabric-shim.ErrorResponse</a></li><li><a href="fabric-shim.FunctionAndParameters.html">fabric-shim.FunctionAndParameters</a></li><li><a href="fabric-shim.Header.html">fabric-shim.Header</a></li><li><a href="fabric-shim.HistoryQueryIterator.html">fabric-shim.HistoryQueryIterator</a></li><li><a href="fabric-shim.PaginationQueryResponse.html">fabric-shim.PaginationQueryResponse</a></li><li><a href="fabric-shim.PrivateQueryResponse.html">fabric-shim.PrivateQueryResponse</a></li><li><a href="fabric-shim.Proposal.html">fabric-shim.Proposal</a></li><li><a href="fabric-shim.ProposalCreator.html">fabric-shim.ProposalCreator</a></li><li><a href="fabric-shim.QueryResponseMetadata.html">fabric-shim.QueryResponseMetadata</a></li><li><a href="fabric-shim.Response.html">fabric-shim.Response</a></li><li><a href="fabric-shim.Shim.html">fabric-shim.Shim</a></li><li><a href="fabric-shim.SignatureHeader.html">fabric-shim.SignatureHeader</a></li><li><a href="fabric-shim.SignedProposal.html">fabric-shim.SignedProposal</a></li><li><a href="fabric-shim.StateQueryIterator.html">fabric-shim.StateQueryIterator</a></li><li><a href="fabric-shim.SuccessResponse.html">fabric-shim.SuccessResponse</a></li><li><a href="module.exports.html">module.exports</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="interfaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Interfaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="ChaincodeServerOpts.html">ChaincodeServerOpts</a></li><li><a href="ChaincodeServerTLSProperties.html">ChaincodeServerTLSProperties</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-annotated-contract-metadata.html">Walkthrough of annotated metadata.json</a></li><li><a href="tutorial-data-types-and-contracts.html">Details of type handling</a></li><li><a href="tutorial-deep-dive-contract-interface.html">Deep dive on Contract Interface</a></li><li><a href="tutorial-using-chaincodeinterface.html">Using the Chaincode Interface</a></li><li><a href="tutorial-using-contractinterface.html">Using the Contract Interface</a></li><li><a href="tutorial-using-iterators.html">Working with apis that return iterators</a></li><li><a href="tutorial-using-typescript-decorators.html">Using TypeScript Decorators</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	<h1 class="page-title">Class: ChaincodeStub</h1>
+<section>
+
+<header>
+    
+        <h2>
+        ChaincodeStub
+        </h2>
+        
+            <div class="class-description">The ChaincodeStub is implemented by the <code>fabric-shim</code>
+library and passed to the ChaincodeInterface calls by the Hyperledger Fabric platform.
+The stub encapsulates the APIs between the chaincode implementation and the Fabric peer</div>
+        
+    
+</header>
+
+
+<article>
+    <div class="container-overview">
+    
+        
+<hr>
+<dt>
+    <h4 class="name" id="ChaincodeStub"><span class="type-signature"></span>new ChaincodeStub(client, channel_id, txId, chaincodeInput, signedProposal)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>client</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Handler</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">an instance of the Handler class</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>channel_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">channel id</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>txId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">transaction id</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>chaincodeInput</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">any</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">decoded message from peer</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>signedProposal</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">any</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the proposal</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="createCompositeKey"><span class="type-signature"></span>createCompositeKey(objectType, attributes)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Creates a composite key by combining the objectType string and the given `attributes` to form a composite
+key. The objectType and attributes are expected to have only valid utf8 strings and should not contain
+U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point). The resulting composite key can be
+used as the key in putState().<br><br>
+
+Hyperledger Fabric uses a simple key/value model for saving chaincode states. In some use case scenarios,
+it is necessary to keep track of multiple attributes. Furthermore, it may be necessary to make the various
+attributes searchable. Composite keys can be used to address these requirements. Similar to using composite
+keys in a relational database table, here you would treat the searchable attributes as key columns that
+make up the composite key. Values for the attributes become part of the key, thus they are searchable with
+functions like getStateByRange() and
+getStateByPartialCompositeKey().<br><br>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>objectType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A string used as the prefix of the resulting key</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">List of attribute values to concatenate into the key</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A composite key with the <code>objectType</code> and the array of <code>attributes</code>
+joined together with special delimiters that will not be confused with values of the attributes
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="deletePrivateData"><span class="type-signature">&lt;async> </span>deletePrivateData(collection, key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        deletePrivateData records the specified `key` to be deleted in the private writeset of
+the transaction. Note that only hash of the private writeset goes into the
+transaction proposal response (which is sent to the client who issued the
+transaction) and the actual private writeset gets temporarily stored in a
+transient store. The `key` and its value will be deleted from the collection
+when the transaction is validated and successfully committed.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key to delete from the state store</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="deleteState"><span class="type-signature">&lt;async> </span>deleteState(key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Deletes the state variable <code>key</code> from the state store.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable key to delete from the state store</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise will be resolved when the peer has successfully handled the state delete request
+or rejected if any errors
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getArgs"><span class="type-signature"></span>getArgs()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the arguments as array of strings from the chaincode invocation request.
+Equivalent to getStringArgs()
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getBinding"><span class="type-signature"></span>getBinding()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns a HEX-encoded string of SHA256 hash of the transaction's nonce, creator and epoch concatenated, as a
+unique representation of the specific transaction. This value can be used to prevent replay attacks in chaincodes
+that need to authenticate an identity independent of the transaction's submitter. In a chaincode proposal, the
+submitter will have been authenticated by the peer such that the identity returned by
+stub.getCreator() can be trusted. But in some scenarios, the chaincode needs
+to authenticate an identity independent of the proposal submitter.<br><br>
+
+For example, Alice is the administrator who installs and instantiates a chaincode that manages assets. During
+instantiate Alice assigns the initial owner of the asset to Bob. The chaincode has a function called <code>
+transfer()</code> that moves the asset to another identity by changing the asset's "owner" property to the
+identity receiving the asset. Naturally only Bob, the current owner, is supposed to be able to call that function.
+While the chaincode can rely on stub.getCreator() to check the submitter's identity and compare that with the
+current owner, sometimes it's not always possible for the asset owner itself to submit the transaction. Let's suppose
+Bob hires a broker agency to handle his trades. The agency participates in the blockchain network and carry out trades
+on behalf of Bob. The chaincode must have a way to authenticate the transaction to ensure it has Bob's authorization
+to do the asset transfer. This can be achieved by asking Bob to sign the message, so that the chaincode can use
+Bob's certificate, which was obtained during the chaincode instantiate, to verify the signature and thus ensure
+the trade was authorized by Bob.<br><br>
+
+Now, to prevent Bob's signature from being re-used in a malicious attack, we want to ensure the signature is unique.
+This is where the <code>binding</code> concept comes in. As explained above, the binding string uniquely represents
+the transaction where the trade proposal and Bob's authorization is submitted in. As long as Bob's signature is over
+the proposal payload and the binding string concatenated together, namely <code>sigma=Sign(BobSigningKey, tx.Payload||tx.Binding)</code>,
+it's guaranteed to be unique and can not be re-used in a different transaction for exploitation.<br><br>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A HEX-encoded string of SHA256 hash of the transaction's nonce, creator and epoch concatenated
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getChannelID"><span class="type-signature"></span>getChannelID()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the channel ID for the proposal for chaincode to process.
+This would be the 'channel_id' of the transaction proposal (see ChannelHeader
+in protos/common/common.proto) except where the chaincode is calling another on
+a different channel.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getCreator"><span class="type-signature"></span>getCreator()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the identity object of the chaincode invocation's submitter
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">ProposalCreator</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getFunctionAndParameters"><span class="type-signature"></span>getFunctionAndParameters()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns an object containing the chaincode function name to invoke, and the array
+of arguments to pass to the target function
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">FunctionAndParameters</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getHistoryForKey"><span class="type-signature">&lt;async> </span>getHistoryForKey(key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns a history of key values across time.
+For each historic key update, the historic value and associated
+transaction id and timestamp are returned. The timestamp is the
+timestamp provided by the client in the proposal header.
+This method requires peer configuration
+<code>core.ledger.history.enableHistoryDatabase</code> to be true.<br><br>
+The query is NOT re-executed during validation phase, phantom reads are
+not detected. That is, other committed transactions may have updated
+the key concurrently, impacting the result set, and this would not be
+detected at validation/commit time. Applications susceptible to this
+should therefore not use GetHistoryForKey as part of transactions that
+update ledger, and should limit use to read-only chaincode operations.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The state variable key</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a HistoryQueryIterator object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getMspID"><span class="type-signature"></span>getMspID()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the MSPID of the peer that started this chaincode
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    MSPID
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPrivateData"><span class="type-signature">&lt;async> </span>getPrivateData(collection, key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getPrivateData returns the value of the specified `key` from the specified
+`collection`. Note that GetPrivateData doesn't read data from the
+private writeset, which has not been committed to the `collection`. In
+other words, GetPrivateData doesn't consider data modified by PutPrivateData
+that has not been committed.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key to retrieve from the state store</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for the private value from the state store
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;byte>></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPrivateDataByPartialCompositeKey"><span class="type-signature"></span>getPrivateDataByPartialCompositeKey(collection, objectType, attributes)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getPrivateDataByPartialCompositeKey queries the state in a given private
+collection based on a given partial composite key. This function returns
+an iterator which can be used to iterate over all composite keys whose prefix
+matches the given partial composite key. The `objectType` and attributes are
+expected to have only valid utf8 strings and should not contain
+U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point).
+See related functions SplitCompositeKey and CreateCompositeKey.
+Call Close() on the returned StateQueryIteratorInterface object when done.
+The query is re-executed during validation phase to ensure result set
+has not changed since transaction endorsement (phantom reads detected).
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>objectType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A string used as the prefix of the resulting key</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">List of attribute values to concatenate into the partial composite key</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a PrivateQueryResponse object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPrivateDataByRange"><span class="type-signature"></span>getPrivateDataByRange(collection, startKey, endKey)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getPrivateDataByRange returns a range iterator over a set of keys in a
+given private collection. The iterator can be used to iterate over all keys
+between the startKey (inclusive) and endKey (exclusive).
+The keys are returned by the iterator in lexical order. Note
+that startKey and endKey can be empty string, which implies unbounded range
+query on start or end.
+Call Close() on the returned StateQueryIteratorInterface object when done.
+The query is re-executed during validation phase to ensure result set
+has not changed since transaction endorsement (phantom reads detected).
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key as the start of the key range (inclusive)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key as the end of the key range (exclusive)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a PrivateQueryResponse object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPrivateDataHash"><span class="type-signature">&lt;async> </span>getPrivateDataHash(collection, key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getPrivateDataHash returns the hash of the value of the specified `key` from
+the specified `collection`.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key to retrieve a hash from the state store</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for the private value hash from the state store
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;byte>></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPrivateDataQueryResult"><span class="type-signature"></span>getPrivateDataQueryResult(collection, query)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getPrivateDataQueryResult performs a "rich" query against a given private
+collection. It is only supported for state databases that support rich query,
+e.g.CouchDB. The query string is in the native syntax
+of the underlying state database. An iterator is returned
+which can be used to iterate (next) over the query result set.
+The query is NOT re-executed during validation phase, phantom reads are
+not detected. That is, other committed transactions may have added,
+updated, or removed keys that impact the result set, and this would not
+be detected at validation/commit time. Applications susceptible to this
+should therefore not use GetQueryResult as part of transactions that update
+ledger, and should limit use to read-only chaincode operations.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The query to be performed</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a PrivateQueryResponse object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPrivateDataValidationParameter"><span class="type-signature">&lt;async> </span>getPrivateDataValidationParameter(collection, key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        GetPrivateDataValidationParameter retrieves the key-level endorsement
+policy for the private data specified by `key`. Note that this introduces
+a read dependency on `key` in the transaction's readset.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name for this private data</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key by which to retrieve endorsement policy</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    endorsement policy for this key
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Buffer</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getQueryResult"><span class="type-signature">&lt;async> </span>getQueryResult(query)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Performs a "rich" query against a state database. It is
+only supported for state databases that support rich query,
+e.g. CouchDB. The query string is in the native syntax
+of the underlying state database. An StateQueryIterator is returned
+which can be used to iterate over all keys in the query result set.<br><br>
+
+However, if the number of keys in the query result set is greater than the
+totalQueryLimit (defined in core.yaml), this iterator cannot be used
+to fetch all keys in the query result set (results will be limited by
+the totalQueryLimit).
+
+The query is NOT re-executed during validation phase, phantom reads are
+not detected. That is, other committed transactions may have added,
+updated, or removed keys that impact the result set, and this would not
+be detected at validation/commit time. Applications susceptible to this
+should therefore not use GetQueryResult as part of transactions that update
+ledger, and should limit use to read-only chaincode operations.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Query string native to the underlying state database</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a StateQueryIterator object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getQueryResultWithPagination"><span class="type-signature"></span>getQueryResultWithPagination(query, pageSize, bookmark)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getQueryResultWithPagination performs a "rich" query against a state database.
+It is only supported for state databases that support rich query,
+e.g., CouchDB. The query string is in the native syntax
+of the underlying state database. An iterator is returned
+which can be used to iterate over keys in the query result set.
+When an empty string is passed as a value to the bookmark argument, the returned
+iterator can be used to fetch the first `pageSize` of query results.
+When the bookmark is a non-emptry string, the iterator can be used to fetch
+the first `pageSize` keys between the bookmark and the last key in the query result.
+Note that only the bookmark present in a prior page of query results (ResponseMetadata)
+can be used as a value to the bookmark argument. Otherwise, an empty string
+must be passed as bookmark.
+This call is only supported in a read only transaction.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bookmark</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a PaginationQueryResponse object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getSignedProposal"><span class="type-signature"></span>getSignedProposal()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns a fully decoded object of the signed transaction proposal
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">SignedProposal</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getState"><span class="type-signature">&lt;async> </span>getState(key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Retrieves the current value of the state variable <code>key</code>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable key to retrieve from the state store</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for the current value of the state variable
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;byte>></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getStateByPartialCompositeKey"><span class="type-signature">&lt;async> </span>getStateByPartialCompositeKey(objectType, attributes)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Queries the state in the ledger based on a given partial composite key. This function returns an iterator
+which can be used to iterate over all composite keys whose prefix matches the given partial composite key.
+
+However, if the number of matching composite keys is greater than the totalQueryLimit (defined in core.yaml),
+this iterator cannot be used to fetch all matching keys (results will be limited by the totalQueryLimit).
+
+The `objectType` and attributes are expected to have only valid utf8 strings and should not contain
+U+0000 (nil byte) and U+10FFFF (biggest and unallocated code point).<br><br>
+
+See related functions splitCompositeKey and
+createCompositeKey.<br><br>
+
+Call close() on the returned StateQueryIterator object when done.<br><br>
+
+The query is re-executed during validation phase to ensure result set has not changed since transaction
+endorsement (phantom reads detected).
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>objectType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A string used as the prefix of the resulting key</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">List of attribute values to concatenate into the partial composite key</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A promise that resolves with a StateQueryIterator, rejects if an error occurs
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getStateByPartialCompositeKeyWithPagination"><span class="type-signature"></span>getStateByPartialCompositeKeyWithPagination(objectType, attributes, pageSize, bookmark)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        GetStateByPartialCompositeKeyWithPagination queries the state in the ledger based on
+a given partial composite key. This function returns an iterator
+which can be used to iterate over the composite keys whose
+prefix matches the given partial composite key.
+When an empty string is passed as a value to the bookmark argument, the returned
+iterator can be used to fetch the first `pageSize` composite keys whose prefix
+matches the given partial composite key.
+When the bookmark is a non-emptry string, the iterator can be used to fetch
+the first `pageSize` keys between the bookmark (inclusive) and the last matching
+composite key.
+Note that only the bookmark present in a prior page of query result (ResponseMetadata)
+can be used as a value to the bookmark argument. Otherwise, an empty string must
+be passed as bookmark.
+The `objectType` and attributes are expected to have only valid utf8 strings
+and should not contain U+0000 (nil byte) and U+10FFFF (biggest and unallocated
+code point). See related functions SplitCompositeKey and CreateCompositeKey.
+Call Close() on the returned StateQueryIteratorInterface object when done.
+This call is only supported in a read only transaction.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>objectType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>attributes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bookmark</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a PaginationQueryResponse object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getStateByRange"><span class="type-signature">&lt;async> </span>getStateByRange(startKey, endKey)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns a range iterator over a set of keys in the
+ledger. The iterator can be used to iterate over all keys
+between the startKey (inclusive) and endKey (exclusive).
+
+However, if the number of keys between startKey and endKey is greater than the
+totalQueryLimit (defined in core.yaml, which is the peer's configuration file),
+this iterator cannot be used to fetch all keys (results will be limited by the totalQueryLimit).
+
+The keys are returned by the iterator in lexical order. Note
+that startKey and endKey can be empty string, which implies unbounded range
+query on start or end.<br><br>
+Call close() on the returned StateQueryIterator object when done.
+The query is re-executed during validation phase to ensure result set
+has not changed since transaction endorsement (phantom reads detected).
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>startKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable key as the start of the key range (inclusive)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable key as the end of the key range (exclusive)</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a StateQueryIterator object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getStateByRangeWithPagination"><span class="type-signature"></span>getStateByRangeWithPagination(startKey, endKey, pageSize, bookmark)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getStateByRangeWithPagination returns a range iterator over a set of keys in the
+ledger. The iterator can be used to fetch keys between the startKey (inclusive)
+and endKey (exclusive).
+When an empty string is passed as a value to the bookmark argument, the returned
+iterator can be used to fetch the first `pageSize` keys between the startKey
+(inclusive) and endKey (exclusive).
+When the bookmark is a non-emptry string, the iterator can be used to fetch
+the first `pageSize` keys between the bookmark (inclusive) and endKey (exclusive).
+Note that only the bookmark present in a prior page of query results (ResponseMetadata)
+can be used as a value to the bookmark argument. Otherwise, an empty string must
+be passed as bookmark.
+The keys are returned by the iterator in lexical order. Note
+that startKey and endKey can be empty string, which implies unbounded range
+query on start or end.
+Call Close() on the returned StateQueryIteratorInterface object when done.
+This call is only supported in a read only transaction.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>startKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>endKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pageSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bookmark</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a PaginationQueryResponse object
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getStateValidationParameter"><span class="type-signature">&lt;async> </span>getStateValidationParameter(key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        getStateValidationParameter retrieves the key-level endorsement policy
+for `key`. Note that this will introduce a read dependency on `key` in
+the transaction's readset.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable key to set endorsement policy</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    returns the endorsement policy for this key
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Buffer</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getStringArgs"><span class="type-signature"></span>getStringArgs()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the arguments as array of strings from the chaincode invocation request
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;string></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getTransient"><span class="type-signature"></span>getTransient()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the transient map that can be used by the chaincode but not
+saved in the ledger, such as cryptographic information for encryption and decryption
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Map.&lt;string:Buffer></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getTxID"><span class="type-signature"></span>getTxID()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the transaction ID for the current chaincode invocation request. The transaction
+ID uniquely identifies the transaction within the scope of the channel.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getTxTimestamp"><span class="type-signature"></span>getTxTimestamp()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Returns the timestamp when the transaction was created. This
+is taken from the transaction ChannelHeader, therefore it will indicate the
+client's timestamp, and will have the same value across all endorsers.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="invokeChaincode"><span class="type-signature">&lt;async> </span>invokeChaincode(chaincodeName, args, channel)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Locally calls the specified chaincode <code>invoke()</code> using the
+same transaction context; that is, chaincode calling chaincode doesn't
+create a new transaction message.<br><br>
+If the called chaincode is on the same channel, it simply adds the called
+chaincode read set and write set to the calling transaction.<br><br>
+If the called chaincode is on a different channel,
+only the Response is returned to the calling chaincode; any PutState calls
+from the called chaincode will not have any effect on the ledger; that is,
+the called chaincode on a different channel will not have its read set
+and write set applied to the transaction. Only the calling chaincode's
+read set and write set will be applied to the transaction. Effectively
+the called chaincode on a different channel is a `Query`, which does not
+participate in state validation checks in subsequent commit phase.<br><br>
+If `channel` is empty, the caller's channel is assumed.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>chaincodeName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the chaincode to call</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Array.&lt;byte>></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">List of arguments to pass to the called chaincode</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the channel where the target chaincode is active</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise for a Response object returned by the called chaincode
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="putPrivateData"><span class="type-signature">&lt;async> </span>putPrivateData(collection, key, value)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        putPrivateData puts the specified `key` and `value` into the transaction's
+private writeSet. Note that only hash of the private writeSet goes into the
+transaction proposal response (which is sent to the client who issued the
+transaction) and the actual private writeSet gets temporarily stored in a
+transient store. PutPrivateData doesn't effect the `collection` until the
+transaction is validated and successfully committed. Simple keys must not be
+an empty string and must not start with null character (0x00), in order to
+avoid range query collisions with composite keys, which internally get
+prefixed with 0x00 as composite key namespace.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key to set the value for</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">Array.&lt;byte></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable value</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="putState"><span class="type-signature">&lt;async> </span>putState(key, value)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Writes the state variable <code>key</code> of value <code>value</code>
+to the state store. If the variable already exists, the value will be
+overwritten.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable key to set the value for</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;byte></span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable value</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    Promise will be resolved when the peer has successfully handled the state update request
+or rejected if any errors
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setEvent"><span class="type-signature"></span>setEvent(name, payload)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Allows the chaincode to propose an event on the transaction proposal. When the transaction
+is included in a block and the block is successfully committed to the ledger, the block event
+will be delivered to the current event listeners that have been registered with the peer's
+event producer. Note that the block event gets delivered to the listeners regardless of the
+status of the included transactions (can be either valid or invalid), so client applications
+are responsible for checking the validity code on each transaction. Consult each SDK's documentation
+for details.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Name of the event</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>payload</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;byte></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A payload can be used to include data about the event</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setPrivateDataValidationParameter"><span class="type-signature">&lt;async> </span>setPrivateDataValidationParameter(collection, key, ep)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        SetPrivateDataValidationParameter sets the key-level endorsement policy
+for the private data specified by `key`.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name for this private data</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key to set endorsement policy</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ep</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">endorsement policy</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setStateValidationParameter"><span class="type-signature">&lt;async> </span>setStateValidationParameter(key, ep)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Sets the key-level endorsement policy for `key`
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">State variable key to set endorsement policy</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ep</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">endorsement policy</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="splitCompositeKey"><span class="type-signature"></span>splitCompositeKey(compositeKey)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Splits the specified key into attributes on which the composite key was formed.
+Composite keys found during range queries or partial composite key queries can
+therefore be split into their original composite parts, essentially recovering
+the values of the attributes.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>compositeKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The composite key to split</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    An object which has properties of 'objectType' (string) and
+'attributes' (string[])
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a>
+	
+		on 2020-11-04T14:20:07+00:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : false,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
