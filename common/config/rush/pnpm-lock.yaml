@@ -27,7 +27,9 @@ dependencies:
   del: 3.0.0
   delay: 4.3.0
   elliptic: 6.5.3
+  fabric-contract-api: 3.0.0-unstable
   fast-safe-stringify: 2.0.7
+  fs-extra: 9.0.1
   get-params: 0.1.2
   git-rev-sync: 1.12.0
   gulp: 4.0.2
@@ -2915,6 +2917,28 @@ packages:
       '0': node >=0.6.0
     resolution:
       integrity: sha1-lpGEQOMEGnpBT4xS48V06zw+HgU=
+  /fabric-contract-api/3.0.0-unstable:
+    dependencies:
+      class-transformer: 0.3.1
+      fabric-shim-api: 3.0.0-unstable
+      fast-safe-stringify: 2.0.7
+      get-params: 0.1.2
+      reflect-metadata: 0.1.13
+      winston: 3.3.3
+    dev: false
+    engines:
+      node: ^12.13.0
+      npm: ^6.4.1
+    resolution:
+      integrity: sha512-49OlWHWoW63LY/YaJIufdlYhRAmbzI/RkuYIC6J/E58uYRd8Sqn6CpubUhje3f4FHN5BCm7GfkgBJVgxDRfgeA==
+  /fabric-shim-api/3.0.0-unstable:
+    dev: false
+    engines:
+      eslint: 6.6.0
+      node: ^12.13.0
+      npm: ^6.4.1
+    resolution:
+      integrity: sha512-7lLx/LwmM58eYlgORz0NwRd0rznWPVS7PcMzcQeDDi51nIiNq3TVmbop1NkR5dtDFCpXxm6ldolMFQ1bYw8qBA==
   /fancy-log/1.3.3:
     dependencies:
       ansi-gray: 0.1.1
@@ -3213,16 +3237,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==
-  /fs-extra/8.1.0:
-    dependencies:
-      graceful-fs: 4.2.4
-      jsonfile: 4.0.0
-      universalify: 0.1.2
-    dev: false
-    engines:
-      node: '>=6 <7 || >=8'
-    resolution:
-      integrity: sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==
   /fs-extra/9.0.1:
     dependencies:
       at-least-node: 1.0.0
@@ -4701,12 +4715,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-KXPvOm8K9IJKFM0bmdn8QXh7udDh1g/giieX0NLCaMnb4hEiVFqnop2ImTXCc5e0/oHz3LTqmHGtExn5hfMkOA==
-  /jsonfile/4.0.0:
-    dev: false
-    optionalDependencies:
-      graceful-fs: 4.2.4
-    resolution:
-      integrity: sha1-h3Gq4HmbZAdrdmQPygWPnBDjPss=
   /jsonfile/6.0.1:
     dependencies:
       universalify: 1.0.0
@@ -8125,12 +8133,6 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-uNaeirEPvpZWSgzwsPGtU2zVSTrn/8L5q/IexZmH0eH6SA73CmAA5U4GwORTxQAZs95TAXLNqeLoPPNO5gZfWg==
-  /universalify/0.1.2:
-    dev: false
-    engines:
-      node: '>= 4.0.0'
-    resolution:
-      integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==
   /universalify/1.0.0:
     dev: false
     engines:
@@ -8666,7 +8668,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-contract-api'
     resolution:
-      integrity: sha512-jVu+xuofVpl1qhSNT0/iTyZmxqoJ28VHXlcB5P3NiL92/pVq4Q9irCdT6yvxjIkwKQpSCXUyinNmwMSLCG3lmg==
+      integrity: sha512-07lOhJJOaJXKZrOEjeCAT+N+ZiuLkn39lFTGEqCNFtVwkGRODe5kKbyMUBFnMqFjG/QcHXixds5az0VkttpoCg==
       tarball: 'file:projects/fabric-contract-api.tgz'
     version: 0.0.0
   'file:projects/fabric-e2e-tests.tgz':
@@ -8694,6 +8696,7 @@ packages:
       chai-as-promised: 7.1.1_chai@4.2.0
       cpx: 1.5.0
       eslint: 6.8.0
+      fabric-contract-api: 3.0.0-unstable
       mocha: 6.2.2
       mockery: 2.1.0
       nyc: 14.1.1
@@ -8707,7 +8710,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-ledger'
     resolution:
-      integrity: sha512-CUylRbVtXG0K5A+16OjbfDHabof32BNCgNEZO/PQP3cxs+f42LhDMNxLDnjgA1idAZWGie8VIaC+vp4ya4dbkw==
+      integrity: sha512-hzfnU11HKatNBkiKeZh0X0GAVaP6dbGTe/UByWJncehDNzIzApWn8OUTFPShKmP4ydS3sxA3246G8dnYuq+Qaw==
       tarball: 'file:projects/fabric-ledger.tgz'
     version: 0.0.0
   'file:projects/fabric-nodeenv.tgz':
@@ -8756,7 +8759,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-shim-docs'
     resolution:
-      integrity: sha512-nkK7U6amYP8W+Ab7fz6AQ5wfW0GuHQ4sPuUh/Gqz/Swe3+spe+5Dsi2g9Q6H+Lf8VW50FNLnSBRHKGjyvVs8Lg==
+      integrity: sha512-oi7XBbRvf+D+M7bwJuWs6rG39CayCaGApjqx65zibUnsenpriYXMSTpClR4V7QVzjUoK14lHV9iw8kTFaVT4rg==
       tarball: 'file:projects/fabric-shim-docs.tgz'
     version: 0.0.0
   'file:projects/fabric-shim.tgz':
@@ -8785,7 +8788,7 @@ packages:
     dev: false
     name: '@rush-temp/fabric-shim'
     resolution:
-      integrity: sha512-ez+BgcGg6P1ysGXs8scLu+KbODIPfN0NMDhsRwmtMtQXT1t05qMOdSG3xNumYnc6mR1Gy57RV5HQO1nWFR4sqg==
+      integrity: sha512-ow411yr9b2B6W7TT0A3PmtzX3sy5+tnvF+0cfUcmsfW0+9ybhsyEwMli1zbmDQSmSSaOm8TIcC6crzc8ZKA5Kw==
       tarball: 'file:projects/fabric-shim.tgz'
     version: 0.0.0
   'file:projects/fvtests.tgz':
@@ -8799,7 +8802,7 @@ packages:
       del: 3.0.0
       delay: 4.3.0
       eslint: 6.6.0
-      fs-extra: 8.1.0
+      fs-extra: 9.0.1
       git-rev-sync: 1.12.0
       gulp: 4.0.2
       ip: 1.1.5
@@ -8813,7 +8816,7 @@ packages:
     dev: false
     name: '@rush-temp/fvtests'
     resolution:
-      integrity: sha512-JWS04jfZvKtN0j47rI+toZAop8grfGOjoT2xQQMIS6H9N/P1O5hTq0csAckWPcI/oN9HELIKJ/DBWXtpRqB4jg==
+      integrity: sha512-T59w2nKPdhDaUw0z2uU4HdTtLKi441Qkbqc65jRH99gxHpCLx7tCWR6LAnm+Aq32XP93c4aC8VB6HOwDvIpMpQ==
       tarball: 'file:projects/fvtests.tgz'
     version: 0.0.0
   'file:projects/toolchain.tgz':
@@ -8864,7 +8867,9 @@ specifiers:
   del: ^3.0.0
   delay: 4.3.0
   elliptic: ^6.5.3
+  fabric-contract-api: 3.0.0-unstable
   fast-safe-stringify: ^2.0.7
+  fs-extra: ^9.0.1
   get-params: ^0.1.2
   git-rev-sync: 1.12.0
   gulp: ^4.0.0

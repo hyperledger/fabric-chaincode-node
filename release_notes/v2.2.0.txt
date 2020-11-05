@@ -1,0 +1,12 @@
+v2.2.0
+------
+
+Release Notes
+-------------
+
+The v2.2.0 release is the LTS version of the fabric-chaincode-node
+
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-2.x/CHANGELOG.md#v2.2.0

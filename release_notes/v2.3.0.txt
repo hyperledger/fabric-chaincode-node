@@ -1,0 +1,17 @@
+v2.3.0
+------
+
+Release Notes
+-------------
+
+- Updated class transformer dependency
+- Fixed type for timestamp.second
+- OOM on Large Arg Size
+- Removed to.be.ok
+- Updated typescript and @types/node
+- Added release guide
+
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-2.x/CHANGELOG.md#v2.3.0

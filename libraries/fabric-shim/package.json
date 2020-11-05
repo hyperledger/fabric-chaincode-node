@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim",
-  "version": "3.0.0-unstable",
+  "version": "2.3.1-unstable",
   "tag": "unstable",
   "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
   "main": "index.js",
@@ -29,7 +29,7 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": "^12.13.0",
+    "node": "^12.16.1",
     "npm": "^6.4.1"
   },
   "types": "./types/index.d.ts",
@@ -59,8 +59,8 @@
     "@grpc/proto-loader": "^0.5.4",
     "@types/node": "^14.0.13",
     "ajv": "^6.12.2",
-    "fabric-contract-api": "3.0.0-unstable",
-    "fabric-shim-api": "3.0.0-unstable",
+    "fabric-contract-api": "2.3.1-unstable",
+    "fabric-shim-api": "2.3.1-unstable",
     "fs-extra": "^9.0.1",
     "reflect-metadata": "^0.1.13",
     "winston": "^3.3.2",

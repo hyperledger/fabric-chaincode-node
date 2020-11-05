@@ -15,8 +15,8 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-shim": "3.0.0-unstable",
-    "fabric-contract-api": "3.0.0-unstable",
-    "fabric-ledger": "3.0.0-unstable"
+    "fabric-shim": "2.3.1-unstable",
+    "fabric-contract-api": "2.3.1-unstable",
+    "fabric-ledger": "2.3.1-unstable"
   }
 }
