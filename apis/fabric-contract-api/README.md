@@ -4,9 +4,9 @@
 
 [![Version](https://badge.fury.io/js/fabric-shim.svg)](http://badge.fury.io/js/fabric-shim)
 
-The `fabric-contract-api` provides the *contract interface*  a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#smart-contract). Working with this API provides a high level entry point to writing business logic.
+The `fabric-contract-api` provides the *contract interface*  a high level API for application developers to implement [Smart Contracts](https://hyperledger-fabric.readthedocs.io/en/release-2.1/glossary.html#smart-contract). Working with this API provides a high level entry point to writing business logic.
 
-Within Hyperledger Fabric, Smart Contracts can also be referred to as [Chaincode](https://hyperledger-fabric.readthedocs.io/en/latest/glossary.html#chaincode).  To be more specific, the term chaincode is preferred to be used to refer to the overall container that is hosting the contracts.
+Within Hyperledger Fabric, Smart Contracts can also be referred to as [Chaincode](https://hyperledger-fabric.readthedocs.io/en/release-2.1/glossary.html#chaincode).  To be more specific, the term chaincode is preferred to be used to refer to the overall container that is hosting the contracts.
 
 The `fabric-shim` provides the *chaincode interface*, a lower level API for implementing "Smart Contracts". It also _currently_ provides the implementation to support communication with Hyperledger Fabric peers for Smart Contracts written using the `fabric-contract-api`.  To confirm that this is the same as the `fabric-shim` in previous versions of Hyperledger Fabric.
 
@@ -129,7 +129,7 @@ Visit [API Reference](https://hyperledger.github.io/fabric-chaincode-node/master
 
 
 ## Support
-Tested with node.js 8.9, and also the v10 LTS release.
+Tested with Node v12  LTS release.
 
 ## License
 
