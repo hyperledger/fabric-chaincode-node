@@ -93,8 +93,8 @@ stages:
             - script: |
                 mkdir -p $(Build.ArtifactStagingDirectory)/logs
                 find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/logs \;
-              condition: or(succeeded(), failed())   # publish either way
               displayName: 'Copy build logs'
+              condition: or(succeeded(), failed())   # publish either way
             - task: PublishBuildArtifacts@1
               condition: or(succeeded(), failed())   # publish either way
               inputs:
@@ -145,8 +145,8 @@ stages:
                 node common/scripts/install-run-rush.js start-fabric
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
                 docker images | grep hyperledger && docker ps -a
-                node common/scripts/install-run-rush.js test:fv
-                node common/scripts/install-run-rush.js test:e2e
+                node common/scripts/install-run-rush.js test:fv --verbose
+                node common/scripts/install-run-rush.js test:e2e --verbose
               displayName: 'FV Tests'
 
             - task: PublishTestResults@2
@@ -311,11 +311,13 @@ stages:
                 docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
                 echo "Logged in to docker registry"
                 # tag nodeenv image to PACKAGE_VERSION
-                docker tag hyperledger/fabric-nodeenv fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable
+                docker tag hyperledger/fabric-nodeenv hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
                 # push nodeenv to repository
-                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)-unstable"
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)-unstable" --target "hyperledger/fabric-nodeenv:2.0-unstable"
+                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
+                # publish patch version (3-digit) image
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)"
+                # publish minor version (2-digit) image
+                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:$(BuildData.MINOR_PACKAGE_VERSION)"
               env:
                 DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
                 DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)
