@@ -15,7 +15,7 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
   "name": "chaincode",
   "description": "My first exciting chaincode implemented in node.js",
   "engines": {
-    "node": "^12.16.1",
+    "node": "^12.13.0",
     "npm": "^6.13.4"
   },
   "scripts": {
