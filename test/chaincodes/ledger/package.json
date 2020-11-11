@@ -2,7 +2,7 @@
   "name": "chaincode",
   "description": "Chaincode testing ledger functionality",
   "engines": {
-    "node": ">=8.4.0",
+    "node": "^12.16.1",
     "npm": "^6.4.1"
   },
   "scripts": {

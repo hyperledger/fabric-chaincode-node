@@ -20,7 +20,7 @@
         "Fabric Shim"
     ],
     "engines": {
-        "node": "^12.13.0",
+        "node": "^12.16.1",
         "npm": "^6.4.1"
     },
     "license": "Apache-2.0",
