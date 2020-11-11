@@ -41,7 +41,9 @@ variables:
   - name: pipeline
     value: ci
   - name: node_version_spec
-    value: '12.18.2'
+    value: '12.16.1'
+  - name: test_node_version_spec # see https://github.com/jhnns/rewire/issues/178
+    value: '12.15.0'
   - name: FABRIC_VERSION
     value: 2.2
 
@@ -66,7 +68,7 @@ stages:
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: 12.15.0
+                versionSpec: $(test_node_version_spec)
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
