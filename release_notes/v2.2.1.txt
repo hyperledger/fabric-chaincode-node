@@ -1,0 +1,16 @@
+v2.2.1
+------
+
+Release Notes
+-------------
+
+The v2.2.1 release is the LTS version of the fabric-chaincode-node
+
+- FABCN-430 Wrong type definition for timestamp
+- FABCN-435 OutOfMemory with large message sizes
+
+See the change log for a full list of updates.
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-2.2/CHANGELOG.md#v2.2.1
