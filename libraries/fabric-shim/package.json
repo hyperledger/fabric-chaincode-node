@@ -29,7 +29,7 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": "^12.13.0",
+    "node": "^12.16.1",
     "npm": "^6.4.1"
   },
   "types": "./types/index.d.ts",
