@@ -403,9 +403,20 @@ class ChaincodeStub {
 	 * Returns the timestamp when the transaction was created. This
 	 * is taken from the transaction {@link ChannelHeader}, therefore it will indicate the
 	 * client's timestamp, and will have the same value across all endorsers.
+	 * Object returned: { seconds: [Long] { low: [int32], high: [int32], unsigned: [bool] }, nanos: [int32] }
 	 */
     getTxTimestamp() {
         return this.txTimestamp;
+    }
+
+    /**
+     * Returns the Date object of when the transaction was created. This
+     * is taken from the transaction {@link ChannelHeader}, therefore it will indicate the
+     * client's date, and will have the same value across all endorsers.
+     */
+    getDateTimestamp() {
+        const date = new Date(this.txTimestamp.seconds * 1e3 + this.txTimestamp.nanos / 1e6);
+        return date;
     }
 
     /**
