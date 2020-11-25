@@ -2,8 +2,8 @@
   "name": "chaincode",
   "description": "Chaincode testing crud functionality",
   "engines": {
-    "node": "^12.13.0",
-    "npm": ">=5.3.0"
+    "node": "^12.16.1",
+    "npm": "^6.4.1"
   },
   "scripts": {
     "start": "fabric-chaincode-node start"
@@ -15,7 +15,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-shim": "3.0.0-unstable",
-    "fabric-contract-api": "3.0.0-unstable"
+    "fabric-shim": "2.3.1-unstable",
+    "fabric-contract-api": "2.3.1-unstable"
   }
 }

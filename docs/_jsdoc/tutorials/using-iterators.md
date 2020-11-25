@@ -18,14 +18,14 @@ An example of these apis (but may not be a complete list) is given here
   - getStateByRange
   - getStateByRangeWithPagination
 
-These api's are a request to return a set of data for which you need to iterate over using the provided iterator. Some of these apis will return the iterator directly and others return an iterator as part of an object property. In previous versions of the fabric-shim api you would need to know which ones did that and handle it appropriately and you need to check the documentation, but the rules are
+These apis are a request to return a set of data for which you need to iterate over using the provided iterator. Some of these apis will return the iterator directly and others return an iterator as part of an object property. In previous versions of the fabric-shim api you would need to know which ones did that and handle it appropriately and you need to check the documentation, but the rules are
 - all private data range queries return an object with just an iterator property containing the iterator
 - all Pagination queries return an object with an iterator property and metadata property
 - all other rich/range/history queries return just the iterator itself.
 
 These iterators were essentially asynchronous iterators (the next and close methods returned promises) but you couldn't use standard iterator capabilities such as for/of constructs in node because node could not work with the concept of asynchronous iterators.
 
-From fabric v2.0 onwards, node chaincode will be using node 12 as the node version and this has added support for asynchronous iterators. Also in fabric v2.0 onwards, fabric-shim has added support to enable it's asynchronous iterators so that `for/of` can now be used, but note that they don't have full support, so should not be used in generator functions.
+From fabric v2.x onwards, node chaincode will be using node 12 and this has added support for asynchronous iterators. Also in fabric v2.x onwards, fabric-shim has added support to enable it's asynchronous iterators so that `for/of` can now be used, but note that they don't have full support, so should not be used in generator functions.
 
 As a comparison, let's present first how you would use iterators in previous releases and then show the new way.
 
