@@ -984,7 +984,8 @@ class ChaincodeStub {
             startKey = EMPTY_KEY_SUBSTITUTE;
         }
 
-        return this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+        const {iterator} = await this.handler.handleGetStateByRange(collection, startKey, endKey, this.channel_id, this.txId);
+        return iterator;
     }
 
     /**

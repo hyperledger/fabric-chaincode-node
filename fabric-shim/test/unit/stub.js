@@ -1227,7 +1227,8 @@ describe('Stub', () => {
             let stub;
 
             beforeEach(() => {
-                handleGetStateByRangeStub = sinon.stub().resolves('some state');
+
+                handleGetStateByRangeStub = sinon.stub().resolves({iterator: 'some state'});
                 stub = new Stub({
                     handleGetStateByRange: handleGetStateByRangeStub
                 }, 'dummyChannelId', 'dummyTxid', {
