@@ -600,6 +600,17 @@ describe('Stub', () => {
             });
         });
 
+        describe('getDateTimestamp', () => {
+            it ('should return transaction date as Node.js Date object', () => {
+                const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
+                    args: []
+                });
+                stub.txTimestamp = {seconds: 1606233385, nanos: 54000000};
+
+                expect(stub.getDateTimestamp()).to.deep.equal(new Date(1606233385054));
+            });
+        });
+
         describe('getBinding', () => {
             it ('should return binding', () => {
                 const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', {
