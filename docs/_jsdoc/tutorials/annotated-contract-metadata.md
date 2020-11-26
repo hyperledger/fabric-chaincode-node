@@ -28,8 +28,10 @@ If within the contract metadata is supplied, then this will be validated against
 If you wish to supply your own metadata, the following rules apply
 
 - it must be in a file called `metadata.json`
-- this must be in a directory called `contract-metadata`
+- this must be in a directory called `META-INF` (alternatively, it can be in the `contract-metadata` directory as well)
 - this directory must be a peer of the package.json file of your contract
+
+`metadata.json` primarily should be supplied in `META-INF` directory, but if it's not found in `META-INF`, it will be checked for in the `contract-metadata` directory.
 
 Depending on the language and implementation, you may only need to augment the metadata. For example, with Typescript the types of arguments can be derived. Typically a full 'info' section may be the only thing that needs augmenting. Therefore it is not required to specific all elements of the metadata
 

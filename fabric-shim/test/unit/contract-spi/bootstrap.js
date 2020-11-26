@@ -270,13 +270,25 @@ describe('bootstrap.js', () => {
 
     describe('#getMetadata', () => {
 
-        it ('should handle when there are files available', async () => {
+        it ('should handle when there are files available in META-INF dir', async () => {
             pathExistsStub.returns(true);
             Bootstrap.loadAndValidateMetadata = sandbox.stub().resolves({'hello':'world'});
 
             const metadata = await Bootstrap.getMetadata('fake path');
 
             metadata.should.deep.equal({'hello':'world'});
+            sinon.assert.calledOnce(pathExistsStub);
+        });
+
+        it ('should handle when there are files available in contract-metadata dir', async () => {
+            pathExistsStub.onFirstCall().returns(false);
+            pathExistsStub.onSecondCall().returns(true);
+            Bootstrap.loadAndValidateMetadata = sandbox.stub().resolves({'hello':'world'});
+
+            const metadata = await Bootstrap.getMetadata('fake path');
+
+            metadata.should.deep.equal({'hello':'world'});
+            sinon.assert.calledTwice(pathExistsStub);
         });
 
         it ('should handle when files not available', async () => {
@@ -285,6 +297,7 @@ describe('bootstrap.js', () => {
             const metadata = await Bootstrap.getMetadata('fake path');
 
             metadata.should.deep.equal({});
+            sinon.assert.calledTwice(pathExistsStub);
         });
 
     });
