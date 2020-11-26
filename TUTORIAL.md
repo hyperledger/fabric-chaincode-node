@@ -195,6 +195,16 @@ For example
 		// emit events etc...
 	}
 
+	async aroundTransaction(ctx, fn, parameters) {
+		try {
+      // don't forget to call super, or your transaction function won't run!
+			super.aroundTransaction(ctx, fn, parameters)
+		} catch (error) {
+			// do something with the error, then rethrow
+			throw error
+		}
+	}
+
 ```
 
 ### Structure of the Transaction Context

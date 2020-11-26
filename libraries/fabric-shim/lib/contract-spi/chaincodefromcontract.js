@@ -374,9 +374,8 @@ class ChaincodeFromContract {
                 // before tx
                 await contractInstance.beforeTransaction(ctx);
 
-                // use the spread operator to make this pass the arguments seperately not as an array
-                // this is the point at which control is handed to the tx function
-                const result = await contractInstance[fn](ctx, ...parameters);
+                // around tx
+                const result = await contractInstance.aroundTransaction(ctx, fn, parameters);
 
                 // after tx fn, assuming that the smart contract hasn't gone wrong
                 await contractInstance.afterTransaction(ctx, result);
