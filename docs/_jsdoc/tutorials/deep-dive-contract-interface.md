@@ -78,21 +78,27 @@ Currently the 'stub' api for handling world state, and the 'Client Identity' is 
 Each contract has a 'createContext' method that can be overridden by specific implementations to provide specific control to add information to the 
 
 
-### Before, After and Unknown Functions
+### Before, After, Around and Unknown Functions
 
 The Contract class defines three functions that can be overridden by specific implementations.
 
 ```javascript
     async beforeTransaction(ctx) {
-    // default implementation is do nothing
+        // default implementation is do nothing
     }
 
     async afterTransaction(ctx, result) {
         // default implementation is do nothing
     }
+
+    async aroundTransaction(ctx, fn, parameters) {
+        // default implementation invokes `fn`
+    }
 ```
 
-Before is called immediately before the transaction function, and after immediately afterwards. Note that before does not get the arguments to the function (note this was the subject of debate, opinions welcomed). After gets the result from the transaction function (this is the result returned from transaction function without any processing). 
+Before is called immediately before the transaction function, and after immediately afterwards. Note that before does not get the arguments to the function (note this was the subject of debate, opinions welcomed). After gets the result from the transaction function (this is the result returned from transaction function without any processing).
+
+Around is the one responsible for invoking the trancaction function, and allows you to wrap all of them into a code block.
 
 If the transaction function throws an Error then the whole transaction fails, likewise if the before or after throws an Error then the transaction fails. (note that if say before throws an error the transaction function is never called, nor the after. Similarly if transaction function throws an Error, after is not called. )
 
@@ -100,6 +106,7 @@ Typical use cases of these functions would be
 
 - logging of the functions called
 - checks of the identity of the caller
+- wrap all functions into a try/catch
 
 The unknown function is called if the requested function is not known; the default implementation is to throw an error. `You've asked to invoke a function that does not exist: {requested function}` 
 However you can implement an `unkownTransition` function - this can return a successful or throw an error as you wish. 

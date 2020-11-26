@@ -9,22 +9,19 @@ import { Contract, Context } from 'fabric-contract-api';
 import { ChaincodeStub, ClientIdentity } from 'fabric-shim-api';
 
 export class ScenarioContext extends Context{
-
-	customFunction():void {
+	customFunction(): void {
 
 	}
 }
 
 export default class TestContractOne extends Contract {
-
     constructor() {
         super('org.papernet.commercialpaper');
     }
 
-	beforeTransaction(ctx: ScenarioContext){
-
+	beforeTransaction(ctx: ScenarioContext) {
 		// test that the context super class properties are available
-        const stubApi: ChaincodeStub = ctx.stub;
+    const stubApi: ChaincodeStub = ctx.stub;
 		const clientIdentity: ClientIdentity = ctx.clientIdentity;
 
 		// tests that the functions in the subclasses context be called
@@ -35,10 +32,16 @@ export default class TestContractOne extends Contract {
 		return Promise.resolve();
 	}
 
-	afterTransaction(ctx: ScenarioContext,result: any){
+	afterTransaction(ctx: ScenarioContext,result: any) {
 		// This proves that typescript is enforcing the
 		// return type of Promise<void>
 		return Promise.resolve();
+	}
+
+	aroundTransaction(ctx: ScenarioContext, fn: Function, parameters: any) {
+		// This proves that typescript is enforcing the
+		// return type of Promise<void>
+		return super.aroundTransaction(ctx, fn, parameters);
 	}
 
 	unknownTransaction(ctx: ScenarioContext){
@@ -51,23 +54,23 @@ export default class TestContractOne extends Contract {
 		return new ScenarioContext();
 	}
 
-    async Transaction(ctx: ScenarioContext)  {
+	async Transaction(ctx: ScenarioContext) {
 		// test that the context super class properties are available
-        const stubApi: ChaincodeStub = ctx.stub;
-        const clientIdentity: ClientIdentity = ctx.clientIdentity;
+		const stubApi: ChaincodeStub = ctx.stub;
+		const clientIdentity: ClientIdentity = ctx.clientIdentity;
 
 		// test that the name returns a string
-        const ns: string = this.getName();
-    }
+		const ns: string = this.getName();
+	}
 }
 
 export class TestContractTwo extends Contract {
-    constructor() {
-        super();
+  constructor() {
+		super();
 	}
 
 	async Transaction(ctx: Context)  {
-        const stubApi: ChaincodeStub = ctx.stub;
-        const clientIdentity: ClientIdentity = ctx.clientIdentity;
-    }
+		const stubApi: ChaincodeStub = ctx.stub;
+		const clientIdentity: ClientIdentity = ctx.clientIdentity;
+	}
 }
