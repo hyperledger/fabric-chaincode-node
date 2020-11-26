@@ -15,8 +15,8 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
   "name": "chaincode",
   "description": "My first exciting chaincode implemented in node.js",
   "engines": {
-    "node": ">=8.4.0",
-    "npm": ">=5.3.0"
+    "node": "^12.16.1",
+    "npm": "^6.4.1"
   },
   "scripts": {
 	  "test":"mocha.....
@@ -28,8 +28,8 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-contract-api": "^1.4.0",
-    "fabric-shim": "^1.4.0"
+    "fabric-contract-api": "^2.3.1-unstable",
+    "fabric-shim": "^2.3.1-unstable"
   }
 }
 
@@ -193,6 +193,16 @@ For example
 	async afterTransaction(ctx,result){
 		// log result to preferred log implementation
 		// emit events etc...
+	}
+
+	async aroundTransaction(ctx, fn, parameters) {
+		try {
+      // don't forget to call super, or your transaction function won't run!
+			super.aroundTransaction(ctx, fn, parameters)
+		} catch (error) {
+			// do something with the error, then rethrow
+			throw error
+		}
 	}
 
 ```

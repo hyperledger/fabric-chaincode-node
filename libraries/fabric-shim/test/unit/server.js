@@ -80,7 +80,7 @@ describe('ChaincodeServer', () => {
             expect(server._serverOpts).to.deep.equal(serverOpts);
             expect(server._credentials).to.deep.equal(mockCredentials);
 
-            expect(insecureCredentialsStub.calledOnce).to.be.ok;
+            expect(insecureCredentialsStub.calledOnce).to.be.true;
         });
         it('should create a gRPC server instance with TLS credentials and call addService in the constructor', () => {
             const server = new ChaincodeServer(mockChaincode, serverTLSOpts);
@@ -89,7 +89,8 @@ describe('ChaincodeServer', () => {
             expect(server._serverOpts).to.deep.equal(serverTLSOpts);
             expect(server._credentials).to.deep.equal(mockTLSCredentials);
 
-            expect(sslCredentialsStub.calledOnce).to.be.ok;
+            expect(sslCredentialsStub.calledOnce).to.be.true;
+
             expect(sslCredentialsStub.firstCall.args[0]).to.be.null;
             expect(sslCredentialsStub.firstCall.args[1]).to.deep.equal([{
                 private_key: tlsKey,
@@ -104,7 +105,8 @@ describe('ChaincodeServer', () => {
             expect(server._serverOpts).to.deep.equal(serverMutualTLSOpts);
             expect(server._credentials).to.deep.equal(mockTLSCredentials);
 
-            expect(sslCredentialsStub.calledOnce).to.be.ok;
+            expect(sslCredentialsStub.calledOnce).to.be.true;
+
             expect(sslCredentialsStub.firstCall.args[0]).to.deep.equal(tlsClientCA);
             expect(sslCredentialsStub.firstCall.args[1]).to.deep.equal([{
                 private_key: tlsKey,
@@ -155,10 +157,11 @@ describe('ChaincodeServer', () => {
             };
 
             expect(await server.start()).not.to.throw;
-            expect(server._server.bindAsync.calledOnce).to.be.ok;
+            expect(server._server.bindAsync.calledOnce).to.be.true;
+
             expect(server._server.bindAsync.firstCall.args[0]).to.equal(serverOpts.address);
             expect(server._server.bindAsync.firstCall.args[1]).to.equal(mockCredentials);
-            expect(server._server.start.calledOnce).to.be.ok;
+            expect(server._server.start.calledOnce).to.be.true;
         });
 
         it('should throw if bindAsync fails', async () => {
@@ -187,8 +190,9 @@ describe('ChaincodeServer', () => {
             
             server.connect(mockStream);
 
-            expect(mockHandlerStub.calledOnce).to.be.ok;
-            expect(mockHandler.chat.calledOnce).to.be.ok;
+            expect(mockHandlerStub.calledOnce).to.be.true;
+            expect(mockHandler.chat.calledOnce).to.be.true;
+
             expect(mockHandler.chat.firstCall.args).to.deep.equal([{
                 type: fabprotos.protos.ChaincodeMessage.Type.REGISTER,
                 payload: fabprotos.protos.ChaincodeID.encode({
@@ -208,8 +212,8 @@ describe('ChaincodeServer', () => {
             const mockStream = {on: sinon.stub(), write: sinon.stub()};
 
             server.connect(mockStream);
-            expect(mockHandlerStub.calledOnce).to.be.ok;
-            expect(mockHandler.chat.calledOnce).to.be.ok;
+            expect(mockHandlerStub.calledOnce).to.be.true;
+            expect(mockHandler.chat.calledOnce).to.be.true;
         });
     });
 });
