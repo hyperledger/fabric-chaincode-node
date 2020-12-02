@@ -35,7 +35,7 @@ export { GreetingContract } from './greetingcontract';
 export const contracts: any[] = [ GreetingContract ];
 ```
 
-- contract-metadata/metadata.json
+- META-INF/metadata.json (alternatively contract-metadata/metadata.json)
 
 This file describes the *external* api that is exposed from these Smart Contracts; these are the functions that can be invoked by client applications. It describes all details about what is callable, and the datatypes of parameter and return values. It can also include information about documentation and licensing. 
 
