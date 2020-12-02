@@ -108,8 +108,13 @@ class Bootstrap {
     static async getMetadata(modulePath) {
         let metadata = {};
         const modPath = path.resolve(process.cwd(), modulePath);
-        const metadataPath = path.resolve(modPath, 'contract-metadata', 'metadata.json');
-        const pathCheck = await fs.pathExists(metadataPath);
+        let metadataPath = path.resolve(modPath, 'META-INF', 'metadata.json');
+        let pathCheck = await fs.pathExists(metadataPath);
+
+        if (!pathCheck) {
+            metadataPath = path.resolve(modPath, 'contract-metadata', 'metadata.json');
+            pathCheck = await fs.pathExists(metadataPath);
+        }
 
         if (pathCheck) {
             metadata = Bootstrap.loadAndValidateMetadata(metadataPath);
