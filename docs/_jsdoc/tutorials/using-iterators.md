@@ -68,10 +68,10 @@ interface KV {
 }
 
 interface KeyModification {
-    is_delete: boolean;
+    isDelete: boolean;
     value: ProtobufBytes;
     timestamp: Timestamp;
-    tx_id: string;
+    txId: string;
     getIsDelete(): boolean;
     getValue(): ProtobufBytes;
     getTimestamp(): Timestamp;
@@ -152,9 +152,9 @@ const results = [];
 for await (const keyMod of promiseOfIterator) {
     const resp = {
         timestamp: keyMod.timestamp,
-        txid: keyMod.tx_id
+        txid: keyMod.txId
     }
-    if (keyMod.is_delete) {
+    if (keyMod.isDelete) {
         resp.data = 'KEY DELETED';
     } else {
         resp.data = keyMod.value.toString('utf8');
