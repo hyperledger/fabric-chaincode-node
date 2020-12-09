@@ -183,10 +183,10 @@ class Shim {
     }
 
     /**
-	 * Returns a log4js logger named after <code>name</code>
+	 * Returns a winston logger named after <code>name</code>
 	 * @static
 	 * @param {string} name Logger name used to label log messages produced by the returned logger
-	 * @returns {Object} log4js based logger. See log4js documentation for usage details
+	 * @returns {Object} winston based logger. See [winston]{@link https://github.com/winstonjs/winston} documentation for usage details
 	 */
     static newLogger(name) {
         if (!name) {
