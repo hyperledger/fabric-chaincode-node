@@ -21,3 +21,4 @@ When using Typescript to code the Contract implementations, Typescript Decorator
 - @Param
   - Permits additional information such as a type and description to provided for parameters. (Note type is only useful in weakly typed languages)
 
+**Note that emitDecoratorMetadata property in *tsconfig.json* file is mandatory.**
