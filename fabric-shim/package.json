@@ -32,7 +32,7 @@
   "types": "./types/index.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ampretia/x509": "^0.4.7",
+    "@ampretia/x509": "^0.4.8",
     "@types/google-protobuf": "^3.2.7",
     "@types/node": "^8.9.4",
     "ajv": "^6.5.5",
