@@ -76,8 +76,13 @@ exports.getArgs = function (yargs) {
         argv['chaincode-id-name'] = argv.chaincodeIdName;
         argv['module-path'] = argv.modulePath;
 
+        // eslint-disable-next-line eqeqeq
+        if (argv.CORE_PEER_ADDRESS != null) {
+            argv['peer.address'] = argv.CORE_PEER_ADDRESS;
+        }
+
         required.forEach((argName) => {
-            if (!argv.hasOwnProperty(argName)) {  // eslint-disable-line no-prototype-builtins
+            if (!argv.hasOwnProperty(argName) || typeof(argv[argName]) === 'undefined') {  // eslint-disable-line no-prototype-builtins
                 throw new Error('Missing required argument ' + argName);
             }
         });

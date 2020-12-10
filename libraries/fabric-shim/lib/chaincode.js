@@ -104,6 +104,7 @@ class Shim {
         delete optsCpy['module-path'];
 
         const url = parsePeerUrl(opts['peer.address']);
+
         if (isTLS()) {
             logger.debug('TLS enabled');
             optsCpy.pem = fs.readFileSync(process.env.CORE_PEER_TLS_ROOTCERT_FILE).toString();
