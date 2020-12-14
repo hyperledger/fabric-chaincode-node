@@ -123,7 +123,7 @@ class Contract {
     }
 
     /**
-     * @return {String} returns the namepsace
+     * @return {String} returns the namespace
      */
     getName() {
         return this.name;
