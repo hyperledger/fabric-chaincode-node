@@ -139,21 +139,21 @@ describe('chaincode cmd', () => {
             };
 
             const mockYargsParser = sinon.stub().returns({
-                chaincodeIdName: 'Jeremy',
+                'CORE_PEER_ADDRESS': 'address',
                 modulePath: '/home/andy/my/super/contract'
             });
 
             const yp = chaincodeStartCommand.__get__('YargsParser');
             chaincodeStartCommand.__set__('YargsParser', mockYargsParser);
 
-            process.argv = ['node', 'test.js', '--chaincode-id-name', 'mycc'];
+            process.argv = ['node', 'test.js', '--CORE_PEER_ADDRESS', 'address'];
 
             expect(() => {
                 chaincodeStartCommand.getArgs(myYargs);
-            }).to.throw(/Missing required argument peer.address/);
+            }).to.throw(/Missing required argument chaincode-id-name/);
 
             sinon.assert.calledOnce(mockYargsParser);
-            sinon.assert.calledWith(mockYargsParser, ['--chaincode-id-name', 'mycc'], {
+            sinon.assert.calledWith(mockYargsParser, ['--CORE_PEER_ADDRESS', 'address'], {
                 default: {
                     'grpc.max_send_message_length': -1,
                     'grpc.max_receive_message_length': -1,
@@ -169,6 +169,54 @@ describe('chaincode cmd', () => {
                 },
                 envPrefix: 'CORE'
             });
+
+            chaincodeStartCommand.__set__('YargsParser', yp);
+        });
+
+        it ('should use yargs parser on process.argv, CORE_PEER_ADDRESS should override peer.address', () => {
+            const myYargs = {
+                argv: {
+                    $0: 'index.js',
+                    someArg: 'hello world'
+                },
+            };
+
+            const mockYargsParser = sinon.stub().returns({
+                chaincodeIdName: 'Jeremy',
+                modulePath: '/home/andy/my/super/contract',
+                'peer.address': 'some addr',
+                'CORE_PEER_ADDRESS': 'localhost:7052'
+            });
+
+            const yp = chaincodeStartCommand.__get__('YargsParser');
+            chaincodeStartCommand.__set__('YargsParser', mockYargsParser);
+
+            process.argv = ['node', 'test.js', '--peer.address', 'localhost:7051', '--chaincode-id-name', 'mycc',
+                '--CORE_PEER_ADDRESS', 'localhost:7052'];
+
+            const args = chaincodeStartCommand.getArgs(myYargs);
+
+            sinon.assert.calledOnce(mockYargsParser);
+            sinon.assert.calledWith(mockYargsParser, ['--peer.address', 'localhost:7051', '--chaincode-id-name', 'mycc',
+                '--CORE_PEER_ADDRESS', 'localhost:7052'], {
+                default: {
+                    'grpc.max_send_message_length': -1,
+                    'grpc.max_receive_message_length': -1,
+                    'grpc.keepalive_time_ms': 110000,
+                    'grpc.http2.min_time_between_pings_ms': 110000,
+                    'grpc.keepalive_timeout_ms': 20000,
+                    'grpc.http2.max_pings_without_data': 0,
+                    'grpc.keepalive_permit_without_calls': 1,
+                    'module-path': process.cwd()
+                },
+                configuration: {
+                    'dot-notation': false
+                },
+                envPrefix: 'CORE'
+            });
+            expect(args['chaincode-id-name']).to.deep.equal('Jeremy');
+            expect(args['peer.address']).to.deep.equal('localhost:7052');
+            expect(args['module-path']).to.deep.equal('/home/andy/my/super/contract');
 
             chaincodeStartCommand.__set__('YargsParser', yp);
         });
