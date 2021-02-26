@@ -357,7 +357,7 @@ stages:
                 NPM_PASS: $(ARTIFACTORY_PASSWORD)
                 NPM_EMAIL: fabric@hyperledger.org
                 NPM_RC_PATH: $(Agent.TempDirectory)
-                NPM_REGISTRY: http://hyperledger.jfrog.io:8081/artifactory/api/npm/npm-repo/
+                NPM_REGISTRY: https://hyperledger.jfrog.io:8081/artifactory/fabric-npm/
             - script: |
                 find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable \;
               displayName: 'npm publish'
