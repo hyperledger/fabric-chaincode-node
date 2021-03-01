@@ -14,8 +14,6 @@ schedules:
     branches:
       include:
         - master
-    always: true
-
 
 # Trigger on the master branch
 # Standard Pull Request and Merge builds
@@ -69,7 +67,12 @@ stages:
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: $(rewire_node_version_spec)
+                versionSpec: $(rewire_node_version_spec)            
+            - script: |
+                set -ev 
+                ./ci/unstable-versions.sh
+                node common/scripts/install-run-rush.js update                
+              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
@@ -120,67 +123,72 @@ stages:
                 artifactName: nodeenv-docker-image
 
         # Run the FV tests but using the built material
-        # - job: fvt
-        #   displayName: 'FV Tests'
-        #   dependsOn: main
-        #   steps:
-        #     - task: NodeTool@0
-        #       inputs:
-        #         versionSpec: $(node_version_spec)
-        #     - task: DownloadPipelineArtifact@2
-        #       inputs:
-        #         artifact: nodeenv-docker-image
-        #         path: $(Build.SourcesDirectory)/build
-        #     - task: DownloadPipelineArtifact@2
-        #       inputs:
-        #         artifact: node-tgz
-        #         path: $(Build.SourcesDirectory)/build
-        #     - script: |
-        #         set -ev
-        #         ./tools/getEdgeDocker.sh                                # essential to get master docker images of peer etc.
-        #         docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
-        #         docker images
-        #         node common/scripts/install-run-rush.js install
-        #         node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
-        #       displayName: 'Get the latest master docker images'
-        #     - script: |
-        #         set -ev
-        #         node common/scripts/install-run-rush.js start-fabric
-        #         node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
-        #         docker images | grep hyperledger && docker ps -a
-        #         node common/scripts/install-run-rush.js test:fv --verbose
-        #         node common/scripts/install-run-rush.js test:e2e --verbose
-        #       displayName: 'FV Tests'
+        - job: fvt
+          displayName: 'FV Tests'
+          dependsOn: main
+          steps:
+            - task: NodeTool@0
+              inputs:
+                versionSpec: $(node_version_spec)
+            - script: |
+                set -ev 
+                ./ci/unstable-versions.sh
+                node common/scripts/install-run-rush.js update                
+              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds                
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: nodeenv-docker-image
+                path: $(Build.SourcesDirectory)/build
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: node-tgz
+                path: $(Build.SourcesDirectory)/build
+            - script: |
+                set -ev
+                ./tools/getEdgeDocker.sh                                # essential to get master docker images of peer etc.
+                docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
+                docker images
+                node common/scripts/install-run-rush.js install
+                node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
+              displayName: 'Get the latest master docker images'
+            - script: |
+                set -ev
+                node common/scripts/install-run-rush.js start-fabric
+                node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
+                docker images | grep hyperledger && docker ps -a
+                node common/scripts/install-run-rush.js test:fv --verbose
+                node common/scripts/install-run-rush.js test:e2e --verbose
+              displayName: 'FV Tests'
 
-        #     - task: PublishTestResults@2
-        #       condition: or(succeeded(), failed())   # publish either way
-        #       inputs:
-        #         testResultsFiles: '**/test-results.xml'
-        #         testRunTitle: 'FV Test results'
-        #     - task: CopyFiles@2
-        #       condition: or(succeeded(), failed())   # publish either way
-        #       inputs:
-        #         sourceFolder: $(Build.SourcesDirectory)/test
-        #         contents: |
-        #           **/*.build*.log
-        #           !**/node_modules/**
-        #         targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
-        #     - script: |
-        #         mkdir -p $(Build.ArtifactStagingDirectory)/testlogs
-        #         find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/testlogs \;
-        #       condition: or(succeeded(), failed())
-        #       displayName: 'Copy test logs'
-        #     - task: PublishBuildArtifacts@1
-        #       condition: or(succeeded(), failed())   # publish either way
-        #       inputs:
-        #         pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
-        #         artifactName: 'Test logs'
-        #       displayName: 'Publish test logs'
-        #     - task: PublishBuildArtifacts@1
-        #       condition: or(succeeded(), failed())   # publish either way
-        #       inputs:
-        #         pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
-        #         artifactName: nodeenv-docker-image
+            - task: PublishTestResults@2
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                testResultsFiles: '**/test-results.xml'
+                testRunTitle: 'FV Test results'
+            - task: CopyFiles@2
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                sourceFolder: $(Build.SourcesDirectory)/test
+                contents: |
+                  **/*.build*.log
+                  !**/node_modules/**
+                targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
+            - script: |
+                mkdir -p $(Build.ArtifactStagingDirectory)/testlogs
+                find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/testlogs \;
+              condition: or(succeeded(), failed())
+              displayName: 'Copy test logs'
+            - task: PublishBuildArtifacts@1
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
+                artifactName: 'Test logs'
+              displayName: 'Publish test logs'
+            - task: PublishBuildArtifacts@1
+              condition: or(succeeded(), failed())   # publish either way
+              inputs:
+                pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
+                artifactName: nodeenv-docker-image
 
 
         # Job to handle the auditing of the code
@@ -198,6 +206,10 @@ stages:
               inputs:
                 artifact: node-tgz
                 path: $(Build.SourcesDirectory)/build
+            - script: |
+                set -ev 
+                ./ci/unstable-versions.sh
+              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled build                
             - script: |
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
@@ -328,11 +340,10 @@ stages:
                 DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
                 DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)
 
-# Stage to publish the nightly drivers                
+    # Stage to publish the nightly drivers                
     - stage: Publish_tag_nightly
       dependsOn: Build_and_Test
-      # condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
-      condition: succeeded()
+      condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
       jobs:
         - job: npm_publish
           displayName: 'npm publish'
@@ -346,47 +357,14 @@ stages:
                 touch $(Agent.TempDirectory)/.npmrc
                 echo '##vso[task.setvariable variable=NPM_CONFIG_USERCONFIG]$(Agent.TempDirectory)/.npmrc'
               displayName: 'create user .npmrc file'
-
             - script: |
-                set -ex -o pipefail
-                npm install -g npm-cli-login
-                npm-cli-login
+                npm config set registry https://registry.npmjs.org/
+                npm config ls
               displayName: 'set npmjs registry'
-              env:
-                NPM_USER: $(ARTIFACTORY_USERNAME)
-                NPM_PASS: $(ARTIFACTORY_PASSWORD)
-                NPM_EMAIL: fabric@hyperledger.org
-                NPM_RC_PATH: $(Agent.TempDirectory)
-                NPM_REGISTRY: https://hyperledger.jfrog.io:8081/artifactory/fabric-npm/
+            - task: npmAuthenticate@0
+              inputs:
+                workingFile: '$(Agent.TempDirectory)/.npmrc'
+                customEndpoint: 'fabric-chainode-node-npm'
             - script: |
                 find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable \;
               displayName: 'npm publish'
-        - job: dockerhub_publish
-          steps:
-            - template: templates/build-data.yaml
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                artifact: nodeenv-docker-image
-                path: $(Build.SourcesDirectory)/build
-
-            - script: |
-                wget -qO "$PWD/manifest-tool" https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
-                chmod +x ./manifest-tool
-
-                docker image load --input build/fabric-nodeenv.tar.gz
-                docker images
-                docker login -u "${ARTIFACTORY_USERNAME}" -p "${ARTIFACTORY_PASSWORD}" hyperledger-fabric.jfrog.io
-                echo "Logged in to docker registry"
-                # tag nodeenv image to PACKAGE_VERSION
-                docker tag hyperledger/fabric-nodeenv hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
-                # push nodeenv to repository
-                docker push hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)
-                # publish patch version (3-digit) image
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:$(BuildData.PACKAGE_VERSION)"
-                # publish minor version (2-digit) image
-                ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-$(BuildData.PACKAGE_VERSION)" --target "hyperledger/fabric-nodeenv:$(BuildData.MINOR_PACKAGE_VERSION)"
-              env:
-                DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
-                DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)
-                ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
-                ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)                                
