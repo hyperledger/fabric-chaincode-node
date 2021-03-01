@@ -8,7 +8,6 @@
         "docs": "rimraf ./gen && jsdoc -c ./_jsdoc.json"
     },
     "devDependencies": {
-        "fabric-ledger": "2.3.1-unstable",
         "ink-docstrap": "^1.3.2",
         "jsdoc": "^3.6.3",
         "rimraf": "^3.0.0"
