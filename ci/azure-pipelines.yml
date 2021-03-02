@@ -51,7 +51,8 @@ pool:
 
 #
 # Publish to NPM on release builds (they are the github tagged releases)
-# PUblish to Artifactory on nightly builds
+# Publish to NPM on nightly builds when there is something to build
+# the ids will be of the format 2.3.1-unstable.{commitid}
 #
 stages:
 
@@ -63,16 +64,23 @@ stages:
           steps:
             - template: templates/build-data.yaml
         - job: main
+          dependsOn: displayenv
           displayName: 'Build, lint, UT'
+          variables:
+            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]     
           steps:
             - task: NodeTool@0
               inputs:
                 versionSpec: $(rewire_node_version_spec)            
             - script: |
                 set -ev 
-                ./ci/unstable-versions.sh
+                export RELEASE_VERSION=${VERSION}-unstable.${COMMIT_ID:0:7}
+                find . \(-wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
                 node common/scripts/install-run-rush.js update                
               condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
+              env:
+                COMMIT_ID: $(Build.SourceVersion)
+                VERSION: $(VERSION)           
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
@@ -126,14 +134,20 @@ stages:
         - job: fvt
           displayName: 'FV Tests'
           dependsOn: main
+          variables:
+            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]              
           steps:
             - task: NodeTool@0
               inputs:
                 versionSpec: $(node_version_spec)
             - script: |
                 set -ev 
-                ./ci/unstable-versions.sh
-                node common/scripts/install-run-rush.js update                
+                export RELEASE_VERSION=${VERSION}-unstable.${COMMIT_ID:0:7}
+                find . \(-wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
+                node common/scripts/install-run-rush.js update
+              env:
+                COMMIT_ID: $(Build.SourceVersion)
+                VERSION: $(VERSION)                           
               condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds                
             - task: DownloadPipelineArtifact@2
               inputs:
@@ -198,6 +212,8 @@ stages:
         - job: src_audit
           displayName: 'Node Module Auditing'
           dependsOn: main
+          variables:
+            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]              
           steps:
             - task: NodeTool@0
               inputs:
@@ -208,8 +224,12 @@ stages:
                 path: $(Build.SourcesDirectory)/build
             - script: |
                 set -ev 
-                ./ci/unstable-versions.sh
-              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled build                
+                export RELEASE_VERSION=${VERSION}--unstable.${COMMIT_ID:0:7}                
+                find . \(-wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
+              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled build
+              env:
+                COMMIT_ID: $(Build.SourceVersion)
+                VERSION: $(VERSION)                
             - script: |
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
