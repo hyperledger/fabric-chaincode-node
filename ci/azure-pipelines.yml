@@ -132,14 +132,7 @@ stages:
             - task: NodeTool@0
               inputs:
                 versionSpec: $(node_version_spec)
-            - script: |
-                set -ev 
-                export RELEASE_VERSION=${VERSION}-unstable.${COMMIT_ID:0:7}
-                find . \(-wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
-                node common/scripts/install-run-rush.js update
-              env:
-                COMMIT_ID: $(Build.SourceVersion)
-                VERSION: $(VERSION)                           
+            - template: templates/nightly-version-update.yaml                               
               condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds                
             - task: DownloadPipelineArtifact@2
               inputs:
@@ -214,14 +207,7 @@ stages:
               inputs:
                 artifact: node-tgz
                 path: $(Build.SourcesDirectory)/build
-            - script: |
-                set -ev 
-                export RELEASE_VERSION=${VERSION}--unstable.${COMMIT_ID:0:7}                
-                find . \(-wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
-              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled build
-              env:
-                COMMIT_ID: $(Build.SourceVersion)
-                VERSION: $(VERSION)                
+            - template: templates/nightly-version-update.yaml                               
             - script: |
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
