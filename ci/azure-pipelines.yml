@@ -72,15 +72,7 @@ stages:
             - task: NodeTool@0
               inputs:
                 versionSpec: $(rewire_node_version_spec)            
-            - script: |
-                set -ev 
-                export RELEASE_VERSION=${VERSION}-unstable.${COMMIT_ID:0:7}
-                find . \(-wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
-                node common/scripts/install-run-rush.js update                
-              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
-              env:
-                COMMIT_ID: $(Build.SourceVersion)
-                VERSION: $(VERSION)           
+            - template: templates/nightly-version-update.yaml              
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
