@@ -67,12 +67,12 @@ stages:
           dependsOn: displayenv
           displayName: 'Build, lint, UT'
           variables:
-            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]     
+            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
           steps:
             - task: NodeTool@0
               inputs:
-                versionSpec: $(rewire_node_version_spec)            
-            - template: templates/nightly-version-update.yaml              
+                versionSpec: $(rewire_node_version_spec)
+            - template: templates/nightly-version-update.yaml
             - script: |
                 set -ev
                 node common/scripts/install-run-rush.js install
@@ -127,13 +127,12 @@ stages:
           displayName: 'FV Tests'
           dependsOn: main
           variables:
-            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]              
+            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
           steps:
             - task: NodeTool@0
               inputs:
                 versionSpec: $(node_version_spec)
-            - template: templates/nightly-version-update.yaml                               
-              condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds                
+            - template: templates/nightly-version-update.yaml
             - task: DownloadPipelineArtifact@2
               inputs:
                 artifact: nodeenv-docker-image
@@ -198,7 +197,7 @@ stages:
           displayName: 'Node Module Auditing'
           dependsOn: main
           variables:
-            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]              
+            VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
           steps:
             - task: NodeTool@0
               inputs:
@@ -207,7 +206,7 @@ stages:
               inputs:
                 artifact: node-tgz
                 path: $(Build.SourcesDirectory)/build
-            - template: templates/nightly-version-update.yaml                               
+            - template: templates/nightly-version-update.yaml
             - script: |
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
@@ -338,7 +337,7 @@ stages:
                 DOCKER_REGISTRY_USERNAME: $(DockerHub-Username)
                 DOCKER_REGISTRY_PASSWORD: $(DockerHub-Password)
 
-    # Stage to publish the nightly drivers                
+    # Stage to publish the nightly drivers
     - stage: Publish_tag_nightly
       dependsOn: Build_and_Test
       condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
