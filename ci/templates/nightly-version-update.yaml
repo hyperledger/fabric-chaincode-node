@@ -2,7 +2,7 @@ steps:
 - script: |
     set -ev 
     export RELEASE_VERSION=${VERSION}-unstable.$(Date:yyyyMMdd)
-    find . \(-wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
+    find . \( -wholename "./docs/package.json" -or -wholename "./apis/**/package.json" -or -wholename "./libraries/**/package.json" -or -wholename "./test/**/package.json" \) -exec node ci/updatePackageJson.js {} \;
     node common/scripts/install-run-rush.js update      
   name: UpdateVersionNightlyDrivers
   displayName: 'Build data'
