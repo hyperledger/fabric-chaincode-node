@@ -9,7 +9,7 @@ name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 # Daily build for final quality
 # cf https://crontab.guru/#0_23_*_*_*
 schedules:
-  - cron: "0 23 * * *"
+  - cron: "0 10,12,14,16,23 * * *"
     displayName: 'Chaincode Node Nightly Driver'
     branches:
       include:
@@ -68,6 +68,7 @@ stages:
           displayName: 'Build, lint, UT'
           variables:
             VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
+            BUILD_DATE: $[ dependencies.displayenv.outputs['BuildData.BUILD_DATE'] ]
           steps:
             - task: NodeTool@0
               inputs:
@@ -128,6 +129,7 @@ stages:
           dependsOn: main
           variables:
             VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
+            BUILD_DATE: $[ dependencies.displayenv.outputs['BuildData.BUILD_DATE'] ]
           steps:
             - task: NodeTool@0
               inputs:
@@ -198,6 +200,7 @@ stages:
           dependsOn: main
           variables:
             VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
+            BUILD_DATE: $[ dependencies.displayenv.outputs['BuildData.BUILD_DATE'] ]
           steps:
             - task: NodeTool@0
               inputs:
