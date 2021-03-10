@@ -126,7 +126,7 @@ stages:
         # Run the FV tests but using the built material
         - job: fvt
           displayName: 'FV Tests'
-          dependsOn: main
+          dependsOn: [main,displayenv]
           variables:
             VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
             BUILD_DATE: $[ dependencies.displayenv.outputs['BuildData.BUILD_DATE'] ]
@@ -197,7 +197,7 @@ stages:
         # error code the job will fail.
         - job: src_audit
           displayName: 'Node Module Auditing'
-          dependsOn: main
+          dependsOn: [main,displayenv]
           variables:
             VERSION: $[ dependencies.displayenv.outputs['BuildData.PACKAGE_VERSION'] ]
             BUILD_DATE: $[ dependencies.displayenv.outputs['BuildData.BUILD_DATE'] ]
@@ -287,7 +287,7 @@ stages:
     # Publish a new version, triggered by a git tag
     - stage: Publish_tag
       dependsOn: Build_and_Test
-      condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
+      condition: and(succeeded('Build_and_Test'), startsWith(variables['Build.SourceBranch'], 'refs/tags'))
       jobs:
         - job: npm_publish
           displayName: 'npm publish'
@@ -343,7 +343,7 @@ stages:
     # Stage to publish the nightly drivers
     - stage: Publish_tag_nightly
       dependsOn: Build_and_Test
-      condition: and(succeeded(), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
+      condition: and(succeeded('Build_and_Test'), eq(variables['Build.Reason'], 'Schedule'))  # only run on the scheduled builds
       jobs:
         - job: npm_publish
           displayName: 'npm publish'
