@@ -13,7 +13,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "hello": "echo test fv project",
-    "test:fv": "mocha *.js --reporter azure-mocha-reporter 2>&1",
+    "test:fv": "mocha *.js --reporter spec-junit-splitter-mocha-reporter 2>&1",
     "build": ""
   },
   "dependencies": {
@@ -41,6 +41,6 @@
     "rewire": "4.0.1",
     "sinon": "7.5.0",
     "sinon-test": "^2.2.0",
-    "azure-mocha-reporter": "1.0.0"
+    "spec-junit-splitter-mocha-reporter": "1.0.1"
   }
 }
