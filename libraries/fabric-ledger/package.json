@@ -10,7 +10,7 @@
     "compile": "tsc",
     "precompile": "npm run eslint",
     "pretest": "npm run compile",
-    "test": "nyc mocha --require ts-node/register --recursive 'test/unit/**/*.spec.ts' --reporter ./node_modules/spec-junit-splitter-mocha-reporter",
+    "test": "nyc mocha --require ts-node/register --recursive 'test/unit/**/*.spec.ts' --reporter spec-junit-splitter-mocha-reporter",
     "eslint": "eslint src --ext .ts"
   },
   "repository": {
