@@ -5,7 +5,7 @@
   "main": "docker.js",
   "scripts": {
     "build": "",
-    "test:e2e": "gulp -f ./scenario.js --reporter azure-mocha-reporter 2>&1"
+    "test:e2e": "gulp -f ./scenario.js --reporter spec-junit-splitter-mocha-reporter 2>&1"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,6 @@
     "ip": "^1.1.5",
     "ajv": "^6.12.2",
     "ajv-cli": "^3.2.1",
-    "azure-mocha-reporter": "1.0.0"
+    "spec-junit-splitter-mocha-reporter": "1.0.1"
   }
 }

@@ -10,7 +10,7 @@
   "scripts": {
     "start": "./startup.sh",
     "compile": "tsc --project test/typescript",
-    "test": "nyc mocha --recursive 'test/unit/**/*.js' --reporter azure-mocha-reporter",
+    "test": "nyc mocha --recursive 'test/unit/**/*.js' --reporter spec-junit-splitter-mocha-reporter",
     "update:clean": "rimraf bundle.js bundle.d.ts protos && mkdirp protos",
     "update:copy": "cpx \"${GOPATH}/src/github.com/hyperledger/fabric-protos/**/*.proto\" protos --verbose",
     "update:pbjs": "pbjs -t static-module -p google-protos -p protos $(find google-protos protos -name \"*.proto\" -type f) -o bundle.js",
@@ -79,6 +79,6 @@
     "rewire": "4.0.1",
     "rimraf": "^3.0.0",
     "sinon": "7.5.0",
-    "azure-mocha-reporter": "1.0.0"
+    "spec-junit-splitter-mocha-reporter": "1.0.1"
   }
 }

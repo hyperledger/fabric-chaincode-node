@@ -2,32 +2,34 @@ dependencies:
   '@fidm/x509': 1.2.1
   '@grpc/grpc-js': 1.1.1
   '@grpc/proto-loader': 0.5.4
-  '@rush-temp/azure-mocha-reporter': 'file:projects/azure-mocha-reporter.tgz'
-  '@rush-temp/fabric-contract-api': 'file:projects/fabric-contract-api.tgz'
-  '@rush-temp/fabric-e2e-tests': 'file:projects/fabric-e2e-tests.tgz'
-  '@rush-temp/fabric-ledger': 'file:projects/fabric-ledger.tgz'
-  '@rush-temp/fabric-nodeenv': 'file:projects/fabric-nodeenv.tgz'
-  '@rush-temp/fabric-shim': 'file:projects/fabric-shim.tgz'
-  '@rush-temp/fabric-shim-api': 'file:projects/fabric-shim-api.tgz'
-  '@rush-temp/fabric-shim-crypto': 'file:projects/fabric-shim-crypto.tgz'
-  '@rush-temp/fabric-shim-docs': 'file:projects/fabric-shim-docs.tgz'
-  '@rush-temp/fvtests': 'file:projects/fvtests.tgz'
-  '@rush-temp/toolchain': 'file:projects/toolchain.tgz'
-  '@rushstack/eslint-config': 0.5.8_typescript@3.4.5
+  '@rush-temp/fabric-contract-api': file:projects/fabric-contract-api.tgz
+  '@rush-temp/fabric-e2e-tests': file:projects/fabric-e2e-tests.tgz
+  '@rush-temp/fabric-ledger': file:projects/fabric-ledger.tgz
+  '@rush-temp/fabric-nodeenv': file:projects/fabric-nodeenv.tgz
+  '@rush-temp/fabric-shim': file:projects/fabric-shim.tgz
+  '@rush-temp/fabric-shim-api': file:projects/fabric-shim-api.tgz
+  '@rush-temp/fabric-shim-crypto': file:projects/fabric-shim-crypto.tgz
+  '@rush-temp/fabric-shim-docs': file:projects/fabric-shim-docs.tgz
+  '@rush-temp/fvtests': file:projects/fvtests.tgz
+  '@rush-temp/toolchain': file:projects/toolchain.tgz
+  '@rushstack/eslint-config': 0.5.8_eslint@6.8.0+typescript@3.4.5
   '@sinonjs/referee-sinon': 5.0.0
   '@types/chai': 4.2.11
   '@types/chai-as-promised': 7.1.2
   '@types/long': 4.0.1
   '@types/mocha': 5.2.7
   '@types/node': 14.0.14
-  chai-as-promised: 7.1.1
+  ajv: 6.12.2
+  ajv-cli: 3.2.1
+  chai: 4.2.0
+  chai-as-promised: 7.1.1_chai@4.2.0
   chai-things: 0.2.0
   class-transformer: 0.3.1
   cpx: 1.5.0
   del: 3.0.0
   delay: 4.3.0
   elliptic: 6.5.3
-  fabric-contract-api: 2.3.1-unstable
+  eslint: 6.8.0
   fast-safe-stringify: 2.0.7
   fs-extra: 9.0.1
   get-params: 0.1.2
@@ -45,7 +47,6 @@ dependencies:
   jsverify: 0.8.4
   merge-stream: 2.0.0
   mocha: 6.2.2
-  mocha-junit-reporter: 1.23.1_mocha@6.2.2
   mockery: 2.1.0
   npm-cli-login: 0.1.1
   nyc: 14.1.1
@@ -54,12 +55,14 @@ dependencies:
   rimraf: 3.0.2
   sinon: 7.5.0
   sinon-test: 2.4.3_sinon@7.5.0
+  spec-junit-splitter-mocha-reporter: 1.0.1
   ts-mockito: 2.6.1
   ts-node: 8.10.2_typescript@3.4.5
   typescript: 3.4.5
+  winston: 3.3.3
   yargs: 15.3.1
   yargs-parser: 18.1.3
-lockfileVersion: 5.1
+lockfileVersion: 5.2
 packages:
   /@babel/code-frame/7.10.3:
     dependencies:
@@ -262,30 +265,6 @@ packages:
       typescript: '>=3.0.0'
     resolution:
       integrity: sha512-SOY3oh/dlISms1UyZiXyTwlY3L+NKtwVvIuWka7GSagfL+KQFvZcVLD8/Ab0skAc4tokVu5SrPrdDiLVAraoMA==
-  /@rushstack/eslint-config/0.5.8_typescript@3.4.5:
-    dependencies:
-      '@rushstack/eslint-plugin': 0.3.2
-      '@typescript-eslint/eslint-plugin': 2.3.3_65593ef2880061590ba8a532375b522c
-      '@typescript-eslint/experimental-utils': 2.3.3
-      '@typescript-eslint/parser': 2.3.3
-      '@typescript-eslint/typescript-estree': 2.3.3
-      eslint-plugin-promise: 4.2.1
-      eslint-plugin-react: 7.16.0
-      eslint-plugin-security: 1.4.0
-      eslint-plugin-tsdoc: 0.2.5
-      typescript: 3.4.5
-    dev: false
-    peerDependencies:
-      eslint: ^5.0.0 || ^6.0.0
-      typescript: '>=3.0.0'
-    resolution:
-      integrity: sha512-SOY3oh/dlISms1UyZiXyTwlY3L+NKtwVvIuWka7GSagfL+KQFvZcVLD8/Ab0skAc4tokVu5SrPrdDiLVAraoMA==
-  /@rushstack/eslint-plugin/0.3.2:
-    dev: false
-    peerDependencies:
-      eslint: ^5.0.0 || ^6.0.0
-    resolution:
-      integrity: sha512-Fzg91tfXtft6IdZlE6altWXuglGT29P/6ZfFGj9IVM8FIEAjMrO7MELINF5LssbFG0Xlu7306cBJVRAyzOCPCw==
   /@rushstack/eslint-plugin/0.3.2_eslint@6.8.0:
     dependencies:
       eslint: 6.8.0
@@ -599,23 +578,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-yohU3zMn0fkhlape1nxXG2bLEGZRc1FeqF80RoHaYXJN7uibaauXfhzhOJr1Xh36sn+/tx21QAOf07b/xYVk1w==
-  /@typescript-eslint/eslint-plugin/2.3.3_65593ef2880061590ba8a532375b522c:
-    dependencies:
-      '@typescript-eslint/experimental-utils': 2.3.3
-      '@typescript-eslint/parser': 2.3.3
-      eslint-utils: 1.4.3
-      functional-red-black-tree: 1.0.1
-      regexpp: 2.0.1
-      tsutils: 3.17.1_typescript@3.4.5
-    dev: false
-    engines:
-      node: ^8.10.0 || ^10.13.0 || >=11.10.1
-    peerDependencies:
-      '@typescript-eslint/parser': ^2.0.0
-      eslint: ^5.0.0 || ^6.0.0
-      typescript: '*'
-    resolution:
-      integrity: sha512-12cCbwu5PbQudkq2xCIS/QhB7hCMrsNPXK+vJtqy/zFqtzVkPRGy12O5Yy0gUK086f3VHV/P4a4R4CjMW853pA==
   /@typescript-eslint/eslint-plugin/2.3.3_9d94ba414fee541e8ac342a35128d447:
     dependencies:
       '@typescript-eslint/experimental-utils': 2.3.3_eslint@6.8.0
@@ -635,18 +597,6 @@ packages:
       typescript: '*'
     resolution:
       integrity: sha512-12cCbwu5PbQudkq2xCIS/QhB7hCMrsNPXK+vJtqy/zFqtzVkPRGy12O5Yy0gUK086f3VHV/P4a4R4CjMW853pA==
-  /@typescript-eslint/experimental-utils/2.3.3:
-    dependencies:
-      '@types/json-schema': 7.0.5
-      '@typescript-eslint/typescript-estree': 2.3.3
-      eslint-scope: 5.1.0
-    dev: false
-    engines:
-      node: ^8.10.0 || ^10.13.0 || >=11.10.1
-    peerDependencies:
-      eslint: '*'
-    resolution:
-      integrity: sha512-MQ4jKPMTU1ty4TigJCRKFPye2qyQdH8jzIIkceaHgecKFmkNS1hXPqKiZ+mOehkz6+HcN5Nuvwm+frmWZR9tdg==
   /@typescript-eslint/experimental-utils/2.3.3_eslint@6.8.0:
     dependencies:
       '@types/json-schema': 7.0.5
@@ -660,19 +610,6 @@ packages:
       eslint: '*'
     resolution:
       integrity: sha512-MQ4jKPMTU1ty4TigJCRKFPye2qyQdH8jzIIkceaHgecKFmkNS1hXPqKiZ+mOehkz6+HcN5Nuvwm+frmWZR9tdg==
-  /@typescript-eslint/parser/2.3.3:
-    dependencies:
-      '@types/eslint-visitor-keys': 1.0.0
-      '@typescript-eslint/experimental-utils': 2.3.3
-      '@typescript-eslint/typescript-estree': 2.3.3
-      eslint-visitor-keys: 1.3.0
-    dev: false
-    engines:
-      node: ^8.10.0 || ^10.13.0 || >=11.10.1
-    peerDependencies:
-      eslint: ^5.0.0 || ^6.0.0
-    resolution:
-      integrity: sha512-+cV53HuYFeeyrNW8x/rgPmbVrzzp/rpRmwbJnNtwn4K8mroL1BdjxwQh7X9cUHp9rm4BBiEWmD3cSBjKG7d5mw==
   /@typescript-eslint/parser/2.3.3_eslint@6.8.0:
     dependencies:
       '@types/eslint-visitor-keys': 1.0.0
@@ -1528,14 +1465,6 @@ packages:
       node: '>= 8'
     resolution:
       integrity: sha512-a+xUyMV7hD1BrDQA/3iPV7oc+6W26BgVJO05PGEoatMyIuPScQKsde6i3YorWX1qs+AZjnJ18NqdKoCtKiNh1g==
-  /chai-as-promised/7.1.1:
-    dependencies:
-      check-error: 1.0.2
-    dev: false
-    peerDependencies:
-      chai: '>= 2.1.2 < 5'
-    resolution:
-      integrity: sha512-azL6xMoi+uxu6z4rhWQ1jbdUhOMhis2PvscD/xjLqNMkv3BPPp2JyyuTHOrf9BOosGpNQ11v6BKv/g57RXbiaA==
   /chai-as-promised/7.1.1_chai@4.2.0:
     dependencies:
       chai: 4.2.0
@@ -1649,7 +1578,7 @@ packages:
     resolution:
       integrity: sha512-5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==
   /circular-json/0.3.3:
-    deprecated: 'CircularJSON is in maintenance only, flatted is its successor.'
+    deprecated: CircularJSON is in maintenance only, flatted is its successor.
     dev: false
     resolution:
       integrity: sha512-UZK3NBx2Mca+b5LsG7bY183pHWt5Y1xts4P3Pz7ENTwGVnJOUWbRb3ocjvX7hx9tq/yTAdclXm9sZ38gNuem4A==
@@ -1920,7 +1849,7 @@ packages:
     resolution:
       integrity: sha512-7cjuUME+p+S3HZlbllgsn2CDwS+5eCCX16qBgNC4jgSTf49qR1VKy/Zhl400m0IQXl/bPGEVqncgUUMjrr4s8A==
   /core-js/2.6.11:
-    deprecated: 'core-js@<3 is no longer maintained and not recommended for usage due to the number of issues. Please, upgrade your dependencies to the actual version of core-js@3.'
+    deprecated: core-js@<3 is no longer maintained and not recommended for usage due to the number of issues. Please, upgrade your dependencies to the actual version of core-js@3.
     dev: false
     requiresBuild: true
     resolution:
@@ -2492,24 +2421,6 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-VoM09vT7bfA7D+upt+FjeBO5eHIJQBUWki1aPvB+vbNiHS3+oGIJGIeyBtKQTME6UPXXy3vV07OL1tHd3ANuDw==
-  /eslint-plugin-react/7.16.0:
-    dependencies:
-      array-includes: 3.1.1
-      doctrine: 2.1.0
-      has: 1.0.3
-      jsx-ast-utils: 2.4.1
-      object.entries: 1.1.2
-      object.fromentries: 2.0.2
-      object.values: 1.1.1
-      prop-types: 15.7.2
-      resolve: 1.17.0
-    dev: false
-    engines:
-      node: '>=4'
-    peerDependencies:
-      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
-    resolution:
-      integrity: sha512-GacBAATewhhptbK3/vTP09CbFrgUJmBSaaRcWdbQLFvUZy9yVcQxigBNHGPU/KE2AyHpzj3AWXpxoMTsIDiHug==
   /eslint-plugin-react/7.16.0_eslint@6.8.0:
     dependencies:
       array-includes: 3.1.1
@@ -2620,51 +2531,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-bT3/1x1EbZB7phzYu7vCr1v3ONuzDtX8WjuM9c0iYxe+cq+pwcKEoQjl7zd3RpC6YOLgnSy3cTN58M2jcoPDIQ==
-  /eslint/6.6.0:
-    dependencies:
-      '@babel/code-frame': 7.10.3
-      ajv: 6.12.2
-      chalk: 2.4.2
-      cross-spawn: 6.0.5
-      debug: 4.1.1
-      doctrine: 3.0.0
-      eslint-scope: 5.1.0
-      eslint-utils: 1.4.3
-      eslint-visitor-keys: 1.3.0
-      espree: 6.2.1
-      esquery: 1.3.1
-      esutils: 2.0.3
-      file-entry-cache: 5.0.1
-      functional-red-black-tree: 1.0.1
-      glob-parent: 5.1.1
-      globals: 11.12.0
-      ignore: 4.0.6
-      import-fresh: 3.2.1
-      imurmurhash: 0.1.4
-      inquirer: 7.2.0
-      is-glob: 4.0.1
-      js-yaml: 3.14.0
-      json-stable-stringify-without-jsonify: 1.0.1
-      levn: 0.3.0
-      lodash: 4.17.15
-      minimatch: 3.0.4
-      mkdirp: 0.5.5
-      natural-compare: 1.4.0
-      optionator: 0.8.3
-      progress: 2.0.3
-      regexpp: 2.0.1
-      semver: 6.3.0
-      strip-ansi: 5.2.0
-      strip-json-comments: 3.1.0
-      table: 5.4.6
-      text-table: 0.2.0
-      v8-compile-cache: 2.1.1
-    dev: false
-    engines:
-      node: ^8.10.0 || ^10.13.0 || >=11.10.1
-    hasBin: true
-    resolution:
-      integrity: sha512-PpEBq7b6qY/qrOmpYQ/jTMDYfuQMELR4g4WI1M/NaSDDD/bdcMb+dj4Hgks7p41kW2caXsPsEZAEAyAgjVVC0g==
   /eslint/6.8.0:
     dependencies:
       '@babel/code-frame': 7.10.3
@@ -3948,6 +3814,7 @@ packages:
     resolution:
       integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
   /ini/1.3.5:
+    deprecated: Please update to ini >=1.3.6 to avoid a prototype pollution issue
     dev: false
     resolution:
       integrity: sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
@@ -5190,14 +5057,14 @@ packages:
     dev: false
     resolution:
       integrity: sha512-rUxjysqif/BZQH2yhd5Aaq7vXMSx9NdEsQcyA07uEzIvxgI7zIr33gGsh+RU0/XjmQpCW7RsVof1vlkvQVCK5A==
-  /md5/2.2.1:
+  /md5/2.3.0:
     dependencies:
       charenc: 0.0.2
       crypt: 0.0.2
       is-buffer: 1.1.6
     dev: false
     resolution:
-      integrity: sha1-U6s41f48iJG6RlMp6iP6wFQBJvk=
+      integrity: sha512-T1GITYmFaKuO91vxyoQMFETst+O71VUPEU3ze5GNzDm0OWdP8v1ziTaAEPUr/3kLsY3Sftgz242A1SetQiDL7g==
   /mdurl/1.0.1:
     dev: false
     resolution:
@@ -5340,7 +5207,7 @@ packages:
   /mocha-junit-reporter/1.23.1_mocha@6.2.2:
     dependencies:
       debug: 2.6.9
-      md5: 2.2.1
+      md5: 2.3.0
       mkdirp: 0.5.5
       mocha: 6.2.2
       strip-ansi: 4.0.0
@@ -6635,7 +6502,7 @@ packages:
       tough-cookie: 2.5.0
       tunnel-agent: 0.6.0
       uuid: 3.4.0
-    deprecated: 'request has been deprecated, see https://github.com/request/request/issues/3142'
+    deprecated: request has been deprecated, see https://github.com/request/request/issues/3142
     dev: false
     engines:
       node: '>= 6'
@@ -6706,7 +6573,7 @@ packages:
     resolution:
       integrity: sha1-MrueOcBtZzONyTeMDW1gdFZq0TE=
   /resolve-url/0.2.1:
-    deprecated: 'https://github.com/lydell/resolve-url#deprecated'
+    deprecated: https://github.com/lydell/resolve-url#deprecated
     dev: false
     resolution:
       integrity: sha1-LGN/53yJOv0qZj/iGqkIAGjiBSo=
@@ -7393,6 +7260,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-J+FWzZoynJEXGphVIS+XEh3kFSjZX/1i9gFBaWQcB+/tmpe2qUsSBABpcxqxnAxFdiUFEgAX1bjYGQvIZmoz9Q==
+  /spec-junit-splitter-mocha-reporter/1.0.1:
+    dependencies:
+      mocha: 6.2.2
+      mocha-junit-reporter: 1.23.1_mocha@6.2.2
+    dev: false
+    resolution:
+      integrity: sha512-V1FLjRTkf0DopeaLCEoK8Q3iF5F/kD9Aq3z9FOtbhC6B3hjodqUN9RW8z6Bb4bX9EDaRTwK6q6OfCWRSEwWX+Q==
   /split-ca/1.0.1:
     dev: false
     resolution:
@@ -8187,7 +8061,7 @@ packages:
     resolution:
       integrity: sha512-KY9Frmirql91X2Qgjry0Wd4Y+YTdrdZheS8TFwvkbLWf/G5KNJDCh6pKL5OZctEW4+0Baa5idK2ZQuELRwPznQ==
   /urix/0.1.0:
-    deprecated: 'Please see https://github.com/lydell/urix#deprecated'
+    deprecated: Please see https://github.com/lydell/urix#deprecated
     dev: false
     resolution:
       integrity: sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI=
@@ -8634,17 +8508,7 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
-  'file:projects/azure-mocha-reporter.tgz':
-    dependencies:
-      mocha: 6.2.2
-      mocha-junit-reporter: 1.23.1_mocha@6.2.2
-    dev: false
-    name: '@rush-temp/azure-mocha-reporter'
-    resolution:
-      integrity: sha512-K4uN3hTX4mFlvlWpjhZJzwgvGRt6CM0/AkCiSk49gydKZfjpWGkWLN6jrrl4WV1HH5ZzMdSw1E3Mk8ENr9BFIA==
-      tarball: 'file:projects/azure-mocha-reporter.tgz'
-    version: 0.0.0
-  'file:projects/fabric-contract-api.tgz':
+  file:projects/fabric-contract-api.tgz:
     dependencies:
       ajv: 6.12.2
       ajv-cli: 3.2.1
@@ -8652,7 +8516,7 @@ packages:
       chai-as-promised: 7.1.1_chai@4.2.0
       chai-things: 0.2.0
       class-transformer: 0.3.1
-      eslint: 6.6.0
+      eslint: 6.8.0
       fast-safe-stringify: 2.0.7
       get-params: 0.1.2
       gulp: 4.0.2
@@ -8668,10 +8532,10 @@ packages:
     dev: false
     name: '@rush-temp/fabric-contract-api'
     resolution:
-      integrity: sha512-07lOhJJOaJXKZrOEjeCAT+N+ZiuLkn39lFTGEqCNFtVwkGRODe5kKbyMUBFnMqFjG/QcHXixds5az0VkttpoCg==
-      tarball: 'file:projects/fabric-contract-api.tgz'
+      integrity: sha512-+j6/PfGCxAH8iZaOMam22yRwawgQjpgDx4JoKno5KgIqWvQTWEkKTEyGkSSz9rhwcNE/yq9Jx/jsTrSrKRmoNw==
+      tarball: file:projects/fabric-contract-api.tgz
     version: 0.0.0
-  'file:projects/fabric-e2e-tests.tgz':
+  file:projects/fabric-e2e-tests.tgz:
     dependencies:
       ajv: 6.12.2
       ajv-cli: 3.2.1
@@ -8680,13 +8544,14 @@ packages:
       git-rev-sync: 1.12.0
       gulp: 4.0.2
       ip: 1.1.5
+      spec-junit-splitter-mocha-reporter: 1.0.1
     dev: false
     name: '@rush-temp/fabric-e2e-tests'
     resolution:
-      integrity: sha512-3k6jsEKg2jlFSihY7glByTBJaeIOE080uLbGm8N/zgqOuTT37JS9FyafUxSohpMj9+5ew6hNEsDjrXuQiUmcKQ==
-      tarball: 'file:projects/fabric-e2e-tests.tgz'
+      integrity: sha512-MztWZKBJryzlc5s3lH902fDPM2q/R17WiHUHaIdb5FRZp3Fi4aBEK0csjRWnHtu2Y+xBa38dku/OsWAYUwVU4Q==
+      tarball: file:projects/fabric-e2e-tests.tgz
     version: 0.0.0
-  'file:projects/fabric-ledger.tgz':
+  file:projects/fabric-ledger.tgz:
     dependencies:
       '@rushstack/eslint-config': 0.5.8_eslint@6.8.0+typescript@3.4.5
       '@types/chai': 4.2.11
@@ -8703,6 +8568,7 @@ packages:
       rewire: 4.0.1
       rimraf: 3.0.2
       sinon: 7.5.0
+      spec-junit-splitter-mocha-reporter: 1.0.1
       ts-mockito: 2.6.1
       ts-node: 8.10.2_typescript@3.4.5
       typescript: 3.4.5
@@ -8710,10 +8576,10 @@ packages:
     dev: false
     name: '@rush-temp/fabric-ledger'
     resolution:
-      integrity: sha512-hzfnU11HKatNBkiKeZh0X0GAVaP6dbGTe/UByWJncehDNzIzApWn8OUTFPShKmP4ydS3sxA3246G8dnYuq+Qaw==
-      tarball: 'file:projects/fabric-ledger.tgz'
+      integrity: sha512-ly20tn40ptq4G1ZO7hGA+z+gT00MRr8AiG2GvIU1ogN5LtCcSbLXTDdBBxRopEDiSdJ+59kQFPVHzR3cVRpSsQ==
+      tarball: file:projects/fabric-ledger.tgz
     version: 0.0.0
-  'file:projects/fabric-nodeenv.tgz':
+  file:projects/fabric-nodeenv.tgz:
     dependencies:
       git-rev-sync: 1.12.0
       gulp: 4.0.2
@@ -8721,37 +8587,38 @@ packages:
     name: '@rush-temp/fabric-nodeenv'
     resolution:
       integrity: sha512-W6+8KwlqUyP5/D/YFLdbJODDvPaWP97H62UlV2VbQda3GZn8N3/EbPZTUmCwaQMQzRaWMrWSs1H6rygNJOkcdg==
-      tarball: 'file:projects/fabric-nodeenv.tgz'
+      tarball: file:projects/fabric-nodeenv.tgz
     version: 0.0.0
-  'file:projects/fabric-shim-api.tgz':
+  file:projects/fabric-shim-api.tgz:
     dependencies:
       '@types/long': 4.0.1
     dev: false
     name: '@rush-temp/fabric-shim-api'
     resolution:
       integrity: sha512-XTqk3nknIzx9XDjIwPAqxlcbyVyZuoETwf8eWxffKlp5MOfZWy+IknQAHB23AdOuUtpAg94QVefEIkO1B2NREg==
-      tarball: 'file:projects/fabric-shim-api.tgz'
+      tarball: file:projects/fabric-shim-api.tgz
     version: 0.0.0
-  'file:projects/fabric-shim-crypto.tgz':
+  file:projects/fabric-shim-crypto.tgz:
     dependencies:
       chai: 4.2.0
       chai-as-promised: 7.1.1_chai@4.2.0
       chai-things: 0.2.0
       elliptic: 6.5.3
-      eslint: 6.6.0
+      eslint: 6.8.0
       jsrsasign: 8.0.20
       mocha: 6.2.2
       nyc: 14.1.1
       rewire: 4.0.1
       sinon: 7.5.0
+      spec-junit-splitter-mocha-reporter: 1.0.1
       typescript: 3.4.5
     dev: false
     name: '@rush-temp/fabric-shim-crypto'
     resolution:
-      integrity: sha512-tIMx51R/0SnfDZoeEb3QR7fSqieP232xhx7KiDT/MYlUUtm78K2p7Mycq//0i923FC9DQcLzm71nVtRPqwUY+A==
-      tarball: 'file:projects/fabric-shim-crypto.tgz'
+      integrity: sha512-QM3+GWTvAaVnQzwBCJ2TTMJ2F4Ug5rmZmnUCwSnOrRwNeKa2pyEoPcKomO3wxadVIJS0s45yAuPOrNh81UyUaQ==
+      tarball: file:projects/fabric-shim-crypto.tgz
     version: 0.0.0
-  'file:projects/fabric-shim-docs.tgz':
+  file:projects/fabric-shim-docs.tgz:
     dependencies:
       ink-docstrap: 1.3.2
       jsdoc: 3.6.4
@@ -8760,9 +8627,9 @@ packages:
     name: '@rush-temp/fabric-shim-docs'
     resolution:
       integrity: sha512-oi7XBbRvf+D+M7bwJuWs6rG39CayCaGApjqx65zibUnsenpriYXMSTpClR4V7QVzjUoK14lHV9iw8kTFaVT4rg==
-      tarball: 'file:projects/fabric-shim-docs.tgz'
+      tarball: file:projects/fabric-shim-docs.tgz
     version: 0.0.0
-  'file:projects/fabric-shim.tgz':
+  file:projects/fabric-shim.tgz:
     dependencies:
       '@fidm/x509': 1.2.1
       '@grpc/grpc-js': 1.1.1
@@ -8773,7 +8640,7 @@ packages:
       chai-as-promised: 7.1.1_chai@4.2.0
       chai-things: 0.2.0
       cpx: 1.5.0
-      eslint: 6.6.0
+      eslint: 6.8.0
       fs-extra: 9.0.1
       mocha: 6.2.2
       mockery: 2.1.0
@@ -8782,16 +8649,17 @@ packages:
       rewire: 4.0.1
       rimraf: 3.0.2
       sinon: 7.5.0
+      spec-junit-splitter-mocha-reporter: 1.0.1
       winston: 3.3.3
       yargs: 15.3.1
       yargs-parser: 18.1.3
     dev: false
     name: '@rush-temp/fabric-shim'
     resolution:
-      integrity: sha512-ow411yr9b2B6W7TT0A3PmtzX3sy5+tnvF+0cfUcmsfW0+9ybhsyEwMli1zbmDQSmSSaOm8TIcC6crzc8ZKA5Kw==
-      tarball: 'file:projects/fabric-shim.tgz'
+      integrity: sha512-g0y+oUDuu2B0kk6G7KxynRVS0PdHPEeNR+ySkh029kOexHnGHuIlEwCLsmfDI/ae0HAxXOTUroOgKb1K3Gq0zw==
+      tarball: file:projects/fabric-shim.tgz
     version: 0.0.0
-  'file:projects/fvtests.tgz':
+  file:projects/fvtests.tgz:
     dependencies:
       '@sinonjs/referee-sinon': 5.0.0
       ajv: 6.12.2
@@ -8801,7 +8669,7 @@ packages:
       chai-things: 0.2.0
       del: 3.0.0
       delay: 4.3.0
-      eslint: 6.6.0
+      eslint: 6.8.0
       fs-extra: 9.0.1
       git-rev-sync: 1.12.0
       gulp: 4.0.2
@@ -8813,13 +8681,14 @@ packages:
       rewire: 4.0.1
       sinon: 7.5.0
       sinon-test: 2.4.3_sinon@7.5.0
+      spec-junit-splitter-mocha-reporter: 1.0.1
     dev: false
     name: '@rush-temp/fvtests'
     resolution:
-      integrity: sha512-T59w2nKPdhDaUw0z2uU4HdTtLKi441Qkbqc65jRH99gxHpCLx7tCWR6LAnm+Aq32XP93c4aC8VB6HOwDvIpMpQ==
-      tarball: 'file:projects/fvtests.tgz'
+      integrity: sha512-4MsEBY8D8qKaaodlJsjUcKVrKmnldyd24v0UKkLlezNfNsQtfF0tZrcl/Z70v0Gu+xfye6RvmBgs+dJzBFpz2w==
+      tarball: file:projects/fvtests.tgz
     version: 0.0.0
-  'file:projects/toolchain.tgz':
+  file:projects/toolchain.tgz:
     dependencies:
       delay: 4.3.0
       fs-extra: 9.0.1
@@ -8835,24 +8704,23 @@ packages:
     name: '@rush-temp/toolchain'
     resolution:
       integrity: sha512-zcwQ437gyMgDN9ksy1TJ0tczvnoUdMExPxvi+22vbpp/dkao/cphxpnZW8vfTFgE+z6cCLSpPLog1UwZpiQepg==
-      tarball: 'file:projects/toolchain.tgz'
+      tarball: file:projects/toolchain.tgz
     version: 0.0.0
 registry: ''
 specifiers:
   '@fidm/x509': ^1.2.1
   '@grpc/grpc-js': ^1.1.1
   '@grpc/proto-loader': ^0.5.4
-  '@rush-temp/azure-mocha-reporter': 'file:./projects/azure-mocha-reporter.tgz'
-  '@rush-temp/fabric-contract-api': 'file:./projects/fabric-contract-api.tgz'
-  '@rush-temp/fabric-e2e-tests': 'file:./projects/fabric-e2e-tests.tgz'
-  '@rush-temp/fabric-ledger': 'file:./projects/fabric-ledger.tgz'
-  '@rush-temp/fabric-nodeenv': 'file:./projects/fabric-nodeenv.tgz'
-  '@rush-temp/fabric-shim': 'file:./projects/fabric-shim.tgz'
-  '@rush-temp/fabric-shim-api': 'file:./projects/fabric-shim-api.tgz'
-  '@rush-temp/fabric-shim-crypto': 'file:./projects/fabric-shim-crypto.tgz'
-  '@rush-temp/fabric-shim-docs': 'file:./projects/fabric-shim-docs.tgz'
-  '@rush-temp/fvtests': 'file:./projects/fvtests.tgz'
-  '@rush-temp/toolchain': 'file:./projects/toolchain.tgz'
+  '@rush-temp/fabric-contract-api': file:./projects/fabric-contract-api.tgz
+  '@rush-temp/fabric-e2e-tests': file:./projects/fabric-e2e-tests.tgz
+  '@rush-temp/fabric-ledger': file:./projects/fabric-ledger.tgz
+  '@rush-temp/fabric-nodeenv': file:./projects/fabric-nodeenv.tgz
+  '@rush-temp/fabric-shim': file:./projects/fabric-shim.tgz
+  '@rush-temp/fabric-shim-api': file:./projects/fabric-shim-api.tgz
+  '@rush-temp/fabric-shim-crypto': file:./projects/fabric-shim-crypto.tgz
+  '@rush-temp/fabric-shim-docs': file:./projects/fabric-shim-docs.tgz
+  '@rush-temp/fvtests': file:./projects/fvtests.tgz
+  '@rush-temp/toolchain': file:./projects/toolchain.tgz
   '@rushstack/eslint-config': ^0.5.1
   '@sinonjs/referee-sinon': ~5.0.0
   '@types/chai': ^4.2.0
@@ -8860,6 +8728,9 @@ specifiers:
   '@types/long': ^4.0.1
   '@types/mocha': ^5.2.7
   '@types/node': ^14.0.13
+  ajv: ^6.12.2
+  ajv-cli: ^3.2.1
+  chai: ^4.1.2
   chai-as-promised: ^7.1.1
   chai-things: ^0.2.0
   class-transformer: ^0.3.1
@@ -8867,7 +8738,7 @@ specifiers:
   del: ^3.0.0
   delay: 4.3.0
   elliptic: ^6.5.3
-  fabric-contract-api: 2.3.1-unstable
+  eslint: ^6.6.0
   fast-safe-stringify: ^2.0.7
   fs-extra: ^9.0.1
   get-params: ^0.1.2
@@ -8885,7 +8756,6 @@ specifiers:
   jsverify: ~0.8.4
   merge-stream: ~2.0.0
   mocha: 6.2.2
-  mocha-junit-reporter: 1.23.1
   mockery: ^2.1.0
   npm-cli-login: ~0.1.1
   nyc: 14.1.1
@@ -8894,8 +8764,10 @@ specifiers:
   rimraf: ^3.0.0
   sinon: 7.5.0
   sinon-test: ^2.2.0
+  spec-junit-splitter-mocha-reporter: 1.0.1
   ts-mockito: ^2.5.0
   ts-node: ^8.3.0
   typescript: 3.4.5
+  winston: ^3.3.2
   yargs: ^15.3.1
   yargs-parser: ^18.1.3
