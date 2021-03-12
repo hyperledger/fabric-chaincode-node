@@ -1,3 +1,9 @@
+/*
+ * Copyright IBM Corp. All Rights Reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 const fs = require('fs');
 let filename = process.argv[2];
 let input = JSON.parse(fs.readFileSync(filename));
