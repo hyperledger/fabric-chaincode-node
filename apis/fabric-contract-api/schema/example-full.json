@@ -88,6 +88,7 @@
                         }
                     ],
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ]
                 },
@@ -157,6 +158,7 @@
                         }
                     ],
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ]
                 },
@@ -209,6 +211,7 @@
                         }
                     ],
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ]
                 }
