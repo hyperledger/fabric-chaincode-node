@@ -12,7 +12,8 @@ const fs = require('fs');
 const path = require('path');
 const ip = require('ip');
 
-
+const org1CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem';
+const org2CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem';
 const ordererCA = '/etc/hyperledger/config/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem';
 const tls = process.env.TLS && process.env.TLS.toLowerCase() === 'true' ? true : false;
 const getTLSArgs = () => {

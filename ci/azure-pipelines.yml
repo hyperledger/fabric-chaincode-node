@@ -153,6 +153,7 @@ stages:
               displayName: 'Get the latest master docker images'
             - script: |
                 set -ev
+                export TLS=true
                 node common/scripts/install-run-rush.js start-fabric
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
                 docker images | grep hyperledger && docker ps -a
