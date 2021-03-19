@@ -4,7 +4,7 @@
     "private": true,
     "tag": "unstable",
     "description": "fabric-chaincode-node monorepo, built with rush",
-    "testFabricVersion": "master",
+    "testFabricVersion": "main",
     "testFabricCAVersion": "1.4.4",
     "testFabricThirdParty": "0.4.15",
     "docsLatestVersion": "release-1.4",

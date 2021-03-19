@@ -7,7 +7,7 @@ mkdir mycc
 cd mycc
 // create a new node project
 npm init
-// install fabric-shim at master branch
+// install fabric-shim at main branch
 npm install fabric-shim@2.3.1-unstable
 // or using the released version
 npm install fabric-shim

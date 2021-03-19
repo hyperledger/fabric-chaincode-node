@@ -27,7 +27,7 @@ The following [Rush categories](https://rushjs.io/pages/maintainer/add_to_repo/)
 
 > Note that npm v6 has some bugs that mean adding new dependencies etc are not properly picked up. Longer term we should consider moving to yarn or pnpm. However in practice this isn't a serious problem and has been possible to be worked around by issuing `rm ./common/config/rush/npm-shrinkwrap.json` and then `rush update`
 
-The fv and e2e tests require a set of docker images of Fabric Peers, Orderers and CAs. To ensure you have the correct images ensure these have been dowloaded and tagged.  `rush edge-docker` will do this for you. 
+The fv and e2e tests require a set of docker images of Fabric Peers, Orderers and CAs. To ensure you have the correct images ensure these have been dowloaded and tagged.  `rush edge-docker` will do this for you.
 
 They also need to have the `nodeenv` image present - this is build as part of the `rush rebuild` so please ensure this has been run first.  It is advisable to clean up the docker containers and images between test runs to avoid any odd behaviour. Commands to help do this are below.
 
@@ -50,8 +50,8 @@ For more specific purposes during development the following are useful:
 * `rush publish --include-all --pack --release-folder ./tarballs --publish`
 If you want to get a set of `.tar.gz` files of the node modules to use for local testing this command will put them into the `tarballs` directory
 * `rush rebuild --to fvtests` to run the unit tests for the core modules, but not the docker or jsdoc
-* `rush rebuild --to fabric-contract-api` to build, lint and run just the `fabric-contract-api` 
-* `rush logs` will show the location of all the log files 
+* `rush rebuild --to fabric-contract-api` to build, lint and run just the `fabric-contract-api`
+* `rush logs` will show the location of all the log files
 
 To clean up docker
 
@@ -67,10 +67,10 @@ The codebase is maintained in [github](https://github.com/hyperledger/fabric-cha
 
 ## Code of Conduct Guidelines <a name="conduct"></a>
 
-See our [Code of Conduct Guidelines](../blob/master/CODE_OF_CONDUCT.md).
+See our [Code of Conduct Guidelines](../blob/main/CODE_OF_CONDUCT.md).
 
 ## Maintainers <a name="maintainers"></a>
 
-Should you have any questions or concerns, please reach out to one of the project's [Maintainers](../blob/master/MAINTAINERS.md).
+Should you have any questions or concerns, please reach out to one of the project's [Maintainers](../blob/main/MAINTAINERS.md).
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.

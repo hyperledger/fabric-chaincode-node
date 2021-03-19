@@ -10,7 +10,7 @@ Maintainers
 | James Taylor | [jt-nti][jt-nti] | jtonline | <jamest@uk.ibm.com>
 | Chaoyi Zhao | [zhaochy1990][zhaochy1990] | zhaochy | <zhaochy_2015@hotmail.com>
 
-Also: Please see the [Release Manager section](https://github.com/hyperledger/fabric/blob/master/MAINTAINERS.md)
+Also: Please see the [Release Manager section](https://github.com/hyperledger/fabric/blob/main/MAINTAINERS.md)
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
