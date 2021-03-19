@@ -1221,7 +1221,7 @@ describe('chaincodefromcontract', () => {
             const metadata = fakeCcfc._augmentMetadataFromCode(partialMetadata);
 
             const correctData = {
-                '$schema': 'https://hyperledger.github.io/fabric-chaincode-node/master/api/contract-schema.json',
+                '$schema': 'https://hyperledger.github.io/fabric-chaincode-node/main/api/contract-schema.json',
                 'components': {
                     'schemas': {}
                 },
@@ -1356,7 +1356,7 @@ describe('chaincodefromcontract', () => {
             metadata.components.should.deep.equal(metadataToSend.components);
             metadata.contracts.should.deep.equal(metadataToSend.contracts);
             metadata.info.should.deep.equal(metadataToSend.info);
-            metadata.$schema.should.deep.equal('https://hyperledger.github.io/fabric-chaincode-node/master/api/contract-schema.json');
+            metadata.$schema.should.deep.equal('https://hyperledger.github.io/fabric-chaincode-node/main/api/contract-schema.json');
         });
     });
 

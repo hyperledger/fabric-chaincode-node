@@ -13,15 +13,15 @@ schedules:
     displayName: 'Chaincode Node Nightly Driver'
     branches:
       include:
-        - master
+        - main
 
-# Trigger on the master branch
+# Trigger on the main branch
 # Standard Pull Request and Merge builds
 # Any git tag will also trigger a build that should do publishing
 trigger:
   branches:
     include:
-      - 'master'
+      - 'main'
   tags:
     include:
       - '*'
@@ -145,12 +145,12 @@ stages:
                 path: $(Build.SourcesDirectory)/build
             - script: |
                 set -ev
-                ./tools/getEdgeDocker.sh                                # essential to get master docker images of peer etc.
+                ./tools/getEdgeDocker.sh                                # essential to get main docker images of peer etc.
                 docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
                 docker images
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
-              displayName: 'Get the latest master docker images'
+              displayName: 'Get the latest main docker images'
             - script: |
                 set -ev
                 export TLS=true
@@ -224,9 +224,9 @@ stages:
           dependsOn: displayenv
           condition: and(succeeded(),eq(variables['Build.Reason'], 'IndividualCI'))
           variables:
-            ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-              jsdoc_release: master
-            ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+            ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+              jsdoc_release: main
+            ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/main') }}:
               jsdoc_release: $[format('release-{0}',dependencies.displayenv.outputs['BuildData.MINOR_PACKAGE_VERSION'])]
           steps:
             - task: NodeTool@0
@@ -249,7 +249,7 @@ stages:
                 cleanTargetFolder: true
               displayName: 'Copy JSDoc'
             - task: CopyFiles@2
-              condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+              condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
               inputs:
                 contents: |
                   _config.yml
@@ -261,7 +261,7 @@ stages:
                 sourceFolder: '$(Build.SourcesDirectory)/docs'
                 targetFolder: $(Build.ArtifactStagingDirectory)/gh-pages
                 cleanTargetFolder: true
-              displayName: 'Copy gh-pages doc (master branch only)'
+              displayName: 'Copy gh-pages doc (main branch only)'
             - script: |
                 git reset --hard HEAD
                 git clean -xdf
@@ -273,7 +273,7 @@ stages:
                 rm -rf $(jsdoc_release)/api/*
                 cp -r $(Build.ArtifactStagingDirectory)/jsdoc/gen/* $(jsdoc_release)/api
                 if [ -d $(Build.ArtifactStagingDirectory)/gh-pages ]; then
-                  find . -maxdepth 1 ! \( -name [.]* -o -name 'gh-pages' -o -name 'master' -o -name 'release-*' \) -exec rm -rf {} \;
+                  find . -maxdepth 1 ! \( -name [.]* -o -name 'gh-pages' -o -name 'main' -o -name 'release-*' \) -exec rm -rf {} \;
                   cp -r $(Build.ArtifactStagingDirectory)/gh-pages/* .
                 fi
               displayName: 'Update gh-pages branch'

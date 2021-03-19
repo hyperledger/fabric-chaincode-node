@@ -79,8 +79,8 @@
         {
             "commandKind": "global",
             "name": "edge-docker",
-            "summary": "Gets the latest master docker images for Fabric ",
-            "description": "Run this command before doing anything to get the master branch Fabric docker images",
+            "summary": "Gets the latest main docker images for Fabric ",
+            "description": "Run this command before doing anything to get the main branch Fabric docker images",
             "shellCommand": "./tools/getEdgeDocker.sh"
         }
     ]
