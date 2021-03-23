@@ -75,7 +75,7 @@ describe('Transaction.js', () => {
 
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').onFirstCall().returns([{
                 name: 'someTransaction',
-                tag: ['submitTx']
+                tag: ['SUBMIT', 'submitTx']
             }]).onSecondCall().returns([
                 MockContext,
                 'some type',
@@ -100,10 +100,10 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'someTransaction',
-                tag: ['submitTx'],
+                tag: ['SUBMIT', 'submitTx'],
             }, {
                 name: 'mockKey',
-                tag: ['submitTx'],
+                tag: ['SUBMIT', 'submitTx'],
                 parameters: [
                     {
                         name: 'param1',
@@ -122,7 +122,7 @@ describe('Transaction.js', () => {
 
             sandbox.stub(Reflect, 'getMetadata').onFirstCall().returns([{
                 name: 'someTransaction',
-                tag: ['submitTx']
+                tag: ['SUBMIT', 'submitTx']
             }]).onSecondCall().returns([
                 MockContext,
                 'Object'
@@ -140,7 +140,7 @@ describe('Transaction.js', () => {
         it ('should handle existing transactions of which matches name and already has param metadata', () => {
             const transactions = [{
                 name: 'mockKey',
-                tag: ['submitTx'],
+                tag: ['SUBMIT', 'submitTx'],
                 parameters: [{
                     name: 'param1',
                     schema: 'some special schema',
@@ -186,7 +186,7 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
-                tag: ['submitTx'],
+                tag: ['SUBMIT', 'submitTx'],
                 parameters: [
                     {
                         name: 'param1',
@@ -226,7 +226,7 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
-                tag: ['submitTx'],
+                tag: ['SUBMIT', 'submitTx'],
                 parameters: []
             }], mockTarget);
         });
@@ -250,7 +250,7 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'mockKey',
-                tag: [],
+                tag: ["EVALUATE"],
                 parameters: []
             }], mockTarget);
         });
@@ -266,7 +266,7 @@ describe('Transaction.js', () => {
         it ('should handle existing transactions', () => {
             const getMetadataStub = sandbox.stub(Reflect, 'getMetadata').returns([{
                 name: 'someTransaction',
-                tag: ['submitTx'],
+                tag: ['SUBMIT', 'submitTx'],
                 parameters: []
             }]);
 
@@ -280,7 +280,7 @@ describe('Transaction.js', () => {
             sinon.assert.calledOnce(defineMetadataStub);
             sinon.assert.calledWith(defineMetadataStub, 'fabric:transactions', [{
                 name: 'someTransaction',
-                tag: ['submitTx'],
+                tag: ['SUBMIT', 'submitTx'],
                 parameters: []
             },  {
                 name: 'mockKey',

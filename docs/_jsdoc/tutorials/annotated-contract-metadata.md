@@ -136,7 +136,7 @@ A starting example is a very simple transaction function.
           {
             "name": "setGreetingText",
             "tag": [
-              "submitTx"
+              "SUBMIT", "submitTx"
             ],
             "parameters": [
               {
@@ -159,7 +159,7 @@ A starting example is a very simple transaction function.
 ```
 
 - the name of the function is 'setGreetingText'
-- it has a tag of 'submitTx' that means that this transaction is intended to be submitted with the 'submitTransaction' sdk function. The implication is that this is then submitted to the orderder.  If this is not present, then the function will be 'evaluated', not submitted to the order so in effect a query-style operation.
+- it has tags of 'SUBMIT' and 'submitTx' that means that this transaction is intended to be submitted with the 'submitTransaction' sdk function. The implication is that this is then submitted to the orderder.  If this is not present, then the function will be 'evaluated', not submitted to the order so in effect a query-style operation.
 - the parameters of the function are defined in 'parameters' as an array of parameter definitions. (each of which follows the [parameterObject](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#parameterObject) of OpenAPI)
 - typically a parameter will contain a 'name', optional 'description' and critically the 'schema' 
 - again 'schema' comes from OpenAPI [schemaObject](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#schemaObject)

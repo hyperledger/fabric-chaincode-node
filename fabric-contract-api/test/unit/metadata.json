@@ -10,6 +10,7 @@
             "transactions": [
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [],
@@ -22,6 +23,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -37,6 +39,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -89,6 +92,7 @@
             "transactions": [
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [],
@@ -101,6 +105,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -116,6 +121,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -168,6 +174,7 @@
             "transactions": [
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [],
@@ -180,6 +187,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -195,6 +203,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -247,6 +256,7 @@
             "transactions": [
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [],
@@ -259,6 +269,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -274,6 +285,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
