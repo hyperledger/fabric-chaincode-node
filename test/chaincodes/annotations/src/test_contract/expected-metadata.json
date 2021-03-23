@@ -10,6 +10,7 @@
             "transactions": [
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -53,6 +54,7 @@
                 },
                 {
                     "tag": [
+                        "SUBMIT",
                         "submitTx"
                     ],
                     "parameters": [
@@ -71,7 +73,7 @@
                         "$ref": "#/components/schemas/Asset"
                     },
                     "name": "getAsset",
-                    "tag": [],
+                    "tag": ["EVALUATE"],
                     "parameters": [
                         {
                             "name": "id",

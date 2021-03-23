@@ -253,7 +253,7 @@ class ChaincodeFromContract {
                 };
 
                 if (contract.getName() !== 'org.hyperledger.fabric') {
-                    transaction.tags = ['submitTx'];
+                    transaction.tags = ['SUBMIT', 'submitTx'];
                 }
 
                 // add 'argN' parameters, skipping the first (stub) parameter
