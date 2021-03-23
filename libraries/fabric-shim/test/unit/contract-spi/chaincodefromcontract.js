@@ -886,7 +886,7 @@ describe('chaincodefromcontract', () => {
                     {
                         returns: {name: 'success', schema: {type: 'string'}},
                         name: 'fn',
-                        tag: ['submitTx'],
+                        tag: ['SUBMIT', 'submitTx'],
                         parameters: []
                     },
                 ]
@@ -1035,7 +1035,7 @@ describe('chaincodefromcontract', () => {
                         }
                     }
                 ],
-                tags: ['submitTx']
+                tags: ['SUBMIT', 'submitTx']
             }]);
 
             delete Object.getPrototypeOf(ci).property;
@@ -1071,7 +1071,7 @@ describe('chaincodefromcontract', () => {
                         }
                     }
                 ],
-                tags: ['submitTx']
+                tags: ['SUBMIT', 'submitTx']
             }]);
 
             delete Object.getPrototypeOf(ci).property;
@@ -1154,11 +1154,11 @@ describe('chaincodefromcontract', () => {
                             }
                         }
                     ],
-                    tags: ['submitTx']
+                    tags: ['SUBMIT', 'submitTx']
                 },
                 {
                     name: 'conga',
-                    tags: ['submitTx']
+                    tags: ['SUBMIT', 'submitTx']
                 }
             ]);
 
