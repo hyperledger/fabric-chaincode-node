@@ -68,7 +68,10 @@ module.exports.Transaction = function Transaction (commit = true) {
 
         const tag = [];
         if (commit) {
+            tag.push('SUBMIT');
             tag.push('submitTx');
+        } else {
+            tag.push('EVALUATE');
         }
 
         utils.appendOrUpdate(transactions, 'name', propertyKey, {
