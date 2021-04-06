@@ -20,10 +20,13 @@ const sinon = require('sinon');
 
 const yargs = require('yargs');
 
+const {execSync} = require('child_process');
+
 describe('fabric-chaincode-node cli', () => {
     let sandbox;
 
     beforeEach(() => {
+
         sandbox = sinon.createSandbox();
         sandbox.stub(yargs, 'parserConfiguration').returns(yargs);
         sandbox.stub(yargs, 'commandDir').returns(yargs);
@@ -35,10 +38,15 @@ describe('fabric-chaincode-node cli', () => {
         sandbox.stub(yargs, 'version').returns(yargs);
 
         sandbox.stub(process, 'exit');
+        execSync('cp ./cli.js ./cli2.js', () => {});
+        execSync('sed 1d ./cli2.js > ./cli.js', () => {});
     });
 
     afterEach(() => {
         sandbox.restore();
+        delete require.cache[require.resolve('../../cli.js')];
+        execSync('rm ./cli.js', () => {});
+        execSync('mv ./cli2.js ./cli.js', () => {});
     });
 
     describe('Main test', () => {
@@ -67,7 +75,6 @@ describe('fabric-chaincode-node cli', () => {
             });
             delete require.cache[require.resolve('../../cli.js')];
             require('../../cli.js');
-
         });
 
         it('should handle rejected promise  correctly', () => {
@@ -79,7 +86,6 @@ describe('fabric-chaincode-node cli', () => {
             });
             delete require.cache[require.resolve('../../cli.js')];
             require('../../cli.js');
-
         });
     });
 });
