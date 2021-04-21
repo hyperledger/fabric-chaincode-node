@@ -159,6 +159,8 @@ const installChaincode = async () => {
     );
     const npmrc = path.join(__dirname, '..', '..', 'test', 'chaincodes','scenario', '.npmrc');
 
+    console.log(`npmrc file ${npmrc} created with http://${ip.address()}:4873`);
+
     await runcmds([
         `echo "registry=http://${ip.address()}:4873" > ${npmrc}`,
         util.format(

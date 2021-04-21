@@ -49,6 +49,8 @@ const multiplier = arch === 's390x' ? 2 : 1;
 
 async function install(ccName) {
     const npmrc = path.join(__dirname, '..', 'chaincodes', ccName, '.npmrc');
+    console.log(`npmrc file ${npmrc} created with http://${ip.address()}:4873`);
+
     try {
         fs.writeFileSync(npmrc, `registry=http://${ip.address()}:4873`);
         const folderName = '/opt/gopath/src/github.com/chaincode/' + ccName;
