@@ -9,9 +9,14 @@ cp -R ${INPUT_DIR}/src/. ${OUTPUT_DIR}
 cd ${OUTPUT_DIR}
 
 cat ${OUTPUT_DIR}/.npmrc
+cat package.json
+
+npm --version
+npm config list
+
 
 if [ -f package-lock.json -o -f npm-shrinkwrap.json ]; then
-    npm ci --only=production
+    npm ci --only=production --verbose
 else
-    npm install
+    npm install --production --verbose
 fi

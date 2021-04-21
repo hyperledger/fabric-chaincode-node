@@ -14,7 +14,7 @@ const expect = chai.expect;
 const utils = require('./utils');
 const {SHORT_STEP, LONG_STEP} = utils.TIMEOUTS;
 
-describe('Typescript chaincode', () => {
+describe.only('Typescript chaincode', () => {
     const suite = 'annotations';
 
     before(async function () {
