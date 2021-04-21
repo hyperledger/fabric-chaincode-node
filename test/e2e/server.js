@@ -32,6 +32,7 @@ async function packageChaincode() {
 
 async function buildChaincode() {
     const npmrc = path.join(chaincodeDir, '.npmrc');
+    console.log(`npmrc file ${npmrc} created with http://${ip.address()}:4873`);
 
     await runcmds([
         `echo "registry=http://${ip.address()}:4873" > ${npmrc}`,
