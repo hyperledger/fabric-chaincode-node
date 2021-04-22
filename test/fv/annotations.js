@@ -19,7 +19,6 @@ describe('Typescript chaincode', () => {
 
     before(async function () {
         this.timeout(LONG_STEP);
-
         return utils.installAndInstantiate(suite);
     });
 

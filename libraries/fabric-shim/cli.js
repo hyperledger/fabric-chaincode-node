@@ -5,7 +5,7 @@ const Logger = require('./lib/logger');
 const logger = Logger.getLogger('fabric-shim/cli');
 
 const results = require('yargs')
-    .parserConfiguration({"dot-notation":false})
+    .parserConfiguration({'dot-notation':false})
     .commandDir('./lib/cmds')
     .demandCommand()
     .help()
