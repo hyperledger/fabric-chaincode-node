@@ -242,7 +242,7 @@ describe('generate', () => {
             sinon.assert.calledOnce(getInfoFromContractStub);
             sinon.assert.calledOnce(getMetadataStub);
             sinon.assert.calledOnce(infoStub);
-            infoStub.getCall(0).args.should.deep.equal(['Metadata is : \n', JSON.stringify(
+            infoStub.getCall(0).args.should.deep.equal([JSON.stringify(
                 {
                     info: {
                         title: 'some title',

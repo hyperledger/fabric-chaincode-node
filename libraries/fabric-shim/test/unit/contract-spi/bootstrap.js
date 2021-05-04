@@ -429,6 +429,11 @@ describe('bootstrap.js', () => {
             expect(metadata).to.deep.equal(JSON.parse(json));
         });
 
+        it('Coverage', () => {
+            const noop = require(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap.js')).noop;
+            noop();
+        });
+
     });
 
 });
