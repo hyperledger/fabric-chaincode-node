@@ -118,7 +118,6 @@ class Bootstrap {
 
         if (pathCheck) {
             metadata = Bootstrap.loadAndValidateMetadata(metadataPath);
-            logger.info('Metadata file has been located');
             logger.debug('Loaded metadata', metadata);
         } else {
             logger.info('No metadata file supplied in contract, introspection will generate all the data');
@@ -126,6 +125,7 @@ class Bootstrap {
         return metadata;
     }
 
+    static noop() {}
 
     static loadAndValidateMetadata(metadataPath) {
         const rootPath = path.dirname(__dirname);
@@ -134,13 +134,12 @@ class Bootstrap {
 
         const metadata = JSON.parse(metadataString);
 
-        const ajv = new Ajv({schemaId: 'id'});
+        const onlyErrors = {log: Bootstrap.noop, warn: Bootstrap.noop, error: console.error}; // eslint-disable-line no-console
+        const ajv = new Ajv({schemaId: 'id', logger: onlyErrors});
         ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
         const valid = ajv.validate(JSON.parse(schemaString), metadata);
         if (!valid) {
             throw new Error('Contract metadata does not match the schema: ' + JSON.stringify(ajv.errors));
-        } else {
-            logger.info('Metadata validated against schema correctly');
         }
         return metadata;
     }

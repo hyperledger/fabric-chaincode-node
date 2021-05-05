@@ -33,8 +33,6 @@ class Contract {
         } else {
             this.name = name.trim();
         }
-
-        logger.info('Creating new Contract', name);
     }
 
     /**
