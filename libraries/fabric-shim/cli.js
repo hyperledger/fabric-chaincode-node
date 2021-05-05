@@ -1,3 +1,9 @@
+/*
+ * Copyright IBM Corp. All Rights Reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #!/usr/bin/env node
 const version = 'v' + require('./package.json').version;
 const Logger = require('./lib/logger');

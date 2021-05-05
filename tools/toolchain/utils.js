@@ -1,3 +1,9 @@
+/*
+ * Copyright contributors to Hyperledger Fabric.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 const ordererCA = '/etc/hyperledger/config/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem';
 const org1CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem';
 const org2CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem';
