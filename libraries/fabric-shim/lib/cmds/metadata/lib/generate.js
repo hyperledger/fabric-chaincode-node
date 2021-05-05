@@ -32,7 +32,7 @@ class Generate {
             await fs.writeFile(filePath, JSON.stringify(chaincode.metadata, null, 4));
             logger.info(`File containing metadata has been saved to ${filePath}`);
         } else {
-            logger.info('Metadata is : \n', JSON.stringify(chaincode.metadata, null, 4));
+            logger.info(JSON.stringify(chaincode.metadata, null, 4));
         }
     }
 }
