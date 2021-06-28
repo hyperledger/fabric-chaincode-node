@@ -1,3 +1,19 @@
+## v2.2.2
+Mon 28 Jun 2021 10:05:22 BST
+
+* [4918854](https://github.com/hyperledger/fabric-chaincode-node/commit/4918854) Metadata generate updated [FABCN-447](https://jira.hyperledger.org/browse/FABCN-447) (#277)
+* [3b94a4b](https://github.com/hyperledger/fabric-chaincode-node/commit/3b94a4b) Shebang issue fixed [FABCN-438](https://jira.hyperledger.org/browse/FABCN-438) (#275)
+* [61ea8e4](https://github.com/hyperledger/fabric-chaincode-node/commit/61ea8e4) Pipeline publishing fixed (#274)
+* [f75318a](https://github.com/hyperledger/fabric-chaincode-node/commit/f75318a) Transaction metadata tags updated (#265) (#269)
+* [8f522ae](https://github.com/hyperledger/fabric-chaincode-node/commit/8f522ae) Refresh updates
+* [211f1b0](https://github.com/hyperledger/fabric-chaincode-node/commit/211f1b0) Remove the use of the "phantom" module
+* [1fb5641](https://github.com/hyperledger/fabric-chaincode-node/commit/1fb5641) [FABCN-351](https://jira.hyperledger.org/browse/FABCN-351) CORE_PEER_ADDRESS issue fixed (#253)
+* [443440f](https://github.com/hyperledger/fabric-chaincode-node/commit/443440f) [FABCN-425](https://jira.hyperledger.org/browse/FABCN-425) getTxTimestamp fixed (#245)
+* [4882958](https://github.com/hyperledger/fabric-chaincode-node/commit/4882958) [FABCN-388](https://jira.hyperledger.org/browse/FABCN-388) Tutorial updated (#247)
+* [f6bf8a7](https://github.com/hyperledger/fabric-chaincode-node/commit/f6bf8a7) [FABCN-429](https://jira.hyperledger.org/browse/FABCN-429) Iterator tutorial updated (#250)
+* [d58fa10](https://github.com/hyperledger/fabric-chaincode-node/commit/d58fa10) Metadata issue solved (#240)
+* [0533ba7](https://github.com/hyperledger/fabric-chaincode-node/commit/0533ba7) Bump version to 2.2.2
+
 ## v2.2.1
 Wed 11 Nov 2020 15:13:14 GMT
 

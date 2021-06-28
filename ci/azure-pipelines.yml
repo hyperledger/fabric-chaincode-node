@@ -296,7 +296,7 @@ stages:
                 workingFile: '$(Agent.TempDirectory)/.npmrc'
                 customEndpoint: 'fabric-chainode-node-npm'
             - script: |
-                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable \;
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag latest \;
               displayName: 'npm publish'
         - job: dockerhub_publish
           steps:
