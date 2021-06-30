@@ -12,7 +12,7 @@ declare module 'fabric-contract-api' {
     export class Context {
         stub: ChaincodeStub;
         clientIdentity: ClientIdentity;
-        logger: {
+        logging: {
             setLevel: (level: string) => void,
             getLogger: (name?: string) => Logger
         }
