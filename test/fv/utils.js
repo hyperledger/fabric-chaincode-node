@@ -11,82 +11,54 @@ const exec = util.promisify(childProcess.exec);
 const fs = require('fs');
 const path = require('path');
 const ip = require('ip');
+const execSync = require('child_process').execSync;
 
-
-const ordererCA = '/etc/hyperledger/config/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem';
-const tls = process.env.TLS && process.env.TLS.toLowerCase() === 'true' ? true : false;
+const ordererCA = '/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem';
+const dir = path.join(__dirname, '..', '..', 'fabric-samples');
+const registerAndEnroll = () => {
+    const cmd = `export PATH=${dir}/bin:$PATH && export FABRIC_CFG_PATH=${dir}/config/ && ` +
+            `export FABRIC_CA_CLIENT_HOME=${dir}/test-network/organizations/peerOrganizations/org1.example.com/ && ` +
+            `fabric-ca-client register --caname ca-org1 --id.name owner --id.secret ownerpw --id.type client --tls.certfiles "${dir}/test-network/organizations/fabric-ca/org1/tls-cert.pem" && ` +
+            `fabric-ca-client enroll -u https://owner:ownerpw@localhost:7054 --caname ca-org1 -M "${dir}/test-network/organizations/peerOrganizations/org1.example.com/users/owner@org1.example.com/msp" --tls.certfiles "${dir}/test-network/organizations/fabric-ca/org1/tls-cert.pem" && ` +
+            `cp "${dir}/test-network/organizations/peerOrganizations/org1.example.com/msp/config.yaml" "${dir}/test-network/organizations/peerOrganizations/org1.example.com/users/owner@org1.example.com/msp/config.yaml" && ` +
+            `export FABRIC_CA_CLIENT_HOME=${dir}/test-network/organizations/peerOrganizations/org2.example.com/ && ` +
+            `fabric-ca-client register --caname ca-org2 --id.name buyer --id.secret buyerpw --id.type client --tls.certfiles "${dir}/test-network/organizations/fabric-ca/org2/tls-cert.pem" && ` +
+            `fabric-ca-client enroll -u https://buyer:buyerpw@localhost:8054 --caname ca-org2 -M "${dir}/test-network/organizations/peerOrganizations/org2.example.com/users/buyer@org2.example.com/msp" --tls.certfiles "${dir}/test-network/organizations/fabric-ca/org2/tls-cert.pem" && ` +
+            `cp "${dir}/test-network/organizations/peerOrganizations/org2.example.com/msp/config.yaml" "${dir}/test-network/organizations/peerOrganizations/org2.example.com/users/buyer@org2.example.com/msp/config.yaml"`;
+    execSync(cmd);
+};
 const getTLSArgs = () => {
-    if (tls) {
-        return '--tls true --cafile ' + ordererCA;
-    }
-
-    return '';
-};
-const getPeerAddresses = () => {
-    if (tls) {
-        return '--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFile ' + org1CA +
-            ' --peerAddresses peer0.org2.example.com:8051 --tlsRootCertFile ' + org2CA;
-    } else {
-        return '--peerAddresses peer0.org1.example.com:7051' +
-            ' --peerAddresses peer0.org2.example.com:8051';
-    }
-};
-const findPackageId = (queryOutput, label) => {
-    const output = JSON.parse(queryOutput);
-
-    const cc = output.installed_chaincodes.filter((chaincode) => chaincode.label === label);
-    if (cc.length !== 1) {
-        throw new Error('Failed to find installed chaincode');
-    }
-
-    return cc[0].package_id;
+    return `--tls true --cafile ${dir}` + ordererCA;
 };
 
 // Increase the timeouts on zLinux!
 const arch = require('os').arch();
 const multiplier = arch === 's390x' ? 2 : 1;
 
-async function install(ccName) {
+async function install(ccName, transient) {
     const npmrc = path.join(__dirname, '..', 'chaincodes', ccName, '.npmrc');
     try {
         fs.writeFileSync(npmrc, `registry=http://${ip.address()}:4873`);
-        const folderName = '/opt/gopath/src/github.com/chaincode/' + ccName;
-        const packageCmd = `docker exec %s peer lifecycle chaincode package -l node /tmp/${ccName}.tar.gz -p ${folderName} --label ${ccName}_v0`;
-        await exec(util.format(packageCmd, 'org1_cli'));
-        await exec(util.format(packageCmd, 'org2_cli'));
-
-        const installCmd = `docker exec %s peer lifecycle chaincode install /tmp/${ccName}.tar.gz --connTimeout 60s`;
-        await exec(util.format(installCmd, 'org1_cli'));
-        await exec(util.format(installCmd, 'org2_cli'));
+        const networkScriptDir = path.join(__dirname, '..', '..', 'fabric-samples', 'test-network');
+        const CCDir = path.join(__dirname, '..', 'chaincodes', ccName);
+        const collectionConfig = transient ? `-cccg ${CCDir}/collection-config/collection.json` : '';
+        const cmd = `cd ${networkScriptDir} && ./network.sh deployCC -ccn ${ccName} -ccp ${CCDir} -ccl javascript ${collectionConfig} -ccep "OR('Org1MSP.peer','Org2MSP.peer')"`;
+        await exec(cmd);
     } finally {
         fs.unlinkSync(npmrc);
     }
 }
 
 async function instantiate(ccName, func, args) {
-    const orgs = ['org1', 'org2'];
-    const endorsementPolicy = '\'OR ("Org1MSP.member")\'';
-
-    for (const org of orgs) {
-        const queryInstalledCmd = `docker exec ${org}_cli peer lifecycle chaincode queryinstalled --output json`;
-        const res = await exec(queryInstalledCmd);
-        const pkgId = findPackageId(res.stdout.toString(), ccName + '_v0');
-        const approveCmd = `docker exec ${org}_cli peer lifecycle chaincode approveformyorg ${getTLSArgs()} -o orderer.example.com:7050` +
-            ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --package-id ${pkgId} --signature-policy ${endorsementPolicy}`;
-
-        await exec(approveCmd);
+    let res = null;
+    if (func !== undefined) {
+        const initCmd = `export PATH=${dir}/bin:$PATH && export FABRIC_CFG_PATH=${dir}/config/ && ` +
+                `export CORE_PEER_TLS_ENABLED=true && export CORE_PEER_LOCALMSPID="Org1MSP" && ` +
+                `export CORE_PEER_TLS_ROOTCERT_FILE=${dir}/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt && ` +
+                `export CORE_PEER_MSPCONFIGPATH=${dir}/test-network/organizations/peerOrganizations/org1.example.com/users/owner@org1.example.com/msp && ` +
+                `export CORE_PEER_ADDRESS=localhost:7051 && peer chaincode invoke ${getTLSArgs()} -o localhost:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent`;
+        res = await exec(initCmd);
     }
-
-    const commitCmd = `docker exec org1_cli peer lifecycle chaincode commit ${getTLSArgs()} -o orderer.example.com:7050` +
-        ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --signature-policy ${endorsementPolicy} ${getPeerAddresses()}`;
-
-    console.log(commitCmd);
-    await exec(commitCmd);
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
-    const initCmd = `docker exec org1_cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} --isInit -c '${printArgs(func, args)}' --waitForEvent`;
-    const res = await exec(initCmd);
-
     return res;
 }
 
@@ -105,27 +77,34 @@ function printArgs(func, args) {
 }
 
 async function invoke(ccName, func, args, transient) {
-    let cmd;
+    let cmd = `export PATH=${dir}/bin:$PATH && export FABRIC_CFG_PATH=${dir}/config/ && ` +
+        `export CORE_PEER_TLS_ENABLED=true && export CORE_PEER_LOCALMSPID="Org1MSP" && ` +
+        `export CORE_PEER_TLS_ROOTCERT_FILE=${dir}/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt && ` +
+        `export CORE_PEER_MSPCONFIGPATH=${dir}/test-network/organizations/peerOrganizations/org1.example.com/users/owner@org1.example.com/msp && ` +
+        `export CORE_PEER_ADDRESS=localhost:7051 && `;
 
     if (transient) {
-        cmd = `docker exec org1_cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --transient '${transient}' --waitForEvent --waitForEventTimeout 100s 2>&1`;
+        cmd += `peer chaincode invoke ${getTLSArgs()} -o localhost:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --transient '${transient}' --waitForEvent --waitForEventTimeout 200s 2>&1`;
     } else {
-        cmd = `docker exec org1_cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent --waitForEventTimeout 100s 2>&1`;
+        cmd += `peer chaincode invoke ${getTLSArgs()} -o localhost:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent --waitForEventTimeout 100s 2>&1`;
     }
-
-    const {stderr} = await exec(cmd);
+    const {stderr} = execSync(cmd);
     if (stderr) {
         throw new Error(stderr);
     }
 }
 
 async function query(ccName, func, args, transient) {
-    let cmd;
+    let cmd = `export PATH=${dir}/bin:$PATH && export FABRIC_CFG_PATH=${dir}/config/ && ` +
+        `export CORE_PEER_TLS_ENABLED=true && export CORE_PEER_LOCALMSPID="Org2MSP" && ` +
+        `export CORE_PEER_TLS_ROOTCERT_FILE=${dir}/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt && ` +
+        `export CORE_PEER_MSPCONFIGPATH=${dir}/test-network/organizations/peerOrganizations/org2.example.com/users/buyer@org2.example.com/msp && ` +
+        `export CORE_PEER_ADDRESS=localhost:9051 && `;
 
     if (transient) {
-        cmd = `docker exec org2_cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --transient '${transient}' 2>&1`;
+        cmd += `peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --transient '${transient}' 2>&1`;
     } else {
-        cmd = `docker exec org2_cli peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' 2>&1`;
+        cmd += `peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' 2>&1`;
     }
     const {error, stdout, stderr} = await exec(cmd);
     if (error) {
@@ -135,13 +114,18 @@ async function query(ccName, func, args, transient) {
     return  stdout.trim().replace(/^"(.*)"$/, '$1').replace(/\\"/g, '"'); // remove surrounding quotes and unescape
 }
 
-async function installAndInstantiate(ccName, instantiateFunc, instantiateArgs) {
-    await install(ccName);
+async function installAndInstantiate(ccName, instantiateFunc, instantiateArgs, transient = false) {
+    await install(ccName, transient);
     return instantiate(ccName, instantiateFunc, instantiateArgs);
 }
 
 async function getLastBlock() {
-    const cmd = 'docker exec org1_cli bash -c "peer channel fetch newest -c mychannel /tmp/mychannel.block && configtxlator proto_decode --type common.Block --input=/tmp/mychannel.block"';
+    const cmd = `export PATH=${dir}/bin:$PATH && export FABRIC_CFG_PATH=${dir}/config/ && ` +
+        `export CORE_PEER_TLS_ENABLED=true && export CORE_PEER_LOCALMSPID="Org2MSP" && ` +
+        `export CORE_PEER_TLS_ROOTCERT_FILE=${dir}/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt && ` +
+        `export CORE_PEER_MSPCONFIGPATH=${dir}/test-network/organizations/peerOrganizations/org2.example.com/users/buyer@org2.example.com/msp && ` +
+        `export CORE_PEER_ADDRESS=localhost:9051 && ` +
+        'peer channel fetch newest -c mychannel /tmp/mychannel.block && configtxlator proto_decode --type common.Block --input=/tmp/mychannel.block --output=/tmp/output && cat /tmp/output';
     const {error, stdout, stderr} = await exec(cmd);
     if (error) {
         throw new Error(error, stderr);
@@ -158,4 +142,4 @@ const TIMEOUTS = {
     MED_INC : 10 * 1000 * multiplier,
     SHORT_INC: 5 * 1000 * multiplier
 };
-module.exports = {installAndInstantiate, invoke, query, getLastBlock, TIMEOUTS};
+module.exports = {installAndInstantiate, invoke, query, getLastBlock, TIMEOUTS, registerAndEnroll};

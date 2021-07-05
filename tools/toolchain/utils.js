@@ -1,17 +1,16 @@
-const ordererCA = '/etc/hyperledger/config/crypto-config/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem';
+const path = require('path');
+
+const ordererCA = '/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem';
 const org1CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem';
 const org2CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem';
+const dir = path.join(__dirname, '..', '..', 'fabric-samples');
 
 const tls = process.env.TLS && process.env.TLS.toLowerCase() === 'true' ? true : false;
 
 exports.tls = tls;
 
 exports.getTLSArgs = () => {
-    if (tls) {
-        return '--tls true --cafile ' + ordererCA;
-    }
-
-    return '';
+    return `--tls true --cafile ${dir}` + ordererCA;
 };
 
 exports.getPeerAddresses = () => {
