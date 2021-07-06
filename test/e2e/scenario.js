@@ -188,4 +188,4 @@ const installChaincode = async () => {
 const clientTests = series(installChaincode, instantiateChaincode, invokeFunctions, queryFunctions);
 const serverTests = require('./server').default;
 
-exports.default = series(clientTests, serverTests);
+exports.default = series(/*clientTests,*/ serverTests);

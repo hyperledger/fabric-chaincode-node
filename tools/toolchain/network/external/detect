@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-set -e
-
+set -ex
+exec 1>&2
 METADIR="$2"
 
 if [ `jq -r .type "${METADIR}/metadata.json"` = "external" ]; then
