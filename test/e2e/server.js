@@ -116,6 +116,10 @@ async function instantiateChaincode() {
             'org2_cli',
             queryInstalled
         ),
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /tmp"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /tmp"`,
     ]);
 
     const packageIdOrg1 = findPackageId(outputs[0], 'server_v0');
@@ -135,6 +139,10 @@ async function instantiateChaincode() {
             'org2_cli',
             util.format(approveChaincode, packageIdOrg2)
         ),
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /tmp"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /tmp"`,
         // Commit the chaincode definition
         util.format('docker exec org1_cli peer lifecycle chaincode commit -o %s %s -C %s -n %s -v %s --sequence %d --signature-policy %s %s',
             'orderer.example.com:7050',
@@ -149,23 +157,26 @@ async function instantiateChaincode() {
     ]);
 }
 
+let cmd=[`docker exec peer0.org1.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+`docker exec peer0.org1.example.com sh -c "ls -lartR /tmp"`,
+`docker exec peer0.org2.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+`docker exec peer0.org2.example.com sh -c "ls -lartR /tmp"`
+]
+
 const invokeFunctions = async () => {
-    console.log("invoke functions...........")
+    console.log("invoke functions...........1")
     const args = util.format('docker exec org1_cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
         getTLSArgs(),
         CHANNEL_NAME,
         'server',
         '\'{"Args":["putValue","\'42\'"]}\'');
-            let cmd=[`docker exec peer0.org1.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
-            `docker exec peer0.org1.example.com sh -c "ls -lartR /tmp"`,
-            `docker exec peer0.org2.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
-            `docker exec peer0.org2.example.com sh -c "ls -lartR /tmp"`,
-            `docker exec peer0.org2.example.com sh -c "df -h"`,
-            `docker exec peer0.org2.example.com sh -c "echo hello > /var/hyperledger/fred && ls -lart /var/hyperledger"`]
+
 
         try {
+            await runcmds(cmd)
+            console.log("invoke functions...........2")
             await runcmds([args]);
-            console.log(packageId)
+            console.log("invoke functions...........3")
             await runcmds(cmd)
         } catch (e){
             await runcmds(cmd)
