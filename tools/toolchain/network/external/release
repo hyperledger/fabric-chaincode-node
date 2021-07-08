@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-set -e
-
+set -ex
+exec 1>&2
 BUILD="$1"
 RELEASE="$2"
 
@@ -16,8 +16,8 @@ fi
 if [ -f "${BUILD}/connection.json" ]; then
     mkdir -p "${RELEASE}/chaincode/server"
     cp "${BUILD}/connection.json" "${RELEASE}/chaincode/server"
-
-    # TODO: TLS
-
-    exit 0
+    ls -l "${RELEASE}/chaincode/server/connection.json"
+    cat "${RELEASE}/chaincode/server/connection.json"
 fi
+
+ls -lartR "${RELEASE}"

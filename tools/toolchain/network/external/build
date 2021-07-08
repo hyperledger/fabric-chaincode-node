@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-set -e
-
+set -ex
+exec 1>&2
 SOURCE="$1"
 OUTPUT="$3"
 

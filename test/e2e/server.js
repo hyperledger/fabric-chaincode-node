@@ -14,7 +14,7 @@ const { shell: runcmds , getTLSArgs, getPeerAddresses } = require('toolchain');
 const ip = require('ip');
 
 const CHANNEL_NAME = 'mychannel';
-
+let packageId="";
 const chaincodeDir = path.join(__dirname, '..', '..', 'test', 'chaincodes', 'server');
 
 async function packageChaincode() {
@@ -27,6 +27,19 @@ async function packageChaincode() {
             'tar -C %s/package -cvzf %s/package/chaincode.tar.gz code.tar.gz metadata.json',
             chaincodeDir, chaincodeDir
         ),
+        util.format(
+            'tar -C %s/package -tvzf %s/package/chaincode.tar.gz',
+            chaincodeDir, chaincodeDir
+        ),
+        util.format(
+            'tar -C %s/package -zvxOf %s/package/code.tar.gz connection.json',
+            chaincodeDir, chaincodeDir
+        ),
+        util.format(
+            'tar -C %s/package -zvxOf %s/package/chaincode.tar.gz code.tar.gz | tar -zxvO connection.json',
+            chaincodeDir, chaincodeDir
+        )
+      
     ]);
 }
 
@@ -71,6 +84,8 @@ function findPackageId(queryOutput, label) {
     return cc[0].package_id;
 }
 
+
+
 async function instantiateChaincode() {
     const endorsementPolicy = '"OR (\'Org1MSP.member\', \'Org2MSP.member\')"';
     const queryInstalled = util.format(
@@ -101,15 +116,20 @@ async function instantiateChaincode() {
             'org2_cli',
             queryInstalled
         ),
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /tmp"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /tmp"`,
     ]);
 
     const packageIdOrg1 = findPackageId(outputs[0], 'server_v0');
     const packageIdOrg2 = findPackageId(outputs[1], 'server_v0');
-
+    packageId = packageIdOrg1;
     // TODO: Assuming the two package IDs are the same
     await runcmds([
         // Start the CC Server container
         `docker run -e CORE_CHAINCODE_ID=${packageIdOrg1} -e CORE_CHAINCODE_ADDRESS=0.0.0.0:9999 -h cc-server --name cc-server -d --network node_default chaincode-e2e-server`,
+        `docker ps`,
         // Approve the chaincode definition by each org
         util.format('docker exec %s %s',
             'org1_cli',
@@ -119,6 +139,10 @@ async function instantiateChaincode() {
             'org2_cli',
             util.format(approveChaincode, packageIdOrg2)
         ),
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org1.example.com sh -c "ls -lartR /tmp"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+        `docker exec peer0.org2.example.com sh -c "ls -lartR /tmp"`,
         // Commit the chaincode definition
         util.format('docker exec org1_cli peer lifecycle chaincode commit -o %s %s -C %s -n %s -v %s --sequence %d --signature-policy %s %s',
             'orderer.example.com:7050',
@@ -133,14 +157,32 @@ async function instantiateChaincode() {
     ]);
 }
 
+let cmd=[`docker exec peer0.org1.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+`docker exec peer0.org1.example.com sh -c "ls -lartR /tmp"`,
+`docker exec peer0.org2.example.com sh -c "ls -lartR /var/hyperledger/production/externalbuilder"`,
+`docker exec peer0.org2.example.com sh -c "ls -lartR /tmp"`
+]
+
 const invokeFunctions = async () => {
+    console.log("invoke functions...........1")
     const args = util.format('docker exec org1_cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
         getTLSArgs(),
         CHANNEL_NAME,
         'server',
         '\'{"Args":["putValue","\'42\'"]}\'');
 
-    await runcmds([args]);
+
+        try {
+            await runcmds(cmd)
+            console.log("invoke functions...........2")
+            await runcmds([args]);
+            console.log("invoke functions...........3")
+            await runcmds(cmd)
+        } catch (e){
+            await runcmds(cmd)
+            throw e;
+        }
+    
 };
 
 const queryFunctions = async () => {

@@ -146,10 +146,11 @@ stages:
                 node common/scripts/install-run-rush.js start-fabric
                 node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
                 docker images | grep hyperledger && docker ps -a
-                node common/scripts/install-run-rush.js test:fv --verbose
+                # node common/scripts/install-run-rush.js test:fv --verbose
                 node common/scripts/install-run-rush.js test:e2e --verbose
+                
               displayName: 'FV Tests'
-
+                        
             - task: PublishTestResults@2
               condition: or(succeeded(), failed())   # publish either way
               inputs:
@@ -164,6 +165,7 @@ stages:
                   !**/node_modules/**
                 targetFolder: $(Build.ArtifactStagingDirectory)/testlogs
             - script: |
+                cat tools/toolchain/network/docker-compose/logs/docker.log
                 mkdir -p $(Build.ArtifactStagingDirectory)/testlogs
                 find . \( -type d -name 'node_modules' \) -prune -o -name '*.build*.log' -exec cp {} $(Build.ArtifactStagingDirectory)/testlogs \;
               condition: or(succeeded(), failed())
