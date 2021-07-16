@@ -73,13 +73,15 @@ async function instantiate(ccName, func, args) {
         const res = await exec(queryInstalledCmd);
         const pkgId = findPackageId(res.stdout.toString(), ccName + '_v0');
         const approveCmd = `docker exec ${org}_cli peer lifecycle chaincode approveformyorg ${getTLSArgs()} -o orderer.example.com:7050` +
-            ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --package-id ${pkgId} --signature-policy ${endorsementPolicy}`;
+            ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --package-id ${pkgId} --signature-policy ${endorsementPolicy}` +
+            ` --collections-config /usr/local/src/collection.json`;
 
         await exec(approveCmd);
     }
 
     const commitCmd = `docker exec org1_cli peer lifecycle chaincode commit ${getTLSArgs()} -o orderer.example.com:7050` +
-        ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --signature-policy ${endorsementPolicy} ${getPeerAddresses()}`;
+        ` -C mychannel -n ${ccName} -v v0 --init-required --sequence 1 --signature-policy ${endorsementPolicy} ${getPeerAddresses()}` +
+        ` --collections-config /usr/local/src/collection.json`;
 
     console.log(commitCmd);
     await exec(commitCmd);
@@ -113,8 +115,11 @@ async function invoke(ccName, func, args, transient) {
     } else {
         cmd = `docker exec org1_cli peer chaincode invoke ${getTLSArgs()} -o orderer.example.com:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent --waitForEventTimeout 100s 2>&1`;
     }
+    console.log('Invoking');
 
     const {stderr} = await exec(cmd);
+    const {stdout} = await exec('echo $?');
+    console.log(stdout);
     if (stderr) {
         throw new Error(stderr);
     }
