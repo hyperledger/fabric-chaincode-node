@@ -10,6 +10,7 @@ An initial `package.json` is as follows;
 
 The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
 
+
 ```
 {
   "name": "chaincode",
