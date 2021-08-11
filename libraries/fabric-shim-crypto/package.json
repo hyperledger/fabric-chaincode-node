@@ -1,7 +1,7 @@
 {
     "name": "fabric-shim-crypto",
-    "version": "2.2.2-unstable",
-    "tag": "unstable",
+    "version": "2.2.2",
+    "tag": "latest",
     "description": "A node.js implementation of encryption library for Hyperledger Fabric chaincode shim",
     "main": "index.js",
     "repository": {
@@ -26,7 +26,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "elliptic": "^6.5.3",
-        "jsrsasign": "^10.2.0"
+        "jsrsasign": "^10.2"
     },
     "devDependencies": {
         "mocha": "6.2.2",
