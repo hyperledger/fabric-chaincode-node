@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Hyperledger Fabric Contract API Class: Contract</title>
+	<title>Hyperledger Fabric Contract API Class: Ledger</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -79,19 +79,16 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Contract</h1>
+	<h1 class="page-title">Class: Ledger</h1>
 <section>
 
 <header>
     
         <h2>
-        Contract
+        Ledger
         </h2>
         
-            <div class="class-description">The main Contact class that all code working within a Chaincode Container must be extending.
-
-Overriding of the `beforeTransaction`, `afterTransaction`, `aroundTransaction`, `unknownTransaction` and `createContext` are all optional
-Supplying a name within the constructor is also option and will default to ''</div>
+            <div class="class-description">Entrypoint for the Ledger API.</div>
         
     
 </header>
@@ -103,73 +100,19 @@ Supplying a name within the constructor is also option and will default to ''</d
         
 <hr>
 <dt>
-    <h4 class="name" id="Contract"><span class="type-signature"></span>new Contract(name)</h4>
+    <h4 class="name" id="Ledger"><span class="type-signature"></span>new Ledger()</h4>
     
     
 </dt>
 <dd>
 
     
-    <div class="description">
-        Constructor - supplying a name is recommended but is not mandatory.
-    </div>
-    
 
     
 
     
 
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">name for the logic within this contract</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
     
 
     
@@ -249,7 +192,7 @@ Supplying a name within the constructor is also option and will default to ''</d
             
 <hr>
 <dt>
-    <h4 class="name" id="._isContract"><span class="type-signature">&lt;static> </span>_isContract(obj)</h4>
+    <h4 class="name" id=".getLedger"><span class="type-signature">&lt;async, static> </span>getLedger(ctx)</h4>
     
     
 </dt>
@@ -257,140 +200,7 @@ Supplying a name within the constructor is also option and will default to ''</d
 
     
     <div class="description">
-        isContract provides functionality to check if a passed object is a contract type. Enables
-checking if its a contract for when contract-api is "required" by different modules
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>obj</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="afterTransaction"><span class="type-signature">&lt;async> </span>afterTransaction(ctx, result)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        'afterTransaction' will be called before any of the transaction functions within your contract
-Override this method to implement your own processing. Examples of what you may wish to code
- are Logging, Event Publishing
-
-If an error is thrown, the whole transaction will be rejected
+        Get a Ledger instance which represents the current ledger state.
     </div>
     
 
@@ -442,31 +252,7 @@ If an error is thrown, the whole transaction will be rejected
 
             
 
-            <td class="description last">the transactional context</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>result</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">value that is returned from the transaction function</td>
+            <td class="description last">The transaction context</td>
         </tr>
 
     
@@ -526,6 +312,30 @@ If an error is thrown, the whole transaction will be rejected
     
 
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    A new Ledger instance
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Ledger></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>
@@ -534,7 +344,7 @@ If an error is thrown, the whole transaction will be rejected
             
 <hr>
 <dt>
-    <h4 class="name" id="aroundTransaction"><span class="type-signature">&lt;async> </span>aroundTransaction(ctx, fn, paramters)</h4>
+    <h4 class="name" id="getCollection"><span class="type-signature">&lt;async> </span>getCollection(collectionName)</h4>
     
     
 </dt>
@@ -542,14 +352,7 @@ If an error is thrown, the whole transaction will be rejected
 
     
     <div class="description">
-        'aroundTransaction' wraps the call to the transaction function within your contract, allowing you
- to encapsulate it into a code block. Examples of what you could do overriding this include, but
- are not limited to: catching exceptions, logging, use a thread-store.
-
-When overriding this function, remember to call `super.aroundTransaction(ctx, fn, parameters)`!
-If you don't, the contract won't be able to run any transaction.
-
-If an error is thrown, the whole transaction will be rejected
+        Get a Collection instance for the named collection.
     </div>
     
 
@@ -584,13 +387,13 @@ If an error is thrown, the whole transaction will be rejected
 
         <tr>
             
-                <td class="name"><code>ctx</code></td>
+                <td class="name"><code>collectionName</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Context</span>
+<span class="param-type">string</span>
 
 
 
@@ -601,55 +404,7 @@ If an error is thrown, the whole transaction will be rejected
 
             
 
-            <td class="description last">the transactional context</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>fn</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the contract function to invoke</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>paramters</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">any</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the parameters for the function to invoke</td>
+            <td class="description last">The name of the collection</td>
         </tr>
 
     
@@ -709,138 +464,30 @@ If an error is thrown, the whole transaction will be rejected
     
 
     
-
+    <h5>Returns:</h5>
     
-</dd>
+            
+<div class="param-desc">
+    A new Collection instance
+</div>
 
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
         
-            
-<hr>
-<dt>
-    <h4 class="name" id="beforeTransaction"><span class="type-signature">&lt;async> </span>beforeTransaction(ctx)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        'beforeTransaction' will be called before any of the transaction functions within your contract
-Override this method to implement your own processing. Examples of what you may wish to code
- are Logging, Event Publishing or Permissions checks
-
-If an error is thrown, the whole transaction will be rejected
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>ctx</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Context</span>
+<span class="param-type">Promise.&lt;Collection></span>
 
 
 
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the transactional context</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
+    </dd>
 </dl>
 
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
+        
 
     
 </dd>
@@ -849,7 +496,7 @@ If an error is thrown, the whole transaction will be rejected
             
 <hr>
 <dt>
-    <h4 class="name" id="createContext"><span class="type-signature"></span>createContext()</h4>
+    <h4 class="name" id="getDefaultCollection"><span class="type-signature">&lt;async> </span>getDefaultCollection()</h4>
     
     
 </dt>
@@ -857,12 +504,7 @@ If an error is thrown, the whole transaction will be rejected
 
     
     <div class="description">
-        'createContext' is called before any after, before, unknown or user defined transaction function. This permits contracts
-to use their own subclass of context to add additinal processing.
-
-After this function returns, the chaincodeStub and client identity objects will be injected.
-No chaincode apis are available for calling directly within this function. Nor should the constructor of the subclasses context assume
-any other setup.
+        Get a Collection instance representing the default world state.
     </div>
     
 
@@ -928,7 +570,7 @@ any other setup.
     
             
 <div class="param-desc">
-    a context implementation that must subclass context
+    A new Collection instance
 </div>
 
 
@@ -939,7 +581,7 @@ any other setup.
     </dt>
     <dd>
         
-<span class="param-type">Context</span>
+<span class="param-type">Promise.&lt;Collection></span>
 
 
 
@@ -948,234 +590,6 @@ any other setup.
 
 
         
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="getName"><span class="type-signature"></span>getName()</h4>
-    
-    
-</dt>
-<dd>
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    returns the namespace
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">String</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt>
-    <h4 class="name" id="unknownTransaction"><span class="type-signature">&lt;async> </span>unknownTransaction(ctx)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        'unknownTransaction' will be called if the required transaction function requested does not exist
-Override this method to implement your own processing.
-If an error is thrown, the whole transaction will be rejected
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>ctx</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Context</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">the transactional context</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
     
 </dd>
