@@ -52,7 +52,7 @@ pool:
 #
 # Publish to NPM on release builds (they are the github tagged releases)
 # Publish to NPM on nightly builds when there is something to build
-# the ids will be of the format 2.3.1-unstable.{commitid}
+# the ids will be of the format 2.4.0-beta.{commitid}
 #
 stages:
 
