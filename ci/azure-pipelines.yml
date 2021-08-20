@@ -185,11 +185,6 @@ stages:
                 pathToPublish:  $(Build.ArtifactStagingDirectory)/testlogs
                 artifactName: 'Test logs'
               displayName: 'Publish test logs'
-            - task: PublishBuildArtifacts@1
-              condition: or(succeeded(), failed())   # publish either way
-              inputs:
-                pathToPublish: tools/toolchain/network/docker-compose/logs/docker.log
-                artifactName: nodeenv-docker-image
 
 
         # Job to handle the auditing of the code
