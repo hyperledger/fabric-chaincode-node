@@ -37,25 +37,6 @@ const getTLSArgs = () => {
 
     return '';
 };
-const getPeerAddresses = () => {
-    if (tls) {
-        return '--peerAddresses peer0.org1.example.com:7051 --tlsRootCertFiles ' + org1CA +
-            ' --peerAddresses peer0.org2.example.com:8051 --tlsRootCertFiles ' + org2CA;
-    } else {
-        return '--peerAddresses peer0.org1.example.com:7051' +
-            ' --peerAddresses peer0.org2.example.com:8051';
-    }
-};
-const findPackageId = (queryOutput, label) => {
-    const output = JSON.parse(queryOutput);
-
-    const cc = output.installed_chaincodes.filter((chaincode) => chaincode.label === label);
-    if (cc.length !== 1) {
-        throw new Error('Failed to find installed chaincode');
-    }
-
-    return cc[0].package_id;
-};
 
 // Increase the timeouts on zLinux!
 const arch = require('os').arch();

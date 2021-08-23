@@ -67,7 +67,7 @@
             "name": "stop-fabric",
             "summary": "Starts local Fabric test network ",
             "description": "Run this command to stop local Fabric network created for testing",
-            "shellCommand": "gulp -f ./tools/toolchain/fabric.js stopFabric"
+            "shellCommand": "cd ./fabric-samples/test-network && ./network.sh down && cd -"
         },
         {
             "commandKind": "global",
