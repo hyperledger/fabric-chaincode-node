@@ -10,11 +10,7 @@ const tls = process.env.TLS && process.env.TLS.toLowerCase() === 'true' ? true :
 exports.tls = tls;
 
 exports.getTLSArgs = () => {
-    if (tls) {
-        return `--tls true --cafile ${dir}` + ordererCA;
-    }
-
-    return '';
+    return `--tls true --cafile ${dir}` + ordererCA;
 };
 
 exports.getPeerAddresses = () => {

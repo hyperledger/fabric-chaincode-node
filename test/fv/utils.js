@@ -13,10 +13,7 @@ const path = require('path');
 const ip = require('ip');
 const execSync = require('child_process').execSync;
 
-const org1CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem';
-const org2CA = '/etc/hyperledger/config/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem';
 const ordererCA = '/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem';
-const tls = process.env.TLS && process.env.TLS.toLowerCase() === 'true' ? true : false;
 const dir = path.join(__dirname, '..', '..', 'fabric-samples');
 const registerAndEnroll = () => {
     const cmd = `export PATH=${dir}/bin:$PATH && export FABRIC_CFG_PATH=${dir}/config/ && ` +
@@ -31,11 +28,7 @@ const registerAndEnroll = () => {
     execSync(cmd);
 };
 const getTLSArgs = () => {
-    if (tls) {
-        return `--tls true --cafile ${dir}` + ordererCA;
-    }
-
-    return '';
+    return `--tls true --cafile ${dir}` + ordererCA;
 };
 
 // Increase the timeouts on zLinux!
