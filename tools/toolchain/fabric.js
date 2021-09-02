@@ -185,8 +185,8 @@ const dockerReady = series(generateConfig, _start_docker);
 async function _channel_init() {
     await runcmds([
         // create channel, join peer0 to the channel
-        'docker exec org1_cli /etc/hyperledger/fixtures/channel-init.sh',
-        'docker exec org2_cli /etc/hyperledger/fixtures/channel-init.sh'
+        'docker exec peer0.org1.example.com /etc/hyperledger/fixtures/channel-init.sh',
+        'docker exec peer0.org2.example.com /etc/hyperledger/fixtures/channel-init.sh'
     ]);
 }
 
@@ -194,7 +194,7 @@ async function _channel_create() {
     await delay(3000);
     await runcmds([
         util.format(
-            'docker exec org1_cli peer channel create -o orderer.example.com:7050 -c %s -f %s/channel.tx --outputBlock %s/mychannel.block %s',
+            'docker exec peer0.org1.example.com peer channel create -o orderer.example.com:7050 -c %s -f %s/channel.tx --outputBlock %s/mychannel.block %s',
             channelName,
             dockerCfgTxPath,
             dockerCfgTxPath,

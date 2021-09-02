@@ -49,12 +49,12 @@ async function installChaincode() {
     await runcmds([
         util.format(
             'docker exec %s %s',
-            'org1_cli',
+            'peer0.org1.example.com',
             peerInstall
         ),
         util.format(
             'docker exec %s %s',
-            'org2_cli',
+            'peer0.org2.example.com',
             peerInstall
         )
     ]);
@@ -93,12 +93,12 @@ async function instantiateChaincode() {
     const outputs = await runcmds([
         util.format(
             'docker exec %s %s',
-            'org1_cli',
+            'peer0.org1.example.com',
             queryInstalled
         ),
         util.format(
             'docker exec %s %s',
-            'org2_cli',
+            'peer0.org2.example.com',
             queryInstalled
         ),
     ]);
@@ -112,15 +112,15 @@ async function instantiateChaincode() {
         `docker run -e CORE_CHAINCODE_ID=${packageIdOrg1} -e CORE_CHAINCODE_ADDRESS=0.0.0.0:9999 -h cc-server --name cc-server -d --network node_default chaincode-e2e-server`,
         // Approve the chaincode definition by each org
         util.format('docker exec %s %s',
-            'org1_cli',
+            'peer0.org1.example.com',
             util.format(approveChaincode, packageIdOrg1)
         ),
         util.format('docker exec %s %s',
-            'org2_cli',
+            'peer0.org2.example.com',
             util.format(approveChaincode, packageIdOrg2)
         ),
         // Commit the chaincode definition
-        util.format('docker exec org1_cli peer lifecycle chaincode commit -o %s %s -C %s -n %s -v %s --sequence %d --signature-policy %s %s',
+        util.format('docker exec peer0.org1.example.com peer lifecycle chaincode commit -o %s %s -C %s -n %s -v %s --sequence %d --signature-policy %s %s',
             'orderer.example.com:7050',
             getTLSArgs(),
             CHANNEL_NAME,
@@ -134,7 +134,7 @@ async function instantiateChaincode() {
 }
 
 const invokeFunctions = async () => {
-    const args = util.format('docker exec org1_cli peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
+    const args = util.format('docker exec peer0.org1.example.com peer chaincode invoke %s -C %s -n %s -c %s --waitForEvent',
         getTLSArgs(),
         CHANNEL_NAME,
         'server',
@@ -144,7 +144,7 @@ const invokeFunctions = async () => {
 };
 
 const queryFunctions = async () => {
-    const args = util.format('docker exec org1_cli peer chaincode query %s -C %s -n %s -c %s',
+    const args = util.format('docker exec peer0.org1.example.com peer chaincode query %s -C %s -n %s -c %s',
         getTLSArgs(),
         CHANNEL_NAME,
         'server',
