@@ -52,7 +52,7 @@ pool:
 #
 # Publish to NPM on release builds (they are the github tagged releases)
 # Publish to NPM on nightly builds when there is something to build
-# the ids will be of the format 2.3.1-unstable.{commitid}
+# the ids will be of the format 2.4.0-beta.{commitid}
 #
 stages:
 
@@ -306,7 +306,7 @@ stages:
                 workingFile: '$(Agent.TempDirectory)/.npmrc'
                 customEndpoint: 'fabric-chainode-node-npm'
             - script: |
-                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable \;
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag beta \;
               displayName: 'npm publish'
         - job: dockerhub_publish
           steps:
@@ -362,5 +362,5 @@ stages:
                 workingFile: '$(Agent.TempDirectory)/.npmrc'
                 customEndpoint: 'fabric-chainode-node-npm'
             - script: |
-                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag unstable \;
+                find $(Pipeline.Workspace)/node-tgz/ -maxdepth 1 -type f -name 'fabric-*.tgz' -exec npm publish {} --tag beta \;
               displayName: 'npm publish'

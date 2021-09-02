@@ -2783,10 +2783,10 @@ packages:
       '0': node >=0.6.0
     resolution:
       integrity: sha1-lpGEQOMEGnpBT4xS48V06zw+HgU=
-  /fabric-contract-api/2.3.1-unstable:
+  /fabric-contract-api/2.4.0-beta:
     dependencies:
       class-transformer: 0.3.1
-      fabric-shim-api: 2.3.1-unstable
+      fabric-shim-api: 2.4.0-beta
       fast-safe-stringify: 2.0.7
       get-params: 0.1.2
       reflect-metadata: 0.1.13
@@ -2797,7 +2797,7 @@ packages:
       npm: ^6.4.1
     resolution:
       integrity: sha512-49OlWHWoW63LY/YaJIufdlYhRAmbzI/RkuYIC6J/E58uYRd8Sqn6CpubUhje3f4FHN5BCm7GfkgBJVgxDRfgeA==
-  /fabric-shim-api/2.3.1-unstable:
+  /fabric-shim-api/2.4.0-beta:
     dev: false
     engines:
       eslint: 6.6.0
@@ -8561,7 +8561,7 @@ packages:
       chai-as-promised: 7.1.1_chai@4.2.0
       cpx: 1.5.0
       eslint: 6.8.0
-      fabric-contract-api: 2.3.1-unstable
+      fabric-contract-api: 2.4.0-beta
       mocha: 6.2.2
       mockery: 2.1.0
       nyc: 14.1.1

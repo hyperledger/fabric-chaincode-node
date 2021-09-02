@@ -1,3 +1,101 @@
+## v2.4.0-beta
+Wed 18 Aug 2021 12:11:16 BST
+
+* [d98e77b](https://github.com/hyperledger/fabric-chaincode-node/commit/d98e77b)  updated documentation for getStateByPartialCompositeKey, getStateByPartialCompositeKeyWithPagination and getPrivateDataByPartialCompositeKey
+* [c982390](https://github.com/hyperledger/fabric-chaincode-node/commit/c982390) Disable server tests
+* [556f32a](https://github.com/hyperledger/fabric-chaincode-node/commit/556f32a) Metadata generate updated [FABCN-447](https://jira.hyperledger.org/browse/FABCN-447) (#276)
+* [2bd68fd](https://github.com/hyperledger/fabric-chaincode-node/commit/2bd68fd) Shebang issue fixed [FABCN-438](https://jira.hyperledger.org/browse/FABCN-438) (#271)
+* [1d43015](https://github.com/hyperledger/fabric-chaincode-node/commit/1d43015) Pipeline publishing fixed (#273)
+* [9b80078](https://github.com/hyperledger/fabric-chaincode-node/commit/9b80078) Transaction metadata tags updated (#265)
+* [ea8da64](https://github.com/hyperledger/fabric-chaincode-node/commit/ea8da64) Update "master" branch references to "main"
+* [c1ec01f](https://github.com/hyperledger/fabric-chaincode-node/commit/c1ec01f) correct cli option
+* [c62883f](https://github.com/hyperledger/fabric-chaincode-node/commit/c62883f) Enable TLS FV Tests
+* [68cca50](https://github.com/hyperledger/fabric-chaincode-node/commit/68cca50) Remove full path as debug
+* [46bfc5c](https://github.com/hyperledger/fabric-chaincode-node/commit/46bfc5c) Remove the use of the "phantom" module
+* [e5389a4](https://github.com/hyperledger/fabric-chaincode-node/commit/e5389a4) Only update dependencies in test chaincodes (#261)
+* [794cb86](https://github.com/hyperledger/fabric-chaincode-node/commit/794cb86) Need explicit dependency for variables
+* [4128b25](https://github.com/hyperledger/fabric-chaincode-node/commit/4128b25) Update rush pnpm version and adjust version format (#259)
+* [20db7eb](https://github.com/hyperledger/fabric-chaincode-node/commit/20db7eb) Move build date to build data (#258)
+* [52d8638](https://github.com/hyperledger/fabric-chaincode-node/commit/52d8638) Move azure variable to env variable
+* [b1991a6](https://github.com/hyperledger/fabric-chaincode-node/commit/b1991a6) Add in the missing dependency, adjust find command" (#256)
+* [b1bb93c](https://github.com/hyperledger/fabric-chaincode-node/commit/b1bb93c) Remove incorrect condition placement
+* [7565306](https://github.com/hyperledger/fabric-chaincode-node/commit/7565306) replicate template
+* [3ed241d](https://github.com/hyperledger/fabric-chaincode-node/commit/3ed241d) Use templates
+* [5e0c543](https://github.com/hyperledger/fabric-chaincode-node/commit/5e0c543) Simplify Naming
+* [54c27e7](https://github.com/hyperledger/fabric-chaincode-node/commit/54c27e7) Move to use NPM directly
+* [4510e67](https://github.com/hyperledger/fabric-chaincode-node/commit/4510e67) Adjust NPM repo URL
+* [2017002](https://github.com/hyperledger/fabric-chaincode-node/commit/2017002) Provide Nightly publishing of drivers
+* [fc7877a](https://github.com/hyperledger/fabric-chaincode-node/commit/fc7877a) Enable nightly publish
+* [3b01913](https://github.com/hyperledger/fabric-chaincode-node/commit/3b01913) Fix typo on fabric-contract-api (#254)
+* [845d689](https://github.com/hyperledger/fabric-chaincode-node/commit/845d689) [FABCN-351](https://jira.hyperledger.org/browse/FABCN-351) CORE_PEER_ADDRESS issue fixed (#252)
+* [6b2b671](https://github.com/hyperledger/fabric-chaincode-node/commit/6b2b671) jsDoc update: fix log4js legacy text (#239)
+* [c0199de](https://github.com/hyperledger/fabric-chaincode-node/commit/c0199de) [FABCN-388](https://jira.hyperledger.org/browse/FABCN-388) Tutorial updated (#246)
+* [9c8e7b9](https://github.com/hyperledger/fabric-chaincode-node/commit/9c8e7b9) [FABCN-429](https://jira.hyperledger.org/browse/FABCN-429) Iterator tutorial updated (#249)
+* [0751396](https://github.com/hyperledger/fabric-chaincode-node/commit/0751396) Metadata issue solved (#238)
+* [bc9f669](https://github.com/hyperledger/fabric-chaincode-node/commit/bc9f669) getTxTimestamp fixed (#237)
+* [bfade8a](https://github.com/hyperledger/fabric-chaincode-node/commit/bfade8a) [FABCN-403](https://jira.hyperledger.org/browse/FABCN-403) around transaction (#196)
+* [64f59d0](https://github.com/hyperledger/fabric-chaincode-node/commit/64f59d0) Set node version for jsdoc build
+* [07b4bc0](https://github.com/hyperledger/fabric-chaincode-node/commit/07b4bc0) Update node/npm versions
+* [ae5a352](https://github.com/hyperledger/fabric-chaincode-node/commit/ae5a352) Tutorials updated (#218)
+* [1d8aa36](https://github.com/hyperledger/fabric-chaincode-node/commit/1d8aa36) [FABCN-1627](https://jira.hyperledger.org/browse/FABCN-1627)-Update class-transformer dependency (#212)
+* [8be5b2b](https://github.com/hyperledger/fabric-chaincode-node/commit/8be5b2b) [FABCN-430](https://jira.hyperledger.org/browse/FABCN-430) Fix type for timestamp.second (#194)
+* [57d46e7](https://github.com/hyperledger/fabric-chaincode-node/commit/57d46e7) [FABCN-435](https://jira.hyperledger.org/browse/FABCN-435) OOM on Large Arg Size (#208)
+* [58b997c](https://github.com/hyperledger/fabric-chaincode-node/commit/58b997c) [FABCN-433](https://jira.hyperledger.org/browse/FABCN-433) Update typescript and @types/node (#200)
+* [b255587](https://github.com/hyperledger/fabric-chaincode-node/commit/b255587) [FABCN-241](https://jira.hyperledger.org/browse/FABCN-241) Remove to.be.ok (#198)
+* [2553b32](https://github.com/hyperledger/fabric-chaincode-node/commit/2553b32) [FABCN-422](https://jira.hyperledger.org/browse/FABCN-422) Add release guide (#187)
+* [b2af9bd](https://github.com/hyperledger/fabric-chaincode-node/commit/b2af9bd) [FABCN-420](https://jira.hyperledger.org/browse/FABCN-420) Remove Azure pipeline warnings
+* [29d42fc](https://github.com/hyperledger/fabric-chaincode-node/commit/29d42fc) Fix: ChaincodeStub.getMspID should be in lowerCamelCASE
+* [bbb58a2](https://github.com/hyperledger/fabric-chaincode-node/commit/bbb58a2) Update doc releases (#183)
+* [259f040](https://github.com/hyperledger/fabric-chaincode-node/commit/259f040) [FABCN-319](https://jira.hyperledger.org/browse/FABCN-319) Update Dependencies (#178)
+* [8380560](https://github.com/hyperledger/fabric-chaincode-node/commit/8380560) Use Official CouchDB 3.1 Image (#180)
+* [88c0a78](https://github.com/hyperledger/fabric-chaincode-node/commit/88c0a78) [FABCN-393](https://jira.hyperledger.org/browse/FABCN-393) Fix broken links in documents (#168)
+* [255325d](https://github.com/hyperledger/fabric-chaincode-node/commit/255325d) [FABCN-412](https://jira.hyperledger.org/browse/FABCN-412) TLS support for chaincode server (#164)
+* [38a7123](https://github.com/hyperledger/fabric-chaincode-node/commit/38a7123) [FABCN-414](https://jira.hyperledger.org/browse/FABCN-414) Update TypeScript definition (#165)
+* [dab4f39](https://github.com/hyperledger/fabric-chaincode-node/commit/dab4f39) [FABCN-413](https://jira.hyperledger.org/browse/FABCN-413) Add e2e test for chaincode server (#162)
+* [bea333d](https://github.com/hyperledger/fabric-chaincode-node/commit/bea333d) [FABCN-411](https://jira.hyperledger.org/browse/FABCN-411) Add server command to CLI (#161)
+* [6c22fde](https://github.com/hyperledger/fabric-chaincode-node/commit/6c22fde) [FABCN-410](https://jira.hyperledger.org/browse/FABCN-410) Use new lifecycle for fv/e2e tests (#158)
+* [749c3eb](https://github.com/hyperledger/fabric-chaincode-node/commit/749c3eb) [FABCN-409](https://jira.hyperledger.org/browse/FABCN-409) Chaincode gRPC server w/o TLS (#159)
+* [1b2768b](https://github.com/hyperledger/fabric-chaincode-node/commit/1b2768b) [FABCN-408](https://jira.hyperledger.org/browse/FABCN-408) Separate message handler from client (#155)
+* [5acea60](https://github.com/hyperledger/fabric-chaincode-node/commit/5acea60) [FABCN-407](https://jira.hyperledger.org/browse/FABCN-407) Update protos (#154)
+* [2fcf3eb](https://github.com/hyperledger/fabric-chaincode-node/commit/2fcf3eb) [FABCN-405](https://jira.hyperledger.org/browse/FABCN-405) Fix tutorial reference (#150)
+* [9927649](https://github.com/hyperledger/fabric-chaincode-node/commit/9927649) Nominate James Taylor for maintainership (#151)
+* [eb57958](https://github.com/hyperledger/fabric-chaincode-node/commit/eb57958) Improve JSDoc title (#127)
+* [d3aab62](https://github.com/hyperledger/fabric-chaincode-node/commit/d3aab62) [FABCN-401](https://jira.hyperledger.org/browse/FABCN-401) Correct use of Yargs api (#147)
+* [955c9ce](https://github.com/hyperledger/fabric-chaincode-node/commit/955c9ce) [FABCN-396](https://jira.hyperledger.org/browse/FABCN-396) Add notes on minimum 1.4 module version for node 12 (#140)
+* [9d45ba7](https://github.com/hyperledger/fabric-chaincode-node/commit/9d45ba7) [FABCN-397](https://jira.hyperledger.org/browse/FABCN-397) State queries limited to 100 results (#141) (#142)
+* [298687a](https://github.com/hyperledger/fabric-chaincode-node/commit/298687a) [FABCN-395](https://jira.hyperledger.org/browse/FABCN-395): Use @grpc/grpc-js for Node.js chaincode (#143)
+* [33b940a](https://github.com/hyperledger/fabric-chaincode-node/commit/33b940a) [FABCN-394](https://jira.hyperledger.org/browse/FABCN-394) Update typescript interface file (#128) (#129)
+* [f120508](https://github.com/hyperledger/fabric-chaincode-node/commit/f120508) Fix broken tutorials link (#137)
+* [6595dd4](https://github.com/hyperledger/fabric-chaincode-node/commit/6595dd4) Cleanup Fabric Version Methodology (#135)
+* [ccf1d5b](https://github.com/hyperledger/fabric-chaincode-node/commit/ccf1d5b) [FAB-17777](https://jira.hyperledger.org/browse/FAB-17777) Create basic settings.yaml (#132)
+* [c2e226c](https://github.com/hyperledger/fabric-chaincode-node/commit/c2e226c) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Update jsdoc 2.x link (#126)
+* [11d2b94](https://github.com/hyperledger/fabric-chaincode-node/commit/11d2b94) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) fix directory for api doc publish (#124)
+* [3f25f75](https://github.com/hyperledger/fabric-chaincode-node/commit/3f25f75) Update timeout (#114)
+* [fcb89fa](https://github.com/hyperledger/fabric-chaincode-node/commit/fcb89fa) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Update apidoc site header
+* [efae4d0](https://github.com/hyperledger/fabric-chaincode-node/commit/efae4d0) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Update publish JSDoc job
+* [b7b9e6c](https://github.com/hyperledger/fabric-chaincode-node/commit/b7b9e6c) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Update master docs to reference release-2.x
+* [9c4da4e](https://github.com/hyperledger/fabric-chaincode-node/commit/9c4da4e) [FABCN-391](https://jira.hyperledger.org/browse/FABCN-391) Update version number in master branch
+* [f3c0592](https://github.com/hyperledger/fabric-chaincode-node/commit/f3c0592) Use two version numbers for fabric docker image pull
+* [e919284](https://github.com/hyperledger/fabric-chaincode-node/commit/e919284) Update audit level
+* [b15a2ed](https://github.com/hyperledger/fabric-chaincode-node/commit/b15a2ed) fix: remove semicolon
+* [e86cde6](https://github.com/hyperledger/fabric-chaincode-node/commit/e86cde6) [FABCN-381](https://jira.hyperledger.org/browse/FABCN-381) Access localmspid
+* [ec6caa6](https://github.com/hyperledger/fabric-chaincode-node/commit/ec6caa6) Re-enable tests
+* [fb30d3d](https://github.com/hyperledger/fabric-chaincode-node/commit/fb30d3d) [FABCN-241](https://jira.hyperledger.org/browse/FABCN-241) Remove to.be.ok
+* [98632a0](https://github.com/hyperledger/fabric-chaincode-node/commit/98632a0) [FABCN-241](https://jira.hyperledger.org/browse/FABCN-241)  Change to.be.ok
+* [4a98b61](https://github.com/hyperledger/fabric-chaincode-node/commit/4a98b61) [FABCN-241](https://jira.hyperledger.org/browse/FABCN-241) Remove to.be.ok
+* [8408fb8](https://github.com/hyperledger/fabric-chaincode-node/commit/8408fb8) Add readme to redirect to site
+* [28682d4](https://github.com/hyperledger/fabric-chaincode-node/commit/28682d4) [FABCN-359](https://jira.hyperledger.org/browse/FABCN-359) Add ledger dev dependency to docs
+* [d4d6711](https://github.com/hyperledger/fabric-chaincode-node/commit/d4d6711) [FABCN-359](https://jira.hyperledger.org/browse/FABCN-359) Add fabric-ledger project
+* [9d616be](https://github.com/hyperledger/fabric-chaincode-node/commit/9d616be) Improve build reliability
+* [3c6f401](https://github.com/hyperledger/fabric-chaincode-node/commit/3c6f401) [FABCN-382](https://jira.hyperledger.org/browse/FABCN-382) fix compatibility.md title
+* [32b465e](https://github.com/hyperledger/fabric-chaincode-node/commit/32b465e) [FABCN-378](https://jira.hyperledger.org/browse/FABCN-378) Update gh-pages
+* [6850de7](https://github.com/hyperledger/fabric-chaincode-node/commit/6850de7) Fix gh-pages publish
+* [b6c5b56](https://github.com/hyperledger/fabric-chaincode-node/commit/b6c5b56) [FABCN-373](https://jira.hyperledger.org/browse/FABCN-373) Compatibility Matrix
+* [2ee7246](https://github.com/hyperledger/fabric-chaincode-node/commit/2ee7246) [FABCN-378](https://jira.hyperledger.org/browse/FABCN-378) Publish jsdoc to correct repo
+* [1e26293](https://github.com/hyperledger/fabric-chaincode-node/commit/1e26293) [FABCN-378](https://jira.hyperledger.org/browse/FABCN-378) Publish jsdoc
+* [9bcd0b3](https://github.com/hyperledger/fabric-chaincode-node/commit/9bcd0b3) [FABCN-377](https://jira.hyperledger.org/browse/FABCN-377) Prepare for v2.1 unstable builds (WIP)
+* [869f107](https://github.com/hyperledger/fabric-chaincode-node/commit/869f107) [FABCI-482](https://jira.hyperledger.org/browse/FABCI-482) Update Nexus URL's to Artifactory
+
 ## v2.3.0
 Tue  3 Nov 15:40:46 GMT 2020
 
