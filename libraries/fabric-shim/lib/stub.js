@@ -839,10 +839,10 @@ class ChaincodeStub {
 	 *
 	 * The query is re-executed during validation phase to ensure result set has not changed since transaction
 	 * endorsement (phantom reads detected).
-	 * 
+	 *
      * This function should be used only for a partial composite key.
      * For a full composite key, an iter with empty response would be returned.
-     * 
+	 *
 	 * @async
 	 * @param {string} objectType A string used as the prefix of the resulting key
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
@@ -880,7 +880,7 @@ class ChaincodeStub {
 	 * This call is only supported in a read only transaction.
      * This function should be used only for a partial composite key.
      * For a full composite key, an iter with empty response would be returned.
-     * 
+	 *
 	 * @param {string} objectType
 	 * @param {string[]} attributes
 	 * @param {int} pageSize
@@ -1078,7 +1078,7 @@ class ChaincodeStub {
 	 * has not changed since transaction endorsement (phantom reads detected).
      * This function should be used only for a partial composite key.
      * For a full composite key, an iter with empty response would be returned.
-     * 
+	 *
 	 * @param {string} collection The collection name
 	 * @param {string} objectType A string used as the prefix of the resulting key
 	 * @param {string[]} attributes List of attribute values to concatenate into the partial composite key
