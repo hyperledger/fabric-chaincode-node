@@ -31,3 +31,4 @@ services:
     volumes:
       - /var/run/:/host/var/run/
       - ../crypto-material:/etc/hyperledger/config/
+      - ../../../../test/chaincodes/privateData/collection-config:/collection-config

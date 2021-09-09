@@ -16,6 +16,7 @@ const {SHORT_STEP, LONG_STEP} = utils.TIMEOUTS;
 
 describe('Typescript chaincode', () => {
     const suite = 'annotations';
+    utils.registerAndEnroll();
 
     before(async function () {
         this.timeout(LONG_STEP);
@@ -32,7 +33,7 @@ describe('Typescript chaincode', () => {
             expect(payload).to.eql({id: 'GLD', name: 'GOLD_BAR', value: 100, extra: {id: 'EXTRA_ID', value: 50}});
         });
 
-        it ('should update an asset', async function() {
+        it('should update an asset', async function() {
             this.timeout(SHORT_STEP);
             await utils.invoke(suite, 'TestContract:updateAsset', [JSON.stringify({id: 'GLD', name: 'GOLD_BAR', value: 200, extra: {id: 'EXTRA_ID', value: 100}})]);
             const payload = JSON.parse(await utils.query(suite, 'TestContract:getAsset', ['GLD']));
