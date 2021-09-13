@@ -1,3 +1,9 @@
+/*
+ * Copyright contributors to Hyperledger Fabric.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 const path = require('path');
 
 const ordererCA = '/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem';
