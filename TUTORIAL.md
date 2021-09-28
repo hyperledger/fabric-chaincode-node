@@ -55,7 +55,7 @@ A docker image is built for this chaincode, the package.json and code copied in.
 
 After the install there is a 'bootstrap' process that starts the chaincode up (more details later). The constructors of the exported Contracts will be run at this point; these constructors are for setting the name and optional setup of the 'error/monitoring functions', (again more later). This instance of the contract will existing whilst this chaincode docker image is up.
 
-When chaincode is instantiated or updated, the `init()` function is the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialisation or migration that might be needed.  These two functions have been abstracted away to focus on specific function implementations.
+When chaincode is instantiated or updated, the `init()` function in the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialisation or migration that might be needed.  These two functions have been abstracted away to focus on specific function implementations.
 
 It is strongly recommended to use the npm shrinkwrap mechanism so the versions of the modules that are used are fixed.
 
@@ -123,7 +123,7 @@ module.exports = UpdateValues;
 Note that ALL the functions defined in these modules will be called by the client SDK.
 
 - There are 3 functions `setup` `setNewAssetValue` and `doubleAssetValue` that can be called by issuing the appropriate invoke client side
-- The `ctx` in the function is a transaction context; each time a invoke is called this will be a new instance that can be used by the function implementation to access apis such as the world state of information on invoking identity.
+- The `ctx` in the function is a transaction context; each time an invoke is called, this will be a new instance that can be used by the function implementation to access apis such as the world state of information on invoking identity.
 - The arguments are split out from the array passed on the invoke.
 - The constructor contains a 'name' to help identify the sets of functions
 
@@ -164,8 +164,8 @@ $ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Arg
 
 ## Additional support provided by the SmartContract class
 
-In the case where you ask for a function to be executed, it could be the case that this doesn't exist.
-You can provide you own function to be executed in this case, the default is to throw and error but you're able to customise this if you wish.
+In case you ask for a function to be executed, it could be that this doesn't exist.
+If so, you can provide you own function to be executed, the default is to throw and error but you're able to customise this if you wish.
 
 For example
 
@@ -261,11 +261,11 @@ Definitions as per https://www.ietf.org/rfc/rfc2119.txt
   - They are scoped per name
 - Each class *MAY* define a function that would be executed if a matching function name does not exist; otherwise a 'no function exists' error will be thrown
 - If too many parameters are passed, they will be discarded
-- If too few parameters are passed, then the remainder will be set to undefined
+- If too few parameters are passed, the remainder will be set to undefined
 	- as per node.js language standard
-- Duplicate function names in a single class is an error
+- Having duplicate function names in a single class is an error
 - Any function that is dynamically added will not be registered as an invokable function
-- There are no specific function that is invoked per Fabric's *init* chaincode spi. The instantiate flow can pass function name and parameters; therefore consider
+- There is no specific function that is invoked per Fabric's *init* chaincode spi. The instantiate flow can pass function name and parameters; therefore consider
 a dedicated function that will be called for new chaincode deployments, and for upgrade deployments.
 
 ## Restrictions on programming in side a Contract function
@@ -274,7 +274,7 @@ Hyperledger Fabric's consensus algorithm permits the ability to use general purp
 
 - Functions should not create random variables, or use any function whose return values are functions of the current time or location of execution
   - i.e. the function will be executed in another context (i.e. peer process).  This could potentially be in a different time zone in a different locale.
-- Functions should be away that they may read state, and write state. But they are producing a set of changes that will be applied to the state. The implication is that updates to the state
+- Functions should be aware that they may read state, and write state. But they are producing a set of changes that will be applied to the state. The implication is that updates to the state
 may not be read back.
 
 ```
@@ -288,7 +288,7 @@ v2=="world" // is false,  v2 is "hello"
 
 In any subsequent invocation, the value would be seen to be updated.
 
-Note that if you have use any Flux architecture implications such as Redux, the above restrictions will be familiar.
+Note that if you have used any Flux architecture implications such as Redux, the above restrictions will be familiar.
 
 
 
