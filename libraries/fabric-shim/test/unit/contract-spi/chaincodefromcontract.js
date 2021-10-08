@@ -38,14 +38,10 @@ const Contract = require('fabric-contract-api').Contract;
 const JSONSerializer = require(path.join(pathToRoot, 'fabric-contract-api/lib/jsontransactionserializer.js'));
 
 const SystemContract = require(path.join('../../../', 'lib/contract-spi/systemcontract'));
- const StartCommand = require(path.join('../../../', 'lib/cmds/startCommand.js'));
+const StartCommand = require(path.join('../../../', 'lib/cmds/startCommand.js'));
 const ChaincodeFromContract = require(path.join('../../../', 'lib/contract-spi/chaincodefromcontract'));
 const shim = require(path.join('../../../', 'lib/chaincode'));
 
-// const SystemContract = require('fabric-shim/lib/contract-spi/systemcontract');
-// const StartCommand = require('fabric-shim/lib/cmds/startCommand.js');
-// const ChaincodeFromContract = require('fabric-shim/lib/contract-spi/chaincodefromcontract');
-// const shim = require( 'fabric-shim/lib/chaincode');
 const utils = require('../../../lib/utils/utils');
 
 const defaultSerialization = {
@@ -112,9 +108,8 @@ describe('chaincodefromcontract', () => {
         * @param {String} arg2 arg2
         */
         async alpha(api, arg1, arg2) {
-            console.log("hllllo")
-            api.logging.getLogger();
-            api.logging.getLogger('fred');
+            // api.logging.getLogger();
+            // api.logging.getLogger('fred');
             return alphaStub(api, arg1, arg2);
         }
     }
@@ -482,7 +477,6 @@ describe('chaincodefromcontract', () => {
         it('should pass the logging object to contracts', async () => {
             let i=0;
             const idBytes = Buffer.from(certWithoutAttrs);
-            console.log('a'+(i++))
             const tempClass =  class  extends Contract {
                 constructor() {
                     super('logging');
@@ -496,7 +490,7 @@ describe('chaincodefromcontract', () => {
                     return alphaStub(ctx, arg1, arg2);
                 }
             };
-            console.log('a'+(i++))
+            
             const systemContract = new SystemContract();
             const appClass = new SCAlpha();
             sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
@@ -517,7 +511,7 @@ describe('chaincodefromcontract', () => {
                         }
                     }
                 });
-                console.log('a'+(i++))
+            
             sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata').returns([]);
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
 
@@ -525,16 +519,15 @@ describe('chaincodefromcontract', () => {
                 mspid: 'Org1MSP',
                 idBytes
             };
-            console.log('a'+(i++))
+         
             const cc = new ChaincodeFromContract([tempClass], defaultSerialization);
-            console.log('aaa'+(i++))
+         
             const mockStub = {getBufferArgs: sandbox.stub().returns(['logging:alpha']),
                 getTxID: sandbox.stub().returns('12345897asd7a7a77v7b77'),
                 getChannelID: sandbox.stub().returns('channel-id-fake'),
                 getCreator: sandbox.stub().returns(mockSigningId)
             };
-            //
-            console.log('aaa'+(i++))
+
             const levelSpy = sinon.spy(Logger, 'setLevel');
 
 
@@ -546,8 +539,6 @@ describe('chaincodefromcontract', () => {
 
             await cc.Invoke(mockStub);
 
-            console.log('bbbbbbbb')
-
             const ctx = alphaStub.getCall(0).args[0];
 
             ctx.logging.setLevel('DEBUG');
@@ -557,14 +548,13 @@ describe('chaincodefromcontract', () => {
             const cclogger = ctx.logging.getLogger();          
             cclogger.info('info');
             sinon.assert.calledWith(spyLogger.info, 'info');
-            console.log('a'+(i++))
+
             ctx.logging.setLevel('INFO');
             sinon.assert.called(levelSpy);
             sinon.assert.calledWith(levelSpy, 'INFO');
-            console.log('a'+(i++))
-
             
-            cclogger.debug('Named logger');
+            const cclogger_named = ctx.logging.getLogger("Named"); 
+            cclogger_named.debug('Named logger');
             sinon.assert.calledWith(spyLogger.debug, 'Named logger');
 
 
@@ -720,13 +710,7 @@ describe('chaincodefromcontract', () => {
                 }
             };
             cc.contractImplementations.name = nameMetadata;
-
-            // try {
-                
-                await cc.invokeFunctionality(mockStub);
-            // } catch (e){
-            //     console.log(`Got error from invoke,,,,,`)
-            // }
+            await cc.invokeFunctionality(mockStub);
            
             sinon.assert.called(fakeSuccess);
             sinon.assert.notCalled(fakeError);
