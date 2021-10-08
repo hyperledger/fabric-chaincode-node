@@ -29,12 +29,12 @@ specifiers:
   fs-extra: ^9.0.1
   get-params: ^0.1.2
   git-rev-sync: 1.12.0
+  gulp-cli: 2.3.0
   gulp-debug: ~4.0.0
   gulp-eslint: ~6.0.0
   gulp-rename: ~1.4.0
   gulp-shell: ~0.7.1
   ink-docstrap: ^1.3.2
-  ip: ^1.1.5
   istanbul-api: ^1.1.13
   jsdoc: ^3.6.3
   jsrsasign: ^10.2
@@ -80,12 +80,12 @@ dependencies:
   fs-extra: 9.1.0
   get-params: 0.1.2
   git-rev-sync: 1.12.0
+  gulp-cli: 2.3.0
   gulp-debug: 4.0.0
   gulp-eslint: 6.0.0
   gulp-rename: 1.4.0
   gulp-shell: 0.7.1
   ink-docstrap: 1.3.2
-  ip: 1.1.5
   istanbul-api: 1.3.7
   jsdoc: 3.6.7
   jsrsasign: 10.4.1
@@ -1677,7 +1677,7 @@ packages:
     resolution: {integrity: sha512-mel+jf7nrtEl5Pn1Qx46zARXKDpBbvzezse7p7LqINmdoIk8PYP5SySaxEmYv6TZ0JyEKA1hsCId6DIhgITtWQ==}
     deprecated: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
     dependencies:
-      ms: 2.1.1
+      ms: 2.1.3
     dev: false
 
   /debug/3.2.7:
@@ -7331,7 +7331,7 @@ packages:
     dev: false
 
   file:projects/toolchain.tgz:
-    resolution: {integrity: sha512-zcwQ437gyMgDN9ksy1TJ0tczvnoUdMExPxvi+22vbpp/dkao/cphxpnZW8vfTFgE+z6cCLSpPLog1UwZpiQepg==, tarball: file:projects/toolchain.tgz}
+    resolution: {integrity: sha512-yeHnBMx7NRFPWmeftcA+QT5Xbm8NN1fegLZoG67UBkEMAQPZbUPtMo0KXMm1BHd3+RoME6nINJ5pMKmBIcVjrQ==, tarball: file:projects/toolchain.tgz}
     name: '@rush-temp/toolchain'
     version: 0.0.0
     dependencies:
@@ -7339,10 +7339,12 @@ packages:
       fs-extra: 9.1.0
       git-rev-sync: 1.12.0
       gulp: 4.0.2
+      gulp-cli: 2.3.0
       gulp-debug: 4.0.0_gulp@4.0.2
       gulp-eslint: 6.0.0
       gulp-rename: 1.4.0
       gulp-shell: 0.7.1
+      ip: 1.1.5
       merge-stream: 2.0.0
       npm-cli-login: 0.1.1
     transitivePeerDependencies:
