@@ -112,6 +112,9 @@ describe('chaincodefromcontract', () => {
         * @param {String} arg2 arg2
         */
         async alpha(api, arg1, arg2) {
+            console.log("hllllo")
+            api.logging.getLogger();
+            api.logging.getLogger('fred');
             return alphaStub(api, arg1, arg2);
         }
     }
@@ -332,6 +335,8 @@ describe('chaincodefromcontract', () => {
 
     describe('#_resolveContractImplementations', () => {
 
+        it('do nothing',()=>{})
+
         it('should handle a single class being passed as a contract', () => {
             const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata').returns([]);
             sandbox.stub(ChaincodeFromContract.prototype, '_augmentMetadataFromCode').returns({});
@@ -475,7 +480,9 @@ describe('chaincodefromcontract', () => {
         });
 
         it('should pass the logging object to contracts', async () => {
+            let i=0;
             const idBytes = Buffer.from(certWithoutAttrs);
+            console.log('a'+(i++))
             const tempClass =  class  extends Contract {
                 constructor() {
                     super('logging');
@@ -489,8 +496,9 @@ describe('chaincodefromcontract', () => {
                     return alphaStub(ctx, arg1, arg2);
                 }
             };
+            console.log('a'+(i++))
             const systemContract = new SystemContract();
-            const appClass = new tempClass();
+            const appClass = new SCAlpha();
             sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
                 .returns({
                     'org.hyperledger.fabric': {
@@ -509,6 +517,7 @@ describe('chaincodefromcontract', () => {
                         }
                     }
                 });
+                console.log('a'+(i++))
             sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata').returns([]);
             sandbox.stub(ChaincodeFromContract.prototype, '_compileSchemas');
 
@@ -516,34 +525,47 @@ describe('chaincodefromcontract', () => {
                 mspid: 'Org1MSP',
                 idBytes
             };
+            console.log('a'+(i++))
             const cc = new ChaincodeFromContract([tempClass], defaultSerialization);
+            console.log('aaa'+(i++))
             const mockStub = {getBufferArgs: sandbox.stub().returns(['logging:alpha']),
                 getTxID: sandbox.stub().returns('12345897asd7a7a77v7b77'),
                 getChannelID: sandbox.stub().returns('channel-id-fake'),
                 getCreator: sandbox.stub().returns(mockSigningId)
             };
             //
+            console.log('aaa'+(i++))
             const levelSpy = sinon.spy(Logger, 'setLevel');
+
+
+            let spyLogger = {
+                info: sinon.stub(),
+                debug: sinon.stub()
+            }
+            sandbox.stub(Logger,'getLogger').returns(spyLogger)
+
             await cc.Invoke(mockStub);
+
+            console.log('bbbbbbbb')
+
             const ctx = alphaStub.getCall(0).args[0];
+
             ctx.logging.setLevel('DEBUG');
             sinon.assert.called(levelSpy);
             sinon.assert.calledWith(levelSpy, 'DEBUG');
-            const cclogger = ctx.logging.getLogger();
-            const logger = Logger.getLogger('logging');
-            const infospy = sinon.spy(logger, 'info');
-            cclogger.info('info');
-            sinon.assert.calledWith(infospy, 'info');
 
+            const cclogger = ctx.logging.getLogger();          
+            cclogger.info('info');
+            sinon.assert.calledWith(spyLogger.info, 'info');
+            console.log('a'+(i++))
             ctx.logging.setLevel('INFO');
             sinon.assert.called(levelSpy);
             sinon.assert.calledWith(levelSpy, 'INFO');
+            console.log('a'+(i++))
 
-
-            const ccloggerNamed = ctx.logging.getLogger('wibble');
-            const debugSpy = sinon.spy(Logger.getLogger('logging:wibble'), 'debug');
-            ccloggerNamed.debug('Named logger');
-            sinon.assert.calledWith(debugSpy, 'Named logger');
+            
+            cclogger.debug('Named logger');
+            sinon.assert.calledWith(spyLogger.debug, 'Named logger');
 
 
         });
@@ -597,7 +619,7 @@ describe('chaincodefromcontract', () => {
             });
 
             fakeError = sinon.fake((e) => {
-                log(e);
+                log(`Expected Error ${e}`);
             });
 
             sandbox.replace(shim, 'success', fakeSuccess);
@@ -630,20 +652,28 @@ describe('chaincodefromcontract', () => {
                     return 'a channel id';
                 }
             };
-            await cc.invokeFunctionality(mockStub);
-
+     
+            try {
+                 await cc.invokeFunctionality(mockStub);
+            } catch (e){
+                // ok....
+            }
+        
             sinon.assert.called(fakeError);
             sinon.assert.notCalled(fakeSuccess);
 
         });
 
-        it ('should handle valid contract name, but missing function', async () => {
+        it('should handle valid contract name, but missing function', async () => {
 
             const idBytes = Buffer.from(certWithoutAttrs);
 
             const ctx = {
                 setChaincodeStub: sandbox.stub(),
-                setClientIdentity: sandbox.stub()
+                setClientIdentity: sandbox.stub(),
+                logging:{
+                    setLevel:()=>{},getLogger:()=>{}
+                }
             };
 
             const nameMetadata = {
@@ -669,6 +699,7 @@ describe('chaincodefromcontract', () => {
                     'name': nameMetadata
                 }
             });
+
             const cc = new ChaincodeFromContract([SCAlpha], defaultSerialization);
             sinon.assert.calledOnce(ChaincodeFromContract.prototype._resolveContractImplementations);
             sinon.assert.calledOnce(_checkSuppliedStub);
@@ -690,7 +721,13 @@ describe('chaincodefromcontract', () => {
             };
             cc.contractImplementations.name = nameMetadata;
 
-            await cc.invokeFunctionality(mockStub);
+            // try {
+                
+                await cc.invokeFunctionality(mockStub);
+            // } catch (e){
+            //     console.log(`Got error from invoke,,,,,`)
+            // }
+           
             sinon.assert.called(fakeSuccess);
             sinon.assert.notCalled(fakeError);
 
@@ -1154,7 +1191,7 @@ describe('chaincodefromcontract', () => {
         });
     });
 
-    describe ('#_augmentMetadataFromCode', () => {
+    describe('#_augmentMetadataFromCode', () => {
         const exampleMetadata = {
             $schema: 'my schema link',
             contracts: {
