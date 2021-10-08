@@ -108,8 +108,6 @@ describe('chaincodefromcontract', () => {
         * @param {String} arg2 arg2
         */
         async alpha(api, arg1, arg2) {
-            // api.logging.getLogger();
-            // api.logging.getLogger('fred');
             return alphaStub(api, arg1, arg2);
         }
     }
@@ -329,8 +327,6 @@ describe('chaincodefromcontract', () => {
     });
 
     describe('#_resolveContractImplementations', () => {
-
-        it('do nothing',()=>{})
 
         it('should handle a single class being passed as a contract', () => {
             const _checkSuppliedStub = sandbox.stub(ChaincodeFromContract.prototype, '_checkAgainstSuppliedMetadata').returns([]);
