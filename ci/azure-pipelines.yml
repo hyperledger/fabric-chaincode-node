@@ -41,9 +41,9 @@ variables:
   - name: pipeline
     value: ci
   - name: node_version_spec
-    value: '12.16.1'
+    value: '12.22.6'
   - name: rewire_node_version_spec # see https://github.com/jhnns/rewire/issues/178
-    value: '12.15.0'
+    value: '12.22.6'
   - name: FABRIC_VERSION
     value: 2.2
 

@@ -13,6 +13,7 @@ const logger = Logger.getLogger('contracts-spi/chaincodefromcontract.js');
 const DataMarshall = require('./datamarshall.js');
 const ClientIdentity = require('../chaincode').ClientIdentity;
 const Ajv = require('ajv');
+const Contract = require('fabric-contract-api').Contract;
 
 require('reflect-metadata');
 
@@ -153,7 +154,6 @@ class ChaincodeFromContract {
         logger.debug('Supplied contract classes', contractClasses);
         this.defaultContractName = Reflect.getMetadata('fabric:default', global);
 
-        const Contract = require('fabric-contract-api').Contract;
 
         const implementations = {};
 
@@ -189,7 +189,6 @@ class ChaincodeFromContract {
         if (!metadata.contracts || Object.keys(metadata.contracts).length === 0) {
             logger.debug('_augmentMetadataFromCode - Contracts not supplied. Generating default');
 
-            const Contract = require('fabric-contract-api').Contract;
             const skipNames = Object.getOwnPropertyNames(Contract.prototype);
 
             metadata.contracts = JSON.parse(JSON.stringify(this.contractImplementations));

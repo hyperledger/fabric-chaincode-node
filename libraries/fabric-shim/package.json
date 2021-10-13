@@ -73,12 +73,12 @@
     "chai-things": "^0.2.0",
     "cpx": "^1.5.0",
     "eslint": "6.6.0",
-    "mocha": "6.2.2",
+    "mocha": "9.1.2",
     "mockery": "^2.1.0",
-    "nyc": "14.1.1",
-    "rewire": "4.0.1",
+    "nyc": "15.1.0",
+    "rewire": "5.0.0",
     "rimraf": "^3.0.0",
-    "sinon": "7.5.0",
+    "sinon": "11.1.2",
     "spec-junit-splitter-mocha-reporter": "1.0.1"
   }
 }
