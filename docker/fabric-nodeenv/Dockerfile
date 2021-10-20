@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-ARG NODE_VER=12.16.1
+ARG NODE_VER=16.4.0
 FROM node:${NODE_VER}-alpine
 RUN apk add --no-cache \
 	make \

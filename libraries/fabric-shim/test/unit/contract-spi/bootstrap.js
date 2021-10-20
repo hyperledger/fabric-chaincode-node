@@ -375,12 +375,6 @@ describe('bootstrap.js', () => {
             Bootstrap.__set__('Ajv', originalAjv);
         });
 
-        xit ('Correct schema path is pointed to in the validate method', () => {
-            const schemaPath = path.resolve(__dirname, '../../../../fabric-contract-api/schema/contract-schema.json');
-            const schemaPathCheck = fs.pathExistsSync(schemaPath);
-            expect(schemaPathCheck).to.equal(true, 'Current contract-schema path: ' + schemaPath + ' is incorrect');
-        });
-
         it('Should correct validate a schema', () => {
             const json = `
             {

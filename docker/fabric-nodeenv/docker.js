@@ -9,7 +9,6 @@
 
 const fs = require('fs');
 const git = require('git-rev-sync');
-const { series } = require('gulp');
 const path = require('path');
 const util = require('util');
 
@@ -41,4 +40,12 @@ const imageClean = async () => {
     ]);
 };
 
-exports.default = series(imageClean, imageBuild);
+const main = async()=>{
+    await imageClean();
+    await imageBuild();
+}
+
+main().catch((e)=>{
+    console.error(e);
+    process.exit(1);
+})

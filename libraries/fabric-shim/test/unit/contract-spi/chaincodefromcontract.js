@@ -31,14 +31,9 @@ const Contract = require('fabric-contract-api').Contract;
 const JSONSerializer = require(path.join(pathToRoot, 'fabric-contract-api/lib/jsontransactionserializer.js'));
 
 const SystemContract = require(path.join('../../../', 'lib/contract-spi/systemcontract'));
- const StartCommand = require(path.join('../../../', 'lib/cmds/startCommand.js'));
+const StartCommand = require(path.join('../../../', 'lib/cmds/startCommand.js'));
 const ChaincodeFromContract = require(path.join('../../../', 'lib/contract-spi/chaincodefromcontract'));
 const shim = require(path.join('../../../', 'lib/chaincode'));
-
-// const SystemContract = require('fabric-shim/lib/contract-spi/systemcontract');
-// const StartCommand = require('fabric-shim/lib/cmds/startCommand.js');
-// const ChaincodeFromContract = require('fabric-shim/lib/contract-spi/chaincodefromcontract');
-// const shim = require( 'fabric-shim/lib/chaincode');
 const utils = require('../../../lib/utils/utils');
 
 const defaultSerialization = {
@@ -489,7 +484,7 @@ describe('chaincodefromcontract', () => {
                 }
             };
             const systemContract = new SystemContract();
-            const appClass = new tempClass();
+            const appClass = new SCAlpha();
             sandbox.stub(ChaincodeFromContract.prototype, '_resolveContractImplementations')
                 .returns({
                     'org.hyperledger.fabric': {
@@ -521,29 +516,33 @@ describe('chaincodefromcontract', () => {
                 getChannelID: sandbox.stub().returns('channel-id-fake'),
                 getCreator: sandbox.stub().returns(mockSigningId)
             };
-            //
+
             const levelSpy = sinon.spy(Logger, 'setLevel');
+
+            let spyLogger = {
+                info: sinon.stub(),
+                debug: sinon.stub()
+            }
+            sandbox.stub(Logger,'getLogger').returns(spyLogger)
+
+
             await cc.Invoke(mockStub);
             const ctx = alphaStub.getCall(0).args[0];
             ctx.logging.setLevel('DEBUG');
             sinon.assert.called(levelSpy);
             sinon.assert.calledWith(levelSpy, 'DEBUG');
-            const cclogger = ctx.logging.getLogger();
-            const logger = Logger.getLogger('logging');
-            const infospy = sinon.spy(logger, 'info');
+            const cclogger = ctx.logging.getLogger();  
             cclogger.info('info');
-            sinon.assert.calledWith(infospy, 'info');
+            sinon.assert.calledWith(spyLogger.info, 'info');
 
             ctx.logging.setLevel('INFO');
             sinon.assert.called(levelSpy);
             sinon.assert.calledWith(levelSpy, 'INFO');
 
-
-            const ccloggerNamed = ctx.logging.getLogger('wibble');
-            const debugSpy = sinon.spy(Logger.getLogger('logging:wibble'), 'debug');
-            ccloggerNamed.debug('Named logger');
-            sinon.assert.calledWith(debugSpy, 'Named logger');
-
+            const cclogger_named = ctx.logging.getLogger("Named"); 
+            cclogger_named.debug('Named logger');
+            sinon.assert.calledWith(spyLogger.debug, 'Named logger');
+            
 
         });
     });
@@ -596,7 +595,7 @@ describe('chaincodefromcontract', () => {
             });
 
             fakeError = sinon.fake((e) => {
-                log(e);
+                log(`Expected Error ${e}`);
             });
 
             sandbox.replace(shim, 'success', fakeSuccess);
@@ -629,8 +628,11 @@ describe('chaincodefromcontract', () => {
                     return 'a channel id';
                 }
             };
-            await cc.invokeFunctionality(mockStub);
-
+            try {
+                await cc.invokeFunctionality(mockStub);
+            } catch (e){
+                // ok...
+            }
             sinon.assert.called(fakeError);
             sinon.assert.notCalled(fakeSuccess);
 
@@ -642,7 +644,10 @@ describe('chaincodefromcontract', () => {
 
             const ctx = {
                 setChaincodeStub: sandbox.stub(),
-                setClientIdentity: sandbox.stub()
+                setClientIdentity: sandbox.stub(),
+                logging:{
+                    setLevel:()=>{},getLogger:()=>{}
+                }
             };
 
             const nameMetadata = {
