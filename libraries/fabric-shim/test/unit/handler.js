@@ -390,7 +390,7 @@ describe('Handler', () => {
         it ('should throw an error if argument missing URL argument', () => {
             expect(() => {
                 new Handler.ChaincodeSupportClient(mockChaincodeImpl);
-            }).to.throw(/Invalid URL: undefined/);
+            }).to.throw(/Invalid URL/);
         });
 
         it ('should throw an error if URL argument does not use grpc as protocol', () => {

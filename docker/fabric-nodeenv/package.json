@@ -4,14 +4,13 @@
   "description": "",
   "main": "docker.js",
   "scripts": {
-    "build": "gulp -f docker.js"
+    "build": "node docker.js"
   },
   "keywords": [],
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "git-rev-sync": "1.12.0",
-    "gulp": "^4.0.0",
+    "git-rev-sync": "3.0.1",
     "toolchain": "1.0.0"
   }
 }
