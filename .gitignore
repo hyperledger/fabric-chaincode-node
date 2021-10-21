@@ -35,3 +35,4 @@ docker.log
 
 # jsdoc output
 docs/gen
+fabric-samples
