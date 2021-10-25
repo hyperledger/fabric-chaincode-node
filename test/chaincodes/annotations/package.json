@@ -18,7 +18,7 @@
   "author": "",
   "license": "APACHE-2.0",
   "dependencies": {
-    "@types/node": "^14.6.4",
+    "@types/node": "^16.11.4",
     "fabric-contract-api": "2.4.0-beta",
     "fabric-shim": "2.4.0-beta",
     "ts-node": "^3.3.0",
