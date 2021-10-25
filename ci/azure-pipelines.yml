@@ -43,7 +43,7 @@ variables:
   - name: rewire_node_version_spec # see https://github.com/jhnns/rewire/issues/178
     value: '16.4.0'
   - name: FABRIC_VERSION
-    value: 2.4.0-beta
+    value: 2.4
 
 # Build on Ubuntu
 pool:
