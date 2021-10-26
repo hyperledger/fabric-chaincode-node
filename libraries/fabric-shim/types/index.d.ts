@@ -99,6 +99,7 @@ declare module 'fabric-shim' {
 
         getSignedProposal(): ChaincodeProposal.SignedProposal;
         getTxTimestamp(): Timestamp;
+        getDateTimestamp(): Date;
         getBinding(): string;
 
         getState(key: string): Promise<Uint8Array>;
