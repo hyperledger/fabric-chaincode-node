@@ -1,5 +1,4 @@
 {
-  "name": "fabric-chaincode-node",
   "version": "2.2.2",
   "tag": "latest",
   "description": "fabric-chaincode-node monorepo, built with rush",
