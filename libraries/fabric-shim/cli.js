@@ -37,4 +37,8 @@ const main = async () => {
 
 }
 
-main();
+main().catch( (e)=> {
+    console.error("Major failure to start fabic-chaincode-node");
+    console.error(e);
+    process.exit(1);
+});
