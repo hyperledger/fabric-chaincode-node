@@ -23,18 +23,8 @@ const main = async () => {
         .describe('v', 'show version information')
         .env('CORE')
         .argv;
-
-    if (typeof (results.thePromise) !== 'undefined') {
-        results.thePromise.then(() => {
-            logger.info("Bootstrap process completed")
-        }).catch((error) => {
-            logger.info(error + '\nCommand failed\n');
-            process.exit(1);
-        });
-    } else {
-        process.exit(0);
-    }
-
+  
+    logger.info("Bootstrap process completed")
 }
 
 main().catch( (e)=> {
