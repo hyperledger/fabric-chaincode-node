@@ -33,9 +33,9 @@ exports.builder = (yargs) => {
 
     return yargs;
 };
-exports.handler = function (argv) {
+exports.handler = async function (argv) {
     const Bootstrap = require('../contract-spi/bootstrap');
-    return argv.thePromise = Bootstrap.bootstrap();
+    await Bootstrap.bootstrap();
 };
 
 exports.getArgs = function (yargs) {

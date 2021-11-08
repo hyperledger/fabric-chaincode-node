@@ -62,21 +62,13 @@ describe('fabric-chaincode-node cli', () => {
 
         it('should handle resolved promise  correctly', () => {
             sandbox.stub(yargs, 'describe').returns(yargs);
-            sandbox.stub(yargs, 'env').returns({
-                argv: {
-                    thePromise: Promise.resolve()
-                }
-            });
+            sandbox.stub(yargs, 'env').resolves("");
             require('../../cli.js');
         });
 
         it('should handle rejected promise  correctly', () => {
             sandbox.stub(yargs, 'describe').returns(yargs);
-            sandbox.stub(yargs, 'env').returns({
-                argv: {
-                    thePromise: Promise.reject()
-                }
-            });
+            sandbox.stub(yargs, 'env').throws("Test Failure")
 
             require('../../cli.js');
         });

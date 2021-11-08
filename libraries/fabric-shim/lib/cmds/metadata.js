@@ -16,7 +16,7 @@ exports.builder = function (yargs) {
     return yargs.demandCommand(1, 'Incorrect command. Please see the list of commands above.')
         .commandDir('metadata');
 };
-exports.handler = function (argv) {};
+exports.handler = async (argv) => {};
 
 module.exports.Generate = require('./metadata/lib/generate');
 

@@ -19,6 +19,6 @@ module.exports.builder = (yargs) => {
     return yargs;
 };
 
-module.exports.handler = (argv) => {
-    return argv.thePromise = Generate.handler(argv);
+module.exports.handler = async (argv) => {
+   await Generate.handler(argv);
 };
