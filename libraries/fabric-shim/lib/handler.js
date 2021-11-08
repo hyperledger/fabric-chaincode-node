@@ -621,13 +621,13 @@ async function handleMessage(msg, client, action) {
                 resp.status));
 
             if (resp.status >= Stub.RESPONSE_CODE.ERROR) {
-                const errMsg = util.format('%s Calling chaincode %s() returned error response [%s]. Sending ERROR message back to peer',
+                const errMsg = util.format('%s Calling chaincode %s() returned error response [%s]. Sending COMPLETED message back to peer',
                     loggerPrefix, method, resp.message);
                 logger.error(errMsg);
 
                 nextStateMsg = {
-                    type: fabprotos.protos.ChaincodeMessage.Type.ERROR,
-                    payload: Buffer.from('' + resp.message),
+                    type: fabprotos.protos.ChaincodeMessage.Type.COMPLETED,
+                    payload: fabprotos.protos.Response.encode(resp).finish(),
                     txid: msg.txid,
                     channel_id: msg.channel_id
                 };
