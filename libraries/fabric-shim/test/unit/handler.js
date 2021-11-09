@@ -1640,9 +1640,15 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
 
                 const text = '[theChannelID-aTX] Calling chaincode Init() has not called success or error.';
-                expectedResponse.payload = Buffer.from(text);
+                const resp = {
+                    status: Stub.RESPONSE_CODE.ERROR,
+                    message: text
+                };
+                const payload = fabprotos.protos.Response.encode(resp).finish()
+                expectedResponse.type = fabprotos.protos.ChaincodeMessage.Type.COMPLETED;
+                expectedResponse.payload = payload;
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
-                expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
+                expect(mockHandler._stream.write.firstCall.args[0].payload).to.deep.equal(payload);
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
 
@@ -1655,10 +1661,16 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Invoke.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
                 const text = '[theChannelID-aTX] Calling chaincode Invoke() has not called success or error.';
-                expectedResponse.payload = Buffer.from(text);
+                const resp = {
+                    status: Stub.RESPONSE_CODE.ERROR,
+                    message: text
+                };
+                const payload = fabprotos.protos.Response.encode(resp).finish()
+                expectedResponse.type = fabprotos.protos.ChaincodeMessage.Type.COMPLETED;
+                expectedResponse.payload = payload;
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
 
-                expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
+                expect(mockHandler._stream.write.firstCall.args[0].payload).to.deep.equal(payload);
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
 
@@ -1671,11 +1683,17 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Init.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
                 const text = '[theChannelID-aTX] Calling chaincode Init() has not called success or error.';
-                expectedResponse.payload = Buffer.from(text);
+                const resp = {
+                    status: Stub.RESPONSE_CODE.ERROR,
+                    message: text
+                };
+                const payload = fabprotos.protos.Response.encode(resp).finish()
+                expectedResponse.type = fabprotos.protos.ChaincodeMessage.Type.COMPLETED;
+                expectedResponse.payload = payload;
 
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
 
-                expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
+                expect(mockHandler._stream.write.firstCall.args[0].payload).to.deep.equal(payload);
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
             });
 
@@ -1688,11 +1706,17 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Invoke.calledOnce).to.be.true;
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
                 const text = '[theChannelID-aTX] Calling chaincode Invoke() has not called success or error.';
-                expectedResponse.payload = Buffer.from(text);
+                const resp = {
+                    status: Stub.RESPONSE_CODE.ERROR,
+                    message: text
+                };
+                const payload = fabprotos.protos.Response.encode(resp).finish()
+                expectedResponse.type = fabprotos.protos.ChaincodeMessage.Type.COMPLETED;
+                expectedResponse.payload = payload;
 
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mockHandler._stream.write.firstCall.args[0]).to.deep.equal(expectedResponse);
-                expect(mockHandler._stream.write.firstCall.args[0].payload.toString()).to.equal(text);
+                expect(mockHandler._stream.write.firstCall.args[0].payload).to.deep.equal(payload);
             });
         });
 

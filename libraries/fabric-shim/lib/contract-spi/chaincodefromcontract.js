@@ -392,14 +392,14 @@ class ChaincodeFromContract {
                     await contractInstance.unknownTransaction(ctx);
                     return shim.success();
                 } catch (error) {
-                    return shim.error(error);
+                    return shim.error(error.message);
                 }
             }
 
         } catch (error) {
             // log the error and then fail the transaction
             logger.error(`${loggerPrefix} ${error.toString()}`);
-            return shim.error(error);
+            return shim.error(error.message);
         }
     }
 
