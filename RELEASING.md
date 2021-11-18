@@ -34,23 +34,6 @@ The `tools/scripts/updateversions.sh` script will update the version in all the 
 
 See the [Prepare 2.1.4 release](https://github.com/hyperledger/fabric-chaincode-node/pull/174) pull request for an example, although be careful to search for all versions in the codebase as they're easy to miss and things change!
 
-You can use this to help update the package.json. 
-Alternatively if you set the version in `config.json` you can use the following script to help locate all the files. 
-
-```bash
-#!/bin/bash
-# Note uses bash4.4 or later features, and sponge from GNU moreutils
-set -exo pipefail
-
-NEW_VERSION=$(jq -r '.version' config.json)
-readarray -d '' PACKAGES < <(find . -name package.json -not -path '*/node_modules/*' -not -path '*/common/*')
-
-for PACKAGE in ${PACKAGES}
-do
-   jq --arg VER "${NEW_VERSION}" '.version=$VER' "${PACKAGE}" | sponge "${PACKAGE}"
-done
-```
-
 ## Create release
 
 Creating a GitHub release on the [releases page](https://github.com/hyperledger/fabric-chaincode-node/releases) will trigger the build to publish the new release.
