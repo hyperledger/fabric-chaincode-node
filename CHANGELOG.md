@@ -1,8 +1,12 @@
+## 2.4.0
+Fri Nov 26 08:07:34 GMT 2021
+
+Release 2.4.0
+
 ## v2.4.0-beta
 Wed 18 Aug 2021 12:11:16 BST
 
 * [d98e77b](https://github.com/hyperledger/fabric-chaincode-node/commit/d98e77b)  updated documentation for getStateByPartialCompositeKey, getStateByPartialCompositeKeyWithPagination and getPrivateDataByPartialCompositeKey
-* [c982390](https://github.com/hyperledger/fabric-chaincode-node/commit/c982390) Disable server tests
 * [556f32a](https://github.com/hyperledger/fabric-chaincode-node/commit/556f32a) Metadata generate updated [FABCN-447](https://jira.hyperledger.org/browse/FABCN-447) (#276)
 * [2bd68fd](https://github.com/hyperledger/fabric-chaincode-node/commit/2bd68fd) Shebang issue fixed [FABCN-438](https://jira.hyperledger.org/browse/FABCN-438) (#271)
 * [1d43015](https://github.com/hyperledger/fabric-chaincode-node/commit/1d43015) Pipeline publishing fixed (#273)
@@ -19,9 +23,6 @@ Wed 18 Aug 2021 12:11:16 BST
 * [52d8638](https://github.com/hyperledger/fabric-chaincode-node/commit/52d8638) Move azure variable to env variable
 * [b1991a6](https://github.com/hyperledger/fabric-chaincode-node/commit/b1991a6) Add in the missing dependency, adjust find command" (#256)
 * [b1bb93c](https://github.com/hyperledger/fabric-chaincode-node/commit/b1bb93c) Remove incorrect condition placement
-* [7565306](https://github.com/hyperledger/fabric-chaincode-node/commit/7565306) replicate template
-* [3ed241d](https://github.com/hyperledger/fabric-chaincode-node/commit/3ed241d) Use templates
-* [5e0c543](https://github.com/hyperledger/fabric-chaincode-node/commit/5e0c543) Simplify Naming
 * [54c27e7](https://github.com/hyperledger/fabric-chaincode-node/commit/54c27e7) Move to use NPM directly
 * [4510e67](https://github.com/hyperledger/fabric-chaincode-node/commit/4510e67) Adjust NPM repo URL
 * [2017002](https://github.com/hyperledger/fabric-chaincode-node/commit/2017002) Provide Nightly publishing of drivers

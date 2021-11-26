@@ -1,6 +1,6 @@
 {
   "name": "fabric-ledger",
-  "version": "2.4.0-beta",
+  "version": "2.4.0",
   "tag": "unstable",
   "description": "A node.js implementation of Hyperledger Fabric ledger api, to allow access to ledger data from smart contracts",
   "main": "lib/index.js",
@@ -49,7 +49,7 @@
     "lines": 100
   },
   "dependencies": {
-    "fabric-contract-api": "2.4.0-beta",
+    "fabric-contract-api": "2.4.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {

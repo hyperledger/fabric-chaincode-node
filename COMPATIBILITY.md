@@ -7,12 +7,13 @@ Github is used for code base management, issues should reported in the [FABCN](h
 
 This table shows the summary of the compatibility of the Node modules at versions 1.4 and 2.x, together with the Nodejs runtime they require and the Fabric Peer versions they can communicate with.
 
-|                         | Peer Connectivity v1.4 | NodeJS | Peer Connectivity v2.x |
-| ----------------------- | ---------------------- | ------ | ---------------------- |
-| Node modules **v1.4.5** | Yes                    | 8      | Yes                    |
-| Node modules **v2.x.x** | Yes                    | 12     | Yes                    |
+|                                | Peer Connectivity v1.4 | NodeJS | Peer Connectivity v2.x |
+| ------------------------------ | ---------------------- | ------ | ---------------------- |
+| Node modules **v1.4.5**        | Yes                    | 8      | Yes                    |
+| Node modules **v2.2.x/v2.3.x** | Yes                    | 12     | Yes                    |
+| Node modules **v2.4.x**        | Yes                    | 16     | Yes                    |
 
-By default a Fabric Peer v1.4 will create a Nodejs v8 runtime, and a Fabric Peer v2.x will create a Nodejs 12 runtime. Whilst this is the default, the docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image. 
+By default a Fabric Peer v1.4 will create a Nodejs v8 runtime, and a Fabric Peer v2.2/2.3 will create a Nodejs 12 runtime. The Fabric v2.4 will create a Nodejs 16 runtime. Whilst these are defaults, the docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image.
 
 For example `CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.1` will allow the use of the latest Node 12 runtime to be used within a Peer v1.4.
 
@@ -22,7 +23,7 @@ Note that the `fabric-contract-api` & `fabric-shim` node modules must be at v1.4
 
 ## Compatibility
 
-The key elements are : 
+The key elements are :
 
 - the version of the Fabric Contract Node modules used
 - the version of the Nodejs runtime used to run the code
@@ -36,7 +37,9 @@ Node modules that are produced are `fabric-contract-api`, `fabric-shim`, `fabric
 
 ### Supported Runtimes
 
-v2.x Node modules are supported running in Nodejs 12.16.1, with the x86_64 architecture.
+v2.4 Node modules are supported running in Nodejs 16.4.0, with the x86_64 architecture.
+
+v2.2/2.3 Node modules are supported running in Nodejs 12.16.1, with the x86_64 architecture.
 
 v1.4.x Node modules are supported running Nodejs 8.16.1 with the x86_64 architecture.
 
@@ -44,7 +47,7 @@ Architecture Support: all docker images, runtimes, tools are tested under x86_6
 
 ### Default Peer Runtime selection
 
-When using Fabric 2.x, the default docker image that is used to run the Node chaincode is node:12.16.1-alpine 
+When using Fabric 2.2/2.3x the default docker image that is used to run the Node chaincode is node:12.16.1-alpine. With Fabric 2.4 the default docker image is node:16.4.0-alpine
 
 *Note:* With the default docker image used by Fabric 2.x, the packaged code will be installed with npm. If a `package-lock.json` or a `npm-shrinkwrap.json` file is present, `npm ci --only=production` will be used. Otherwise `npm install --production` will be used. 
 
