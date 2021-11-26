@@ -1,21 +1,21 @@
 {
-    "name": "chaincode",
-    "description": "Chaincode testing cross chaincode functionality",
-    "engines": {
-      "node": "^12.16.1",
-      "npm": "^6.4.1"
-    },
-    "scripts": {
-      "start": "fabric-chaincode-node start"
-    },
-    "main": "index.js",
-    "engine-strict": true,
-    "engineStrict": true,
-    "version": "1.0.0",
-    "author": "",
-    "license": "Apache-2.0",
-    "dependencies": {
-      "fabric-shim": "2.4.0-beta",
-      "fabric-contract-api": "2.4.0-beta"
-    }
+  "name": "chaincode",
+  "description": "Chaincode testing cross chaincode functionality",
+  "engines": {
+    "node": "^12.16.1",
+    "npm": "^6.4.1"
+  },
+  "scripts": {
+    "start": "fabric-chaincode-node start"
+  },
+  "main": "index.js",
+  "engine-strict": true,
+  "engineStrict": true,
+  "version": "2.4.0",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fabric-shim": "2.4.0",
+    "fabric-contract-api": "2.4.0"
+  }
 }

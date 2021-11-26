@@ -1,6 +1,6 @@
 {
   "name": "toolchain",
-  "version": "1.0.0",
+  "version": "2.4.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -20,8 +20,8 @@
     "gulp-shell": "~0.7.1",
     "merge-stream": "~2.0.0",
     "npm-cli-login": "~0.1.1",
-    "ip":"^1.1.5",
-    "gulp-cli":"2.3.0"
+    "ip": "^1.1.5",
+    "gulp-cli": "2.3.0"
   },
   "devDependencies": {
     "gulp": "^4.0.2"

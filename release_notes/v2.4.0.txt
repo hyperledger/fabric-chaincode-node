@@ -1,0 +1,12 @@
+v2.4.0
+------
+
+Release Notes
+-------------
+This v2.4.0 Release is a bug fix release of the main branch.
+
+Note that version of Node.js is updated to 16.4.0. See the COMPATIBILITY.md file in the main branch for information.
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/release-2.x/CHANGELOG.md#v2.4.0-beta
