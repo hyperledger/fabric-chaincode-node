@@ -1,3 +1,8 @@
+## v2.4.1
+Mon Nov 29 10:39:51 GMT 2021
+
+* [8acc32a](https://github.com/hyperledger/fabric-chaincode-node/commit/8acc32a) CI Pipeline Fixes (#304)
+
 ## 2.4.0
 Fri Nov 26 08:07:34 GMT 2021
 
