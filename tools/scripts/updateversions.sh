@@ -17,3 +17,8 @@ do
    echo "Updating '${PACKAGE}'"
    jq --arg VER "${NEW_VERSION}" '.version=$VER' "${PACKAGE}" | sponge "${PACKAGE}"
 done
+
+
+echo "Please also check these files"
+# NB - the grep regexp syntax is a little different
+find . -name "*.js" -not -path '*/node_modules/*' -not -path '*/common/*' | xargs grep "2\.4\.\?[0-9]"
