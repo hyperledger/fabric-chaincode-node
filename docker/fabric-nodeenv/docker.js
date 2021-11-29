@@ -15,7 +15,7 @@ const util = require('util');
 
 const { shell: runcmds } = require('toolchain');
 
-const version = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'package.json'))).version;
+const version = JSON.parse(fs.readFileSync(path.join(__dirname,'package.json'))).version;
 const node_version = process.env.NODE_VERSION || '12.16.1';
 const build_dir = path.join(__dirname);
 const tag = version + '-' + git.short();
