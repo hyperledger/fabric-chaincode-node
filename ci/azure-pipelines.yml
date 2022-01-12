@@ -6,17 +6,6 @@
 # 
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 
-# Daily build for final quality
-# cf https://crontab.guru/#0_23_*_*_*
-schedules:
-  - cron: "0 23 * * *"
-    displayName: 'Chaincode Node Nightly Driver'
-    branches:
-      include:
-        - release-1.4
-    always: true
-
-
 trigger:
   branches:
     include:
@@ -63,12 +52,14 @@ stages:
                 npm install
                 npm install -g gulp-cli
               displayName: 'Setup the node environment'
-            - script: cd $(Build.SourcesDirectory)/fabric-contract-api && npm audit --audit-level=moderate
-              displayName: 'Run npm audit in fabric-contract-api'
-            - script: cd $(Build.SourcesDirectory)/fabric-shim && npm audit --audit-level=moderate
-              displayName: 'Run npm audit in fabric-shim'
-            - script: cd $(Build.SourcesDirectory)/fabric-shim-crypto && npm audit --audit-level=moderate
-              displayName: 'Run npm audit in fabric-shim-crypto'
+            - script: echo "NPM AUDIT DISABLED - DO NOT USE THIS RELEASE"
+              displayName: 'Disable NPM AUDIT' 
+            # - script: cd $(Build.SourcesDirectory)/fabric-contract-api && npm audit --audit-level=moderate
+            #   displayName: 'Run npm audit in fabric-contract-api'
+            # - script: cd $(Build.SourcesDirectory)/fabric-shim && npm audit --audit-level=moderate
+            #   displayName: 'Run npm audit in fabric-shim'
+            # - script: cd $(Build.SourcesDirectory)/fabric-shim-crypto && npm audit --audit-level=moderate
+            #   displayName: 'Run npm audit in fabric-shim-crypto'
             - script: gulp test-headless
               displayName: 'Unit tests'
             - task: PublishTestResults@2
