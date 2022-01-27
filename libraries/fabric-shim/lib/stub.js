@@ -730,7 +730,7 @@ class ChaincodeStub {
 	 * If `channel` is empty, the caller's channel is assumed.
 	 * @async
 	 * @param {string} chaincodeName Name of the chaincode to call
-	 * @param {byte[][]} args List of arguments to pass to the called chaincode
+	 * @param {string[]} args List of arguments to pass to the called chaincode
 	 * @param {string} channel Name of the channel where the target chaincode is active
 	 * @returns {Promise} Promise for a {@link Response} object returned by the called chaincode
 	 */
