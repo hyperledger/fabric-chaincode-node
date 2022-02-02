@@ -998,6 +998,19 @@ class ChaincodeStub {
         return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
     }
 
+
+    async purgePrivateData(collection, key) {
+        // Access public data by setting the collection to empty string
+        logger.debug('deletePrivateData called with collection:%s, key:%s', collection, key);
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!key || typeof key !== 'string') {
+            throw new Error('key must be a valid string');
+        }
+        return await this.handler.handlePurgeState(collection, key, this.channel_id, this.txId);
+    }
+
     /**
 	 * SetPrivateDataValidationParameter sets the key-level endorsement policy
 	 * for the private data specified by `key`.

@@ -87,6 +87,7 @@ declare module 'fabric-shim-api' {
         getPrivateDataHash(collection: string, key: string): Promise<Uint8Array>;
         putPrivateData(collection: string, key: string, value: Uint8Array): Promise<void>;
         deletePrivateData(collection: string, key: string): Promise<void>;
+        purgePrivateData(collection: string, key: string): Promise<void>;
         setPrivateDataValidationParameter(collection: string, key: string, ep: Uint8Array): Promise<void>;
         getPrivateDataValidationParameter(collection: string, key: string): Promise<Uint8Array>;
         getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;

@@ -421,6 +421,16 @@ class ChaincodeMessageHandler {
         return await this._askPeerAndListen(msg, 'DeleteState');
     }
 
+    async handlePurgeState(collection, key, channel_id, txId) {
+        const msg = {
+            type: fabprotos.protos.ChaincodeMessage.Type.PURGE_PRIVATE_DATA,
+            payload: fabprotos.protos.PurgePrivateState.encode({key, collection}).finish(),
+            txid: txId,
+            channel_id: channel_id
+        };
+        return await this._askPeerAndListen(msg, 'PurgePrivateState');
+    }
+
     async handlePutStateMetadata(collection, key, metakey, ep, channel_id, txId) {
         const msg = {
             type: fabprotos.protos.ChaincodeMessage.Type.PUT_STATE_METADATA,
