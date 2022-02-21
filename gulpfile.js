@@ -28,6 +28,6 @@ exports.protos = protos;
 exports.default = series(lint, test_schema, unittest);
 
 task('channel-init', startFabric);
-task('test-headless', series(lint, test_schema, unittest));
+task('test-headless', series(test_schema, unittest));
 task('test-e2e', series(testfvshim, testScenario));
 // task('test-devmode', series(test-scenario-devmode));
