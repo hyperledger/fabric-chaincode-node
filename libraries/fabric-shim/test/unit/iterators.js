@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-/* global describe it beforeEach afterEach */
+/* global  */
 'use strict';
 
 const sinon = require('sinon');
@@ -15,8 +15,9 @@ const Iterator = rewire('../../../fabric-shim/lib/iterators.js');
 const StateQueryIterator = Iterator.StateQueryIterator;
 const HistoryQueryIterator = Iterator.HistoryQueryIterator;
 const {ChaincodeMessageHandler} = require('../../../fabric-shim/lib/handler.js');
-const fabprotos = require('../../bundle');
 
+
+const {ledger} = require('@hyperledger/fabric-protos');
 const channel_id = 'theChannelId';
 const txID = 'aTx';
 
@@ -50,7 +51,7 @@ describe('Iterator', () => {
 
         describe('close', () => {
             it ('should return handler.handleQueryStateClose', async () => {
-                mockResponse.id = 1;
+                mockResponse.getId = () => 1;
                 mockHandler.handleQueryStateClose = sinon.stub().resolves('some resolution');
 
                 const ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'some type');
@@ -60,29 +61,29 @@ describe('Iterator', () => {
                 expect(result).to.deep.equal('some resolution');
 
                 expect(mockHandler.handleQueryStateClose.calledOnce).to.be.true;
-                expect(mockHandler.handleQueryStateClose.firstCall.args).to.deep.equal([mockResponse.id, channel_id, txID]);
+                expect(mockHandler.handleQueryStateClose.firstCall.args).to.deep.equal([mockResponse.getId(), channel_id, txID]);
             });
         });
 
         describe('_getResultFromBytes', () => {
 
-            fabprotos.queryresult.KV.decode = sinon.stub().returns('decoded KV');
-            fabprotos.queryresult.KeyModification.decode = sinon.stub().returns('decoded Keymodification');
-
             it ('should return KV decode on resultbytes for a QUERY type', () => {
                 const ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'QUERY');
 
-                const result = ci._getResultFromBytes({resultBytes: 'some bytes'});
-
-                expect(result).to.deep.equal('decoded KV');
+                const bytes = new ledger.queryresult.KV();
+                bytes.setValue('some bytes');
+                const result = ci._getResultFromBytes({getResultbytes:() => bytes.serializeBinary()});
+                expect(result).is.not.null;
             });
 
             it ('should return KeyModification decode on resultbytes for a HISTORY type', () => {
                 const ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'HISTORY');
 
-                const result = ci._getResultFromBytes({resultBytes: 'some bytes'});
+                const bytes = new ledger.queryresult.KeyModification();
+                bytes.setValue('some bytes');
 
-                expect(result).to.equal('decoded Keymodification');
+                const result = ci._getResultFromBytes({getResultbytes:() => bytes.serializeBinary()});
+                expect(result).is.not.null;
             });
 
             it ('should throw an error for unknown types', () => {
@@ -108,22 +109,25 @@ describe('Iterator', () => {
             });
 
             it ('should return value of first element of results converted from bytes and done false when hasMore false and results has no more elements after currentLoc', () => {
-                mockResponse.results = ['some result bytes'];
-                mockResponse.hasMore = false;
+                mockResponse.getResultsList = () => ['some result bytes'];
+                mockResponse.getHasMore = () => false;
+                getResultFromBytesStub.returns({getKey:() => 'akey', getValue:() => 'some result'});
 
                 const result = ci._createAndEmitResult();
 
                 expect(getResultFromBytesStub.calledOnce).to.be.true;
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(result).to.deep.equal({
-                    value: 'some result',
+                    value: {value:Buffer.from('some result'),
+                        key: 'akey'},
                     done: false
                 });
             });
 
             it ('should return value of first element of results converted from bytes and done false when hasMore true and results has no more elements after currentLoc', () => {
-                mockResponse.results = ['some result bytes'];
-                mockResponse.hasMore = true;
+                mockResponse.getResultsList = () => ['some result bytes'];
+                mockResponse.getHasMore = () => true;
+                getResultFromBytesStub.returns({getKey:() => 'akey', getValue:() => 'some result'});
 
                 const result = ci._createAndEmitResult();
 
@@ -131,14 +135,16 @@ describe('Iterator', () => {
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal({
-                    value: 'some result',
-                    done: false
+                    value: {value:Buffer.from('some result'), key: 'akey'},
+                    done: false,
+
                 });
             });
 
             it ('should return value of first element of results converted from bytes and done false when hasMore false and results has elements after currentLoc', () => {
-                mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.hasMore = false;
+                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
+                mockResponse.getHasMore = () => false;
+                getResultFromBytesStub.returns({getKey:() => 'akey', getValue:() => 'some result'});
 
                 const result = ci._createAndEmitResult();
 
@@ -146,14 +152,18 @@ describe('Iterator', () => {
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal({
-                    value: 'some result',
+                    value: {value:Buffer.from('some result'),
+                        key: 'akey'},
                     done: false
                 });
             });
 
             it ('should return value of first element of results converted from bytes and done false when hasMore true and results has elements after currentLoc', () => {
-                mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.hasMore = true;
+                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
+                mockResponse.getHasMore = () => true;
+
+                getResultFromBytesStub.returns({getKey:() => 'akey', getValue:() => 'some result'});
+
 
                 const result = ci._createAndEmitResult();
 
@@ -161,16 +171,20 @@ describe('Iterator', () => {
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal({
-                    value: 'some result',
+                    value: {value: Buffer.from('some result'),
+                        key: 'akey'},
                     done: false
                 });
             });
 
             it ('should return as expected with non-zero currentLoc', () => {
-                mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.hasMore = true;
+                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
+                mockResponse.getHasMore = () => true;
 
                 ci.currentLoc = 1;
+
+                getResultFromBytesStub.returns({getKey:() => 'akey', getValue:() => 'some result'});
+
 
                 const result = ci._createAndEmitResult();
 
@@ -178,19 +192,23 @@ describe('Iterator', () => {
                 expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some more result bytes']);
                 expect(ci.currentLoc).to.deep.equal(2);
                 expect(result).to.deep.equal({
-                    value: 'some result',
+                    value: {value:Buffer.from('some result'),
+                        key: 'akey'},
                     done: false
                 });
             });
 
-            it ('should return value of first element of results converted from bytes and done false', () => {
-                mockResponse.results = ['some result bytes', 'some more result bytes'];
-                mockResponse.hasMore = false;
+            it('should return value of first element of results converted from bytes and done false', () => {
+                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
+                mockResponse.getHasMore = () => false;
 
                 const expectedResult = {
-                    value: 'some result',
+                    value: {value: Buffer.from('some result'),
+                        key: 'akey'},
                     done: false
                 };
+
+                getResultFromBytesStub.returns({getKey:() => 'akey', getValue:() => 'some result'});
 
                 const result = ci._createAndEmitResult();
 
@@ -215,7 +233,7 @@ describe('Iterator', () => {
             });
 
             it ('should return _createAndEmitResult when there are elements left in the result set', async () => {
-                mockResponse.results = ['some result bytes', 'some more result bytes'];
+                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
 
                 const result = await ci.next();
 
@@ -223,12 +241,14 @@ describe('Iterator', () => {
             });
 
             it ('should return _createAndEmitResult when response hasMore and no error occurs', async () => {
-                mockResponse.results = [];
-                mockResponse.hasMore = true;
+                mockResponse.getResultsList = () => [];
+                mockResponse.getHasMore = () => true;
+                mockResponse.getId = () => 1;
 
                 const nextResponse = {
-                    results: ['some result bytes', 'some more result bytes'],
-                    hasMore: false
+                    getResultsList: () => ['some result bytes', 'some more result bytes'],
+                    getHasMore: () => false,
+                    getId: () => 1
                 };
 
                 mockHandler.handleQueryStateNext = sinon.stub().resolves(nextResponse);
@@ -243,8 +263,8 @@ describe('Iterator', () => {
             });
 
             it ('should throw an error if error occurs when hasMore and listenerCount for data = 0', async () => {
-                mockResponse.results = [];
-                mockResponse.hasMore = true;
+                mockResponse.getResultsList = () => [];
+                mockResponse.getHasMore = () => true;
 
                 const err = new Error('some error');
 
@@ -259,8 +279,8 @@ describe('Iterator', () => {
             });
 
             it ('should return done if response does not hasMore and listenerCount for end > 0', async () => {
-                mockResponse.results = [];
-                mockResponse.hasMore = false;
+                mockResponse.getResultsList = () => [];
+                mockResponse.getHasMore = () => false;
 
                 const result = await ci.next();
 
@@ -269,8 +289,8 @@ describe('Iterator', () => {
             });
 
             it ('should return done if response does not hasMore and listenerCount for end = 0', async () => {
-                mockResponse.results = [];
-                mockResponse.hasMore = false;
+                mockResponse.getResultsList = () => [];
+                mockResponse.getHasMore = () => false;
 
                 const result = await ci.next();
 

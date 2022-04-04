@@ -6,7 +6,7 @@
 /* eslint-disable no-useless-escape */
 'use strict';
 
-const fabprotos = require('../bundle');
+
 const util = require('util');
 const {Certificate} = require('@fidm/x509');
 const Logger = require('./logger');
@@ -20,6 +20,8 @@ const Iterators = require('./iterators');
 const ChaincodeStub = require('./stub');
 const KeyEndorsementPolicy = require('./utils/statebased');
 const fs = require('fs');
+
+const {peer} = require('@hyperledger/fabric-protos');
 
 const StartCommand = require('./cmds/startCommand.js');
 
@@ -125,15 +127,15 @@ class Shim {
 
         const chaincodeName = opts['chaincode-id-name'];
         const client = new ChaincodeSupportClient(chaincode, url, optsCpy);
-        const chaincodeID = {
-            name: chaincodeName
-        };
 
         logger.info(util.format('Registering with peer %s as chaincode "%s"', opts['peer.address'], chaincodeName));
 
+        const chaincodePB = new peer.ChaincodeID();
+        chaincodePB.setName(chaincodeName);
+
         client.chat({
-            type: fabprotos.protos.ChaincodeMessage.Type.REGISTER,
-            payload: fabprotos.protos.ChaincodeID.encode(chaincodeID).finish()
+            type: peer.ChaincodeMessage.Type.REGISTER,
+            payload: chaincodePB.serializeBinary()
         });
 
         // return the client object to give the calling code
@@ -256,7 +258,7 @@ class ClientIdentity {
         this.mspId = signingId.mspid;
 
         this.idBytes = signingId.idBytes;
-        const normalizedCert = normalizeX509(this.idBytes.toString(), loggerPrefix);
+        const normalizedCert = normalizeX509(new TextDecoder().decode(this.idBytes), loggerPrefix);
 
         // assemble the unique ID based on certificate
         const certificate = Certificate.fromPEM(normalizedCert);

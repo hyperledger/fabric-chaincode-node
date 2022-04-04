@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 */
-/* global describe it beforeEach afterEach before after */
+/* global  */
 'use strict';
 
 const sinon = require('sinon');
@@ -14,11 +14,13 @@ const fs = require('fs');
 const path = require('path');
 const rewire = require('rewire');
 
-const fabprotos = require('../../bundle');
+const {peer} = require('@hyperledger/fabric-protos');
+
+
 const grpc = require('@grpc/grpc-js');
 
 const serverPath = '../../lib/server';
-let ChaincodeServer = rewire(serverPath);
+const ChaincodeServer = rewire(serverPath);
 
 const mockChaincode = {Init: () => {}, Invoke: () => {}};
 
@@ -187,17 +189,18 @@ describe('ChaincodeServer', () => {
 
             const server = new ChaincodeServer(mockChaincode, serverOpts);
             const mockStream = {on: sinon.stub(), write: sinon.stub()};
-            
+
             server.connect(mockStream);
 
             expect(mockHandlerStub.calledOnce).to.be.true;
             expect(mockHandler.chat.calledOnce).to.be.true;
 
+            const payloadPb = new peer.ChaincodeID();
+            payloadPb.setName('example-chaincode-id');
+
             expect(mockHandler.chat.firstCall.args).to.deep.equal([{
-                type: fabprotos.protos.ChaincodeMessage.Type.REGISTER,
-                payload: fabprotos.protos.ChaincodeID.encode({
-                    name: 'example-chaincode-id'
-                }).finish()
+                type: peer.ChaincodeMessage.Type.REGISTER,
+                payload: payloadPb.serializeBinary()
             }]);
         });
 
@@ -208,7 +211,7 @@ describe('ChaincodeServer', () => {
             const mockHandlerStub = sinon.stub().returns(mockHandler);
             ChaincodeServer.__set__('ChaincodeMessageHandler', mockHandlerStub);
 
-            const server = new ChaincodeServer(mockChaincode, serverOpts);           
+            const server = new ChaincodeServer(mockChaincode, serverOpts);
             const mockStream = {on: sinon.stub(), write: sinon.stub()};
 
             server.connect(mockStream);

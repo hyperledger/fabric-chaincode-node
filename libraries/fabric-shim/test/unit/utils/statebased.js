@@ -72,46 +72,6 @@ describe('KeyEndorsementPolicy', () => {
         });
     });
 
-    describe('#_getPolicyFromMspId', () => {
-        let ep;
-        beforeEach(() => {
-            ep = new KeyEndorsementPolicy();
-            ep.addOrgs('MEMBER', 'Org1MSP', 'Org2MSP', 'Org3MSP');
-        });
-
-        it('should successfully get policy from mspIds', () => {
-            const policy = ep._getPolicyFromMspId();
-            expect(policy).haveOwnProperty('version').eqls(0);
-            expect(policy).haveOwnProperty('identities').to.be.an('array');
-            expect(policy.identities.length).to.eql(3);
-            expect(policy.rule.nOutOf.n).to.eql(3);
-            expect(policy.rule.nOutOf.rules.length).to.eql(3);
-            expect(policy.rule.nOutOf.rules[0].signedBy).to.eql(0);
-            expect(policy.rule.nOutOf.rules[1].signedBy).to.eql(1);
-            expect(policy.rule.nOutOf.rules[2].signedBy).to.eql(2);
-        });
-    });
-
-    describe('#_setMspIdsFromSPE', () => {
-        let spe;
-        beforeEach(() => {
-            const ep = new KeyEndorsementPolicy();
-            ep.addOrgs('MEMBER', 'Org1MSP', 'Org2MSP', 'Org3MSP');
-            ep.addOrgs('PEER', 'Org4MSP', 'Org5MSP');
-            spe = ep._getPolicyFromMspId();
-        });
-
-        it('should successfully set mspIds from spe', () => {
-            const ep = new KeyEndorsementPolicy();
-            ep._setMspIdsFromSPE(spe);
-            expect(ep.orgs).haveOwnProperty('Org1MSP').eqls(0);
-            expect(ep.orgs).haveOwnProperty('Org2MSP').eqls(0);
-            expect(ep.orgs).haveOwnProperty('Org3MSP').eqls(0);
-            expect(ep.orgs).haveOwnProperty('Org4MSP').eqls(3);
-            expect(ep.orgs).haveOwnProperty('Org5MSP').eqls(3);
-        });
-    });
-
     describe('#delOrgs', () => {
         let ep;
 
