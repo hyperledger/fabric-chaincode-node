@@ -9,7 +9,7 @@
         "url": "https://github.com/hyperledger/fabric-chaincode-node"
     },
     "scripts": {
-        "test": "nyc mocha --recursive 'test/**/*.js' --reporter spec-junit-splitter-mocha-reporter",
+        "test": "nyc mocha --recursive 'test/**/*.js' --reporter spec-junit-splitter-mocha-reporter 2>&1",
         "lint":"eslint ./lib/",
         "build": "npm run lint && npm test"
     },
