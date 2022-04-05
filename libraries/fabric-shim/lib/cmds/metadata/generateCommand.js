@@ -20,5 +20,5 @@ module.exports.builder = (yargs) => {
 };
 
 module.exports.handler = async (argv) => {
-   await Generate.handler(argv);
+    await Generate.handler(argv);
 };

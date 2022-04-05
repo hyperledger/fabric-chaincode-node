@@ -58,7 +58,6 @@ exports.handler = async function (argv) {
     const Bootstrap = require('../contract-spi/bootstrap');
 
     await Bootstrap.bootstrap(true);
-    console.log("Returning from hanlder")
 };
 
 exports.getArgs = function (yargs) {
