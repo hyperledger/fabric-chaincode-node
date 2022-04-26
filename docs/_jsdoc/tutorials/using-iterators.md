@@ -84,7 +84,7 @@ and you would obtain an iterator as follows (depending on the api you are callin
 ```javascript
 // use await to get the iterator and pass it to getAllResults
 const iterator = await ctx.stub.getStateByRange(startKey, endKey);
-let results await getAllResults(iterator);
+let results = await getAllResults(iterator);
 
 // use await to get the object containing the iterator and metadata and
 // pass it to getAllResults. All Pagination type queries return an object
