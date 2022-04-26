@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-ARG NODE_VER=16.4.0
+ARG NODE_VER=16
 FROM node:${NODE_VER}-alpine
 RUN apk add --no-cache \
 	make \
-	python \
+	python3 \
 	g++;
 RUN mkdir -p /chaincode/input \
 	&& mkdir -p /chaincode/output \

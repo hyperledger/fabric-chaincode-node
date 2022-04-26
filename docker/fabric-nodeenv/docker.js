@@ -15,7 +15,6 @@ const util = require('util');
 const { shell: runcmds } = require('toolchain');
 
 const version = JSON.parse(fs.readFileSync(path.join(__dirname,'package.json'))).version;
-const node_version = process.env.NODE_VERSION || '12.16.1';
 const build_dir = path.join(__dirname);
 const tag = version + '-' + git.short();
 
@@ -23,8 +22,8 @@ const tag = version + '-' + git.short();
 const imageBuild = async () => {
     await runcmds(
         [
-            util.format('docker build --build-arg NODE_VER=%s -t hyperledger/fabric-nodeenv:%s -f %s %s',
-                node_version, tag, path.join(build_dir, 'Dockerfile'), build_dir),
+            util.format('docker build -t hyperledger/fabric-nodeenv:%s -f %s %s',
+                tag, path.join(build_dir, 'Dockerfile'), build_dir),
             util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:%s',
                 tag, version),
             util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:latest', tag)
