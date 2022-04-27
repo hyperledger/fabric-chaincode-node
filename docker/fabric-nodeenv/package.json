@@ -1,6 +1,6 @@
 {
   "name": "fabric-nodeenv",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "",
   "main": "docker.js",
   "scripts": {
