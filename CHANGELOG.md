@@ -1,5 +1,5 @@
 ## v2.2.3
-Wed 27 Apr 2022 09:24:59 BST
+Thu 28 Apr 2022 09:44:19 BST
 
 * [437c67e](https://github.com/hyperledger/fabric-chaincode-node/commit/437c67e) Recent builds have failued with the browserlist module reporting (on stderr) that it was outdated. This is a dependency of nyc, code coverage.
 * [5311536](https://github.com/hyperledger/fabric-chaincode-node/commit/5311536) Rename the root json config file (#301)
