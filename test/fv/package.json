@@ -29,7 +29,6 @@
     "fabric-contract-api": "2.4.1",
     "fabric-shim": "2.4.1",
     "fabric-shim-api": "2.4.1",
-    "fabric-shim-crypto": "2.4.1",
     "fs-extra": "^10.0.1",
     "git-rev-sync": "3.0.1",
     "gulp": "^4.0.2",

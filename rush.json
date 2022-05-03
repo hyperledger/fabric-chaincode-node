@@ -354,12 +354,6 @@
             "shouldPublish": true
         },
         {
-            "packageName": "fabric-shim-crypto",
-            "projectFolder": "libraries/fabric-shim-crypto",
-            "reviewCategory": "libraries",
-            "shouldPublish": true
-        },
-        {
             "packageName": "fabric-ledger",
             "projectFolder": "libraries/fabric-ledger",
             "reviewCategory": "libraries",

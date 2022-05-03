@@ -36,7 +36,7 @@ Fabric v1.4.2, and Fabric v2.x will, by default, start up docker image to host t
 
 With Fabric v2.x, the chaincode container can be configured to be started by other means, and not the Peer. In this case, the environment used is not in the control of Fabric.
 
-Node modules that are produced are `fabric-contract-api`, `fabric-shim`, `fabric-shim-crypto` & `fabric-shim-api`
+Node modules that are produced are `fabric-contract-api`, `fabric-shim` & `fabric-shim-api`
 
 ### Supported Runtimes
 

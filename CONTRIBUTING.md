@@ -16,7 +16,7 @@ The following [Rush categories](https://rushjs.io/pages/maintainer/add_to_repo/)
 
 - `apis` contains the `fabric-contract-api` and `fabric-shim-api` modules
 - `tools` contains a set of scripts for build tooling (evolved from the `build` folder that existed previously)
-- `libraries` contains the `fabric-shim` and `fabric-shim-crypto` modules
+- `libraries` contains the `fabric-shim` module
 - `docker` contains the scripts and dockerfile for the nodeenv image
 - `docs` contains the `apidocs` building scripts
 

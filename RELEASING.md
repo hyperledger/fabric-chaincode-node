@@ -8,7 +8,6 @@ The following artifacts are created as a result of releasing Fabric Chaincode No
     - [fabric-contract-api](https://www.npmjs.com/package/fabric-contract-api)
     - [fabric-shim](https://www.npmjs.com/package/fabric-shim)
     - [fabric-shim-api](https://www.npmjs.com/package/fabric-shim-api)
-    - [fabric-shim-crypto](https://www.npmjs.com/package/fabric-shim-crypto)
 
 **Note:** A docker image with a matching V.R version is required before releasing a new version of Fabric.
 
