@@ -23,7 +23,6 @@ The following packages are available from the npm Registry:
 - [fabric-contract-api](https://www.npmjs.com/package/fabric-contract-api)
 - [fabric-shim](https://www.npmjs.com/package/fabric-shim)
 - [fabric-shim-api](https://www.npmjs.com/package/fabric-shim-api)
-- [fabric-shim-crypto](https://www.npmjs.com/package/fabric-shim-crypto)
 
 Check the [release notes](https://github.com/hyperledger/fabric-chaincode-node/releases) for the changes in each version.
 

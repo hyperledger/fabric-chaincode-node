@@ -20,6 +20,5 @@ if (input.dependencies) {
     if (input.dependencies['fabric-ledger']) input.dependencies['fabric-ledger'] = ver;
     if (input.dependencies['fabric-shim']) input.dependencies['fabric-shim'] = ver;
     if (input.dependencies['fabric-shim-api']) input.dependencies['fabric-shim-api'] = ver;
-    if (input.dependencies['fabric-shim-crypto']) input.dependencies['fabric-shim-crypto'] = ver;
 }
 fs.writeFileSync(filename, JSON.stringify(input, null, 2));
