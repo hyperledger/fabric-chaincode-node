@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim-docs",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "",
   "private": true,
   "scripts": {
@@ -8,7 +8,7 @@
     "docs": "rimraf ./gen && jsdoc -c ./_jsdoc.json"
   },
   "dependencies": {
-    "fabric-ledger": "2.4.1"
+    "fabric-ledger": "2.4.2"
   },
   "devDependencies": {
     "ink-docstrap": "^1.3.2",

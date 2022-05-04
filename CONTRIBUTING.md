@@ -22,7 +22,7 @@ The following [Rush categories](https://rushjs.io/pages/maintainer/add_to_repo/)
 
 ### Pre-requisites
 
-* node v12.16.1 (npm v6.4.1) => recommend to use [nvm](https://github.com/nvm-sh/nvm)
+* node v16.4.0 (npm v8.0.0) => recommend to use [nvm](https://github.com/nvm-sh/nvm)
 * rush => `npm install -g @microsoft/rush`
 
 > Note that npm v6 has some bugs that mean adding new dependencies etc are not properly picked up. Longer term we should consider moving to yarn or pnpm. However in practice this isn't a serious problem and has been possible to be worked around by issuing `rm ./common/config/rush/npm-shrinkwrap.json` and then `rush update`
