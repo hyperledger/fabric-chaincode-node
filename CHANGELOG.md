@@ -1,3 +1,15 @@
+## v2.4.2
+Wed  4 May 2022 11:30:35 BST
+
+* [4467c458](https://github.com/hyperledger/fabric-chaincode-node/commit/4467c458) Allow jsdoc push to fail (#331)
+* [3f1dbffd](https://github.com/hyperledger/fabric-chaincode-node/commit/3f1dbffd) Remove fabric-shim-crypto package
+* [d9cfc3d0](https://github.com/hyperledger/fabric-chaincode-node/commit/d9cfc3d0) Correct 2.4 to be Node 16
+* [e1ae5b31](https://github.com/hyperledger/fabric-chaincode-node/commit/e1ae5b31) Fixing a command which is giving errors while copying and pasting (#322)
+* [671a5442](https://github.com/hyperledger/fabric-chaincode-node/commit/671a5442) Some updates to the latest tool versions
+* [2d861535](https://github.com/hyperledger/fabric-chaincode-node/commit/2d861535) Replace RocketChat with Discord
+* [f7288eba](https://github.com/hyperledger/fabric-chaincode-node/commit/f7288eba) add missing bracket (#312)
+* [a53121f0](https://github.com/hyperledger/fabric-chaincode-node/commit/a53121f0) Fix Doc: Type of args in invokeChaincode() is string[] (#311)
+
 ## v2.4.1
 Mon Nov 29 10:39:51 GMT 2021
 

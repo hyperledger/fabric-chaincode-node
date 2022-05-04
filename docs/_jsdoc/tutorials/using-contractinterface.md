@@ -28,8 +28,8 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-contract-api": "^2.4.1",
-    "fabric-shim": "^2.4.1"
+    "fabric-contract-api": "^2.4.2",
+    "fabric-shim": "^2.4.2"
   }
 }
 

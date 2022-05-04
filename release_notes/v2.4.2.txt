@@ -1,0 +1,15 @@
+v2.4.2
+------
+
+Release Notes
+-------------
+
+This release corrects the 2.4 nodeenv docker image to be Node 16, and removes the fabric-shim-crypto package.
+
+Note that version of Node.js is updated to 16.4.0. See the COMPATIBILITY.md file in the main branch for information.
+
+See the change log for a full list of updates.
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/main/CHANGELOG.md#v2.4.2
