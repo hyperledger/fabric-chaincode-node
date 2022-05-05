@@ -1,6 +1,6 @@
 {
   "name": "fabric-nodeenv",
-  "version": "2.4.2",
+  "version": "2.4.3-unstable",
   "description": "",
   "main": "docker.js",
   "scripts": {
@@ -11,6 +11,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "git-rev-sync": "3.0.1",
-    "toolchain": "2.4.2"
+    "toolchain": "2.4.3-unstable"
   }
 }
