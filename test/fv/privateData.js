@@ -48,4 +48,15 @@ describe('Chaincode privateData', () => {
         expect(payload).to.eql('false');
     });
 
+    it('should call purge private data without failing', async function () {
+        this.timeout(MED_STEP);
+        const privateData = Buffer.from('privateData').toString('base64');
+        await utils.invoke(suite, 'privateDataContract:createAsset', ['4'], `{"privateValue":"${privateData}"}`);
+        let payload = await utils.query(suite, 'privateDataContract:readAsset', ['4']);
+        expect(payload).to.eql('{"privateValue":"privateData"}');
+        console.log(await utils.invoke(suite, 'privateDataContract:purgeAsset', ['4']));
+        payload = await utils.query(suite, 'privateDataContract:assetExists', ['4']);
+        expect(payload).to.eql('false');
+    });
+
 });

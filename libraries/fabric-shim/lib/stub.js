@@ -1008,6 +1008,30 @@ class ChaincodeStub {
     }
 
     /**
+     * PurgePrivateData records the specified `key` to be purged in the private writeset
+     * of the transaction. Note that only hash of the private writeset goes into the
+     * transaction proposal response (which is sent to the client who issued the
+     * transaction) and the actual private writeset gets temporarily stored in a
+     * transient store. The `key` and its value will be deleted from the collection
+     * when the transaction is validated and successfully committed, and will
+     * subsequently be completely removed from the private data store (that maintains
+     * the historical versions of private writesets) as a background operation.
+     * @param {string} collection The collection name
+     * @param {string} key Private data variable key to delete from the state store
+     */
+    async purgePrivateData(collection, key) {
+        // Access public data by setting the collection to empty string
+        logger.debug('purgePrivateData called with collection:%s, key:%s', collection, key);
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!key || typeof key !== 'string') {
+            throw new Error('key must be a valid string');
+        }
+        return await this.handler.handlePurgeState(collection, key, this.channel_id, this.txId);
+    }
+
+    /**
      * SetPrivateDataValidationParameter sets the key-level endorsement policy
      * for the private data specified by `key`.
      *

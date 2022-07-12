@@ -1210,6 +1210,41 @@ describe('Stub', () => {
             });
         });
 
+        describe('purgePrivateData', () => {
+            let handlePurgeStateStub;
+            let stub;
+
+            beforeEach(() => {
+                handlePurgeStateStub = sinon.stub().resolves('some state');
+                stub = new Stub({
+                    handlePurgeState: handlePurgeStateStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+            });
+
+            it ('should throw an error if no arguments supplied', async () => {
+                const result = stub.purgePrivateData();
+                await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+            });
+
+            it ('should throw an error if one argument supplied', async () => {
+                const result = stub.purgePrivateData('some arg');
+                await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
+            });
+
+            it ('should throw an error if collection null', async () => {
+                const result = stub.purgePrivateData(null, 'some key');
+                await expect(result).to.eventually.be.rejectedWith(Error, 'collection must be a valid string');
+            });
+
+            it ('should return handler.handlePurgeState', async () => {
+                const result = await stub.purgePrivateData('some collection', 'some key');
+
+                expect(result).to.deep.equal('some state');
+                expect(handlePurgeStateStub.calledOnce).to.be.true;
+                expect(handlePurgeStateStub.firstCall.args).to.deep.equal(['some collection', 'some key', 'dummyChannelId', 'dummyTxid']);
+            });
+        });
+
         describe('setPrivateDataValidationParameter', () => {
             it('should return handler.handlePutStateMetadata', async () => {
                 const handlePutStateMetadataStub = sinon.stub().resolves('nothing');

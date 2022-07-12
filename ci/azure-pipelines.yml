@@ -43,7 +43,7 @@ variables:
   - name: rewire_node_version_spec # see https://github.com/jhnns/rewire/issues/178
     value: '16.4.0'
   - name: FABRIC_VERSION
-    value: 2.4
+    value: 2.5
 
 # Build on Ubuntu
 pool:
@@ -147,6 +147,7 @@ stages:
                 set -ev
                 ./tools/getEdgeDocker.sh                                # essential to get main docker images of peer etc.
                 docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
+                docker tag hyperledger/fabric-nodeenv:latest hyperledger/fabric-nodeenv:$(FABRIC_VERSION)
                 docker images
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
