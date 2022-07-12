@@ -415,6 +415,19 @@ class ChaincodeMessageHandler {
         return await this._askPeerAndListen(msg, 'DeleteState');
     }
 
+    async handlePurgeState(collection, key, channel_id, txId) {
+        const msgPb = new peer.PurgePrivateState();
+        msgPb.setKey(key);
+        msgPb.setCollection(collection);
+        const msg = mapToChaincodeMessage({
+            type: peer.ChaincodeMessage.Type.PURGE_PRIVATE_DATA,
+            payload: msgPb.serializeBinary(),
+            txid: txId,
+            channel_id: channel_id
+        });
+        return await this._askPeerAndListen(msg, 'PurgePrivateState');
+    }
+
     async handlePutStateMetadata(collection, key, metakey, ep, channel_id, txId) {
         const msgPb = new peer.PutStateMetadata();
         msgPb.setCollection(collection);

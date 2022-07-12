@@ -66,6 +66,14 @@ class privateDataContract extends Contract {
         await ctx.stub.deletePrivateData("collection", assetId);
     }
 
+    async purgeAsset(ctx, assetId) {
+        const exists = await this.assetExists(ctx, assetId);
+        if (!exists) {
+            throw new Error(`The asset asset ${assetId} does not exist`);
+        }
+        await ctx.stub.purgePrivateData("collection", assetId);
+    }
+
     async verifyAsset(ctx, mspid, assetId, objectToVerify) {
 
         const hashToVerify = crypto.createHash('sha256').update(objectToVerify).digest('hex');

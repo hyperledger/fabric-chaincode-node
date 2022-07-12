@@ -1053,6 +1053,56 @@ describe('Handler', () => {
             });
         });
 
+        describe('handlePurgeState', () => {
+            const key = 'theKey';
+            const collection = '';
+
+            let expectedMsg;
+
+            before(() => {
+                const payloadPb = new peer.PurgePrivateState();
+                payloadPb.setKey(key);
+                payloadPb.setCollection(collection);
+                expectedMsg = mapToChaincodeMessage({
+                    type: peer.ChaincodeMessage.Type.PURGE_PRIVATE_DATA,
+                    payload: payloadPb.serializeBinary(),
+                    channel_id: 'theChannelID',
+                    txid: 'theTxID'
+                });
+            });
+
+            afterEach(() => {
+                Handler = rewire('../../../fabric-shim/lib/handler.js');
+                sandbox.restore();
+            });
+
+            it ('should resolve when _askPeerAndListen resolves', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+                const result = await handler.handlePurgeState(collection, key, 'theChannelID', 'theTxID');
+
+                expect(result).to.deep.equal('some response');
+                expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+                expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+                expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('PurgePrivateState');
+            });
+
+            it ('should reject when _askPeerAndListen rejects', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+                const result = handler.handlePurgeState(collection, key, 'theChannelID', 'theTxID');
+
+                await expect(result).to.eventually.be.rejected;
+                expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+                expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+                expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('PurgePrivateState');
+            });
+        });
+
         describe('handlePutStateMetadata', () => {
             const key = 'theKey';
             const collection = '';
