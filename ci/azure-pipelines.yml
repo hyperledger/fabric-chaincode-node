@@ -147,6 +147,7 @@ stages:
                 set -ev
                 ./tools/getEdgeDocker.sh                                # essential to get main docker images of peer etc.
                 docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
+                docker tag hyperledger/fabric-nodeenv:latest hyperledger/fabric-nodeenv:$(FABRIC_VERSION)
                 docker images
                 node common/scripts/install-run-rush.js install
                 node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
