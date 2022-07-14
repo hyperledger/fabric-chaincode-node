@@ -11,12 +11,12 @@
   "main": "index.js",
   "engine-strict": true,
   "engineStrict": true,
-  "version": "2.4.3-unstable",
+  "version": "2.5.0-unstable",
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-shim": "2.4.3-unstable",
-    "fabric-contract-api": "2.4.3-unstable",
-    "fabric-ledger": "2.4.3-unstable"
+    "fabric-shim": "2.5.0-unstable",
+    "fabric-contract-api": "2.5.0-unstable",
+    "fabric-ledger": "2.5.0-unstable"
   }
 }
