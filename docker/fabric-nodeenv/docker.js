@@ -18,6 +18,11 @@ const version = JSON.parse(fs.readFileSync(path.join(__dirname,'package.json')))
 const build_dir = path.join(__dirname);
 const tag = version + '-' + git.short();
 
+// reg exp the sort tag versions
+const regex = /^(\d+\.\d+)/
+const shortVersion = version.match(regex);
+
+
 // build and tag the fabric-nodeenv image
 const imageBuild = async () => {
     await runcmds(
@@ -26,6 +31,8 @@ const imageBuild = async () => {
                 tag, path.join(build_dir, 'Dockerfile'), build_dir),
             util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:%s',
                 tag, version),
+            util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:%s',
+                tag, shortVersion[shortVersion.index]),
             util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:latest', tag)
         ]
 
