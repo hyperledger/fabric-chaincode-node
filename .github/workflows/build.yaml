@@ -1,0 +1,25 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+name: fabric-chaincode-node-build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  create:
+    tags:
+      - "*"      
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: placeholder
+        run: |
+          ls -lart
+          echo "Hello!"
