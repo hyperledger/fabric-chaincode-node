@@ -25,7 +25,7 @@
             "description": "Runs the Scenario e2e tests.",
             "enableParallelism": true,
             "ignoreMissingScript": true
-        },        
+        },
         {
             "commandKind": "global",
             "name": "update-protos",
@@ -60,7 +60,7 @@
             "name": "start-fabric",
             "summary": "Starts local Fabric test network ",
             "description": "Run this command to start local Fabric network for testing",
-            "shellCommand": "rm -rf ./fabric-samples && curl -sSL https://bit.ly/2ysbOFE | bash -s -- 2.3.2 1.5.1 && cd ./fabric-samples/test-network && ./network.sh down && ./network.sh up createChannel -ca -s couchdb && cd -"
+            "shellCommand": "rm -rf ./fabric-samples && curl -sSL https://bit.ly/2ysbOFE | bash -s -- 2.4.6 1.5.5 && cd ./fabric-samples/test-network && ./network.sh down && ./network.sh up createChannel -ca -s couchdb && cd -"
         },
         {
             "commandKind": "global",
