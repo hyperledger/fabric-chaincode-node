@@ -7,11 +7,11 @@
 
 const util = require('util');
 const childProcess = require('child_process');
+const execSync = require('child_process').execSync;
 const exec = util.promisify(childProcess.exec);
 const fs = require('fs');
 const path = require('path');
 const ip = require('ip');
-const execSync = require('child_process').execSync;
 
 const ordererCA = '/test-network/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem';
 const dir = path.join(__dirname, '..', '..', 'fabric-samples');
@@ -43,7 +43,16 @@ async function install(ccName, transient) {
         const CCDir = path.join(__dirname, '..', 'chaincodes', ccName);
         const collectionConfig = transient ? `-cccg ${CCDir}/collection-config/collection.json` : '';
         const cmd = `cd ${networkScriptDir} && ./network.sh deployCC -ccn ${ccName} -ccp ${CCDir} -ccl javascript ${collectionConfig} -ccep "OR('Org1MSP.peer','Org2MSP.peer')"`;
-        await exec(cmd);
+
+        const {error, stderr, stdout} = await exec(cmd);
+        if (error) {
+          console.log(`error: ${error.message}`);
+        }
+        if (stderr) {
+          console.log(`stderr: ${stderr}`);
+        }
+        console.log(`stdout: ${stdout}`);
+
     } finally {
         fs.unlinkSync(npmrc);
     }
