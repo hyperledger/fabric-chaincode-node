@@ -19,7 +19,7 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
     "npm": "^6.4.1"
   },
   "scripts": {
-	  "test":"mocha.....
+    "test":"mocha.....
   },
   "engine-strict": true,
   "engineStrict": true,
@@ -74,7 +74,7 @@ In this example we have a single value that can be queried and updated. This has
 const UpdateValues = require('./updatevalues')
 const RemoveValues = require('./removevalues')
 
-module.exports.contracts = [UpdateValues,RemoveValues];
+module.exports.contracts = [UpdateValues, RemoveValues];
 ```
 
 This exports two classes that together form the Contract. There can be other code that within the model that is used in a support role.
@@ -97,24 +97,23 @@ const util = require('util');
 /**
  * Support the Updating of values within the SmartContract
  */
-class UpdateValues extends Contract{
+class UpdateValues extends Contract {
 
-    constructor(){
-		super('UpdateValuesContract');
-	}
+  constructor() {
+    super('UpdateValuesContract');
+  }
 
-	async instantiate(ctx){
-	  //  .....
-	}
+  async instantiate(ctx) {
+    //  .....
+  }
 
-	async setNewAssetValue(ctx, newValue) {
-	  //  .....
-	}
+  async setNewAssetValue(ctx, newValue) {
+    //  .....
+  }
 
-	async doubleAssetValue(ctx) {
-	  //  .....
-	}
-
+  async doubleAssetValue(ctx) {
+    //  .....
+  }
 };
 
 module.exports = UpdateValues;
@@ -171,40 +170,39 @@ For example
 
 
 ```
-	/**
-	 * Sets a name so that the functions in this particular class can
-	 * be separated from others.
-	 */
-	constructor() {
-		super('UpdateValuesContract');
-	}
+/**
+ * Sets a name so that the functions in this particular class can
+ * be separated from others.
+ */
+constructor() {
+  super('UpdateValuesContract');
+}
 
-	/** The function to invoke if something unkown comes in.
-	 *
-	 */
-	async unknownTransaction(ctx){		
-        throw new Error('a custom error message')
-	}
+/** The function to invoke if something unkown comes in.
+ *
+ */
+async unknownTransaction(ctx) {
+  throw new Error('a custom error message');
+}
 
-	async beforeTransaction(ctx){
-		console.info(`Transaction ID: ${ctx.stub.getTxID()}`);
-	}
+async beforeTransaction(ctx){
+  console.info(`Transaction ID: ${ctx.stub.getTxID()}`);
+}
 
-	async afterTransaction(ctx,result){
-		// log result to preferred log implementation
-		// emit events etc...
-	}
+async afterTransaction(ctx,result){
+  // log result to preferred log implementation
+  // emit events etc...
+}
 
-	async aroundTransaction(ctx, fn, parameters) {
-		try {
-      // don't forget to call super, or your transaction function won't run!
-			super.aroundTransaction(ctx, fn, parameters)
-		} catch (error) {
-			// do something with the error, then rethrow
-			throw error
-		}
-	}
-
+async aroundTransaction(ctx, fn, parameters) {
+  try {
+    // don't forget to call super, or your transaction function won't run!
+    super.aroundTransaction(ctx, fn, parameters);
+  } catch (error) {
+    // do something with the error, then rethrow
+    throw error;
+  }
+}
 ```
 
 ### Structure of the Transaction Context
@@ -222,12 +220,12 @@ The context object contains
 You are at liberty to create a subclass of the Context to provide additional functions, or per-transaction context storage. For example
 
 ```
-	/**
-	 * Custom context for use within this contract
-	 */
-	createContext(){
-		return new ScenarioContext();
-	}
+/**
+ * Custom context for use within this contract
+ */
+createContext() {
+  return new ScenarioContext();
+}
 ```
 
 and the Context class itself is
@@ -235,16 +233,15 @@ and the Context class itself is
 ```
 const { Context } = require('fabric-contract-api');
 
-class ScenarioContext extends Context{
+class ScenarioContext extends Context {
 
-	constructor(){
-		super();
-	}
+  constructor() {
+    super();
+  }
 
-	generateKey(){
-		return this.stub.createCompositeKey('type',['keyvalue']);
-	}
-
+  generateKey() {
+    return this.stub.createCompositeKey('type', ['keyvalue']);
+  }
 }
 
 ```
@@ -278,22 +275,14 @@ Hyperledger Fabric's consensus algorithm permits the ability to use general purp
 may not be read back.
 
 ```
-let v1 = getState("key")
-v1=="hello" // is true
-putState("key","world")
+let v1 = getState("key");
+v1 == "hello"; // is true
+putState("key", "world");
 
-let v2 = getState("key")
-v2=="world" // is false,  v2 is "hello"
+let v2 = getState("key");
+v2 == "world"; // is false,  v2 is "hello"
 ```
 
 In any subsequent invocation, the value would be seen to be updated.
 
 Note that if you have used any Flux architecture implications such as Redux, the above restrictions will be familiar.
-
-
-
-
-
-
-
-
