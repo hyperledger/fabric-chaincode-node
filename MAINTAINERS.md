@@ -5,7 +5,6 @@ Maintainers
 
 | Name | GitHub | Chat | email
 |------|--------|------|-------
-| David Kelsey | [davidkel][davidkel] | davidkel | <d_kelsey@uk.ibm.com>
 | Matthew B White | [mbwhite][mbwhite] | mbwhite | <whitemat@uk.ibm.com>
 | James Taylor | [jt-nti][jt-nti] | jtonline | <jamest@uk.ibm.com>
 
@@ -16,6 +15,7 @@ Maintainers
 | Andrew Hurt | [awjh-ibm][awjh-ibm] | awjh-ibm | <andrew.hurt1@ibm.com>
 | Bret Harrison | [harrisob][harrisob] | bretharrison | <beharrison@nc.rr.com>
 | Chaoyi Zhao | [zhaochy1990][zhaochy1990] | zhaochy | <zhaochy_2015@hotmail.com>
+| David Kelsey | [davidkel][davidkel] | davidkel | <d_kelsey@uk.ibm.com>
 
 Also: Please see the [Release Manager section](https://github.com/hyperledger/fabric/blob/main/MAINTAINERS.md)
 
