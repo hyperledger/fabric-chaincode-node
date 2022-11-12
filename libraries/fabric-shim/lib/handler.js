@@ -328,8 +328,8 @@ class ChaincodeMessageHandler {
                     // can not process any message other than "ready"
                     // from the peer when in "established" state
                     // send an error message telling the peer about this
-                    logger.error(util.format('Chaincode is in "ready" state, can only ' +
-                        'process messages of type "established", but received "%s"', msg.type));
+                    logger.error(util.format('Chaincode is in "established" state, can only ' +
+                        'process messages of type "ready", but received "%s"', msg.type));
                     const errMsg = newErrorMsg(msg, state);
                     stream.write(errMsg);
                 }
