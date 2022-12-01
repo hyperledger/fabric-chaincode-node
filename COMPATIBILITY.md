@@ -11,6 +11,8 @@ This table shows the summary of the compatibility of the Node modules at version
 | Node modules **v1.4.5**        | Yes                    | 8                | Yes                    |
 | Node modules **v2.2.x/v2.3.x** | Yes                    | 12               | Yes                    |
 | Node modules **v2.4.x**        | Yes                    | 16               | Yes                    |
+| Node modules **v2.5.x**        | Yes                    | 16               | Yes                    |
+
 
 By default a Fabric Peer v1.4 will create a Nodejs v8 runtime, and a Fabric Peer v2.2/2.3 will create a Nodejs 12 runtime. The Fabric v2.4 will create a Nodejs 16 runtime. Whilst these are defaults, the docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image.
 
