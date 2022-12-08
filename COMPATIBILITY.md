@@ -14,7 +14,7 @@ This table shows the summary of the compatibility of the Node modules at version
 | Node modules **v2.5.x**        | Yes                    | 16               | Yes                    |
 
 
-By default a Fabric Peer v1.4 will create a Nodejs v8 runtime, and a Fabric Peer v2.2/2.3 will create a Nodejs 12 runtime. The Fabric v2.4 will create a Nodejs 16 runtime. Whilst these are defaults, the docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image.
+By default a Fabric Peer v1.4 will create a Nodejs v8 runtime, and a Fabric Peer v2.2/2.3 will create a Nodejs 12 runtime. The Fabric v2.5 will create a Nodejs 16 runtime. Whilst these are defaults, the docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the docker image.
 
 For example `CORE_CHAINCODE_NODE_RUNTIME=hyperledger/fabric-nodeenv:2.1` will allow the use of the latest Node 12 runtime to be used within a Peer v1.4.
 
@@ -24,7 +24,7 @@ The Node modules will connect to the peer whilst running; this is referred to as
 
 Note that the `fabric-contract-api` & `fabric-shim` node modules must be at v1.4.5 or greater to work with Node version 12. If you therefore use a contract originally written to work with Fabric 1.4, check the node modules before deploying on Fabric v2.
 
-Also please note that that the v1.4 libraries WILL NOT work with Node16. Unless you configure a different node environment, any chaincode using the v1.4 libraries will need to move to v2.4 before being able to run with a Fabric v2.4 Peer.
+Also please note that that the v1.4 libraries WILL NOT work with Node16. Unless you configure a different node environment, any chaincode using the v1.4 libraries will need to move to v2.5 before being able to run with a Fabric v2.4 Peer.
 
 ## Compatibility
 
