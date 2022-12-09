@@ -13,7 +13,7 @@ schedules:
     displayName: 'Chaincode Node Nightly Driver'
     branches:
       include:
-        - main
+        - 'release-2.5'
 
 # Trigger on the main branch
 # Standard Pull Request and Merge builds
@@ -21,7 +21,7 @@ schedules:
 trigger:
   branches:
     include:
-      - 'main'
+      - 'release-2.5'
   tags:
     include:
       - '*'
@@ -52,7 +52,7 @@ pool:
 #
 # Publish to NPM on release builds (they are the github tagged releases)
 # Publish to NPM on nightly builds when there is something to build
-# the ids will be of the format 2.5.0-unstable.{commitid}
+# the ids will be of the format 2.5.0.{commitid}
 #
 stages:
 
