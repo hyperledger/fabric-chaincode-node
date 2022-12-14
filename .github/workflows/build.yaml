@@ -7,9 +7,11 @@ on:
   push:
     branches:
       - main
+      - release-2.5
   pull_request:
     branches:
       - main
+      - release-2.5
   create:
     tags:
       - "*"      
@@ -18,8 +20,51 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
     steps:
-      - name: placeholder
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}    
+      - name: Install/Rebuild/UnitTest
         run: |
-          ls -lart
-          echo "Hello!"
+          set -xev
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js rebuild
+      - name: Pre-process Artifacts
+        run: |
+          npx cobertura-merge -o merged_coverage.xml shim=./libraries/fabric-shim/coverage/cobertura-coverage.xml contractapi=./apis/fabric-contract-api/coverage/cobertura-coverage.xml -p
+      - uses: actions/upload-artifact@v3
+        name: Upload test results      
+        with:
+          path: **/test-results.xml
+
+      - name: Build Binaries
+        run: |
+          set -sev
+          node common/scripts/install-run-rush.js publish --include-all --pack --release-folder tgz --publish
+          docker image save hyperledger/fabric-nodeenv | gzip > fabric-nodeenv.tar.gz
+
+      - uses: actions/upload-artifact@v3
+        name: Binaries
+        with:
+          name: node-tgzs
+          path: tgz/
+
+      - uses: actions/upload-artifact@v3
+        name: Docker
+        with:
+          name: nodeenv-docker-image
+          path: fabric-nodeenv.tar.gz
+
+  # fvtest:
+  #   runs-on: ubuntu-latest
+
+  #   strategy:
+  #     matrix:
+  #       node-version: [16.x]
