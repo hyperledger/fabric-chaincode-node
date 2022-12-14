@@ -9,7 +9,7 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const utils = require('./utils');
-const {LONG_STEP} = utils.TIMEOUTS;
+const {SHORT_STEP, MED_STEP, LONG_STEP} = utils.TIMEOUTS;
 
 describe('Chaincode ledger', () => {
     const suite = 'ledger';
