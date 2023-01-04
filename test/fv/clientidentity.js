@@ -25,7 +25,7 @@ describe('Chaincode clientidentity', () => {
 
         const payload = JSON.parse(await utils.query(suite, 'org.mynamespace.clientidentity:clientIdentityInstance', []));
         expect(payload.mspId).to.equal('Org2MSP', 'Test mspId value');
-        expect(payload.id).to.equal('x509::CN=buyer,OU=client,O=Hyperledger,ST=North Carolina,C=US::CN=ca.org2.example.com,O=org2.example.com,L=Hursley,S=Hampshire,C=UK', 'Test getID()');
+        expect(payload.id).to.equal('x509::CN=buyer,OU=client,O=Hyperledger,ST=North Carolina,C=US::CN=ca.org2.example.com,O=org2.example.com,L=Hursley,ST=Hampshire,C=UK', 'Test getID()');
     });
 
     it('should be able to check the peer MSPID', async function () {
