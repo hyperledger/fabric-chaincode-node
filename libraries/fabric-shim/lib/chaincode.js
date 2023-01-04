@@ -265,8 +265,8 @@ class ClientIdentity {
         function formatDN(dn) {
             return dn.attributes.map((attribute) => {
                 const value = attribute.value.replace('/', '\\/');
-                return `/${attribute.shortName}=${value}`;
-            }).join('');
+                return `${attribute.shortName}=${value}`;
+            }).reverse().join(',');
         }
         this.id = `x509::${formatDN(certificate.subject)}::${formatDN(certificate.issuer)}`;
         const extension = certificate.extensions.find((ext) => ext.oid === FABRIC_CERT_ATTR_OID);
