@@ -1,3 +1,19 @@
+## v2.5.0
+Thu Dec  8 09:19:10 GMT 2022
+
+* [b8cb8d72](https://github.com/hyperledger/fabric-chaincode-node/commit/b8cb8d72) Update dependencies
+* [bbd5b6f6](https://github.com/hyperledger/fabric-chaincode-node/commit/bbd5b6f6) Update MAINTAINERS.md (#352)
+* [d03fc721](https://github.com/hyperledger/fabric-chaincode-node/commit/d03fc721) Move inactive maintainers to emeritus status
+* [37b4256b](https://github.com/hyperledger/fabric-chaincode-node/commit/37b4256b) updated tutorial (#350)
+* [78a02ada](https://github.com/hyperledger/fabric-chaincode-node/commit/78a02ada) Add fv test chaincode deploy logging
+* [341956d4](https://github.com/hyperledger/fabric-chaincode-node/commit/341956d4) Enabled GHA with template workflow (#343)
+* [c02ca323](https://github.com/hyperledger/fabric-chaincode-node/commit/c02ca323) Add in short version docker tag (#342)
+* [ffa075ed](https://github.com/hyperledger/fabric-chaincode-node/commit/ffa075ed) added purgePrivateData function with tests
+* [501af57a](https://github.com/hyperledger/fabric-chaincode-node/commit/501af57a) Bump version to 2.5.0 (#340)
+* [eee58335](https://github.com/hyperledger/fabric-chaincode-node/commit/eee58335) Swap to using the published fabric-protos libraries (#320)
+* [ebf16ead](https://github.com/hyperledger/fabric-chaincode-node/commit/ebf16ead) Update README.md
+* [838b02fd](https://github.com/hyperledger/fabric-chaincode-node/commit/838b02fd) Bump version to 2.4.2 (#332)
+
 ## v2.4.2
 Wed  4 May 2022 11:30:35 BST
 
