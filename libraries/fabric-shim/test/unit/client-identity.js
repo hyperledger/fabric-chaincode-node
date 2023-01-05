@@ -98,7 +98,7 @@ describe('Client-Identity', () => {
         });
 
         it ('should return correct value on getID()', () => {
-            expect(cid.getID()).to.deep.equal('x509::/CN=MyTestUserWithAttrs::/CN=fabric-ca-server');
+            expect(cid.getID()).to.deep.equal('x509::CN=MyTestUserWithAttrs::CN=fabric-ca-server');
         });
 
         it ('should have correct attrs', () => {
@@ -160,7 +160,7 @@ describe('Client-Identity', () => {
         const cid = new shim.ClientIdentity(stub);
 
         it ('should return correct value on getID()', () => {
-            expect(cid.getID()).to.deep.equal('x509::/C=US/ST=California/L=San Francisco/CN=User1@org2.example.com::/C=US/ST=California/L=San Francisco/O=org2.example.com/CN=ca.org2.example.com');
+            expect(cid.getID()).to.deep.equal('x509::CN=User1@org2.example.com,L=San Francisco,ST=California,C=US::CN=ca.org2.example.com,O=org2.example.com,L=San Francisco,ST=California,C=US');
         });
     });
 });
