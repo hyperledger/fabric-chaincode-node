@@ -7,19 +7,231 @@ on:
   push:
     branches:
       - main
+      - release-2.5
   pull_request:
     branches:
       - main
+      - release-2.5
   create:
     tags:
       - "*"      
   workflow_dispatch:
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs: 
+      PACKAGE_VERSION: ${{ steps.builddata.outputs.PACKAGE_VERSION }}
+      MINOR_PACKAGE_VERSION: ${{ steps.builddata.outputs.MINOR_PACKAGE_VERSION }}
+      BUILD_DATE: ${{ steps.builddata.outputs.BUILD_DATE }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - name: BuildData
+        id: builddata
+        run: |
+          set -ex -o pipefail
+          env | sort
+          
+          # handle full version number
+          VERSION=$(jq '.version' docker/fabric-nodeenv/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
+          echo Current version in code is :${VERSION}:
+          echo "PACKAGE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          
+          # handle minor version
+          MINOR_VERSION=$(jq '.version' docker/fabric-nodeenv/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9])\.[0-9]?[0-9].*/\1/")
+          echo Current minor version in code is :${MINOR_VERSION}:
+          echo "MINOR_PACKAGE_VERSION=${MINOR_VERSION}" >> $GITHUB_OUTPUT
+
+          # get the current date for using in dev builds
+          BUILD_DATE=$(date '+%Y%m%d')
+          echo Build date is :${BUILD_DATE}
+          echo "BUILD_DATE=${BUILD_DATE}" >> $GITHUB_OUTPUT
+
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+
     steps:
-      - name: placeholder
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}    
+      - name: Install/Rebuild/UnitTest
         run: |
-          ls -lart
-          echo "Hello!"
+          set -xev
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js rebuild
+      - name: Pre-process Artifacts
+        run: |
+          npx cobertura-merge -o merged_coverage.xml shim=./libraries/fabric-shim/coverage/cobertura-coverage.xml contractapi=./apis/fabric-contract-api/coverage/cobertura-coverage.xml -p
+      - uses: actions/upload-artifact@v3
+        name: Upload test results      
+        if: success() || failure()
+        with:
+          name: TestResults
+          path: ./**/test-results.xml
+
+      - name: Build Binaries
+        run: |
+          set -xev
+          node common/scripts/install-run-rush.js publish --include-all --pack --release-folder tgz --publish
+          docker image save hyperledger/fabric-nodeenv | gzip > fabric-nodeenv.tar.gz
+
+      - uses: actions/upload-artifact@v3
+        name: Binaries
+        with:
+          name: node-tgzs
+          path: tgz/
+
+      - uses: actions/upload-artifact@v3
+        name: Docker
+        with:
+          name: nodeenv-docker-image
+          path: fabric-nodeenv.tar.gz
+
+  fvtest:
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}    
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: nodeenv-docker-image
+          path: build/
+      - uses: actions/download-artifact@v3
+        with:
+          name: node-tgzs
+          path: build/
+
+      - name: Setup the fv build
+        env:
+          PIPELINE_WORKSPACE: workspace
+        run: |
+          set -xev
+          ./tools/getEdgeDocker.sh                                # essential to get main docker images of peer etc.
+          docker image load --input build/fabric-nodeenv.tar.gz         # gets the build image of nodeenv
+          docker tag hyperledger/fabric-nodeenv:latest hyperledger/fabric-nodeenv:2.5
+          docker images
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
+          node common/scripts/install-run-rush.js start-fabric
+          node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
+
+      - name: Run the FV Tests
+        run: |
+          set -xev
+          export TLS=true
+          docker images | grep hyperledger && docker ps -a
+          
+          node common/scripts/install-run-rush.js test:fv --verbose
+          node common/scripts/install-run-rush.js test:e2e --verbose
+    
+
+      - uses: actions/upload-artifact@v3
+        if: success() || failure()
+        name: TestLogs
+        with:
+          name: TestLogs
+          path: ./**/*.build.log
+
+
+        # Job to handle the auditing of the code
+        # NPM audit is run on a 'fake' installation of the libraries
+        # Pulling in all the dependencies it will be able to run NPM AUDIT, and if that returns a
+        # error code the job will fail.
+  src_audit:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}   
+      - uses: actions/download-artifact@v3
+        with:
+          name: node-tgzs
+          path: build/
+      - name: run audit
+        run: |
+          set -xev -o pipefail
+          node common/scripts/install-run-rush.js install
+          node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
+          mkdir -p audit && cd audit && npm init -y
+          npm install --registry http://localhost:4873 fabric-shim fabric-shim-api fabric-contract-api --save
+          npm audit --audit-level=moderate
+
+  publishnpm:
+    runs-on: ubuntu-latest
+    needs: [build,fvtest,src_audit]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: actions/download-artifact@v3
+        with:
+          name: node-tgzs
+          path: build/          
+      - run: |
+          set -xev
+          ls -lart build/
+          cd build
+          find . -type f -name 'fabric-*.tgz' -exec npm publish {} \;
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+  publishdocker:
+    runs-on: ubuntu-latest
+    needs: [setup,build,fvtest,src_audit]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - uses: actions/download-artifact@v3
+        with:
+          name: nodeenv-docker-image
+          path: build/          
+      - name: Push to registry
+        run: |
+          set -xev
+          wget -qO "$PWD/manifest-tool" https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
+          chmod +x ./manifest-tool
+
+          echo "Version strings are ${PACKAGE_VERSION} ${MINOR_PACKAGE_VERSION}"
+
+          docker image load --input build/fabric-javaenv.tar.gz
+          docker images
+          docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
+          echo "Logged in to docker registry"
+          # tag javaenv image to PACKAGE_VERSION
+          docker tag hyperledger/fabric-javaenv hyperledger/fabric-nodeenv:amd64-${ PACKAGE_VERSION }
+          # push javaenv to repository
+          docker push hyperledger/fabric-javaenv:amd64-${ PACKAGE_VERSION }
+          ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-${ PACKAGE_VERSION }" --target "hyperledger/fabric-nodeenv:${ PACKAGE_VERSION }"
+          ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-${ PACKAGE_VERSION }" --target "hyperledger/fabric-nodeenv:${ MINOR_PACKAGE_VERSION }"
+        env:
+          DOCKER_REGISTRY_USERNAME:  ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_REGISTRY_PASSWORD:  ${{ secrets.DOCKERHUB_TOKEN }}      
+          PACAKGE_VERSION: ${{  needs.setup.outputs.PACKAGE_VERSION }}
+          MINOR_PACKAGE_VERSION: ${{ needs.setup.outputs.MINOR_PACKAGE_VERSION }}
