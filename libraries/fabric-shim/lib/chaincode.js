@@ -265,8 +265,8 @@ class ClientIdentity {
         function formatDN(dn) {
             return dn.attributes.map((attribute) => {
                 const value = attribute.value.replace('/', '\\/');
-                return `/${attribute.shortName}=${value}`;
-            }).join('');
+                return `${attribute.shortName}=${value}`;
+            }).reverse().join(',');
         }
         this.id = `x509::${formatDN(certificate.subject)}::${formatDN(certificate.issuer)}`;
         const extension = certificate.extensions.find((ext) => ext.oid === FABRIC_CERT_ATTR_OID);
@@ -282,6 +282,8 @@ class ClientIdentity {
     /**
 	 * getID returns the ID associated with the invoking identity.  This ID
 	 * is guaranteed to be unique within the MSP.
+     * This will return the ID string as per the new format. For example
+     * x509::CN=ca.org1.example.com,O=org1.example.com,L=San Francisco,ST=California,C=US::CN=ca.org1.example.com,O=org1.example.com,L=San Francisco,ST=California,C=US
 	 * @returns {string} A string in the format: "x509::{subject DN}::{issuer DN}"
 	 */
     getID() {
