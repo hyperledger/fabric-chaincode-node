@@ -95,11 +95,12 @@ class ChaincodeServer {
             const msgPb = new peer.ChaincodeID();
             msgPb.setName(this._serverOpts.ccid);
 
+            const registerMsg = new peer.ChaincodeMessage();
+            registerMsg.setType(peer.ChaincodeMessage.Type.REGISTER);
+            registerMsg.setPayload(msgPb.serializeBinary());
+
             logger.debug('Start chatting with a peer through a new stream. Chaincode ID = ' + this._serverOpts.ccid);
-            client.chat({
-                type: peer.ChaincodeMessage.Type.REGISTER,
-                payload: msgPb.serializeBinary()
-            });
+            client.chat(registerMsg);
         } catch (e) {
             logger.warn('connection from peer failed: ' + e);
         }
