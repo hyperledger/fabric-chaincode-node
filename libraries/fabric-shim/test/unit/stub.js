@@ -524,6 +524,7 @@ describe('Stub', () => {
             });
 
             it ('should throw Error if MSPID is not available', () => {
+                delete process.env.CORE_PEER_LOCALMSPID;
                 const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', chaincodeInput);
 
                 expect(() => {
