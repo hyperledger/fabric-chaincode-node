@@ -14,13 +14,17 @@ on:
       - release-2.5
   create:
     tags:
-      - "*"      
+      - "v2.*"
   workflow_dispatch:
+
+env:
+  CHAINCODE_CONTAINER_NODE_VER: 16
+  DOCKER_REGISTRY: ${{ github.repository_owner == 'hyperledger' && 'docker.io' || 'ghcr.io' }}
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
-    outputs: 
+    runs-on: ubuntu-20.04
+    outputs:
       PACKAGE_VERSION: ${{ steps.builddata.outputs.PACKAGE_VERSION }}
       MINOR_PACKAGE_VERSION: ${{ steps.builddata.outputs.MINOR_PACKAGE_VERSION }}
       BUILD_DATE: ${{ steps.builddata.outputs.BUILD_DATE }}
@@ -34,12 +38,12 @@ jobs:
         run: |
           set -ex -o pipefail
           env | sort
-          
+
           # handle full version number
           VERSION=$(jq '.version' docker/fabric-nodeenv/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9]).*/\1/")
           echo Current version in code is :${VERSION}:
           echo "PACKAGE_VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          
+
           # handle minor version
           MINOR_VERSION=$(jq '.version' docker/fabric-nodeenv/package.json | sed -r "s/\"([0-9]?[0-9]\.[0-9]?[0-9])\.[0-9]?[0-9].*/\1/")
           echo Current minor version in code is :${MINOR_VERSION}:
@@ -51,7 +55,7 @@ jobs:
           echo "BUILD_DATE=${BUILD_DATE}" >> $GITHUB_OUTPUT
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         node-version: [16.x]
@@ -61,7 +65,7 @@ jobs:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}    
+          node-version: ${{ matrix.node-version }}
       - name: Install/Rebuild/UnitTest
         run: |
           set -xev
@@ -71,7 +75,7 @@ jobs:
         run: |
           npx cobertura-merge -o merged_coverage.xml shim=./libraries/fabric-shim/coverage/cobertura-coverage.xml contractapi=./apis/fabric-contract-api/coverage/cobertura-coverage.xml -p
       - uses: actions/upload-artifact@v3
-        name: Upload test results      
+        name: Upload test results
         if: success() || failure()
         with:
           name: TestResults
@@ -96,7 +100,7 @@ jobs:
           path: fabric-nodeenv.tar.gz
 
   fvtest:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [build]
     strategy:
       matrix:
@@ -106,7 +110,7 @@ jobs:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}    
+          node-version: ${{ matrix.node-version }}
 
       - uses: actions/download-artifact@v3
         with:
@@ -136,10 +140,10 @@ jobs:
           set -xev
           export TLS=true
           docker images | grep hyperledger && docker ps -a
-          
+
           node common/scripts/install-run-rush.js test:fv --verbose
           node common/scripts/install-run-rush.js test:e2e --verbose
-    
+
 
       - uses: actions/upload-artifact@v3
         if: success() || failure()
@@ -154,7 +158,7 @@ jobs:
         # Pulling in all the dependencies it will be able to run NPM AUDIT, and if that returns a
         # error code the job will fail.
   src_audit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: build
     strategy:
       matrix:
@@ -164,7 +168,7 @@ jobs:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}   
+          node-version: ${{ matrix.node-version }}
       - uses: actions/download-artifact@v3
         with:
           name: node-tgzs
@@ -179,7 +183,7 @@ jobs:
           npm audit --audit-level=moderate
 
   publishnpm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [build,fvtest,src_audit]
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -190,7 +194,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: node-tgzs
-          path: build/          
+          path: build/
       - run: |
           set -xev
           ls -lart build/
@@ -201,37 +205,54 @@ jobs:
 
 
   publishdocker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [setup,build,fvtest,src_audit]
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-      - uses: actions/download-artifact@v3
-        with:
-          name: nodeenv-docker-image
-          path: build/          
-      - name: Push to registry
-        run: |
-          set -xev
-          wget -qO "$PWD/manifest-tool" https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
-          chmod +x ./manifest-tool
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-          echo "Version strings are ${PACKAGE_VERSION} ${MINOR_PACKAGE_VERSION}"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug
+          config-inline: |
+            [worker.oci]
+              max-parallelism = 1
 
-          docker image load --input build/fabric-javaenv.tar.gz
-          docker images
-          docker login ${DOCKER_REGISTRY_URL} --username=${DOCKER_REGISTRY_USERNAME} --password=${DOCKER_REGISTRY_PASSWORD}
-          echo "Logged in to docker registry"
-          # tag javaenv image to PACKAGE_VERSION
-          docker tag hyperledger/fabric-javaenv hyperledger/fabric-nodeenv:amd64-${ PACKAGE_VERSION }
-          # push javaenv to repository
-          docker push hyperledger/fabric-javaenv:amd64-${ PACKAGE_VERSION }
-          ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-${ PACKAGE_VERSION }" --target "hyperledger/fabric-nodeenv:${ PACKAGE_VERSION }"
-          ./manifest-tool push from-args --platforms linux/amd64 --template "hyperledger/fabric-nodeenv:amd64-${ PACKAGE_VERSION }" --target "hyperledger/fabric-nodeenv:${ MINOR_PACKAGE_VERSION }"
-        env:
-          DOCKER_REGISTRY_USERNAME:  ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKER_REGISTRY_PASSWORD:  ${{ secrets.DOCKERHUB_TOKEN }}      
-          PACAKGE_VERSION: ${{  needs.setup.outputs.PACKAGE_VERSION }}
-          MINOR_PACKAGE_VERSION: ${{ needs.setup.outputs.MINOR_PACKAGE_VERSION }}
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to the ${{ env.DOCKER_REGISTRY }} Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ env.DOCKER_REGISTRY == 'docker.io' && secrets.DOCKERHUB_USERNAME || github.actor }}
+          password: ${{ env.DOCKER_REGISTRY == 'docker.io' && secrets.DOCKERHUB_TOKEN    || secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/fabric-nodeenv
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
+
+      - name: Build and push ${{ matrix.COMPONENT }} Image
+        id: push
+        uses: docker/build-push-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+          file: docker/fabric-nodeenv/Dockerfile
+          context: docker/fabric-nodeenv
+          tags: ${{ steps.meta.outputs.tags }}
+          push: ${{ github.event_name != 'pull_request' }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NODE_VER=${{ env.CHAINCODE_CONTAINER_NODE_VER }}
