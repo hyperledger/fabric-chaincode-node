@@ -198,10 +198,11 @@ describe('ChaincodeServer', () => {
             const payloadPb = new peer.ChaincodeID();
             payloadPb.setName('example-chaincode-id');
 
-            expect(mockHandler.chat.firstCall.args).to.deep.equal([{
-                type: peer.ChaincodeMessage.Type.REGISTER,
-                payload: payloadPb.serializeBinary()
-            }]);
+            const expectedResponse = new peer.ChaincodeMessage();
+            expectedResponse.setType(peer.ChaincodeMessage.Type.REGISTER);
+            expectedResponse.setPayload(payloadPb.serializeBinary());
+
+            expect(mapFromChaincodeMessage(mockHandler.chat.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
         });
 
         it('should not throw even if chat fails', () => {
@@ -220,3 +221,14 @@ describe('ChaincodeServer', () => {
         });
     });
 });
+
+function mapFromChaincodeMessage(msgPb) {
+    return {
+        type: msgPb.getType(),
+        payload: Buffer.from(msgPb.getPayload_asU8()),
+        txid: msgPb.getTxid(),
+        channel_id: msgPb.getChannelId(),
+        proposal: msgPb.getProposal(),
+        chaincode_event: msgPb.getChaincodeEvent()
+    };
+}
