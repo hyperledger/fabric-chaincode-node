@@ -1,6 +1,6 @@
 {
   "name": "fabric-contract-api",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "tag": "latest",
   "description": "A node.js implementation of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
   "main": "index.js",
@@ -46,7 +46,7 @@
     "lines": 100
   },
   "dependencies": {
-    "fabric-shim-api": "2.5.0",
+    "fabric-shim-api": "2.5.1",
     "class-transformer": "^0.4.0",
     "fast-safe-stringify": "^2.1.1",
     "get-params": "^0.1.2",
