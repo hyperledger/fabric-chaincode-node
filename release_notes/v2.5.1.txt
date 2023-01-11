@@ -1,0 +1,14 @@
+v2.5.1
+------
+
+Release Notes
+-------------
+This is the LTS Release of of the v2.5 Fabric Chaincode Node. It replaces the previous v2.2 LTS.
+
+- the PurgePrivateData feature is exposed via a new `PurgePrivateData` API 
+- the grpc-js dependency has been locked to 1.8.1
+- arm docker builds
+
+Change Log
+----------
+https://github.com/hyperledger/fabric-chaincode-node/blob/main/CHANGELOG.md#v2.5.0

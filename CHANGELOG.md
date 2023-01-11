@@ -1,3 +1,11 @@
+## v2.5.1
+Wed Jan 11 11:31:22 GMT 2023
+
+* [30125f68](https://github.com/hyperledger/fabric-chaincode-node/commit/30125f68) Pin fabric-shim's dependency on grpc-js to 1.8.1 (#369)
+* [4a0fc571](https://github.com/hyperledger/fabric-chaincode-node/commit/4a0fc571) GHA workflow
+* [102473e7](https://github.com/hyperledger/fabric-chaincode-node/commit/102473e7) GHA Workflow
+* [c6ff468b](https://github.com/hyperledger/fabric-chaincode-node/commit/c6ff468b) Get builds on release-2.5 branch (#360)
+
 ## v2.5.0
 Thu Dec  8 09:19:10 GMT 2022
 
