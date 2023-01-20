@@ -70,21 +70,28 @@ class CommonIterator {
 	 * creates a return value
 	 */
     _createAndEmitResult() {
-        const queryResult = {};
+
         const resultsList = this.response.getResultsList();
-
         const queryResultPb = this._getResultFromBytes(resultsList[this.currentLoc]);
-        queryResult.value = {value:Buffer.from(queryResultPb.getValue())};
-        /* istanbul ignore else*/
-        if ('getKey' in queryResultPb) {
-            queryResult.value.key = Buffer.from(queryResultPb.getKey()).toString();
-        }
 
+        // established external API has a very specific structure here
+        // so need to 'fluff' up this structure to match
+        // of possible concern is that the timestamp (google's proto definition)
+        // may have changed with these new protos
+        const queryResult = {
+            value: queryResultPb.getValue_asU8(),
+            txId: queryResultPb.getTxId(),
+            isDelete: queryResultPb.getIsDelete(),
+            timestamp: queryResultPb.getTimestamp().toObject(),
+        };
+
+        if ('getKey' in queryResultPb) {
+            queryResult.key = queryResultPb.getKey();
+        }
 
         this.currentLoc++;
 
-        queryResult.done = false;
-        return queryResult;
+        return {value:queryResult, done:false};
     }
 
     /**
