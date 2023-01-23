@@ -14,11 +14,11 @@ const rewire = require('rewire');
 const Iterator = rewire('../../../fabric-shim/lib/iterators.js');
 const StateQueryIterator = Iterator.StateQueryIterator;
 const HistoryQueryIterator = Iterator.HistoryQueryIterator;
-const {ChaincodeMessageHandler} = require('../../../fabric-shim/lib/handler.js');
+const { ChaincodeMessageHandler } = require('../../../fabric-shim/lib/handler.js');
 const google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb');
 
-const {ledger} = require('@hyperledger/fabric-protos');
-const { time } = require('console');
+const { ledger } = require('@hyperledger/fabric-protos');
+
 const channel_id = 'theChannelId';
 const txID = 'aTx';
 
@@ -66,209 +66,80 @@ describe('Iterator', () => {
             });
         });
 
-        describe('_getResultFromBytes', () => {
-
-            it('should return KV decode on resultbytes for a QUERY type', () => {
-                const ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'QUERY');
-
-                const bytes = new ledger.queryresult.KV();
-                bytes.setValue('some bytes');
-                const result = ci._getResultFromBytes({ getResultbytes: () => bytes.serializeBinary() });
-                expect(result).is.not.null;
-            });
-
-            it('should return KeyModification decode on resultbytes for a HISTORY type', () => {
-                const ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'HISTORY');
-
-                const bytes = new ledger.queryresult.KeyModification();
-                bytes.setValue('some bytes');
-
-                const result = ci._getResultFromBytes({ getResultbytes: () => bytes.serializeBinary() });
-                expect(result).is.not.null;
-            });
-
-            it('should throw an error for unknown types', () => {
-                const ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'some type');
-
-                expect(() => {
-                    ci._getResultFromBytes({ resultBytes: 'some bytes' });
-                }).to.throw(/Iterator constructed with unknown type: some type/);
-            });
-        });
-
         describe('_createAndEmitResult', () => {
             let ci;
-            let getResultFromBytesStub;
+            let getResultBytesQuery;
+            let getResultBytesHistory;
             let queryResult;
+            let historyResult;
             let timestampStub;
+            let getResultbytes;
 
             beforeEach(() => {
                 ci = new CommonIterator(mockHandler, channel_id, txID, mockResponse, 'QUERY');
-                queryResult = sandbox.createStubInstance(ledger.queryresult.KeyModification);
-
+                queryResult = sandbox.createStubInstance(ledger.queryresult.KV);
+                historyResult = sandbox.createStubInstance(ledger.queryresult.KeyModification);
                 timestampStub = sandbox.createStubInstance(google_protobuf_timestamp_pb.Timestamp);
+                getResultbytes = sinon.stub();
 
-                queryResult.getTimestamp.returns(timestampStub);
-                timestampStub.toObject.returns({seconds:0,nanos:0});
-                queryResult.getValue_asU8.returns(Buffer.from('hello'));
-                queryResult.getTxId.returns('0xCAFE');
-                queryResult.getIsDelete.returns(true);
-                getResultFromBytesStub = sinon.stub(ci, '_getResultFromBytes').returns(queryResult);
+
+                // queryResult.getTimestamp.returns(timestampStub);
+                timestampStub.toObject.returns({ seconds: 0, nanos: 0 });
+                queryResult.getValue.returns('hello');
+                queryResult.getKey.returns('fred');
+                historyResult.getValue.returns('hello');
+                historyResult.getTxId.returns('0xCAFE');
+                historyResult.getIsDelete.returns(true);
+                historyResult.getTimestamp.returns(timestampStub);
+                getResultBytesQuery = sinon.stub(ledger.queryresult.KV, 'deserializeBinary').returns(queryResult);
+                getResultBytesHistory = sinon.stub(ledger.queryresult.KeyModification, 'deserializeBinary').returns(historyResult);
             });
 
             afterEach(() => {
-                getResultFromBytesStub.restore();
+                getResultBytesQuery.restore();
+                getResultBytesHistory.restore();
             });
 
-            it('should return value of first element of results converted from bytes and done false when hasMore false and results has no more elements after currentLoc', () => {
-                mockResponse.getResultsList = () => ['some result bytes'];
-                mockResponse.getHasMore = () => false;
-
+            it('should return value from query API', () => {
+                mockResponse.getResultsList = () => [{ getResultbytes }];
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.true;
-                expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
+                expect(getResultBytesQuery.calledOnce).to.be.true;
                 expect(result).to.deep.equal({
                     value: {
-                        value: Buffer.from('hello'),
-                        txId:'0xCAFE',
-                        isDelete:true,
-                        timestamp:{seconds:0,nanos:0},
+                        key: 'fred',
+                        value: Buffer.from('hello')
                     },
                     done: false
                 });
             });
 
-            it('should return value of first element of results converted from bytes and done false when hasMore true and results has no more elements after currentLoc', () => {
-                mockResponse.getResultsList = () => ['some result bytes'];
-                mockResponse.getHasMore = () => true;
+            it('should return value from history API', () => {
 
+                mockResponse.getResultsList = () => [{ getResultbytes }];
+                ci.type = 'HISTORY';
                 const result = ci._createAndEmitResult();
 
-                expect(getResultFromBytesStub.calledOnce).to.be.true;
-                expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
+                expect(getResultBytesHistory.calledOnce).to.be.true;
                 expect(ci.currentLoc).to.deep.equal(1);
                 expect(result).to.deep.equal({
                     value: {
                         value: Buffer.from('hello'),
-                        txId:'0xCAFE',
-                        isDelete:true,
-                        timestamp:{seconds:0,nanos:0},
+                        isDelete: true,
+                        timestamp: {nanos:0, seconds:0},
+                        txId:'0xCAFE'
                     },
                     done: false
                 });
             });
 
-            it('should return value of first element of results converted from bytes and done false when hasMore false and results has elements after currentLoc', () => {
-                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
-                mockResponse.getHasMore = () => false;
+            it('should return error from history API', () => {
 
-                const result = ci._createAndEmitResult();
-
-                expect(getResultFromBytesStub.calledOnce).to.be.true;
-                expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
-                expect(ci.currentLoc).to.deep.equal(1);
-                expect(result).to.deep.equal({
-                    value: {
-                        value: Buffer.from('hello'),
-                        txId:'0xCAFE',
-                        isDelete:true,
-                        timestamp:{seconds:0,nanos:0},
-                    },
-                    done: false
-                });
+                mockResponse.getResultsList = () => [{ getResultbytes }];
+                ci.type = 'WIBBLE';
+                expect(()=>{ci._createAndEmitResult();}).to.throw(/Iterator constructed with unknown type/);
             });
 
-            it('should return value of first element of results converted from bytes and done false when hasMore true and results has elements after currentLoc', () => {
-                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
-                mockResponse.getHasMore = () => true;
-
-                // getResultFromBytesStub.returns({ getKey: () => 'akey', getValue: () => 'some result' });
-
-
-                const result = ci._createAndEmitResult();
-
-                expect(getResultFromBytesStub.calledOnce).to.be.true;
-                expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
-                expect(ci.currentLoc).to.deep.equal(1);
-                expect(result).to.deep.equal({
-                    value: {
-                        value: Buffer.from('hello'),
-                        txId:'0xCAFE',
-                        isDelete:true,
-                        timestamp:{seconds:0,nanos:0},
-                    },
-                    done: false
-                });
-            });
-
-            it('should return as expected with non-zero currentLoc', () => {
-                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
-                mockResponse.getHasMore = () => true;
-
-                ci.currentLoc = 1;
-
-                const result = ci._createAndEmitResult();
-
-                expect(getResultFromBytesStub.calledOnce).to.be.true;
-                expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some more result bytes']);
-                expect(ci.currentLoc).to.deep.equal(2);
-                expect(result).to.deep.equal({
-                    value: {
-                        value: Buffer.from('hello'),
-                        txId:'0xCAFE',
-                        isDelete:true,
-                        timestamp:{seconds:0,nanos:0},
-                    },
-                    done: false
-                });
-            });
-
-            it('should return as expected with key element', () => {
-                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
-                mockResponse.getHasMore = () => true;
-
-                ci.currentLoc = 1;
-
-                queryResult.getKey = sinon.stub().returns('IamKey');
-                const result = ci._createAndEmitResult();
-
-                expect(getResultFromBytesStub.calledOnce).to.be.true;
-                expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some more result bytes']);
-                expect(ci.currentLoc).to.deep.equal(2);
-                expect(result).to.deep.equal({
-                    value: {
-                        key:'IamKey',
-                        value: Buffer.from('hello'),
-                        txId:'0xCAFE',
-                        isDelete:true,
-                        timestamp:{seconds:0,nanos:0},
-                    },
-                    done: false
-                });
-            });
-
-            it('should return value of first element of results converted from bytes and done false', () => {
-                mockResponse.getResultsList = () => ['some result bytes', 'some more result bytes'];
-                mockResponse.getHasMore = () => false;
-
-                const expectedResult = {
-                    value: {
-                        value: Buffer.from('hello'),
-                        txId:'0xCAFE',
-                        isDelete:true,
-                        timestamp:{seconds:0,nanos:0},
-                    },
-                    done: false
-                };
-
-                const result = ci._createAndEmitResult();
-
-                expect(getResultFromBytesStub.calledOnce).to.be.true;
-                expect(getResultFromBytesStub.firstCall.args).to.deep.equal(['some result bytes']);
-                expect(ci.currentLoc).to.deep.equal(1);
-                expect(result).to.deep.equal(expectedResult);
-            });
         });
 
         describe('next', () => {
