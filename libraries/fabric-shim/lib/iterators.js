@@ -8,7 +8,7 @@
 
 const logger = require('./logger').getLogger('lib/iterators.js');
 
-const {ledger} = require('@hyperledger/fabric-protos');
+const { ledger } = require('@hyperledger/fabric-protos');
 
 /**
  * CommonIterator allows a chaincode to check whether any more result(s)
@@ -20,16 +20,16 @@ const {ledger} = require('@hyperledger/fabric-protos');
 class CommonIterator {
 
     /**
-	 * constructor
+     * constructor
      *
      * Note that the decoded payload will be a protobuf of type
      * fabprotos.protos.QueryResponse
      *
-	 * @param {ChaincodeSupportClient} handler client handler
-	 * @param {string} channel_id channel id
-	 * @param {string} txID transaction id
-	 * @param {object} response decoded payload
-	 */
+     * @param {ChaincodeSupportClient} handler client handler
+     * @param {string} channel_id channel id
+     * @param {string} txID transaction id
+     * @param {object} response decoded payload
+     */
     constructor(handler, channel_id, txID, response, type) {
         this.type = type;
         this.handler = handler;
@@ -42,58 +42,57 @@ class CommonIterator {
     }
 
     /**
-	 * close the iterator.
-	 * @async
-	 * @return {promise} A promise that is resolved with the close payload or rejected
-	 * if there is a problem
-	 */
+     * close the iterator.
+     * @async
+     * @return {promise} A promise that is resolved with the close payload or rejected
+     * if there is a problem
+     */
     async close() {
         logger.debug('close called on %s iterator for txid: %s', this.type, this.txID);
         return await this.handler.handleQueryStateClose(this.response.getId(), this.channel_id, this.txID);
     }
 
     /*
-	 * decode the payload depending on the type of iterator.
-	 * @param {object} bytes
-	 */
-    _getResultFromBytes(bytes) {
-        if (this.type === 'QUERY') {
-            return ledger.queryresult.KV.deserializeBinary(bytes.getResultbytes());
-        } else if (this.type === 'HISTORY') {
-            return ledger.queryresult.KeyModification.deserializeBinary(bytes.getResultbytes());
-        }
-        throw new Error('Iterator constructed with unknown type: ' + this.type);
-    }
-
-
-    /*
-	 * creates a return value
-	 */
+     * creates a return value
+     */
     _createAndEmitResult() {
-        const queryResult = {};
         const resultsList = this.response.getResultsList();
+        let queryResult;
 
-        const queryResultPb = this._getResultFromBytes(resultsList[this.currentLoc]);
-        queryResult.value = {value:Buffer.from(queryResultPb.getValue())};
-        /* istanbul ignore else*/
-        if ('getKey' in queryResultPb) {
-            queryResult.value.key = Buffer.from(queryResultPb.getKey()).toString();
+        // established external API has a very specific structure here
+        // so need to 'fluff' up this structure to match
+        // Not all queryResults have the same methods
+        if (this.type === 'QUERY') {
+            const queryResultPb = ledger.queryresult.KV.deserializeBinary((resultsList[this.currentLoc]).getResultbytes());
+            queryResult = {
+                key: queryResultPb.getKey(),
+                value: Buffer.from(queryResultPb.getValue())
+            };
+        } else if (this.type === 'HISTORY') {
+            const queryResultPb = ledger.queryresult.KeyModification.deserializeBinary((resultsList[this.currentLoc]).getResultbytes());
+            queryResult = {
+                txId: queryResultPb.getTxId(),
+                value: Buffer.from(queryResultPb.getValue()),
+                isDelete: queryResultPb.getIsDelete(),
+                timestamp: queryResultPb.getTimestamp().toObject()
+
+            };
+        } else {
+            throw new Error('Iterator constructed with unknown type: ' + this.type);
         }
-
 
         this.currentLoc++;
 
-        queryResult.done = false;
-        return queryResult;
+        return {value: queryResult, done: false};
     }
 
     /**
-	 * Get the next value and return it through a promise.
-	 * @async
-	 * @return {promise} a promise that is fulfilled with an object { value: (next value) },
-	 * is fulfilled with an object { done: true } if there is no more value,
-	 * or is rejected if any error occurs.
-	 */
+     * Get the next value and return it through a promise.
+     * @async
+     * @return {promise} a promise that is fulfilled with an object { value: (next value) },
+     * is fulfilled with an object { done: true } if there is no more value,
+     * or is rejected if any error occurs.
+     */
     async next() {
         // check to see if there are some results left in the current result set
         const resultsList = this.response.getResultsList();
@@ -112,7 +111,7 @@ class CommonIterator {
                     throw err;
                 }
             }
-            return {done: true};
+            return { done: true };
         }
 
     }
