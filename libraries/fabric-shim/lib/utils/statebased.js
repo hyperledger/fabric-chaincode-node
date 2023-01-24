@@ -132,10 +132,14 @@ class KeyEndorsementPolicy {
             sigsPolicies.push(signedBy);
         });
 
-        const policy = new common.SignaturePolicy();
+
+        // Need to say that we want all of the mspIDs from the list.
         const nOutOf = new common.SignaturePolicy.NOutOf();
         nOutOf.setN(mspIds.length);
         nOutOf.setRulesList(sigsPolicies);
+
+        const policy = new common.SignaturePolicy();
+        policy.setNOutOf(nOutOf);
 
         spe.setIdentitiesList(principals);
         spe.setRule(policy);
