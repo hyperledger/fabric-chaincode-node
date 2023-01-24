@@ -14,6 +14,7 @@ async function getAllResults(iterator, getKeys) {
         const res = await iterator.next();
         if (!res.value && res.done) {
             await iterator.close();
+            console.log(`All Result Old Iterator `+allResults)
             return allResults;
         } else if (!res.value) {
             throw new Error('no value and not done (internal error?)');
@@ -23,6 +24,7 @@ async function getAllResults(iterator, getKeys) {
         if (res.done) {
             await iterator.close();
             loop = false;
+            console.log(`All Result Old Iterator `+allResults)
             return allResults;
         }
     }
@@ -34,6 +36,8 @@ async function getAllResultsUsingAsyncIterator(promiseOfIterator, getKeys) {
         const theVal = (getKeys) ? res.key : res.value.toString('utf8');
         allResults.push(theVal);
     }
+
+    console.log(`All Result AsyncIterator `+allResults)
 
     // iterator will be automatically closed on exit from the loop
     // either by reaching the end, or a break or throw terminated the loop

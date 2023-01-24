@@ -98,6 +98,8 @@ async function invoke(ccName, func, args, transient) {
         cmd += `peer chaincode invoke ${getTLSArgs()} -o localhost:7050 -C mychannel -n ${ccName} -c '${printArgs(func, args)}' --waitForEvent --waitForEventTimeout 100s 2>&1`;
     }
     const {stderr, stdout} = execSync(cmd);
+    console.log(stderr);
+    console.log(stdout)
     if (stderr) {
         throw new Error(stderr);
     }
@@ -116,6 +118,8 @@ async function query(ccName, func, args, transient) {
         cmd += `peer chaincode query ${getTLSArgs()} -C mychannel -n ${ccName} -c '${printArgs(func, args)}' 2>&1`;
     }
     const {error, stdout, stderr} = await exec(cmd);
+    console.log(stderr);
+    console.log(stdout);
     if (error) {
         throw new Error(error, stderr);
     }
