@@ -286,13 +286,13 @@ class ChaincodeMessageHandler {
         this.msgQueueHandler = new MsgQueueHandler(this);
 
         const stream = this._stream;
-        const self = this;
+
         // the conversation is supposed to follow a certain protocol,
         // if either side spoke out of turn, then we error out and
         // reject that response. The initial state is "created"
         let state = 'created';
 
-        stream.on('data', function (msgpb) {
+        stream.on('data', (msgpb) => {
             const msg = mapFromChaincodeMessage(msgpb);
             logger.debug(util.format('Received chat message from peer: %s, state: %s, type: %s', msg.txid, state, msg.type));
             if (state === STATES.Ready) {
@@ -304,13 +304,13 @@ class ChaincodeMessageHandler {
 
                     if (type === MSG_TYPE.RESPONSE || type === MSG_TYPE.ERROR) {
                         logger.debug(util.format('%s Received %s,  handling good or error response', loggerPrefix, msg.type));
-                        self.msgQueueHandler.handleMsgResponse(msg);
+                        this.msgQueueHandler.handleMsgResponse(msg);
                     } else if (type === MSG_TYPE.INIT) {
                         logger.debug(util.format('%s Received %s, initializing chaincode', loggerPrefix, msg.type));
-                        self.handleInit(msg);
+                        this.handleInit(msg);
                     } else if (type === MSG_TYPE.TRANSACTION) {
                         logger.debug(util.format('%s Received %s, invoking transaction on chaincode(state:%s)', loggerPrefix, msg.type, state));
-                        self.handleTransaction(msg);
+                        this.handleTransaction(msg);
                     } else {
                         logger.error('Received unknown message from the peer. Exiting.');
                         // TODO: Should we really do this ?
@@ -351,12 +351,12 @@ class ChaincodeMessageHandler {
             }
         });
 
-        stream.on('end', function () {
+        stream.on('end', () => {
             logger.debug('Chat stream ending');
             stream.cancel();
         });
 
-        stream.on('error', function (err) {
+        stream.on('error', (err) => {
             logger.error('Chat stream with peer - on error: %j', err.stack ? err.stack : err);
             stream.end();
         });

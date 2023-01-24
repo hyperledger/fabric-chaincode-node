@@ -29,7 +29,7 @@ class Bootstrap {
      * @ignore
      * @param {Contract} contracts contract to register to use
      */
-    static register(contracts, serializers, fileMetadata, title, version, opts, serverMode = false) {
+    static async register(contracts, serializers, fileMetadata, title, version, opts, serverMode = false) {
         // load up the meta data that the user may have specified
         // this will need to passed in and rationalized with the
         // code as implemented
@@ -37,7 +37,7 @@ class Bootstrap {
 
         if (serverMode) {
             const server = shim.server(chaincode, opts);
-            server.start();
+            await server.start();
         } else {
             // say hello to the peer
             shim.start(chaincode);
@@ -53,7 +53,7 @@ class Bootstrap {
         const opts = serverMode ? ServerCommand.getArgs(yargs) : StartCommand.getArgs(yargs);
         const {contracts, serializers, title, version} = this.getInfoFromContract(opts['module-path']);
         const fileMetadata = await Bootstrap.getMetadata(opts['module-path']);
-        Bootstrap.register(contracts, serializers, fileMetadata, title, version, opts, serverMode);
+        await Bootstrap.register(contracts, serializers, fileMetadata, title, version, opts, serverMode);
     }
 
     static getInfoFromContract(modulePath) {
