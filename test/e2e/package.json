@@ -1,6 +1,6 @@
 {
   "name": "fabric-e2e-tests",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "",
   "main": "docker.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "devDependencies": {
     "git-rev-sync": "3.0.1",
     "gulp": "^4.0.2",
-    "toolchain": "2.5.1",
+    "toolchain": "2.5.2",
     "delay": "5.0.0",
     "fs-extra": "^10.0.1",
     "ip": "^1.1.5",
