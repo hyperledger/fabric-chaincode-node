@@ -1,9 +1,14 @@
+## v2.5.2
+Wed Jan 25 14:21:32 GMT 2023
+
+* [fe2946d3](https://github.com/hyperledger/fabric-chaincode-node/commit/fe2946d3) Prepare release 2.5.2
+* [653b7245](https://github.com/hyperledger/fabric-chaincode-node/commit/653b7245) Fix the handling of the key endorsement policy (#377)
+* [982eddab](https://github.com/hyperledger/fabric-chaincode-node/commit/982eddab) GetHistoryForKey to return correct data (#375)
+
 ## v2.5.1
 Wed Jan 11 11:31:22 GMT 2023
 
 * [30125f68](https://github.com/hyperledger/fabric-chaincode-node/commit/30125f68) Pin fabric-shim's dependency on grpc-js to 1.8.1 (#369)
-* [4a0fc571](https://github.com/hyperledger/fabric-chaincode-node/commit/4a0fc571) GHA workflow
-* [102473e7](https://github.com/hyperledger/fabric-chaincode-node/commit/102473e7) GHA Workflow
 * [c6ff468b](https://github.com/hyperledger/fabric-chaincode-node/commit/c6ff468b) Get builds on release-2.5 branch (#360)
 
 ## v2.5.0
