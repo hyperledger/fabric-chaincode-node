@@ -72,7 +72,7 @@ jobs:
         name: Upload test results
         if: success() || failure()
         with:
-          name: TestResults
+          name: TestResults-${{ matrix.node-version }}-${{ inputs.checkout-ref }}
           path: ./**/test-results.xml
 
       - name: Build Binaries
@@ -84,13 +84,13 @@ jobs:
       - uses: actions/upload-artifact@v3
         name: Binaries
         with:
-          name: node-tgzs
+          name: node-tgzs-${{ matrix.node-version }}-${{ inputs.checkout-ref }}
           path: tgz/
 
       - uses: actions/upload-artifact@v3
         name: Docker
         with:
-          name: nodeenv-docker-image
+          name: nodeenv-docker-image-${{ matrix.node-version }}-${{ inputs.checkout-ref }}
           path: fabric-nodeenv.tar.gz
 
   fvtest:
@@ -110,11 +110,11 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: nodeenv-docker-image
+          name: nodeenv-docker-image-${{ matrix.node-version }}-${{ inputs.checkout-ref }}
           path: build/
       - uses: actions/download-artifact@v3
         with:
-          name: node-tgzs
+          name: node-tgzs-${{ matrix.node-version }}-${{ inputs.checkout-ref }}
           path: build/
 
       - name: Setup the fv build
@@ -145,7 +145,7 @@ jobs:
         if: success() || failure()
         name: TestLogs
         with:
-          name: TestLogs
+          name: TestLogs-${{ matrix.node-version }}-${{ inputs.checkout-ref }}
           path: ./**/*.build.log
 
 
@@ -169,7 +169,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - uses: actions/download-artifact@v3
         with:
-          name: node-tgzs
+          name: node-tgzs-${{ matrix.node-version }}-${{ inputs.checkout-ref }}
           path: build/
       - name: run audit
         run: |
