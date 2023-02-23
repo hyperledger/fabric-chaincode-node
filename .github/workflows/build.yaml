@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 env:
-  CHAINCODE_CONTAINER_NODE_VER: 16
+  CHAINCODE_CONTAINER_NODE_VER: 18
   DOCKER_REGISTRY: ${{ github.repository_owner == 'hyperledger' && 'docker.io' || 'ghcr.io' }}
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
       - name: BuildData
         id: builddata
         run: |
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
 
     steps:
       - uses: actions/checkout@v3
@@ -104,7 +104,7 @@ jobs:
     needs: [build]
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -162,7 +162,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -189,7 +189,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
       - uses: actions/download-artifact@v3
         with:
