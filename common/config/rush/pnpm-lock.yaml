@@ -7246,7 +7246,7 @@ packages:
     dev: false
 
   file:projects/fabric-contract-api.tgz:
-    resolution: {integrity: sha512-WeRli7QZ/qurpPhdLWQZKxqbjCuenMqk/erhPXqQj+8ntVeuujmjpHcd7ni/x36f2QkRcFymgoWg40AMBAkZaQ==, tarball: file:projects/fabric-contract-api.tgz}
+    resolution: {integrity: sha512-4K7qEa02qkK9zluNMgnQaILTEydJ+nrnm7A+UUZ1NXjG1MDSCNdmQE2HStcOHQ2lOeaiGLuUlGiDihCE0zrz1Q==, tarball: file:projects/fabric-contract-api.tgz}
     name: '@rush-temp/fabric-contract-api'
     version: 0.0.0
     dependencies:
@@ -7275,7 +7275,7 @@ packages:
     dev: false
 
   file:projects/fabric-e2e-tests.tgz:
-    resolution: {integrity: sha512-bp7LbwT1KA55tQSq+OrLnGIgb+IzJJBZKamXFuvH4hDxYU4TJS5F4IYmaUEhn+cezZYvaEY/JtAMjzh6eEQaVA==, tarball: file:projects/fabric-e2e-tests.tgz}
+    resolution: {integrity: sha512-4uY7mngP0xfS2NekRX7WeWSL30LfJQ+cImKCLewIpQEndCw6gEGREMheyYiMqUb+1NEQPCCQo2ilTVP51X2UBw==, tarball: file:projects/fabric-e2e-tests.tgz}
     name: '@rush-temp/fabric-e2e-tests'
     version: 0.0.0
     dependencies:
@@ -7290,7 +7290,7 @@ packages:
     dev: false
 
   file:projects/fabric-ledger.tgz_@types+node@16.11.33:
-    resolution: {integrity: sha512-BnwvvJqQ1EqwZEDvdqVtRYATLS5V0pO+ghFjPodUswCSH9ZvSaxSMLi7y2bfCcXi3S3PsxGjGRklAhiEA+8PYg==, tarball: file:projects/fabric-ledger.tgz}
+    resolution: {integrity: sha512-pTDCc9QjO6s44W1HETS+R9I2X49cc2l95gkFwdkI5ND/KKyCQ+xopxGeDynLm1n4xU21Tj4Wa4/0z10cYpGLug==, tarball: file:projects/fabric-ledger.tgz}
     id: file:projects/fabric-ledger.tgz
     name: '@rush-temp/fabric-ledger'
     version: 0.0.0
@@ -7322,7 +7322,7 @@ packages:
     dev: false
 
   file:projects/fabric-nodeenv.tgz:
-    resolution: {integrity: sha512-2xlHPeg7Ai19lR/DZmXF6VgDCOXXAahx6vl6qGf5D5qCEeskNz2sC1xbDplhQ6kTndeUG+WAmAuVcHL2vwo7kA==, tarball: file:projects/fabric-nodeenv.tgz}
+    resolution: {integrity: sha512-xlLxgg4kwWzmz0z6hArSJeUoQbXJP+GhXz7hE1252siupsuq7BReSa/lJ3LSzQnzQ3B6wNAApybnLiP4+H/KaA==, tarball: file:projects/fabric-nodeenv.tgz}
     name: '@rush-temp/fabric-nodeenv'
     version: 0.0.0
     dependencies:
@@ -7338,7 +7338,7 @@ packages:
     dev: false
 
   file:projects/fabric-shim-docs.tgz:
-    resolution: {integrity: sha512-jOYtRlpdPlAvXoTZMDrte9nruyqobBOsDK6ALZqMkAHWpnwK/kChQ0oT+jtUjiVwLfW3Mx3NDf3b9Nqd+7tOwA==, tarball: file:projects/fabric-shim-docs.tgz}
+    resolution: {integrity: sha512-Qr2O8J/b0WvKIAnrVphuXeQme0eP1Ju2NRPBV9ZlswVXxbm/7nIQekZuu88PKKa/M2yG60PxRziJZXZE4EjWnA==, tarball: file:projects/fabric-shim-docs.tgz}
     name: '@rush-temp/fabric-shim-docs'
     version: 0.0.0
     dependencies:
@@ -7348,7 +7348,7 @@ packages:
     dev: false
 
   file:projects/fabric-shim.tgz:
-    resolution: {integrity: sha512-iAReiPzm4SAg32FRjn2c+0B+dgV6xvOa717uq2CyE9cOVGzBepnA5m3p6AoD/ITZxuOBWm79E5iLxCjgnekscw==, tarball: file:projects/fabric-shim.tgz}
+    resolution: {integrity: sha512-YXwlABklbvMJihahU+lfs0AoD0y1xZetRbiHfQ+Warg90sugSk3+wplSK1e7W9ZlxwsHgmWg2vo7AyXBqNtBwg==, tarball: file:projects/fabric-shim.tgz}
     name: '@rush-temp/fabric-shim'
     version: 0.0.0
     dependencies:
@@ -7364,6 +7364,7 @@ packages:
       chai-things: 0.2.0
       cpx: 1.5.0
       eslint: 6.8.0
+      fast-safe-stringify: 2.1.1
       fs-extra: 10.1.0
       mocha: 9.1.3
       mockery: 2.1.0
@@ -7381,7 +7382,7 @@ packages:
     dev: false
 
   file:projects/fvtests.tgz:
-    resolution: {integrity: sha512-zQbaPJ0nbq66+36UAkCGkclKySVzOpxEugaXgJo4MaypYhXBFacoQfxlIN8NqqRDP7n1FSienIehRAdbC9VC0Q==, tarball: file:projects/fvtests.tgz}
+    resolution: {integrity: sha512-j16BJYgmKsknhdXBGFqIYJlYWAuqNh6QNCBKymoyI6EW+0vC7qXfwZc7AsRHy+OqVqE0gtEDnXDLBbSwOiq5vw==, tarball: file:projects/fvtests.tgz}
     name: '@rush-temp/fvtests'
     version: 0.0.0
     dependencies:

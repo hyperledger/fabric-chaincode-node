@@ -60,8 +60,14 @@
     "@hyperledger/fabric-protos": "0.1.0-dev.2300102001.1",
     "@types/node": "^16.11.1",
     "ajv": "^6.12.2",
+<<<<<<< HEAD
     "fabric-contract-api": "2.5.3-unstable",
     "fabric-shim-api": "2.5.3-unstable",
+=======
+    "fabric-contract-api": "3.0.0-unstable",
+    "fabric-shim-api": "3.0.0-unstable",
+    "fast-safe-stringify": "^2.1.1",
+>>>>>>> 80096f8 (Add missing `fast-safe-stringify` dependency to `fabric-shim` (#389))
     "fs-extra": "^10.0.1",
     "reflect-metadata": "^0.1.13",
     "winston": "^3.7.2",
