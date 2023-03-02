@@ -2,8 +2,7 @@
   "name": "chaincode",
   "description": "Chaincode testing crud functionality",
   "engines": {
-    "node": "^12.16.1",
-    "npm": "^6.4.1"
+    "node": "^18.0.0"    
   },
   "scripts": {
     "start": "set -x && CORE_CHAINCODE_LOGGING_LEVEL=debug fabric-chaincode-node start"

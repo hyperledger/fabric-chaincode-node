@@ -17,8 +17,7 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": "^16.4.0",
-    "npm": "^8.0.0",
+    "node": "^18.0.0",
     "eslint": "^6.6.0"
   },
   "types": "./types/index.d.ts",
