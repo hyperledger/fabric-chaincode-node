@@ -2,7 +2,7 @@
   "name": "chaincode",
   "description": "Chaincode testing private data functionality",
   "engines": {
-    "node": "^12.16.1",
+    "node": "^18.0.0",
     "npm": ">=5.3.0"
   },
   "scripts": {

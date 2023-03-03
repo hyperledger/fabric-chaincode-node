@@ -23,8 +23,7 @@
     "Fabric Ledger"
   ],
   "engines": {
-    "node": "^16.4.0",
-    "npm": "^8.0.0"
+    "node": "^18.0.0"    
   },
   "license": "Apache-2.0",
   "nyc": {

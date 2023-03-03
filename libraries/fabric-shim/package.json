@@ -29,8 +29,7 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": "^16.4.0",
-    "npm": "^8.0.0"
+    "node": "^18.0.0"    
   },
   "types": "./types/index.d.ts",
   "license": "Apache-2.0",
@@ -62,6 +61,7 @@
     "ajv": "^6.12.2",
     "fabric-contract-api": "2.5.3-unstable",
     "fabric-shim-api": "2.5.3-unstable",
+    "fast-safe-stringify": "^2.1.1",
     "fs-extra": "^10.0.1",
     "reflect-metadata": "^0.1.13",
     "winston": "^3.7.2",
