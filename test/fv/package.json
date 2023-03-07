@@ -1,12 +1,12 @@
 {
   "name": "fvtests",
-  "version": "2.5.3-unstable",
+  "version": "2.5.3",
   "description": "fv tests",
   "testFabricVersion": "main",
   "testFabricThirdParty": "0.4.15",
   "docsLatestVersion": "release-1.4",
   "engines": {
-    "node": "^18.0.0"    
+    "node": "^18.0.0"
   },
   "engineStrict": true,
   "license": "Apache-2.0",
@@ -25,9 +25,9 @@
     "del": "^3.0.0",
     "delay": "5.0.0",
     "eslint": "^6.6.0",
-    "fabric-contract-api": "2.5.3-unstable",
-    "fabric-shim": "2.5.3-unstable",
-    "fabric-shim-api": "2.5.3-unstable",
+    "fabric-contract-api": "2.5.3",
+    "fabric-shim": "2.5.3",
+    "fabric-shim-api": "2.5.3",
     "fs-extra": "^10.0.1",
     "git-rev-sync": "3.0.1",
     "gulp": "^4.0.2",

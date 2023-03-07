@@ -1,6 +1,6 @@
 {
   "name": "toolchain",
-  "version": "2.5.3-unstable",
+  "version": "2.5.3",
   "description": "",
   "main": "index.js",
   "scripts": {
