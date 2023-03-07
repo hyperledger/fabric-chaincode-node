@@ -1,6 +1,6 @@
 {
   "name": "fabric-shim-api",
-  "version": "2.5.3-unstable",
+  "version": "2.5.3",
   "tag": "unstable",
   "description": "A node.js API of Hyperledger Fabric chaincode shim, to allow endorsing peers and user-provided chaincodes to communicate with each other",
   "main": "index.js",
