@@ -752,13 +752,15 @@ class ChaincodeStub {
     }
 
     /**
-     * Allows the chaincode to propose an event on the transaction proposal. When the transaction
-     * is included in a block and the block is successfully committed to the ledger, the block event
-     * will be delivered to the current event listeners that have been registered with the peer's
-     * event producer. Note that the block event gets delivered to the listeners regardless of the
-     * status of the included transactions (can be either valid or invalid), so client applications
-     * are responsible for checking the validity code on each transaction. Consult each SDK's documentation
-     * for details.
+     * Allows the chaincode to propose an event on the transaction proposal response.
+     * When the transaction is included in a block and the block is successfully committed to the ledger,
+     * the block event (including transaction level chaincode events)
+     * will be delivered to the current client application event listeners that have been registered with the peer's event producer.
+     * Consult each SDK's documentation for details.
+     * Only a single chaincode event can be included in a transaction.
+     * If setEvent() is called multiple times only the last event will be included in the transaction.
+     * The event must originate from the outer-most invoked chaincode in chaincode-to-chaincode scenarios.
+     * The marshaled ChaincodeEvent will be available in the transaction's ChaincodeAction.events field.
      * @param {string} name Name of the event
      * @param {byte[]} payload A payload can be used to include data about the event
      */
