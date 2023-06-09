@@ -58,16 +58,12 @@ class ChaincodeServer {
             this._credentials = grpc.ServerCredentials.createInsecure();
         }
 
+        const grpcOptions = Object.fromEntries(
+            Object.entries(serverOpts).filter(([key]) => key.startsWith('grpc.'))
+        );
+
         // Create GRPC Server and register RPC handler
-        this._server = new grpc.Server({
-            'grpc.max_send_message_length': serverOpts['grpc.max_send_message_length'],
-            'grpc.max_receive_message_length': serverOpts['grpc.max_receive_message_length'],
-            'grpc.keepalive_time_ms': serverOpts['grpc.keepalive_time_ms'],
-            'grpc.http2.min_time_between_pings_ms': serverOpts['grpc.http2.min_time_between_pings_ms'],
-            'grpc.keepalive_timeout_ms': serverOpts['grpc.keepalive_timeout_ms'],
-            'grpc.http2.max_pings_without_data': serverOpts['grpc.http2.max_pings_without_data'],
-            'grpc.keepalive_permit_without_calls': serverOpts['grpc.keepalive_permit_without_calls'],
-        });
+        this._server = new grpc.Server(grpcOptions);
         this._server.addService(peer.ChaincodeService, this);
 
         this._serverOpts = serverOpts;
