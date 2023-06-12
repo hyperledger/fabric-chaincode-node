@@ -58,8 +58,12 @@ class ChaincodeServer {
             this._credentials = grpc.ServerCredentials.createInsecure();
         }
 
+        const grpcOptions = Object.fromEntries(
+            Object.entries(serverOpts).filter(([key]) => key.startsWith('grpc.'))
+        );
+
         // Create GRPC Server and register RPC handler
-        this._server = new grpc.Server();
+        this._server = new grpc.Server(grpcOptions);
         this._server.addService(peer.ChaincodeService, this);
 
         this._serverOpts = serverOpts;

@@ -6,8 +6,8 @@
 */
 declare module 'fabric-shim' {
 
-    import { EventEmitter } from 'events';
     import { Logger } from 'winston';
+    import { ChannelOptions } from '@grpc/grpc-js'
 
     import {
         ChaincodeInterface,
@@ -53,7 +53,11 @@ declare module 'fabric-shim' {
         start(): Promise<void>;
     }
 
-    export interface ChaincodeServerOpts {
+    type GRPCOptions = {
+        [K in keyof ChannelOptions as string extends K ? never : K]?: ChannelOptions[K];
+    }
+
+    export interface ChaincodeServerOpts extends GRPCOptions {
         ccid: string;
         address: string;
         tlsProps: ChaincodeServerTLSProperties;
@@ -140,7 +144,7 @@ declare module 'fabric-shim' {
         constructor(policy?: Uint8Array);
         getPolicy(): Uint8Array;
         addOrgs(role: string, ...newOrgs: string[]): void;
-        delOrgs(...delOrgs: string[]):void;
+        delOrgs(...delOrgs: string[]): void;
         listOrgs(): string[];
     }
 
