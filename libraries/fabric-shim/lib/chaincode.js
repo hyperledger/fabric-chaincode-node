@@ -200,6 +200,11 @@ class Shim {
     }
 
     /**
+     * @interface GRPCOptions
+     * @description ChannelOptions on "@grpc/grpc-js". For a complete list, refer to <a href=https://www.npmjs.com/package/@grpc/grpc-js#supported-channel-options>@grpc/grpc-js Documentation</a>
+     * @property {unknown[]} ['grpc.${string}'] Connection options defined on "@grpc/grpc-js"
+     */
+    /**
      * @interface ChaincodeServerTLSProperties
      * @property {Buffer} key Private key for TLS
      * @property {Buffer} cert Certificate for TLS
@@ -207,6 +212,7 @@ class Shim {
      */
     /**
      * @interface ChaincodeServerOpts
+     * @extends GRPCOptions
      * @property {string} ccid Chaincode ID
      * @property {string} address Listen address for the server
      * @property {ChaincodeServerTLSProperties} [tlsProps] TLS properties if TLS is required.

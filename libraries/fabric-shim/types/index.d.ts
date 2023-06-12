@@ -7,7 +7,7 @@
 declare module 'fabric-shim' {
 
     import { Logger } from 'winston';
-    import { ChannelOptions as GRPCOptions } from '@grpc/grpc-js'
+    import { ChannelOptions } from '@grpc/grpc-js'
 
     import {
         ChaincodeInterface,
@@ -53,7 +53,11 @@ declare module 'fabric-shim' {
         start(): Promise<void>;
     }
 
-    export interface ChaincodeServerOpts extends Partial<GRPCOptions> {
+    type GRPCOptions = {
+        [K in keyof ChannelOptions as string extends K ? never : K]?: ChannelOptions[K];
+    }
+
+    export interface ChaincodeServerOpts extends GRPCOptions {
         ccid: string;
         address: string;
         tlsProps: ChaincodeServerTLSProperties;
