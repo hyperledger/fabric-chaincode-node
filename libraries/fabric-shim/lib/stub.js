@@ -12,6 +12,7 @@ const {msp, peer, common} = require('@hyperledger/fabric-protos');
 const util = require('util');
 const crypto = require('crypto');
 const {ChaincodeEvent} = require('@hyperledger/fabric-protos/lib/peer');
+const Long = require('long');
 
 const logger = require('./logger').getLogger('lib/stub.js');
 
@@ -416,7 +417,10 @@ class ChaincodeStub {
      * Object returned: { seconds: [Long] { low: [int32], high: [int32], unsigned: [bool] }, nanos: [int32] }
      */
     getTxTimestamp() {
-        return this.txTimestamp;
+        return {
+            nanos: this.txTimestamp.getNanos(),
+            seconds: Long.fromNumber(this.txTimestamp.getSeconds(), true),
+        };
     }
 
     /**
@@ -425,8 +429,7 @@ class ChaincodeStub {
      * client's date, and will have the same value across all endorsers.
      */
     getDateTimestamp() {
-        const date = new Date(this.txTimestamp.seconds * 1e3 + this.txTimestamp.nanos / 1e6);
-        return date;
+        return this.txTimestamp.toDate();
     }
 
     /**
