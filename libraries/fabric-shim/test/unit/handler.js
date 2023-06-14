@@ -642,7 +642,7 @@ describe('Handler', () => {
                     Handler.__set__('MsgQueueHandler', mockMsgQueueHandler);
                     Handler.__set__('newErrorMsg', mockNewErrorMsg);
 
-                    mockStream = {write: (sinon.stub()), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
+                    mockStream = {write: (sinon.stub()), on: mockEventEmitter, end: sinon.stub()};
 
                     handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                     handler.chat('some starter message');
@@ -815,7 +815,7 @@ describe('Handler', () => {
                         eventReg[event] = cb;
                     };
 
-                    const mockStream = {write: sinon.stub(), on: mockEventEmitter, cancel: sinon.stub(), end: sinon.stub()};
+                    const mockStream = {write: sinon.stub(), on: mockEventEmitter, end: sinon.stub()};
 
                     const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
                     handler.chat('some starter message');
@@ -823,7 +823,7 @@ describe('Handler', () => {
                     eventReg.end();
 
                     expect(mockStream.write.calledOnce).to.be.true;
-                    expect(mockStream.cancel.calledOnce).to.be.true;
+                    expect(mockStream.end.calledOnce).to.be.true;
                 });
             });
 

@@ -353,7 +353,7 @@ class ChaincodeMessageHandler {
 
         stream.on('end', () => {
             logger.debug('Chat stream ending');
-            stream.cancel();
+            stream.end();
         });
 
         stream.on('error', (err) => {
