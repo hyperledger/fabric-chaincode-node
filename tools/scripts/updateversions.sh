@@ -10,9 +10,24 @@ fi
 NEW_VERSION="$1"
 echo "Setting new version to '${NEW_VERSION}'"
 
+DEPENDENCIES=( fabric-contract-api fabric-shim-api fabric-ledger toolchain )
+
+updatePackageVersion() {
+    npm --allow-same-version --no-git-tag-version version "$1"
+    for dependency in "${DEPENDENCIES[@]}"; do
+        updateDependencyVersion "${dependency}" "$1"
+    done
+}
+
+updateDependencyVersion() {
+    local packageJson
+    packageJson=$(node -e "const pkg = require('./package.json'); if (pkg.dependencies['$1']) pkg.dependencies['$1'] = '$2'; console.log(JSON.stringify(pkg, undefined, 2))")
+    echo "${packageJson}" > package.json
+}
+
 while read -r PACKAGE; do
     echo "Updating '${PACKAGE}'"
-    ( cd "$(dirname "${PACKAGE}")" && npm --allow-same-version --no-git-tag-version version "${NEW_VERSION}" )
+    ( cd "$(dirname "${PACKAGE}")" && updatePackageVersion "${NEW_VERSION}" )
 done <<< "$(find . -type d \( -name node_modules -o -name common \) -prune -o -type f -name package.json -print)"
 
 MAJOR_MINOR=$(cut -d. -f-2 <<< "${NEW_VERSION}")
