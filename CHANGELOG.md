@@ -1,6 +1,17 @@
-## 2.5.3
-Tue Mar  7 09:36:52 GMT 2023
+## v2.5.4
+Wed 14 Jun 2023 12:29:35 BST
 
+* [690c91a9](https://github.com/hyperledger/fabric-chaincode-node/commit/690c91a9) Using the CLI provided gRPC configurations when starting the chaincode (#401)
+* [cf179e7b](https://github.com/hyperledger/fabric-chaincode-node/commit/cf179e7b) Update SetEvent documentation (#399)
+* [6f66124b](https://github.com/hyperledger/fabric-chaincode-node/commit/6f66124b) Update COMPATIBILITY.md for Node 18. (#396)
+
+## v2.5.3
+Tue Mar  7 09:36:52 GMT 2023
+* [7d865afd](https://github.com/hyperledger/fabric-chaincode-node/commit/7d865afd) Update to new version Update to the .github workflows to handle the branch rename.
+* [220ac53b](https://github.com/hyperledger/fabric-chaincode-node/commit/220ac53b) Clean-up npm engine specs (#394)
+* [5d72d902](https://github.com/hyperledger/fabric-chaincode-node/commit/5d72d902) Nominate Mark Lewis as maintainer, Remove James Taylor (#391)
+* [385efa8b](https://github.com/hyperledger/fabric-chaincode-node/commit/385efa8b) Add scheduled builds (#392)
+* [e9c9eb79](https://github.com/hyperledger/fabric-chaincode-node/commit/e9c9eb79) Update to Node18
 
 ## v2.5.2
 Wed Jan 25 14:21:32 GMT 2023

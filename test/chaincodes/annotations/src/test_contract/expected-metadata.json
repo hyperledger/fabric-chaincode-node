@@ -107,7 +107,7 @@
         }
     },
     "info": {
-        "version": "2.5.3",
+        "version": "2.5.4",
         "title": "ts_chaincode"
     },
     "components": {
