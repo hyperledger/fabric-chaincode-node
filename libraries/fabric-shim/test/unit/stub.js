@@ -8,6 +8,8 @@
 const sinon = require('sinon');
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
+const { Timestamp } = require('google-protobuf/google/protobuf/timestamp_pb');
+const Long = require('long');
 // chai.config.truncateThreshold = 0;
 const expect = chai.expect;
 const rewire = require('rewire');
@@ -556,19 +558,31 @@ describe('Stub', () => {
         describe('getTxTimestamp', () => {
             it ('should return transaction timestamp', () => {
                 const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                const millis = Date.now();
+                const seconds = Math.trunc(millis / 1000);
+                const nanos = (millis - (seconds * 1000)) * 1e6;
+                const timestamp = new Timestamp();
+                timestamp.setSeconds(seconds);
+                timestamp.setNanos(nanos);
+                stub.txTimestamp = timestamp;
 
-                stub.txTimestamp = 'some timestamp';
+                const actual = stub.getTxTimestamp();
 
-                expect(stub.getTxTimestamp()).to.deep.equal('some timestamp');
+                expect(actual).to.deep.include({
+                    nanos,
+                    seconds: Long.fromNumber(seconds, true),
+                });
             });
         });
 
         describe('getDateTimestamp', () => {
             it ('should return transaction date as Node.js Date object', () => {
                 const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', chaincodeInput);
-                stub.txTimestamp = {seconds: 1606233385, nanos: 54000000};
+                const now = new Date();
+                const timestamp = Timestamp.fromDate(now);
+                stub.txTimestamp = timestamp;
 
-                expect(stub.getDateTimestamp()).to.deep.equal(new Date(1606233385054));
+                expect(stub.getDateTimestamp().toISOString()).to.equal(now.toISOString());
             });
         });
 
