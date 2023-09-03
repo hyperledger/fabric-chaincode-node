@@ -4,7 +4,7 @@
 name: Release
 
 on:
-  create:
+  push:
     tags:
       - "v2.*"
   workflow_dispatch:

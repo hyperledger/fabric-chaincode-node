@@ -7,51 +7,45 @@
 /* eslint-disable no-console*/
 'use strict';
 
-const fs = require('fs');
+const fs = require('node:fs');
 const git = require('git-rev-sync');
-const path = require('path');
-const util = require('util');
-
-const { shell: runcmds } = require('toolchain');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
+const process = require('node:process');
 
 const version = JSON.parse(fs.readFileSync(path.join(__dirname,'package.json'))).version;
 const build_dir = path.join(__dirname);
 const tag = version + '-' + git.short();
+const imageName = 'hyperledger/fabric-nodeenv'
 
 // reg exp the sort tag versions
 const regex = /^(\d+\.\d+)/
 const shortVersion = version.match(regex);
 
+function runCmd(command) {
+    console.log(command);
+    execSync(command, {
+        stdio: 'inherit',
+    });
+}
 
 // build and tag the fabric-nodeenv image
-const imageBuild = async () => {
-    await runcmds(
-        [
-            util.format('docker build -t hyperledger/fabric-nodeenv:%s -f %s %s',
-                tag, path.join(build_dir, 'Dockerfile'), build_dir),
-            util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:%s',
-                tag, version),
-            util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:%s',
-                tag, shortVersion[shortVersion.index]),
-            util.format('docker tag hyperledger/fabric-nodeenv:%s hyperledger/fabric-nodeenv:latest', tag)
-        ]
-
-    );
+function imageBuild() {
+    runCmd(`docker build -t ${imageName}:${tag} -f ${path.join(build_dir, 'Dockerfile')} ${build_dir} 2>&1`);
+    runCmd(`docker tag ${imageName}:${tag} ${imageName}:${version}`);
+    runCmd(`docker tag ${imageName}:${tag} ${imageName}:${shortVersion[shortVersion.index]}`);
+    runCmd(`docker tag ${imageName}:${tag} ${imageName}:latest`);
 };
 
 // remove fabric-nodeenv images
-const imageClean = async () => {
-    await runcmds([
-        util.format('docker rmi -f `docker images -q --filter=reference="hyperledger/fabric-nodeenv:%s*"` 2>&1 || true', version)
-    ]);
+function imageClean() {
+    runCmd(`docker images -q --filter=reference="${imageName}:${version}*" | uniq | xargs -r docker rmi -f`);
 };
 
-const main = async()=>{
-    await imageClean();
-    await imageBuild();
-}
-
-main().catch((e)=>{
+try {
+    imageClean();
+    imageBuild();
+} catch (e) {
     console.error(e);
-    process.exit(1);
-})
+    process.exitCode = 1;
+}
