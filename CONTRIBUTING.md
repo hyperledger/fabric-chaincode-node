@@ -22,7 +22,7 @@ The following [Rush categories](https://rushjs.io/pages/maintainer/add_to_repo/)
 
 ### Pre-requisites
 
-* node v16.4.0 (npm v8.0.0) => recommend to use [nvm](https://github.com/nvm-sh/nvm)
+* node v18 => recommend to use [nvm](https://github.com/nvm-sh/nvm)
 * rush => `npm install -g @microsoft/rush`
 
 > Note that npm v6 has some bugs that mean adding new dependencies etc are not properly picked up. Longer term we should consider moving to yarn or pnpm. However in practice this isn't a serious problem and has been possible to be worked around by issuing `rm ./common/config/rush/npm-shrinkwrap.json` and then `rush update`
@@ -33,7 +33,7 @@ They also need to have the `nodeenv` image present - this is build as part of th
 
 ## Using the repo
 
-* Clone the repo, and ensure you are using node v12, and have rush installed
+* Clone the repo, and ensure you are using node v18, and have rush installed
 * `rush update` is needed to ensure everything is correctly linked and updated.
 * `rush edge-docker` will pull down and tag the very latest docker images for the peers, orderes etc to test against
 

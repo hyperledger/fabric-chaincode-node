@@ -11,5 +11,3 @@ on:
 jobs:
   test:
     uses: ./.github/workflows/test.yaml
-    with:
-      checkout-ref: ${{ matrix.checkout-ref }}
