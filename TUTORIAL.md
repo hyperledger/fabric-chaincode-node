@@ -19,7 +19,7 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
     "npm": "^6.4.1"
   },
   "scripts": {
-    "test":"mocha.....
+    "test": "mocha....."
   },
   "engine-strict": true,
   "engineStrict": true,
