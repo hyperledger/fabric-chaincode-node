@@ -14,8 +14,8 @@ jobs:
       MINOR_PACKAGE_VERSION: ${{ steps.builddata.outputs.MINOR_PACKAGE_VERSION }}
       BUILD_DATE: ${{ steps.builddata.outputs.BUILD_DATE }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18.x'
       - name: BuildData
@@ -43,8 +43,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18.x'
       - name: Install/Rebuild/UnitTest
@@ -55,9 +55,9 @@ jobs:
       - name: Pre-process Artifacts
         run: |
           npx cobertura-merge -o merged_coverage.xml shim=./libraries/fabric-shim/coverage/cobertura-coverage.xml contractapi=./apis/fabric-contract-api/coverage/cobertura-coverage.xml -p
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Upload test results
-        if: success() || failure()
+        if: ${{ !cancelled() }}
         with:
           name: TestResults
           path: ./**/test-results.xml
@@ -68,13 +68,13 @@ jobs:
           node common/scripts/install-run-rush.js publish --include-all --pack --release-folder tgz --publish
           docker image save hyperledger/fabric-nodeenv | gzip > fabric-nodeenv.tar.gz
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Binaries
         with:
           name: node-tgzs
           path: tgz/
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         name: Docker
         with:
           name: nodeenv-docker-image
@@ -84,16 +84,16 @@ jobs:
     runs-on: ubuntu-20.04
     needs: build
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18.x'
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: nodeenv-docker-image
           path: build/
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: node-tgzs
           path: build/
@@ -121,28 +121,27 @@ jobs:
           node common/scripts/install-run-rush.js test:fv --verbose
           node common/scripts/install-run-rush.js test:e2e --verbose
 
-
-      - uses: actions/upload-artifact@v3
-        if: success() || failure()
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         name: TestLogs
         with:
           name: TestLogs
-          path: ./**/*.build.log
+          path: "**/*.build.log"
 
 
-        # Job to handle the auditing of the code
-        # NPM audit is run on a 'fake' installation of the libraries
-        # Pulling in all the dependencies it will be able to run NPM AUDIT, and if that returns a
-        # error code the job will fail.
+  # Job to handle the auditing of the code
+  # NPM audit is run on a 'fake' installation of the libraries
+  # Pulling in all the dependencies it will be able to run NPM AUDIT, and if that returns a
+  # error code the job will fail.
   src_audit:
     runs-on: ubuntu-20.04
     needs: build
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: node-tgzs
           path: build/
