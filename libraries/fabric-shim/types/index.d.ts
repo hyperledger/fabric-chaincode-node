@@ -12,6 +12,8 @@ declare module 'fabric-shim' {
     import {
         ChaincodeInterface,
         ChaincodeProposal,
+        ErrorResponse,
+        SuccessResponse,
         ChaincodeResponse,
         ChaincodeStub as IChaincodeStub,
         ClientIdentity as IClientIdentity,
@@ -26,6 +28,8 @@ declare module 'fabric-shim' {
     export {
         ChaincodeInterface,
         ChaincodeProposal,
+        ErrorResponse,
+        SuccessResponse,
         ChaincodeResponse,
         Iterators,
         QueryResponseMetadata,
@@ -35,16 +39,16 @@ declare module 'fabric-shim' {
         Timestamp
     }
 
-    export function error(msg: Uint8Array): ChaincodeResponse;
+    export function error(msg: Uint8Array): ErrorResponse;
     export function newLogger(name: string): Logger;
     export function start(chaincode: ChaincodeInterface): any;
-    export function success(payload?: Uint8Array): ChaincodeResponse;
+    export function success(payload?: Uint8Array): SuccessResponse;
 
     export class Shim {
-        static error(msg: Uint8Array): ChaincodeResponse;
+        static error(msg: Uint8Array): ErrorResponse;
         static newLogger(name: string): Logger;
         static start(chaincode: ChaincodeInterface): any;
-        static success(payload?: Uint8Array): ChaincodeResponse;
+        static success(payload?: Uint8Array): SuccessResponse;
         static server(chaincode: ChaincodeInterface, serverOpts: ChaincodeServerOpts): ChaincodeServer;
     }
 

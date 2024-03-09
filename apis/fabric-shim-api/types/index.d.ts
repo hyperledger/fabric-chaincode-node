@@ -14,9 +14,21 @@ declare module 'fabric-shim-api' {
 
     interface ChaincodeResponse {
         status: number;
-        message: string;
+        message?: string;
+        payload?: Uint8Array;
+    }
+
+    interface SuccessResponse {
+        status: RESPONSE_CODE.OK;
+        message?: string;
         payload: Uint8Array;
     }
+    
+    interface ErrorResponse {
+        status: RESPONSE_CODE.ERROR;
+        message: string;
+        payload?: Uint8Array;
+    }   
 
     interface ClientIdentity {
         assertAttributeValue(attrName: string, attrValue: string): boolean;
