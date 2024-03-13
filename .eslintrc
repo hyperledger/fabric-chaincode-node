@@ -4,7 +4,7 @@
         "node": true,
         "mocha": true
     },
-	"extends": [ "eslint:recommended", "@rushstack/eslint-config"],
+    "extends": [ "eslint:recommended", "@rushstack/eslint-config"],
     "overrides": [
         {
             "files": ["**/test/typescript/*.ts"],
