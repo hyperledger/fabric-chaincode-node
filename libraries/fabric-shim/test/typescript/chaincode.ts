@@ -40,12 +40,12 @@ class TestTS implements ChaincodeInterface {
 
         if (fcn === 'ThrowError') {
             const err: Error = new Error('Had a problem');
-            return shim.error(Buffer.from(err.message));
+            return shim.error(err.message);
         }
 
         if (fcn === 'ThrowErrorShim') {
             const err: Error = new Error('Had a problem');
-            return Shim.error(Buffer.from(err.message));
+            return Shim.error(err.message);
         }
 
         if (fcn === 'SuccessShim') {
