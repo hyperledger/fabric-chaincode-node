@@ -6,6 +6,7 @@
 */
 {
     "compilerOptions": {
+      "types": ["../../types/"],
       "module": "commonjs",
       "target": "es2017",
       "sourceMap": true,
