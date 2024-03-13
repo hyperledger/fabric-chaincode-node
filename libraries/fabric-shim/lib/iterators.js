@@ -8,7 +8,7 @@
 
 const logger = require('./logger').getLogger('lib/iterators.js');
 
-const { ledger } = require('@hyperledger/fabric-protos');
+const {ledger} = require('@hyperledger/fabric-protos');
 
 /**
  * CommonIterator allows a chaincode to check whether any more result(s)
@@ -111,7 +111,7 @@ class CommonIterator {
                     throw err;
                 }
             }
-            return { done: true };
+            return {done: true};
         }
 
     }

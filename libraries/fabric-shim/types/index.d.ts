@@ -6,8 +6,8 @@
 */
 declare module 'fabric-shim' {
 
-    import { Logger } from 'winston';
-    import { ChannelOptions } from '@grpc/grpc-js'
+    import {Logger} from 'winston';
+    import {ChannelOptions} from '@grpc/grpc-js';
 
     import {
         ChaincodeInterface,
@@ -37,7 +37,7 @@ declare module 'fabric-shim' {
         SplitCompositekey,
         StateQueryResponse,
         Timestamp
-    }
+    };
 
     export function error(msg: string): ErrorResponse;
     export function newLogger(name: string): Logger;
@@ -95,6 +95,8 @@ declare module 'fabric-shim' {
     }
 
     export class ChaincodeStub implements IChaincodeStub {
+        static RESPONSE_CODE: ResponseCode;
+
         getArgs(): string[];
         getStringArgs(): string[];
         getFunctionAndParameters(): { params: string[], fcn: string };
@@ -140,8 +142,6 @@ declare module 'fabric-shim' {
         getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
         getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
         getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
-
-        static RESPONSE_CODE: ResponseCode;
     }
 
     export class KeyEndorsementPolicy {
