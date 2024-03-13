@@ -1,11 +1,19 @@
 {
     "env": {
-
         "es6": true,
         "node": true,
         "mocha": true
     },
-	"extends": "eslint:recommended",
+	"extends": [ "eslint:recommended", "@rushstack/eslint-config"],
+    "overrides": [
+        {
+            "files": ["**/test/typescript/*.ts"],
+            "rules": {
+                "no-unused-vars": "off",
+                "@typescript-eslint/no-unused-vars": "off"
+            }
+        }
+    ],
     "parserOptions": {
         "ecmaVersion": 9,
         "sourceType": "module"
@@ -25,7 +33,7 @@
                 "SwitchCase": 1
             }
         ],
-        "keyword-spacing":"error",
+        "keyword-spacing": "error",
         "linebreak-style": ["error", "unix"],
         "max-len": [
             "error",
@@ -67,6 +75,11 @@
         ],
         "space-infix-ops": ["error"],
         "space-in-parens": ["error", "never"],
-        "yoda": "error"
+        "yoda": "error",
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/explicit-member-accessibility": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/interface-name-prefix": "off",
+        "@typescript-eslint/no-namespace": "off"
     }
 }
