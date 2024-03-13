@@ -5,7 +5,7 @@
 
 */
 declare module 'fabric-shim-api' {
-    import Long = require("long");
+    import Long = require('long');
 
     interface Timestamp {
         seconds: Long;
@@ -23,12 +23,12 @@ declare module 'fabric-shim-api' {
         message?: string;
         payload: Uint8Array;
     }
-    
+
     interface ErrorResponse {
         status: RESPONSE_CODE.ERROR;
         message: string;
         payload?: Uint8Array;
-    }   
+    }
 
     interface ClientIdentity {
         assertAttributeValue(attrName: string, attrValue: string): boolean;
