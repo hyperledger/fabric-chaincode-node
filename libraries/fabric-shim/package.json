@@ -16,7 +16,7 @@
     "update:pbjs": "pbjs -t static-module -p google-protos -p protos $(find google-protos protos -name \"*.proto\" -type f) -o bundle.js",
     "update:pbts": "pbts -o bundle.d.ts bundle.js",
     "update": "npm run update:clean && npm run update:copy && npm run update:pbjs && npm run update:pbts",
-    "lint": "eslint ./lib",
+    "lint": "eslint ./lib ./types ./test/typescript/*.ts --ext .js --ext .ts",
     "build": "npm run lint & npm test 2>&1"
   },
   "repository": {
