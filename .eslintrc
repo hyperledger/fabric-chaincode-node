@@ -12,6 +12,12 @@
                 "no-unused-vars": "off",
                 "@typescript-eslint/no-unused-vars": "off"
             }
+        },
+        {
+            "files": ["**/index.d.ts"],
+            "rules": {
+                "max-len": "warn"
+            }
         }
     ],
     "parserOptions": {
