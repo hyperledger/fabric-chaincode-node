@@ -7,7 +7,7 @@
 
 import * as shim from 'fabric-shim';
 
-import { Shim,
+import {Shim,
     ChaincodeStub,
     Iterators,
     ChaincodeInterface,
@@ -21,9 +21,9 @@ import { Shim,
     KeyEndorsementPolicy,
     ENDORSER_ROLES,
     Timestamp
- } from 'fabric-shim';
+} from 'fabric-shim';
 
-import { Logger } from 'winston';
+import {Logger} from 'winston';
 
 class TestTS implements ChaincodeInterface {
     async Init(stub: ChaincodeStub): Promise<ChaincodeResponse> {
@@ -40,12 +40,12 @@ class TestTS implements ChaincodeInterface {
 
         if (fcn === 'ThrowError') {
             const err: Error = new Error('Had a problem');
-            return shim.error(Buffer.from(err.message));
+            return shim.error(err.message);
         }
 
         if (fcn === 'ThrowErrorShim') {
             const err: Error = new Error('Had a problem');
-            return Shim.error(Buffer.from(err.message));
+            return Shim.error(err.message);
         }
 
         if (fcn === 'SuccessShim') {
@@ -159,10 +159,10 @@ class TestTS implements ChaincodeInterface {
         await historyQuery.close();
         const done: boolean = historyNext.done;
         const keyMod: Iterators.KeyModification = historyNext.value;
-        let isDelete: boolean = keyMod.isDelete;
-        let timestamp: Timestamp = keyMod.timestamp;
-        let txid: string = keyMod.txId;
-        let value: Uint8Array = keyMod.value;
+        const isDelete: boolean = keyMod.isDelete;
+        const timestamp: Timestamp = keyMod.timestamp;
+        const txid: string = keyMod.txId;
+        const value: Uint8Array = keyMod.value;
     }
 
     async testStateQueryIterator(stateQuery: Iterators.StateQueryIterator) {
@@ -170,8 +170,8 @@ class TestTS implements ChaincodeInterface {
         await stateQuery.close();
         const done: boolean = stateNext.done;
         const keyVal: Iterators.KV = stateNext.value;
-        let key: string = keyVal.key;
-        let val: Uint8Array = keyVal.value;
+        const key: string = keyVal.key;
+        const val: Uint8Array = keyVal.value;
     }
 
     async testPrivateData(stub: ChaincodeStub): Promise<void> {
@@ -217,8 +217,8 @@ class TestTS implements ChaincodeInterface {
         const TxTimestamp: Timestamp = stub.getTxTimestamp();
 
         const creator: SerializedIdentity = stub.getCreator();
-        let idbytes: Uint8Array = creator.idBytes;
-        let mspid: string = creator.mspid;
+        const idbytes: Uint8Array = creator.idBytes;
+        const mspid: string = creator.mspid;
 
         const invokeChaincode: ChaincodeResponse = await stub.invokeChaincode('ccid', ['bob', 'duck'], 'channelid');
     }
@@ -239,28 +239,28 @@ class TestTS implements ChaincodeInterface {
     }
 
     testSignedProposal(proposal: ChaincodeProposal.SignedProposal) {
-        let prop: ChaincodeProposal.Proposal = proposal.proposal;
-        let sig: Uint8Array = proposal.signature;
+        const prop: ChaincodeProposal.Proposal = proposal.proposal;
+        const sig: Uint8Array = proposal.signature;
 
-        let hdr: ChaincodeProposal.Header = prop.header;
-        let payload: ChaincodeProposal.ChaincodeProposalPayload = prop.payload;
+        const hdr: ChaincodeProposal.Header = prop.header;
+        const payload: ChaincodeProposal.ChaincodeProposalPayload = prop.payload;
 
-        let cHdr: ChaincodeProposal.ChannelHeader = hdr.channelHeader;
-        let sHdr: ChaincodeProposal.SignatureHeader = hdr.signatureHeader;
+        const cHdr: ChaincodeProposal.ChannelHeader = hdr.channelHeader;
+        const sHdr: ChaincodeProposal.SignatureHeader = hdr.signatureHeader;
 
-        let chId: string = cHdr.channelId;
-        let epoch: number = cHdr.epoch;
-        let timestamp: Timestamp = cHdr.timestamp;
-        let hash: Uint8Array = cHdr.tlsCertHash;
-        let txId: string = cHdr.txId;
-        let type: ChaincodeProposal.HeaderType = cHdr.type;
-        let version: number = cHdr.version;
+        const chId: string = cHdr.channelId;
+        const epoch: number = cHdr.epoch;
+        const timestamp: Timestamp = cHdr.timestamp;
+        const hash: Uint8Array = cHdr.tlsCertHash;
+        const txId: string = cHdr.txId;
+        const type: ChaincodeProposal.HeaderType = cHdr.type;
+        const version: number = cHdr.version;
 
-        let creator: SerializedIdentity = sHdr.creator;
-        let nonce: Uint8Array = sHdr.nonce;
+        const creator: SerializedIdentity = sHdr.creator;
+        const nonce: Uint8Array = sHdr.nonce;
 
-        let input: Uint8Array = payload.input;
-        let map: Map<string, Uint8Array> = payload.transientMap;
+        const input: Uint8Array = payload.input;
+        const map: Map<string, Uint8Array> = payload.transientMap;
     }
 
     testQueryResponseMetadata(metadata: QueryResponseMetadata) {

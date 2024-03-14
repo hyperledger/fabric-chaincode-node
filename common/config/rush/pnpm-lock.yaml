@@ -7423,11 +7423,14 @@ packages:
     dev: false
 
   file:projects/fabric-shim-api.tgz:
-    resolution: {integrity: sha512-XTqk3nknIzx9XDjIwPAqxlcbyVyZuoETwf8eWxffKlp5MOfZWy+IknQAHB23AdOuUtpAg94QVefEIkO1B2NREg==, tarball: file:projects/fabric-shim-api.tgz}
+    resolution: {integrity: sha512-HVtCRnEfr3iMv9+akMNMC144OI++srlpwPTyvSKr9KrQNjmIwKtEmdNOqrG5532krmUPdn+V6iFnd22PP3bc1Q==, tarball: file:projects/fabric-shim-api.tgz}
     name: '@rush-temp/fabric-shim-api'
     version: 0.0.0
     dependencies:
       '@types/long': 4.0.2
+      eslint: 6.8.0
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   file:projects/fabric-shim-docs.tgz:

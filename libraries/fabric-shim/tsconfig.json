@@ -5,21 +5,20 @@
  */
 {
   "compilerOptions": {
+    "types": ["./types/"],
     "alwaysStrict": true,
     "module": "commonjs",
     "declaration": true,
-    "outDir": "lib",
-    "rootDir": "src",
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
     "lib": [
       "esnext",
-      "esnext.asynciterable"
     ]
   },
   "include": [
-    "src/**/*"
+    "lib/**/*",
+    "test/**/*"
   ],
   "exclude": [
     "node_modules/**/*"

@@ -6,8 +6,8 @@
 */
 
 declare module 'fabric-contract-api' {
-    import { Logger } from 'winston';
-    import { ChaincodeStub, ClientIdentity } from 'fabric-shim-api';
+    import {Logger} from 'winston';
+    import {ChaincodeStub, ClientIdentity} from 'fabric-shim-api';
 
     export class Context {
         stub: ChaincodeStub;
@@ -36,8 +36,8 @@ declare module 'fabric-contract-api' {
 
 
     export class JSONSerializer {
-        toBuffer(result: any,schema:any,loggerPrefix?:string): Buffer;
-        fromBuffer(data: Buffer,schema:any,loggerPrefix?:string): any;
+        toBuffer(result: any, schema:any, loggerPrefix?:string): Buffer;
+        fromBuffer(data: Buffer, schema:any, loggerPrefix?:string): any;
     }
 
     export function Transaction(commit?: boolean): (target: any, propertyKey: string | symbol) => void;

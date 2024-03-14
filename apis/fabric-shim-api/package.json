@@ -9,6 +9,7 @@
     "url": "https://github.com/hyperledger/fabric-chaincode-node"
   },
   "scripts": {
+    "lint": "eslint ./types/ --ext .ts",
     "build": "echo No Build needed"
   },
   "keywords": [
@@ -23,6 +24,7 @@
   "types": "./types/index.d.ts",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/long": "^4.0.1"
+    "@types/long": "^4.0.1",
+    "eslint": "^6.6.0"
   }
 }
