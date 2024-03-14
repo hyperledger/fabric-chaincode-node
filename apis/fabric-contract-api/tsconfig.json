@@ -3,24 +3,24 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
- {
-	"compilerOptions": {
+{
+  "compilerOptions": {
     "types": ["./types/"],
-		"alwaysStrict": true,
-		"module": "commonjs",
-		"declaration": true,
-		"sourceMap": true,
-		"strict": true,
-		"target": "es2017",
-		"lib": [
-			"esnext",
-		]
-	},
-	"include": [
-		"lib/**/*",
-		"test/**/*"
-	],
-	"exclude": [
-		"node_modules/**/*"
+    "alwaysStrict": true,
+    "module": "commonjs",
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2017",
+    "lib": [
+      "esnext",
+    ]
+  },
+  "include": [
+    "lib/**/*",
+    "test/**/*"
+  ],
+  "exclude": [
+    "node_modules/**/*"
   ]
 }
