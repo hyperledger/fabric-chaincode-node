@@ -16,9 +16,8 @@ chai.use(require('chai-things'));
 const sinon = require('sinon');
 const rewire = require('rewire');
 
-const fs = require('fs-extra');
 const mockery = require('mockery');
-const path = require('path');
+const path = require('node:path');
 
 // class under test
 const pathToRoot = '../../../..';
@@ -81,7 +80,7 @@ describe('bootstrap.js', () => {
         mockery.registerMock('../cmds/startCommand.js', mockCmd);
         mockery.registerMock('../cmds/serverCommand.js', mockCmd);
         mockery.registerMock('./chaincodefromcontract', MockChaincodeFromContract);
-        mockery.registerMock('fs-extra', {pathExists:pathExistsStub, readFileSync : readFileStub});
+        mockery.registerMock('node:fs', {promises: {access: pathExistsStub}, readFileSync: readFileStub});
 
         Bootstrap = rewire(path.join(pathToRoot, 'fabric-shim/lib/contract-spi/bootstrap'));
     });
@@ -293,7 +292,7 @@ describe('bootstrap.js', () => {
     describe('#getMetadata', () => {
 
         it ('should handle when there are files available in META-INF dir', async () => {
-            pathExistsStub.returns(true);
+            pathExistsStub.resolves();
             Bootstrap.loadAndValidateMetadata = sandbox.stub().resolves({'hello':'world'});
 
             const metadata = await Bootstrap.getMetadata('fake path');
@@ -303,8 +302,8 @@ describe('bootstrap.js', () => {
         });
 
         it ('should handle when there are files available in contract-metadata dir', async () => {
-            pathExistsStub.onFirstCall().returns(false);
-            pathExistsStub.onSecondCall().returns(true);
+            pathExistsStub.onFirstCall().rejects();
+            pathExistsStub.onSecondCall().resolves();
             Bootstrap.loadAndValidateMetadata = sandbox.stub().resolves({'hello':'world'});
 
             const metadata = await Bootstrap.getMetadata('fake path');
@@ -314,7 +313,7 @@ describe('bootstrap.js', () => {
         });
 
         it ('should handle when files not available', async () => {
-            pathExistsStub.returns(false);
+            pathExistsStub.rejects();
 
             const metadata = await Bootstrap.getMetadata('fake path');
 
