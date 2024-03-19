@@ -8,9 +8,9 @@
 const {series} = require('gulp');
 const delay = require('delay');
 
-const util = require('util');
-const fs = require('fs-extra');
-const path = require('path');
+const util = require('node:util');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const { shell: runcmds , getTLSArgs, getPeerAddresses } = require('toolchain');
 const Ajv = require('ajv');

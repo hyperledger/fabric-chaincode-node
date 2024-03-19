@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 'use strict';
-const path = require('path');
-const fs = require('fs-extra');
+const path = require('node:path');
+const {promises: fs} = require('node:fs');
 const ChaincodeFromContract = require('../../../contract-spi/chaincodefromcontract.js');
 const Bootstrap = require('../../../contract-spi/bootstrap.js');
 const Logger = require('../../../logger');
