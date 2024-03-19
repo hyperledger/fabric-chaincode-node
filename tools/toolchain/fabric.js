@@ -6,9 +6,9 @@
 'use strict';
 /* eslint-disable no-console*/
 const {series} = require('gulp');
-const util = require('util');
-const fs = require('fs-extra');
-const path = require('path');
+const util = require('node:util');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const delay = require('delay');
 const getTLSArgs = require('./utils').getTLSArgs;
