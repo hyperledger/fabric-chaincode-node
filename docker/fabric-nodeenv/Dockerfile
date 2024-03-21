@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-ARG NODE_VER=18
-FROM node:${NODE_VER}-alpine
+FROM node:20-alpine
 RUN apk add --no-cache \
 	make \
 	python3 \

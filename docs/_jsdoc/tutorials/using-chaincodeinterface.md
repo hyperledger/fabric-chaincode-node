@@ -60,8 +60,7 @@ Finally, update the "start" script in package.json to "node mychaincode.js":
 	"version": "1.0.0",
 	"description": "My first exciting chaincode implemented in node.js",
 	"engines": {
-		"node": "^12.16.1",
-		"npm": "^6.4.1"
+		"node": "^>=18"
 	},
         "scripts": { "start" : "node mychaincode.js" },
 	"engine-strict": true,
