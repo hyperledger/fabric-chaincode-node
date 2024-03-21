@@ -15,9 +15,6 @@ jobs:
       BUILD_DATE: ${{ steps.builddata.outputs.BUILD_DATE }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
       - name: BuildData
         id: builddata
         run: |
@@ -41,7 +38,6 @@ jobs:
 
   build:
     runs-on: ubuntu-20.04
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,19 +57,16 @@ jobs:
         with:
           name: TestResults
           path: ./**/test-results.xml
-
       - name: Build Binaries
         run: |
           set -xev
           node common/scripts/install-run-rush.js publish --include-all --pack --release-folder tgz --publish
           docker image save hyperledger/fabric-nodeenv | gzip > fabric-nodeenv.tar.gz
-
       - uses: actions/upload-artifact@v4
         name: Binaries
         with:
           name: node-tgzs
           path: tgz/
-
       - uses: actions/upload-artifact@v4
         name: Docker
         with:
@@ -88,7 +81,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-
       - uses: actions/download-artifact@v4
         with:
           name: nodeenv-docker-image
@@ -97,7 +89,6 @@ jobs:
         with:
           name: node-tgzs
           path: build/
-
       - name: Setup the fv build
         env:
           PIPELINE_WORKSPACE: workspace
@@ -111,7 +102,6 @@ jobs:
           node common/scripts/install-run-rush.js update          # should the tests need 'building' this will need to go here
           node common/scripts/install-run-rush.js start-fabric
           node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
-
       - name: Run the FV Tests
         run: |
           set -xev
@@ -120,7 +110,6 @@ jobs:
 
           node common/scripts/install-run-rush.js test:fv --verbose
           node common/scripts/install-run-rush.js test:e2e --verbose
-
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         name: TestLogs

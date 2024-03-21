@@ -2,7 +2,7 @@
   "name": "chaincode",
   "description": "Chaincode testing cross chaincode functionality",
   "engines": {
-    "node": "^18.0.0"
+    "node": ">=18"
   },
   "scripts": {
     "start": "set -x && CORE_CHAINCODE_LOGGING_LEVEL=debug fabric-chaincode-node start"

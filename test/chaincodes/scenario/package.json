@@ -2,7 +2,7 @@
   "name": "chaincode",
   "description": "My first exciting chaincode implemented in node.js",
   "engines": {
-    "node": "^18.0.0"
+    "node": ">=18"
   },
   "scripts": {
     "start": "fabric-chaincode-node start"
