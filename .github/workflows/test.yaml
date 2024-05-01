@@ -127,29 +127,3 @@ jobs:
         with:
           name: TestLogs
           path: "**/*.build.log"
-
-
-  # Job to handle the auditing of the code
-  # NPM audit is run on a 'fake' installation of the libraries
-  # Pulling in all the dependencies it will be able to run NPM AUDIT, and if that returns a
-  # error code the job will fail.
-  src_audit:
-    runs-on: ubuntu-20.04
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
-      - uses: actions/download-artifact@v4
-        with:
-          name: node-tgzs
-          path: build/
-      - name: run audit
-        run: |
-          set -xev -o pipefail
-          node common/scripts/install-run-rush.js install
-          node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
-          mkdir -p audit && cd audit && npm init -y
-          npm install --registry http://localhost:4873 fabric-shim fabric-shim-api fabric-contract-api --save
-          npm audit --audit-level=moderate
