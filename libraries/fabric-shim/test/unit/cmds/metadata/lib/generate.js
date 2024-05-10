@@ -7,8 +7,8 @@
 /* eslint-disable no-console */
 'use strict';
 
-const fs = require('fs-extra');
-const path = require('path');
+const {promises: fs} = require('node:fs');
+const path = require('node:path');
 
 require('chai').should();
 const chai = require('chai');
@@ -90,7 +90,7 @@ describe('generate', () => {
             getMetadataStub.restore();
             getInfoFromContractStub.restore();
             if (args.file) {
-                await fs.remove(args.file);
+                await fs.rm(args.file, {force: true});
             }
         });
 

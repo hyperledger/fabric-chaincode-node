@@ -5,10 +5,10 @@
 */
 'use strict';
 
-const path = require('path');
+const path = require('node:path');
 const yargs = require('yargs');
 const Ajv = require('ajv');
-const fs = require('fs-extra');
+const fs = require('node:fs');
 
 const shim = require('../chaincode');
 const ChaincodeFromContract = require('./chaincodefromcontract');
@@ -109,11 +109,11 @@ class Bootstrap {
         let metadata = {};
         const modPath = path.resolve(process.cwd(), modulePath);
         let metadataPath = path.resolve(modPath, 'META-INF', 'metadata.json');
-        let pathCheck = await fs.pathExists(metadataPath);
+        let pathCheck = await fs.promises.access(metadataPath).then(() => true, () => false);
 
         if (!pathCheck) {
             metadataPath = path.resolve(modPath, 'contract-metadata', 'metadata.json');
-            pathCheck = await fs.pathExists(metadataPath);
+            pathCheck = await fs.promises.access(metadataPath).then(() => true, () => false);
         }
 
         if (pathCheck) {
