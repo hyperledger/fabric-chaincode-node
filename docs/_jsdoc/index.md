@@ -158,8 +158,8 @@ To run a chaincode with the `fabric-contract` API as an external service, simply
 ```
 
 When `fabric-chaincode-node server` is used, the following options should be set as either arguments or environment variables:
-* **CORE_CHAINCODE_ID (--chaincode-id)**: See **CCID** in the Go chaincode above.
-* **CORE_CHAINCODE_ADDRESS (--chaincode-address)**: See **Address** in the Go chaincode above.
+* **CORE_CHAINCODE_ID (--chaincode-id)**
+* **CORE_CHAINCODE_ADDRESS (--chaincode-address)**
 
 If TLS is enabled, the following additional options are required:
 * **CORE_CHAINCODE_TLS_CERT_FILE (--chaincode-tls-cert-file)**: path to a certificate
