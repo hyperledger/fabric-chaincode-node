@@ -12,7 +12,7 @@ The `fabric-shim` provides the *chaincode interface*, a lower level API for impl
 
 To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
-A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/latest/developapps/smartcontract.html).
+A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/release-2.3/developapps/smartcontract.html).
 
 ## Contract Interface
 
@@ -122,6 +122,59 @@ const Chaincode = class {
 Start the chaincode process and listen for incoming endorsement requests:
 ```javascript
 shim.start(new Chaincode());
+```
+
+To run chaincode as an external service, fabric-shim provides the `shim.server` API. If you are using contract APIs, you may want to use the `server` command provided by `fabric-chaincode-node` CLI to run a contract in the external service mode.
+
+The following is a sample chaincode using `fabric-shim`:
+```javascript
+const shim = require('fabric-shim');
+
+class SimpleChaincode extends shim.ChaincodeInterface {
+        async Init(stub) {
+                // ... Init code
+        }
+        async Invoke(stub) {
+                // ... Invoke code
+        }
+}
+
+const server = shim.server(new SimpleChaincode(), {
+        ccid: "mycc:fcbf8724572d42e859a7dd9a7cd8e2efb84058292017df6e3d89178b64e6c831",
+        address: "0.0.0.0:9999"
+});
+
+server.start();
+```
+
+To run a chaincode with the `fabric-contract` API as an external service, simply use `fabric-chaincode-node server` instead of `fabric-chaincode-node start`. Here is a sample for `package.json`:
+```javascript
+{
+        "scripts": {
+                "start": "fabric-chaincode-node server"
+        },
+        ...
+}
+```
+
+When `fabric-chaincode-node server` is used, the following options should be set as either arguments or environment variables:
+* **CORE_CHAINCODE_ID (--chaincode-id)**: See **CCID** in the Go chaincode above.
+* **CORE_CHAINCODE_ADDRESS (--chaincode-address)**: See **Address** in the Go chaincode above.
+
+If TLS is enabled, the following additional options are required:
+* **CORE_CHAINCODE_TLS_CERT_FILE (--chaincode-tls-cert-file)**: path to a certificate
+* **CORE_CHAINCODE_TLS_KEY_FILE (--chaincode-tls-key-file)**: path to a private key
+
+When mutual TLS is enabled, **CORE_CHAINCODE_TLS_CLIENT_CACERT_FILE (--chaincode-tls-client-cacert-file)** option should be set to specify the path to the CA certificate for acceptable client certificates.
+
+There are other optional arguments can be set to pass gRPC options which will be used to override the default values. Here is a sample for ``package.json`:
+```javascript
+{
+       "scripts": {
+                "start": "fabric-chaincode-node server --chaincode-address=localhost:7100 --chaincode-id=<ccid> --grpc.max_send_message_length 100000000 --grpc.max_receive_message_length 100000000"
+        },
+        ...
+}
 ```
 
 ## Support
