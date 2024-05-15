@@ -167,7 +167,8 @@ If TLS is enabled, the following additional options are required:
 
 When mutual TLS is enabled, **CORE_CHAINCODE_TLS_CLIENT_CACERT_FILE (--chaincode-tls-client-cacert-file)** option should be set to specify the path to the CA certificate for acceptable client certificates.
 
-There are other optional arguments can be set to pass gRPC options which will be used to override the default values. Here is a sample for ``package.json`:
+There are other optional arguments can be set to pass gRPC options which will be used to override the default values. Here is a sample for `package.json`:
+
 ```javascript
 {
        "scripts": {
