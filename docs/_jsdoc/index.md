@@ -129,19 +129,30 @@ To run chaincode as an external service, fabric-shim provides the `shim.server` 
 The following is a sample chaincode using `fabric-shim`:
 ```javascript
 const shim = require('fabric-shim');
+const yargs = require('yargs');
 
 class SimpleChaincode extends shim.ChaincodeInterface {
-        async Init(stub) {
-                // ... Init code
-        }
-        async Invoke(stub) {
-                // ... Invoke code
-        }
+    async Init(stub) {
+        // ... Init code
+    }
+
+    async Invoke(stub) {
+        // ... Invoke code
+    }
 }
 
+const argv = yargs(process.argv.slice(2))
+    .option('chaincode-address', {
+        alias: 'ccid'
+    })
+    .option('chaincode-id', {
+        alias: 'address'
+    })
+    .argv;
+
 const server = shim.server(new SimpleChaincode(), {
-        ccid: "mycc:fcbf8724572d42e859a7dd9a7cd8e2efb84058292017df6e3d89178b64e6c831",
-        address: "0.0.0.0:9999"
+    ccid: argv['chaincode-id'],
+    address: argv['chaincode-address']
 });
 
 server.start();
@@ -165,7 +176,7 @@ If TLS is enabled, the following additional options are required:
 * **CORE_CHAINCODE_TLS_CERT_FILE (--chaincode-tls-cert-file)**: path to a certificate
 * **CORE_CHAINCODE_TLS_KEY_FILE (--chaincode-tls-key-file)**: path to a private key
 
-When mutual TLS is enabled, **CORE_CHAINCODE_TLS_CLIENT_CACERT_FILE (--chaincode-tls-client-cacert-file)** option should be set to specify the path to the CA certificate for acceptable client certificates.
+When mutual TLS is enabled, **CORE_CHAINCODE_TLS_CLIENT_CACERT_FILE (--chaincode-tls-client-cacert-file)** option should be set to specify the path to the CA certificate for acceptable client certific
 
 There are other optional arguments can be set to pass gRPC options which will be used to override the default values. Here is a sample for `package.json`:
 
@@ -176,6 +187,26 @@ There are other optional arguments can be set to pass gRPC options which will be
         },
         ...
 }
+```
+
+The valid options are as listed below:
+```
+      --chaincode-address  [string] [required]
+	  --chaincode-id  [string] [required]
+      --grpc.max_send_message_length  [number] [default: -1]
+      --grpc.max_receive_message_length  [number] [default: -1]
+      --grpc.keepalive_time_ms  [number] [default: 110000]
+      --grpc.http2.min_time_between_pings_ms  [number] [default: 110000]
+      --grpc.keepalive_timeout_ms  [number] [default: 20000]
+      --grpc.http2.max_pings_without_data  [number] [default: 0]
+      --grpc.keepalive_permit_without_calls  [number] [default: 1]
+      --chaincode-tls-cert-file  [string]
+      --chaincode-tls-cert-path  [string]
+      --chaincode-tls-key-file  [string]
+      --chaincode-tls-key-path  [string]
+      --chaincode-tls-client-cacert-file  [string]
+      --chaincode-tls-client-cacert-path  [string]
+      --module-path  [string]
 ```
 
 ## Support
