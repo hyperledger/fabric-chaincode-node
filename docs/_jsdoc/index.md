@@ -188,7 +188,7 @@ There are other optional arguments can be set to pass gRPC options which will be
         ...
 }
 ```
-This would increase the grpc limit from the default of 4MB to 100MB. This gRPC parameter overirde feature has been added in node chaincode v2.5.4.
+This would increase the grpc limit from the default of 4MB to 100MB. This gRPC parameter override option has been added in node chaincode v2.5.4.
 
 The valid options are as listed below:
 ```
