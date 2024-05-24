@@ -124,41 +124,8 @@ Start the chaincode process and listen for incoming endorsement requests:
 shim.start(new Chaincode());
 ```
 
-To run chaincode as an external service, fabric-shim provides the `shim.server` API. If you are using contract APIs, you may want to use the `server` command provided by `fabric-chaincode-node` CLI to run a contract in the external service mode.
-
-The following is a sample chaincode using `fabric-shim`:
-```javascript
-const shim = require('fabric-shim');
-const yargs = require('yargs');
-
-class SimpleChaincode extends shim.ChaincodeInterface {
-    async Init(stub) {
-        // ... Init code
-    }
-
-    async Invoke(stub) {
-        // ... Invoke code
-    }
-}
-
-const argv = yargs(process.argv.slice(2))
-    .option('chaincode-address', {
-        alias: 'ccid'
-    })
-    .option('chaincode-id', {
-        alias: 'address'
-    })
-    .argv;
-
-const server = shim.server(new SimpleChaincode(), {
-    ccid: argv['chaincode-id'],
-    address: argv['chaincode-address']
-});
-
-server.start();
-```
-
-To run a chaincode with the `fabric-contract` API as an external service, simply use `fabric-chaincode-node server` instead of `fabric-chaincode-node start`. Here is a sample for `package.json`:
+## Run chaincode as a external service
+To run chaincode as an external service, fabric-shim provides the `shim.server` API. If you are using contract APIs, you may want to use the `server` command provided by `fabric-chaincode-node` CLI to run a contract in the external service mode. To run a chaincode with the `fabric-contract` API as an external service, simply use `fabric-chaincode-node server` instead of `fabric-chaincode-node start`. Here is a sample for `package.json`:
 ```javascript
 {
         "scripts": {
