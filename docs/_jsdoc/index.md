@@ -12,7 +12,7 @@ The `fabric-shim` provides the *chaincode interface*, a lower level API for impl
 
 To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
-A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/latest/developapps/smartcontract.html).
+A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/release-2.3/developapps/smartcontract.html).
 
 ## Contract Interface
 
@@ -122,6 +122,59 @@ const Chaincode = class {
 Start the chaincode process and listen for incoming endorsement requests:
 ```javascript
 shim.start(new Chaincode());
+```
+
+## Run chaincode as a external service
+To run chaincode as an external service, fabric-shim provides the `shim.server` API. If you are using contract APIs, you may want to use the `server` command provided by `fabric-chaincode-node` CLI to run a contract in the external service mode. To run a chaincode with the `fabric-contract` API as an external service, simply use `fabric-chaincode-node server` instead of `fabric-chaincode-node start`. Here is a sample for `package.json`:
+```javascript
+{
+        "scripts": {
+                "start": "fabric-chaincode-node server"
+        },
+        ...
+}
+```
+
+When `fabric-chaincode-node server` is used, the following options should be set as either arguments or environment variables:
+* **CORE_CHAINCODE_ID (--chaincode-id)**
+* **CORE_CHAINCODE_ADDRESS (--chaincode-address)**
+
+If TLS is enabled, the following additional options are required:
+* **CORE_CHAINCODE_TLS_CERT_FILE (--chaincode-tls-cert-file)**: path to a certificate
+* **CORE_CHAINCODE_TLS_KEY_FILE (--chaincode-tls-key-file)**: path to a private key
+
+When mutual TLS is enabled, **CORE_CHAINCODE_TLS_CLIENT_CACERT_FILE (--chaincode-tls-client-cacert-file)** option should be set to specify the path to the CA certificate for acceptable client certific
+
+There are other optional arguments can be set to pass gRPC options which will be used to override the default values. Here is a sample for `package.json`:
+
+```javascript
+{
+       "scripts": {
+                "start": "fabric-chaincode-node server --chaincode-address=localhost:7100 --chaincode-id=<ccid> --grpc.max_send_message_length 100000000 --grpc.max_receive_message_length 100000000"
+        },
+        ...
+}
+```
+This would increase the grpc limit from the default of 4MB to 100MB. This gRPC parameter override option has been added in node chaincode v2.5.4.
+
+The valid options are as listed below:
+```
+      --chaincode-address  [string] [required]
+	  --chaincode-id  [string] [required]
+      --grpc.max_send_message_length  [number] [default: -1]
+      --grpc.max_receive_message_length  [number] [default: -1]
+      --grpc.keepalive_time_ms  [number] [default: 110000]
+      --grpc.http2.min_time_between_pings_ms  [number] [default: 110000]
+      --grpc.keepalive_timeout_ms  [number] [default: 20000]
+      --grpc.http2.max_pings_without_data  [number] [default: 0]
+      --grpc.keepalive_permit_without_calls  [number] [default: 1]
+      --chaincode-tls-cert-file  [string]
+      --chaincode-tls-cert-path  [string]
+      --chaincode-tls-key-file  [string]
+      --chaincode-tls-key-path  [string]
+      --chaincode-tls-client-cacert-file  [string]
+      --chaincode-tls-client-cacert-path  [string]
+      --module-path  [string]
 ```
 
 ## Support
