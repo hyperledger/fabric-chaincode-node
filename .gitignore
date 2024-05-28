@@ -14,6 +14,7 @@ yarn.lock
 **/typescript/*.js.map
 
 fabric*.tgz
+install-fabric.sh
 
 libraries/fabric-ledger/lib
 
@@ -28,6 +29,7 @@ common/temp/**
 **/.rush/temp/**
 **/*.build.error.log
 **/*.build.log
+**/*.test_fv.log
 
 package-deps.json
 test-results.xml
