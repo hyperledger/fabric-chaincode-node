@@ -10,11 +10,11 @@
   "main": "index.js",
   "engine-strict": true,
   "engineStrict": true,
-  "version": "2.5.5",
+  "version": "2.5.6",
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-shim": "2.5.5",
-    "fabric-contract-api": "2.5.5"
+    "fabric-shim": "2.5.6",
+    "fabric-contract-api": "2.5.6"
   }
 }
