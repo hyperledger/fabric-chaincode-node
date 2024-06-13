@@ -67,7 +67,7 @@ Finally, update the "start" script in package.json to "node mychaincode.js":
 	"engineStrict": true,
 	"license": "Apache-2.0",
 	"dependencies": {
-		"fabric-shim": "2.5.0"
+		"fabric-shim": "~2.5"
 	}
 }
 ```
