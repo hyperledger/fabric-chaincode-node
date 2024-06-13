@@ -1,7 +1,7 @@
 lockfileVersion: '6.0'
 
 settings:
-  autoInstallPeers: true
+  autoInstallPeers: false
   excludeLinksFromLockfile: false
 
 dependencies:
@@ -9,8 +9,8 @@ dependencies:
     specifier: ^1.2.1
     version: 1.2.1
   '@grpc/grpc-js':
-    specifier: 1.8.15
-    version: 1.8.15
+    specifier: ~1.10.9
+    version: 1.10.9
   '@grpc/proto-loader':
     specifier: ^0.6.6
     version: 0.6.11
@@ -453,12 +453,12 @@ packages:
       tweetnacl: 1.0.3
     dev: false
 
-  /@grpc/grpc-js@1.8.15:
-    resolution: {integrity: sha512-H2Bu/w6+oQ58DsRbQol66ERBk3V5ZIak/z/MDx0T4EgDnJWps807I6BvTjq0v6UvZtOcLO+ur+Q9wvniqu3OJA==}
-    engines: {node: ^8.13.0 || >=10.10.0}
+  /@grpc/grpc-js@1.10.9:
+    resolution: {integrity: sha512-5tcgUctCG0qoNyfChZifz2tJqbRbXVO9J7X6duFcOjY3HUNCxg5D0ZCK7EP9vIcZ0zRpLU9bWkyCqVCLZ46IbQ==}
+    engines: {node: '>=12.10.0'}
     dependencies:
-      '@grpc/proto-loader': 0.7.4
-      '@types/node': 16.11.33
+      '@grpc/proto-loader': 0.7.13
+      '@js-sdsl/ordered-map': 4.4.2
     dev: false
 
   /@grpc/proto-loader@0.6.11:
@@ -473,16 +473,15 @@ packages:
       yargs: 16.2.0
     dev: false
 
-  /@grpc/proto-loader@0.7.4:
-    resolution: {integrity: sha512-MnWjkGwqQ3W8fx94/c1CwqLsNmHHv2t0CFn+9++6+cDphC1lolpg9M2OU0iebIjK//pBNX9e94ho+gjx6vz39w==}
+  /@grpc/proto-loader@0.7.13:
+    resolution: {integrity: sha512-AiXO/bfe9bmxBjxxtYxFAXGZvMaN5s8kO+jBHAJCON8rJoB5YS/D6X7ZNc6XQkuHNmyl4CYaMI1fJ/Gn27RGGw==}
     engines: {node: '>=6'}
     hasBin: true
     dependencies:
-      '@types/long': 4.0.2
       lodash.camelcase: 4.3.0
-      long: 4.0.0
-      protobufjs: 7.1.2
-      yargs: 16.2.0
+      long: 5.2.3
+      protobufjs: 7.3.2
+      yargs: 17.7.2
     dev: false
 
   /@humanwhocodes/config-array@0.5.0:
@@ -503,9 +502,17 @@ packages:
   /@hyperledger/fabric-protos@0.1.0-dev.2300102001.1:
     resolution: {integrity: sha512-MtVXncAQz09PYOcFZUB2QbS9eVwbSGnULPuZKqFr9iScbasG194QyN6Tq8cl+kthQGSoBQORyjCIbrGIaN8EFQ==}
     dependencies:
-      '@grpc/grpc-js': 1.8.15
+      '@grpc/grpc-js': 1.10.9
       '@types/google-protobuf': 3.15.6
       google-protobuf: 3.20.1
+    dev: false
+
+  /@hyperledger/fabric-protos@0.2.1:
+    resolution: {integrity: sha512-qjm0vIQIfCall804tWDeA8p/mUfu14sl5Sj+PbOn2yDKJq+7ThoIhNsLAqf+BCxUfqsoqQq6AojhqQeTFyOOqg==}
+    engines: {node: '>=14.15.0'}
+    dependencies:
+      '@grpc/grpc-js': 1.10.9
+      google-protobuf: 3.21.2
     dev: false
 
   /@istanbuljs/load-nyc-config@1.1.0:
@@ -551,6 +558,10 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.0.6
       '@jridgewell/sourcemap-codec': 1.4.12
+    dev: false
+
+  /@js-sdsl/ordered-map@4.4.2:
+    resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
     dev: false
 
   /@microsoft/tsdoc-config@0.16.1:
@@ -602,7 +613,7 @@ packages:
     dev: false
 
   /@protobufjs/pool@1.1.0:
-    resolution: {integrity: sha1-Cf0V8tbTq/qbZbw2ZQbWrXhG/1Q=}
+    resolution: {integrity: sha512-0kELaGSIDBKvcgS4zkjz1PeddatrjYcmMWOlAuAPwAeccUrPHdUqo/J6LiymHHEiJT5NrF1UVwxY14f+fy4WQw==}
     dev: false
 
   /@protobufjs/utf8@1.1.0:
@@ -1697,6 +1708,15 @@ packages:
 
   /cliui@7.0.4:
     resolution: {integrity: sha512-OcRE68cOsVMXp1Yvonl/fzkQOyjLSu/8bhPDfQt0e0/Eb283TKP20Fs2MqoPsr9SwA595rRCA+QMzYc9nBP+JQ==}
+    dependencies:
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      wrap-ansi: 7.0.0
+    dev: false
+
+  /cliui@8.0.1:
+    resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
+    engines: {node: '>=12'}
     dependencies:
       string-width: 4.2.3
       strip-ansi: 6.0.1
@@ -3235,6 +3255,10 @@ packages:
     resolution: {integrity: sha512-XMf1+O32FjYIV3CYu6Tuh5PNbfNEU5Xu22X+Xkdb/DUexFlCzhvv7d5Iirm4AOwn8lv4al1YvIhzGrg2j9Zfzw==}
     dev: false
 
+  /google-protobuf@3.21.2:
+    resolution: {integrity: sha512-3MSOYFO5U9mPGikIYCzK0SaThypfGgS6bHqrUGXG3DPHCrb+txNqeEcns1W0lkGfk0rCyNXm7xB9rMxnCiZOoA==}
+    dev: false
+
   /graceful-fs@4.1.15:
     resolution: {integrity: sha512-6uHUhOPEBgQ24HM+r6b/QwWfZq+yiFcipKFrOFiBEnWdy5sdzYoi+pJeQaPI5qOLRFqWmAXUPQNsielzdLoecA==}
     dev: false
@@ -4247,14 +4271,6 @@ packages:
     hasBin: true
     dev: false
 
-  /jsonfile@6.1.0:
-    resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==}
-    dependencies:
-      universalify: 2.0.0
-    optionalDependencies:
-      graceful-fs: 4.2.10
-    dev: false
-
   /jsprim@1.4.2:
     resolution: {integrity: sha512-P2bSOMAc/ciLz6DzgjVlGJP9+BrJWu5UDGK70C2iweC5QBIeFf0ZXRvGjEj2uYgrY2MkAAhsSWHDWlFtEroZWw==}
     engines: {node: '>=0.6.0'}
@@ -5004,6 +5020,7 @@ packages:
 
   /npmlog@4.1.2:
     resolution: {integrity: sha512-2uUqazuKlTaSI/dC8AzicUck7+IrEaOnN/e0jd3Xtt1KcGpwx30v50mL7oPyr/h9bL3E4aZccVwpwP+5W9Vjkg==}
+    deprecated: This package is no longer supported.
     requiresBuild: true
     dependencies:
       are-we-there-yet: 1.1.7
@@ -5591,8 +5608,8 @@ packages:
       long: 4.0.0
     dev: false
 
-  /protobufjs@7.1.2:
-    resolution: {integrity: sha512-4ZPTPkXCdel3+L81yw3dG6+Kq3umdWKh7Dc7GW/CpNk4SX3hK58iPCWeCyhVTDrbkNeKrYNZ7EojM5WDaEWTLQ==}
+  /protobufjs@7.3.2:
+    resolution: {integrity: sha512-RXyHaACeqXeqAKGLDl68rQKbmObRsTIn4TYVUUug1KfS47YWCo5MacGITEryugIgZqORCvJWEk4l449POg5Txg==}
     engines: {node: '>=12.0.0'}
     requiresBuild: true
     dependencies:
@@ -6881,11 +6898,6 @@ packages:
       through2-filter: 3.0.0
     dev: false
 
-  /universalify@2.0.0:
-    resolution: {integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==}
-    engines: {node: '>= 10.0.0'}
-    dev: false
-
   /unset-value@1.0.0:
     resolution: {integrity: sha1-g3aHP30jNRef+x5vw6jtDfyKtVk=}
     engines: {node: '>=0.10.0'}
@@ -7214,6 +7226,11 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
+  /yargs-parser@21.1.1:
+    resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
+    engines: {node: '>=12'}
+    dev: false
+
   /yargs-parser@5.0.1:
     resolution: {integrity: sha512-wpav5XYiddjXxirPoCTUPbqM0PXvJ9hiBMvuJgInvo4/lAOTZzUprArw17q2O1P2+GHhbBr18/iQwjL5Z9BqfA==}
     dependencies:
@@ -7298,6 +7315,19 @@ packages:
       yargs-parser: 21.0.1
     dev: false
 
+  /yargs@17.7.2:
+    resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
+    engines: {node: '>=12'}
+    dependencies:
+      cliui: 8.0.1
+      escalade: 3.1.1
+      get-caller-file: 2.0.5
+      require-directory: 2.1.1
+      string-width: 4.2.3
+      y18n: 5.0.8
+      yargs-parser: 21.1.1
+    dev: false
+
   /yargs@7.1.2:
     resolution: {integrity: sha512-ZEjj/dQYQy0Zx0lgLMLR8QuaqTihnxirir7EwUHp1Axq4e3+k8jXU5K0VLbNvedv1f4EWtBonDIZm0NUr+jCcA==}
     dependencies:
@@ -7327,7 +7357,7 @@ packages:
     dev: false
 
   file:projects/fabric-contract-api.tgz:
-    resolution: {integrity: sha512-ZHcr/5E0Fb6aQKnwQZYW9EiU0uHhnGfeNz7fkO41Uj4W2J3t6EEhtCz2ngzxZOQMXPQcRFdT1iVh2n9CJsIDtw==, tarball: file:projects/fabric-contract-api.tgz}
+    resolution: {integrity: sha512-Gtud5ZpAO3hknQwdi3U0JJOTXxNO2pM8PaTTB45U0wVv+UR56HKekg0x6a71vCKiB417IPAmsBXVhw18YvWBvQ==, tarball: file:projects/fabric-contract-api.tgz}
     name: '@rush-temp/fabric-contract-api'
     version: 0.0.0
     dependencies:
@@ -7356,7 +7386,7 @@ packages:
     dev: false
 
   file:projects/fabric-e2e-tests.tgz:
-    resolution: {integrity: sha512-w33EZ6Jg+zcUUDFTNXhVcMV5xLRldBtWnXc5NYRVMi8DBYG+WO4Tkd7ksFlScxhZQUhVtzwJJVAt9Wi6R3skig==, tarball: file:projects/fabric-e2e-tests.tgz}
+    resolution: {integrity: sha512-O6Gj63hTJCqIQ0rC+8s3yoBlWfPh0TxfDXno/cNMhxFFc1zkcZIsxCq653K2D+pSFfWtzmtE+OJaqwL9q4P5zg==, tarball: file:projects/fabric-e2e-tests.tgz}
     name: '@rush-temp/fabric-e2e-tests'
     version: 0.0.0
     dependencies:
@@ -7370,7 +7400,7 @@ packages:
     dev: false
 
   file:projects/fabric-ledger.tgz(@types/node@16.11.33):
-    resolution: {integrity: sha512-JMnW6H0IRyCb/Hbhp9/sL1QqteZhrP6IabHAT1xsPTnDWSLHTNm/DQkJ6mvtDETM8hcVkfHg4xKSAXFsAQRB0A==, tarball: file:projects/fabric-ledger.tgz}
+    resolution: {integrity: sha512-qDVr4SBidXhHZdKhPG6FJLu2nq8O0V27h4oTkwTJy31Oye/y0BNyo3VbGf4fvZq/vncaLWWsyBw3xW9Z1DrNtg==, tarball: file:projects/fabric-ledger.tgz}
     id: file:projects/fabric-ledger.tgz
     name: '@rush-temp/fabric-ledger'
     version: 0.0.0
@@ -7421,7 +7451,7 @@ packages:
     dev: false
 
   file:projects/fabric-shim-docs.tgz:
-    resolution: {integrity: sha512-brw61u2u8y8k7oGVwCyzNcXIYMjBhTr7phaVoq0Lt20pY8w0O6sPpktxpywbvTONvjKXyb7a1NQZRzApkKaI7g==, tarball: file:projects/fabric-shim-docs.tgz}
+    resolution: {integrity: sha512-v9zDGgTG8V8VlKo5Cq4eKPYUJMqSKrwgmr6p0Fm3teLmsJM1KBFsqXvfy/jHJDZ16YBu+rxlGUwjyAx51RF37w==, tarball: file:projects/fabric-shim-docs.tgz}
     name: '@rush-temp/fabric-shim-docs'
     version: 0.0.0
     dependencies:
@@ -7431,14 +7461,14 @@ packages:
     dev: false
 
   file:projects/fabric-shim.tgz:
-    resolution: {integrity: sha512-SSyA5+s1HphAp9QRPTl8HHyx4zZAsSuHkQLNKUls7f1Gf9mtT246JueJFI/KSpJJg2oid/9AajJ9LMZAUDZOsg==, tarball: file:projects/fabric-shim.tgz}
+    resolution: {integrity: sha512-xtNQJuc7bWcdbWtBTpzF5hgm0DR8SsQ5I8H4FvO5DBAFgprGdqS/BTe4gN6vjThW4BNSrUFG6XBTmUJ9LHbZAw==, tarball: file:projects/fabric-shim.tgz}
     name: '@rush-temp/fabric-shim'
     version: 0.0.0
     dependencies:
       '@fidm/x509': 1.2.1
-      '@grpc/grpc-js': 1.8.15
+      '@grpc/grpc-js': 1.10.9
       '@grpc/proto-loader': 0.6.11
-      '@hyperledger/fabric-protos': 0.1.0-dev.2300102001.1
+      '@hyperledger/fabric-protos': 0.2.1
       '@types/node': 16.11.33
       ajv: 6.12.6
       caniuse-lite: 1.0.30001336
@@ -7465,7 +7495,7 @@ packages:
     dev: false
 
   file:projects/fvtests.tgz:
-    resolution: {integrity: sha512-d790eBg2wbje6ApqGIdiJHncDQYiueYWPEezwQgxD0xW0WXbFAs0qpC2c+nnfn1hvP8rqfOvE0uR4ROte0xDCg==, tarball: file:projects/fvtests.tgz}
+    resolution: {integrity: sha512-jTIuEWO8AeKdVMFQiHpir0ZOAXlJFDycWRhq0EVev6zyjMOk2Iq95PF/2jhHSY5+VN5nmoOuq8M0dGjRfXiU4g==, tarball: file:projects/fvtests.tgz}
     name: '@rush-temp/fvtests'
     version: 0.0.0
     dependencies:
@@ -7494,7 +7524,7 @@ packages:
     dev: false
 
   file:projects/toolchain.tgz:
-    resolution: {integrity: sha512-W/quztgrRXRhdUqJtjX4QYts+Ry1MeaQRo+nJMrMEbkGkJwRlOHcB3JHQstc75F//5ZZ9oWMOF8LiV3EAw2MsQ==, tarball: file:projects/toolchain.tgz}
+    resolution: {integrity: sha512-8Oz2p9wtIGPcd/RWmxM4vngdkCve3qbs3eWC1TQ1CNr8b6FAqHkHRHuz7MlUjqrld74ji9dZGJp6UbiqlgD2AA==, tarball: file:projects/toolchain.tgz}
     name: '@rush-temp/toolchain'
     version: 0.0.0
     dependencies:
