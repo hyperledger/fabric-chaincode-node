@@ -25,6 +25,8 @@ The following [Rush categories](https://rushjs.io/pages/maintainer/add_to_repo/)
 * node v18 => recommend to use [nvm](https://github.com/nvm-sh/nvm)
 * rush => `npm install -g @microsoft/rush`
 
+> As an alternative to installing rush on your system, you can also have node install it for executing single commands similar to what is done in CI, for example from the `libraries/fabric-shim` directory you could add or update a dependency by running `node ../../common/scripts/install-run-rush.js add --package @grpc/grpc-js@latest`
+
 > Note that npm v6 has some bugs that mean adding new dependencies etc are not properly picked up. Longer term we should consider moving to yarn or pnpm. However in practice this isn't a serious problem and has been possible to be worked around by issuing `rm ./common/config/rush/npm-shrinkwrap.json` and then `rush update`
 
 The fv and e2e tests require a set of docker images of Fabric Peers, Orderers and CAs. To ensure you have the correct images ensure these have been dowloaded and tagged.  `rush edge-docker` will do this for you.
@@ -35,6 +37,8 @@ They also need to have the `nodeenv` image present - this is build as part of th
 
 * Clone the repo, and ensure you are using node v18, and have rush installed
 * `rush update` is needed to ensure everything is correctly linked and updated.
+    - For example, after updating dependencies in `libraries/fabric-shim/package.json` run `rush update` which will delegate to `pnpm` to update the appropriate project files.
+    - Note - you could also use `rush add` to have rush manage the `package.json` updates.
 * `rush edge-docker` will pull down and tag the very latest docker images for the peers, orderes etc to test against
 
 At this point the repo is fully ready for use and running tests, etc. A full sequence of build-test that is equivalent to the CI pipeline is
@@ -60,17 +64,16 @@ To clean up docker
 
 ## Mechanics of Contributing
 
-The codebase is maintained in [github](https://github.com/hyperledger/fabric-chaincode-node), with a CI pipeline run with [Azure Devlops](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_build?definitionId=33&_a=summary). Issues are handling in [Jira](https://jira.hyperledger.org/issues/?jql=project%20%3D%20FAB%20AND%20component%20%3D%20fabric-chaincode-node)   (please use the component `fabric-chaincode-node` in jira as this is shared project with other Fabric components).
-
+The codebase is maintained in [github](https://github.com/hyperledger/fabric-chaincode-node), with a CI pipeline run with [Github Actions](https://github.com/hyperledger/fabric-chaincode-node/actions). Issues are handled in [Github Issues](https://github.com/hyperledger/fabric-chaincode-node/issues).
 
 
 
 ## Code of Conduct Guidelines <a name="conduct"></a>
 
-See our [Code of Conduct Guidelines](../blob/main/CODE_OF_CONDUCT.md).
+See our [Code of Conduct Guidelines](https://github.com/hyperledger/fabric-chaincode-node/blob/main/CODE_OF_CONDUCT.md).
 
 ## Maintainers <a name="maintainers"></a>
 
-Should you have any questions or concerns, please reach out to one of the project's [Maintainers](../blob/main/MAINTAINERS.md).
+Should you have any questions or concerns, please reach out to one of the project's [Maintainers](https://github.com/hyperledger/fabric-chaincode-node/blob/main/MAINTAINERS.md).
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
