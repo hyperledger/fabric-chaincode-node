@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-FROM node:20-alpine
+ARG NODE_IMAGE_TAG=22-alpine
+FROM node:${NODE_IMAGE_TAG}
 RUN apk add --no-cache \
 	make \
 	python3 \
