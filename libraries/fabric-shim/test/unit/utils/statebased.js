@@ -23,7 +23,7 @@ describe('KeyEndorsementPolicy', () => {
             const anotherEp = new KeyEndorsementPolicy(policy);
             expect(anotherEp.orgs).to.deep.eql({
                 Org1MSP: 0,
-                Org2MSP: 0
+                Org2MSP: 0,
             });
         });
     });
@@ -36,11 +36,15 @@ describe('KeyEndorsementPolicy', () => {
         });
 
         it('should throw error if role is not supported', () => {
-            expect(() => ep.addOrgs('aDummyRole', 'org1msp')).to.throw(/role type aDummyRole does not exist/);
+            expect(() => ep.addOrgs('aDummyRole', 'org1msp')).to.throw(
+                /role type aDummyRole does not exist/
+            );
         });
 
         it('should throw error if role is missing', () => {
-            expect(() => ep.addOrgs()).to.throw(/role type undefined does not exist/);
+            expect(() => ep.addOrgs()).to.throw(
+                /role type undefined does not exist/
+            );
         });
 
         it('should success add multiple orgs', () => {
@@ -106,33 +110,70 @@ describe('KeyEndorsementPolicy', () => {
             const policy = ep.getPolicy();
             const anotherEp = new KeyEndorsementPolicy(policy);
 
-            const spe = common.SignaturePolicyEnvelope.deserializeBinary(policy);
-            const speClone = common.SignaturePolicyEnvelope.deserializeBinary(anotherEp.getPolicy());
+            const spe =
+                common.SignaturePolicyEnvelope.deserializeBinary(policy);
+            const speClone = common.SignaturePolicyEnvelope.deserializeBinary(
+                anotherEp.getPolicy()
+            );
             expect(spe.toObject()).to.deep.equals(speClone.toObject());
         });
 
-
         it('should get policy that is semantically valid', () => {
             const policy = ep.getPolicy();
-            const spe = common.SignaturePolicyEnvelope.deserializeBinary(policy);
+            const spe =
+                common.SignaturePolicyEnvelope.deserializeBinary(policy);
 
             // create a blank object and expand all the protobufs into it
             const speObject = spe.toObject();
 
-            speObject.identitiesList = spe.getIdentitiesList().map(principal => {
-                let mapped = { principalClassification: 0 };
-                mapped.principal = msp.MSPRole.deserializeBinary(principal.getPrincipal_asU8()).toObject();
-                return mapped;
-            });            
+            speObject.identitiesList = spe
+                .getIdentitiesList()
+                .map((principal) => {
+                    let mapped = { principalClassification: 0 };
+                    mapped.principal = msp.MSPRole.deserializeBinary(
+                        principal.getPrincipal_asU8()
+                    ).toObject();
+                    return mapped;
+                });
 
-            speObject.rule.nOutOf.rulesList = spe.getRule().getNOutOf().getRulesList().map(sigRule =>{
-                 return {signedBy: sigRule.getSignedBy()}
-            });
+            speObject.rule.signedBy = spe.getRule().getSignedBy();
+            speObject.rule.nOutOf.rulesList = spe
+                .getRule()
+                .getNOutOf()
+                .getRulesList()
+                .map((sigRule) => {
+                    return { signedBy: sigRule.getSignedBy() };
+                });
 
-            const expectedPolicy={"version":0,"rule":{"signedBy":0,"nOutOf":{"n":3,"rulesList":[{"signedBy":0},{"signedBy":1},{"signedBy":2}]}},"identitiesList":[{"principalClassification":0,"principal":{"mspIdentifier":"Org1MSP","role":0}},{"principalClassification":0,"principal":{"mspIdentifier":"Org2MSP","role":0}},{"principalClassification":0,"principal":{"mspIdentifier":"Org3MSP","role":0}}]}
+            const expectedPolicy = {
+                version: 0,
+                rule: {
+                    signedBy: 0,
+                    nOutOf: {
+                        n: 3,
+                        rulesList: [
+                            { signedBy: 0 },
+                            { signedBy: 1 },
+                            { signedBy: 2 },
+                        ],
+                    },
+                },
+                identitiesList: [
+                    {
+                        principalClassification: 0,
+                        principal: { mspIdentifier: 'Org1MSP', role: 0 },
+                    },
+                    {
+                        principalClassification: 0,
+                        principal: { mspIdentifier: 'Org2MSP', role: 0 },
+                    },
+                    {
+                        principalClassification: 0,
+                        principal: { mspIdentifier: 'Org3MSP', role: 0 },
+                    },
+                ],
+            };
             expect(speObject).to.deep.equals(expectedPolicy);
         });
     });
 });
-
-

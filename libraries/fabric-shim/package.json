@@ -54,8 +54,8 @@
   },
   "dependencies": {
     "@fidm/x509": "^1.2.1",
-    "@grpc/grpc-js": "~1.10.9",
-    "@hyperledger/fabric-protos": "~0.2.1",
+    "@grpc/grpc-js": "^1.11.0",
+    "@hyperledger/fabric-protos": "^0.2.2",
     "@types/node": "^16.11.1",
     "ajv": "^6.12.2",
     "fabric-contract-api": "2.5.7",
