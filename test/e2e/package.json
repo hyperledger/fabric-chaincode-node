@@ -1,6 +1,6 @@
 {
   "name": "fabric-e2e-tests",
-  "version": "2.5.7",
+  "version": "2.5.8",
   "description": "",
   "main": "docker.js",
   "scripts": {
