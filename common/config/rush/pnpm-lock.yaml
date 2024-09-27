@@ -9,14 +9,11 @@ dependencies:
     specifier: ^1.2.1
     version: 1.2.1
   '@grpc/grpc-js':
-    specifier: ~1.10.9
-    version: 1.10.9
-  '@grpc/proto-loader':
-    specifier: ^0.6.6
-    version: 0.6.11
+    specifier: ^1.11.3
+    version: 1.11.3
   '@hyperledger/fabric-protos':
-    specifier: 0.1.0-dev.2300102001.1
-    version: 0.1.0-dev.2300102001.1
+    specifier: ~0.2.1
+    version: 0.2.1
   '@rush-temp/fabric-contract-api':
     specifier: file:./projects/fabric-contract-api.tgz
     version: file:projects/fabric-contract-api.tgz
@@ -453,8 +450,8 @@ packages:
       tweetnacl: 1.0.3
     dev: false
 
-  /@grpc/grpc-js@1.10.9:
-    resolution: {integrity: sha512-5tcgUctCG0qoNyfChZifz2tJqbRbXVO9J7X6duFcOjY3HUNCxg5D0ZCK7EP9vIcZ0zRpLU9bWkyCqVCLZ46IbQ==}
+  /@grpc/grpc-js@1.11.3:
+    resolution: {integrity: sha512-i9UraDzFHMR+Iz/MhFLljT+fCpgxZ3O6CxwGJ8YuNYHJItIHUzKJpW2LvoFZNnGPwqc9iWy9RAucxV0JoR9aUQ==}
     engines: {node: '>=12.10.0'}
     dependencies:
       '@grpc/proto-loader': 0.7.13
@@ -499,19 +496,19 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: false
 
-  /@hyperledger/fabric-protos@0.1.0-dev.2300102001.1:
-    resolution: {integrity: sha512-MtVXncAQz09PYOcFZUB2QbS9eVwbSGnULPuZKqFr9iScbasG194QyN6Tq8cl+kthQGSoBQORyjCIbrGIaN8EFQ==}
-    dependencies:
-      '@grpc/grpc-js': 1.10.9
-      '@types/google-protobuf': 3.15.6
-      google-protobuf: 3.20.1
-    dev: false
-
   /@hyperledger/fabric-protos@0.2.1:
     resolution: {integrity: sha512-qjm0vIQIfCall804tWDeA8p/mUfu14sl5Sj+PbOn2yDKJq+7ThoIhNsLAqf+BCxUfqsoqQq6AojhqQeTFyOOqg==}
     engines: {node: '>=14.15.0'}
     dependencies:
-      '@grpc/grpc-js': 1.10.9
+      '@grpc/grpc-js': 1.11.3
+      google-protobuf: 3.21.2
+    dev: false
+
+  /@hyperledger/fabric-protos@0.2.2:
+    resolution: {integrity: sha512-p5Meqig8DqsNDygoFMfAp0rqZQDtaatwUaYGF0LQvKS77ZLjP8WxvZ4/9zsr8aNs/4NkohKcq7ZUtEK70iBcrQ==}
+    engines: {node: '>=16.13.0'}
+    dependencies:
+      '@grpc/grpc-js': 1.11.3
       google-protobuf: 3.21.2
     dev: false
 
@@ -578,7 +575,7 @@ packages:
     dev: false
 
   /@protobufjs/aspromise@1.1.2:
-    resolution: {integrity: sha1-m4sMxmPWaafY9vXQiToU00jzD78=}
+    resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
     dev: false
 
   /@protobufjs/base64@1.1.2:
@@ -594,22 +591,22 @@ packages:
     dev: false
 
   /@protobufjs/fetch@1.1.0:
-    resolution: {integrity: sha1-upn7WYYUr2VwDBYZ/wbUVLDYTEU=}
+    resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
     dependencies:
       '@protobufjs/aspromise': 1.1.2
       '@protobufjs/inquire': 1.1.0
     dev: false
 
   /@protobufjs/float@1.0.2:
-    resolution: {integrity: sha1-Xp4avctz/Ap8uLKR33jIy9l7h9E=}
+    resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
     dev: false
 
   /@protobufjs/inquire@1.1.0:
-    resolution: {integrity: sha1-/yAOPnzyQp4tyvwRQIKOjMY48Ik=}
+    resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}
     dev: false
 
   /@protobufjs/path@1.1.2:
-    resolution: {integrity: sha1-bMKyDFya1q0NzP0hynZz2Nf79o0=}
+    resolution: {integrity: sha512-6JOcJ5Tm08dOHAbdR3GrvP+yUUfkjG5ePsHYczMFLq3ZmMkAD98cDgcT2iA1lJ9NVwFd4tH/iSSoe44YWkltEA==}
     dev: false
 
   /@protobufjs/pool@1.1.0:
@@ -617,7 +614,7 @@ packages:
     dev: false
 
   /@protobufjs/utf8@1.1.0:
-    resolution: {integrity: sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=}
+    resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
     dev: false
 
   /@rushstack/eslint-config@0.5.8(eslint@6.8.0)(typescript@4.4.4):
@@ -736,10 +733,6 @@ packages:
 
   /@types/eslint-visitor-keys@1.0.0:
     resolution: {integrity: sha512-OCutwjDZ4aFS6PB1UZ988C4YgwlBHJd6wCeQqaLdmadZ/7e+w79+hbMUFC1QXDNCmdyoRfAFdm0RypzwR+Qpag==}
-    dev: false
-
-  /@types/google-protobuf@3.15.6:
-    resolution: {integrity: sha512-pYVNNJ+winC4aek+lZp93sIKxnXt5qMkuKmaqS3WGuTq0Bw1ZDYNBgzG5kkdtwcv+GmYJGo3yEg6z2cKKAiEdw==}
     dev: false
 
   /@types/json-schema@7.0.11:
@@ -2979,7 +2972,7 @@ packages:
     resolution: {integrity: sha512-oWb1Z6mkHIskLzEJ/XWX0srkpkTQ7vaopMQkyaEIoq0fmtFVxOthb8cCxeT+p3ynTdkk/RZwbgG4brR5BeWECw==}
     engines: {node: '>= 4.0'}
     os: [darwin]
-    deprecated: The v1 package contains DANGEROUS / INSECURE binaries. Upgrade to safe fsevents v2
+    deprecated: Upgrade to fsevents v2 to mitigate potential security issues
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
@@ -3249,10 +3242,6 @@ packages:
     engines: {node: '>= 0.10'}
     dependencies:
       sparkles: 1.0.1
-    dev: false
-
-  /google-protobuf@3.20.1:
-    resolution: {integrity: sha512-XMf1+O32FjYIV3CYu6Tuh5PNbfNEU5Xu22X+Xkdb/DUexFlCzhvv7d5Iirm4AOwn8lv4al1YvIhzGrg2j9Zfzw==}
     dev: false
 
   /google-protobuf@3.21.2:
@@ -4448,7 +4437,7 @@ packages:
     dev: false
 
   /lodash.camelcase@4.3.0:
-    resolution: {integrity: sha1-soqmKIorn8ZRA1x3EfZathkDMaY=}
+    resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
     dev: false
 
   /lodash.flattendeep@4.4.0:
@@ -7357,7 +7346,7 @@ packages:
     dev: false
 
   file:projects/fabric-contract-api.tgz:
-    resolution: {integrity: sha512-Gtud5ZpAO3hknQwdi3U0JJOTXxNO2pM8PaTTB45U0wVv+UR56HKekg0x6a71vCKiB417IPAmsBXVhw18YvWBvQ==, tarball: file:projects/fabric-contract-api.tgz}
+    resolution: {integrity: sha512-T9dEoUsbQ9iwOSJmwuLNpVGBwlFlMJQ1XZjtlktoCyt+jKLoJmvdWBtwHcH9NUIdnVV6L07wFeXloZm2zEjM3Q==, tarball: file:projects/fabric-contract-api.tgz}
     name: '@rush-temp/fabric-contract-api'
     version: 0.0.0
     dependencies:
@@ -7386,7 +7375,7 @@ packages:
     dev: false
 
   file:projects/fabric-e2e-tests.tgz:
-    resolution: {integrity: sha512-O6Gj63hTJCqIQ0rC+8s3yoBlWfPh0TxfDXno/cNMhxFFc1zkcZIsxCq653K2D+pSFfWtzmtE+OJaqwL9q4P5zg==, tarball: file:projects/fabric-e2e-tests.tgz}
+    resolution: {integrity: sha512-ketrbfG3FDyCQgbdPNilxwG53ezqoZxricwNv4ymi0naodg6OQOliJC4A+abXUqxHjWVSIm9t5nkGwQQmSGMUQ==, tarball: file:projects/fabric-e2e-tests.tgz}
     name: '@rush-temp/fabric-e2e-tests'
     version: 0.0.0
     dependencies:
@@ -7400,7 +7389,7 @@ packages:
     dev: false
 
   file:projects/fabric-ledger.tgz(@types/node@16.11.33):
-    resolution: {integrity: sha512-qDVr4SBidXhHZdKhPG6FJLu2nq8O0V27h4oTkwTJy31Oye/y0BNyo3VbGf4fvZq/vncaLWWsyBw3xW9Z1DrNtg==, tarball: file:projects/fabric-ledger.tgz}
+    resolution: {integrity: sha512-509ctmmZtHJOiAV9DWNBP8KOOxnzm9ojq+4tQCg0GfCQOHQ5/ssK8a5W29rYSPK0XqisW96QUW5o5HfW2DJVPw==, tarball: file:projects/fabric-ledger.tgz}
     id: file:projects/fabric-ledger.tgz
     name: '@rush-temp/fabric-ledger'
     version: 0.0.0
@@ -7432,7 +7421,7 @@ packages:
     dev: false
 
   file:projects/fabric-nodeenv.tgz:
-    resolution: {integrity: sha512-6Pz5wgOMxus0Sr8Q+bi6DnaNErV6jZQHC1KWQUzfPZsU7wREsrW4JSnm/jCkQkdjDbctcnD7z/3UmBzeEEBXVg==, tarball: file:projects/fabric-nodeenv.tgz}
+    resolution: {integrity: sha512-qvF47beXNv1OgN3lLNNEFW8lJ8gOrFpC9Ll4bwDqGKRgHoJjxHZt4QLY3PW+vgjh58gPpkOlyT1dlMplQOF8Yw==, tarball: file:projects/fabric-nodeenv.tgz}
     name: '@rush-temp/fabric-nodeenv'
     version: 0.0.0
     dependencies:
@@ -7440,7 +7429,7 @@ packages:
     dev: false
 
   file:projects/fabric-shim-api.tgz:
-    resolution: {integrity: sha512-HVtCRnEfr3iMv9+akMNMC144OI++srlpwPTyvSKr9KrQNjmIwKtEmdNOqrG5532krmUPdn+V6iFnd22PP3bc1Q==, tarball: file:projects/fabric-shim-api.tgz}
+    resolution: {integrity: sha512-6zckyQQ4iSoJFdeIoiwCFP0XmcspCvyruNAXYSi3bQW+WuLkvzhXEakcN6iGCkLWCiB7mbbP5oTb84vCMOoPHQ==, tarball: file:projects/fabric-shim-api.tgz}
     name: '@rush-temp/fabric-shim-api'
     version: 0.0.0
     dependencies:
@@ -7451,7 +7440,7 @@ packages:
     dev: false
 
   file:projects/fabric-shim-docs.tgz:
-    resolution: {integrity: sha512-v9zDGgTG8V8VlKo5Cq4eKPYUJMqSKrwgmr6p0Fm3teLmsJM1KBFsqXvfy/jHJDZ16YBu+rxlGUwjyAx51RF37w==, tarball: file:projects/fabric-shim-docs.tgz}
+    resolution: {integrity: sha512-RiRBQPcTgwpOCB1LndZIyejsaWbw2JqfnGJokT0tJVeUuWoQfGEYG4yU1j/xSvyIeiBf6JDl6Bq3cjTVpW59FA==, tarball: file:projects/fabric-shim-docs.tgz}
     name: '@rush-temp/fabric-shim-docs'
     version: 0.0.0
     dependencies:
@@ -7461,14 +7450,14 @@ packages:
     dev: false
 
   file:projects/fabric-shim.tgz:
-    resolution: {integrity: sha512-xtNQJuc7bWcdbWtBTpzF5hgm0DR8SsQ5I8H4FvO5DBAFgprGdqS/BTe4gN6vjThW4BNSrUFG6XBTmUJ9LHbZAw==, tarball: file:projects/fabric-shim.tgz}
+    resolution: {integrity: sha512-2FsnHlF9B6sUDzX7DP9ITS+/hRwA71INLC0/ST8HMKk3aSp9PNanMWwWK45Zt/x2JO6F4HSIxzlBTAlUix7gPA==, tarball: file:projects/fabric-shim.tgz}
     name: '@rush-temp/fabric-shim'
     version: 0.0.0
     dependencies:
       '@fidm/x509': 1.2.1
-      '@grpc/grpc-js': 1.10.9
+      '@grpc/grpc-js': 1.11.3
       '@grpc/proto-loader': 0.6.11
-      '@hyperledger/fabric-protos': 0.2.1
+      '@hyperledger/fabric-protos': 0.2.2
       '@types/node': 16.11.33
       ajv: 6.12.6
       caniuse-lite: 1.0.30001336
@@ -7495,7 +7484,7 @@ packages:
     dev: false
 
   file:projects/fvtests.tgz:
-    resolution: {integrity: sha512-jTIuEWO8AeKdVMFQiHpir0ZOAXlJFDycWRhq0EVev6zyjMOk2Iq95PF/2jhHSY5+VN5nmoOuq8M0dGjRfXiU4g==, tarball: file:projects/fvtests.tgz}
+    resolution: {integrity: sha512-0nQbohnrAAef2lZccZ8ma6I2o5zEeVS2TuMxvk0O/6gP8KZ0gAgW6hPsw2wg4RdPrWKbY5rr3L1AkLudi3hp+Q==, tarball: file:projects/fvtests.tgz}
     name: '@rush-temp/fvtests'
     version: 0.0.0
     dependencies:
@@ -7524,7 +7513,7 @@ packages:
     dev: false
 
   file:projects/toolchain.tgz:
-    resolution: {integrity: sha512-8Oz2p9wtIGPcd/RWmxM4vngdkCve3qbs3eWC1TQ1CNr8b6FAqHkHRHuz7MlUjqrld74ji9dZGJp6UbiqlgD2AA==, tarball: file:projects/toolchain.tgz}
+    resolution: {integrity: sha512-p6o/nzHSK8hVhDmrlSa+K9yX9dZGzTREEaiPL2wIgfOT1Fbag6ppe8zig8ZLIWfdMMIN1Ps1ydbnCDeFGJUMkA==, tarball: file:projects/toolchain.tgz}
     name: '@rush-temp/toolchain'
     version: 0.0.0
     dependencies:
