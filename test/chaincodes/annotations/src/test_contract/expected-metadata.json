@@ -9,10 +9,7 @@
             },
             "transactions": [
                 {
-                    "tag": [
-                        "SUBMIT",
-                        "submitTx"
-                    ],
+                    "tag": ["SUBMIT", "submitTx"],
                     "parameters": [
                         {
                             "name": "id",
@@ -53,10 +50,7 @@
                     "name": "createAsset"
                 },
                 {
-                    "tag": [
-                        "SUBMIT",
-                        "submitTx"
-                    ],
+                    "tag": ["SUBMIT", "submitTx"],
                     "parameters": [
                         {
                             "name": "asset",
@@ -107,7 +101,7 @@
         }
     },
     "info": {
-        "version": "2.5.7",
+        "version": "2.5.8",
         "title": "ts_chaincode"
     },
     "components": {
