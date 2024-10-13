@@ -8,7 +8,7 @@ on:
 
 jobs:
   setup:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     outputs:
       PACKAGE_VERSION: ${{ steps.builddata.outputs.PACKAGE_VERSION }}
       MINOR_PACKAGE_VERSION: ${{ steps.builddata.outputs.MINOR_PACKAGE_VERSION }}
@@ -37,12 +37,12 @@ jobs:
           echo "BUILD_DATE=${BUILD_DATE}" >> $GITHUB_OUTPUT
 
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: "18.x"
       - name: Install/Rebuild/UnitTest
         run: |
           set -xev
@@ -74,13 +74,13 @@ jobs:
           path: fabric-nodeenv.tar.gz
 
   fvtest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: "18.x"
       - uses: actions/download-artifact@v4
         with:
           name: nodeenv-docker-image
