@@ -1,0 +1,43 @@
+name: "Security vulnerability scan"
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Branch, tag or SHA to scan.
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  # Job to handle the auditing of the code
+  # NPM audit is run on a 'fake' installation of the libraries
+  # Pulling in all the dependencies it will be able to run NPM AUDIT, and if that returns a
+  # error code the job will fail.
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install
+        run: node common/scripts/install-run-rush.js install
+      - name: Build packages
+        run: node common/scripts/install-run-rush.js publish --include-all --pack --release-folder tgz --publish
+      - name: Start local NPM registry
+        run: node common/scripts/install-run-rush.js start-verdaccio # script will check for the ci variable and use built images
+      - name: Deploy scan project
+        run: |
+          mkdir -p audit
+          cd audit
+          npm init --yes
+          npm install --save --package-lock-only --registry http://localhost:4873 fabric-shim fabric-shim-api fabric-contract-api
+      - name: Scan
+        working-directory: audit
+        run: npm audit --omit=dev
