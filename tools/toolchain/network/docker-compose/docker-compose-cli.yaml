@@ -12,8 +12,6 @@
 # limitations under the License.
 #
 
-version: '2'
-
 services:
   clinopeer:
     container_name: cli
