@@ -2,12 +2,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-FROM node:20-alpine
+ARG NODE_IMAGE_TAG=22-alpine
+FROM node:${NODE_IMAGE_TAG}
 RUN apk add --no-cache \
 	make \
 	python3 \
-	g++;
+	g++
 RUN mkdir -p /chaincode/input \
 	&& mkdir -p /chaincode/output \
-	&& mkdir -p /usr/local/src;
+	&& mkdir -p /usr/local/src
 ADD build.sh start.sh /chaincode/
