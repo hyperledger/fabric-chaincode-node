@@ -2,20 +2,21 @@
 
 **Active maintainers**
 
-| Name            | GitHub                             | Chat            | email                    |
-| --------------- | ---------------------------------- | --------------- | ------------------------ |
-| Matthew B White | [mbwhite][mbwhite]                 | mbwhite         | <whitemat@uk.ibm.com>    |
-| Mark Lewis      | [bestbeforetoday][bestbeforetoday] | bestbeforetoday | Mark.S.Lewis@outlook.com |
+| Name         | GitHub                             | Chat            | email                      |
+| ------------ | ---------------------------------- | --------------- | -------------------------- |
+| Dave Enyeart | [denyeart][denyeart]               | denyeart        | <enyeart@us.ibm.com>       |
+| Mark Lewis   | [bestbeforetoday][bestbeforetoday] | bestbeforetoday | <Mark.S.Lewis@outlook.com> |
 
 **Emeritus maintainers**
 
-| Name          | GitHub                     | Chat         | email                      |
-| ------------- | -------------------------- | ------------ | -------------------------- |
-| James Taylor  | [jt-nti][jt-nti]           | jtonline     | <jamest@uk.ibm.com>        |
-| Andrew Hurt   | [awjh-ibm][awjh-ibm]       | awjh-ibm     | <andrew.hurt1@ibm.com>     |
-| Bret Harrison | [harrisob][harrisob]       | bretharrison | <beharrison@nc.rr.com>     |
-| Chaoyi Zhao   | [zhaochy1990][zhaochy1990] | zhaochy      | <zhaochy_2015@hotmail.com> |
-| David Kelsey  | [davidkel][davidkel]       | davidkel     | <d_kelsey@uk.ibm.com>      |
+| Name            | GitHub                     | Chat         | email                      |
+| --------------- | -------------------------- | ------------ | -------------------------- |
+| Matthew B White | [mbwhite][mbwhite]         | mbwhite      | <whitemat@uk.ibm.com>      |
+| James Taylor    | [jt-nti][jt-nti]           | jtonline     | <jamest@uk.ibm.com>        |
+| Andrew Hurt     | [awjh-ibm][awjh-ibm]       | awjh-ibm     | <andrew.hurt1@ibm.com>     |
+| Bret Harrison   | [harrisob][harrisob]       | bretharrison | <beharrison@nc.rr.com>     |
+| Chaoyi Zhao     | [zhaochy1990][zhaochy1990] | zhaochy      | <zhaochy_2015@hotmail.com> |
+| David Kelsey    | [davidkel][davidkel]       | davidkel     | <d_kelsey@uk.ibm.com>      |
 
 Also: Please see the [Release Manager section](https://github.com/hyperledger/fabric/blob/main/MAINTAINERS.md)
 
@@ -28,3 +29,4 @@ Also: Please see the [Release Manager section](https://github.com/hyperledger/fa
 [mbwhite]: https://github.com/mbwhite
 [jt-nti]: https://github.com/jt-nti
 [bestbeforetoday]: https://github.com/bestbeforetoday
+[denyeart]: https://github.com/denyeart
