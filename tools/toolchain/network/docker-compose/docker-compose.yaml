@@ -11,32 +11,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-version: '2'
 
 services:
-
   ca0.example.com:
     extends:
-        file: docker-compose-base.yaml
-        service: ca0
+      file: docker-compose-base.yaml
+      service: ca0
     container_name: ca0.example.com
 
   ca1.example.com:
     extends:
-        file: docker-compose-base.yaml
-        service: ca1
+      file: docker-compose-base.yaml
+      service: ca1
     container_name: ca1.example.com
 
   orderer.example.com:
     extends:
-        file: docker-compose-base.yaml
-        service: orderer
+      file: docker-compose-base.yaml
+      service: orderer
     container_name: orderer.example.com
 
   peer0.org1.example.com:
     extends:
-        file: docker-compose-base.yaml
-        service: peer
+      file: docker-compose-base.yaml
+      service: peer
     container_name: peer0.org1.example.com
     environment:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -54,16 +52,16 @@ services:
     ports:
       - 7051:7051
     volumes:
-        - /var/run/:/host/var/run/
-        - ../crypto-material/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/peer
+      - /var/run/:/host/var/run/
+      - ../crypto-material/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/peer
     depends_on:
       - orderer.example.com
       - couchdb.org1.example.com
 
   couchdb.org1.example.com:
     extends:
-        file: docker-compose-base.yaml
-        service: couchdb
+      file: docker-compose-base.yaml
+      service: couchdb
     container_name: couchdb.org1.example.com
     ports:
       - 5984:5984
@@ -72,8 +70,8 @@ services:
 
   peer0.org2.example.com:
     extends:
-        file: docker-compose-base.yaml
-        service: peer
+      file: docker-compose-base.yaml
+      service: peer
     container_name: peer0.org2.example.com
 
     environment:
@@ -91,16 +89,16 @@ services:
     ports:
       - 8051:8051
     volumes:
-        - /var/run/:/host/var/run/
-        - ../crypto-material/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com:/etc/hyperledger/peer
+      - /var/run/:/host/var/run/
+      - ../crypto-material/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com:/etc/hyperledger/peer
     depends_on:
       - orderer.example.com
       - couchdb.org2.example.com
 
   couchdb.org2.example.com:
     extends:
-        file: docker-compose-base.yaml
-        service: couchdb
+      file: docker-compose-base.yaml
+      service: couchdb
     container_name: couchdb.org2.example.com
     ports:
       - 6984:5984
@@ -123,7 +121,7 @@ services:
       - /var/run/:/host/var/run/
     depends_on:
       - peer0.org1.example.com
-      
+
   org2_cli:
     extends:
       file: docker-compose-base.yaml
@@ -140,7 +138,7 @@ services:
       - /var/run/:/host/var/run/
     depends_on:
       - peer0.org2.example.com
-      
+
   logging:
     container_name: logging
     image: gliderlabs/logspout
@@ -148,4 +146,4 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./logs:/logs
     ports:
-    - 17056:80         
+      - 17056:80

@@ -11,11 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-version: '2'
 
 services:
   ca0:
-    image: hyperledger/fabric-ca${CA_IMG_TAG}
+    image: hyperledger/fabric-ca
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org1
@@ -29,7 +28,7 @@ services:
     container_name: ca_peerOrg1
 
   ca1:
-    image: hyperledger/fabric-ca${CA_IMG_TAG}
+    image: hyperledger/fabric-ca
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca-org2
@@ -58,10 +57,10 @@ services:
     ports:
       - 7050:7050
     volumes:
-        - ../crypto-material/:/etc/hyperledger/configtx
-        - ../crypto-material/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/orderer
-        - ../crypto-material/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/peerOrg1
-        - ../crypto-material/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/etc/hyperledger/peerOrg2
+      - ../crypto-material/:/etc/hyperledger/configtx
+      - ../crypto-material/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/orderer
+      - ../crypto-material/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/peerOrg1
+      - ../crypto-material/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/etc/hyperledger/peerOrg2
 
   peer:
     container_name: peer
@@ -101,9 +100,9 @@ services:
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --peer-chaincodedev=true
     volumes:
-        - /var/run/:/host/var/run/
-        - ../external:/opt/chaincode/bin:ro
-        - ../crypto-material/core.yaml:/etc/hyperledger/fabric/core.yaml:ro
+      - /var/run/:/host/var/run/
+      - ../external:/opt/chaincode/bin:ro
+      - ../crypto-material/core.yaml:/etc/hyperledger/fabric/core.yaml:ro
 
   clibase:
     extends:
@@ -132,7 +131,7 @@ services:
 
   couchdb:
     container_name: couchdb
-    image: couchdb:3.1
+    image: couchdb
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
