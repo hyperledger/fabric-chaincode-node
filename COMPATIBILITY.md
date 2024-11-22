@@ -6,14 +6,15 @@ Github is used for code base management, issues should reported in the repositor
 
 This table shows the summary of the compatibility of the Node modules at versions 1.4 and 2.x, together with the Node.js runtime they require and the Fabric Peer versions they can communicate with.
 
-| Chaincode Docker image | Peer connectivity v1.4 | Peer connectivity v2.x | Minimum supported Node.js | Node.js runtime |
-| --- | --- | --- | --- | --- |
-| **v1.4.5** | Yes | Yes | 8 | 8 |
-| **v2.2.x** | Yes | Yes | 12 | 12 |
-| **v2.3.x** | Yes | Yes | 12 | 12 |
-| **v2.4.x** | Yes | Yes | 16 | 16 |
-| **v2.5.0** - **v2.5.4** | Yes | Yes | 18 | 18 |
-| **v2.5.5+** | Yes | Yes | 18 | 20 |
+| Chaincode Docker image  | Peer connectivity v1.4 | Peer connectivity v2.x | Minimum supported Node.js | Node.js runtime |
+| ----------------------- | ---------------------- | ---------------------- | ------------------------- | --------------- |
+| **v1.4.5**              | Yes                    | Yes                    | 8                         | 8               |
+| **v2.2.x**              | Yes                    | Yes                    | 12                        | 12              |
+| **v2.3.x**              | Yes                    | Yes                    | 12                        | 12              |
+| **v2.4.x**              | Yes                    | Yes                    | 16                        | 16              |
+| **v2.5.0** - **v2.5.4** | Yes                    | Yes                    | 18                        | 18              |
+| **v2.5.5** - **v2.5.7** | Yes                    | Yes                    | 18                        | 20              |
+| **v2.5.8+**             | Yes                    | Yes                    | 18                        | 22              |
 
 Whilst these are defaults based on the corresponding `fabric-nodeenv` Docker image version, the Docker image used to host the chaincode and contracts can be altered. Set the environment variable `CORE_CHAINCODE_NODE_RUNTIME` on the peer to the name of the desired Docker image and version.
 
@@ -43,24 +44,25 @@ Node modules that are produced are `fabric-contract-api`, `fabric-shim` & `fabri
 
 ### Supported Runtimes
 
-* Fabric v1.4 Node.js chaincode modules are supported running Nodejs 8.16.1 with the x86_64 architecture.
-* Fabric v2.2/v2.3 Node.js chaincode modules are supported running in Node.js 12.22.6, with the x86_64 architecture.
-* Fabric v2.4 Node.js chaincode modules are supported running in Node.js 16.x, with the x86_64 architecture.
-* Fabric v2.5.x Node.js chaincode modules are supported running in Node.js 18.x, with the x86_64 and arm64 architectures.
+- Fabric v1.4 Node.js chaincode modules are supported running Nodejs 8.16.1 with the x86_64 architecture.
+- Fabric v2.2/v2.3 Node.js chaincode modules are supported running in Node.js 12.22.6, with the x86_64 architecture.
+- Fabric v2.4 Node.js chaincode modules are supported running in Node.js 16.x, with the x86_64 architecture.
+- Fabric v2.5.x Node.js chaincode modules are supported running in Node.js 18.x, with the x86_64 and arm64 architectures.
 
 Architecture Support: all Docker images, runtimes, tools are tested under x86_64 ONLY
 
 ### Default Peer Runtime selection
 
-* Fabric 2.2/2.3 `fabric-nodeenv` Docker image is based on node:12.22.6-alpine.
-* Fabric 2.4 `fabric-nodeenv` Docker image is based on node:16-alpine.
-* Fabric 2.5.0 - 2.5.4 `fabric-nodeenv` Docker image is based on node:18-alpine.
-* Fabric 2.5.5+ `fabric-nodeenv` Docker image is based on node:20-alpine.
+- Fabric 2.2/2.3 `fabric-nodeenv` Docker image is based on node:12.22.6-alpine.
+- Fabric 2.4 `fabric-nodeenv` Docker image is based on node:16-alpine.
+- Fabric 2.5.0 - 2.5.4 `fabric-nodeenv` Docker image is based on node:18-alpine.
+- Fabric 2.5.5+ `fabric-nodeenv` Docker image is based on node:20-alpine.
+- Fabric 3.0 `fabric-nodeenv` Docker image is based on node:22-alpine
 
-*Note:* With the default Docker image used by Fabric 2.x, the packaged code will be installed with npm. If a `package-lock.json` or a `npm-shrinkwrap.json` file is present, `npm ci --only=production` will be used. Otherwise `npm install --production` will be used. 
+_Note:_ With the default Docker image used by Fabric 2.x and later, the packaged code will be installed with npm. If a `package-lock.json` or a `npm-shrinkwrap.json` file is present, `npm ci --only=production` will be used. Otherwise `npm install --production` will be used.
 
 When using Fabric 1.4.x, the Docker image that is used to run the Node.js chaincode is node v8.16.1. It is installed with npm install --production
 
 ### Supported Runtime communication with the Peer
 
-Subject to a suitable runtime environment, the 1.4.x Node.js chaincode modules and 2.x Node.js chaincode modules can be used to communicate with a Fabric 2.x or 1.4.x Peer - with the level of functionality that is implied by the Fabric version in use. 
+Subject to a suitable runtime environment, the 1.4.x Node.js chaincode modules and 2.x Node.js chaincode modules can be used to communicate with a Fabric 2.x or 1.4.x Peer - with the level of functionality that is implied by the Fabric version in use.
