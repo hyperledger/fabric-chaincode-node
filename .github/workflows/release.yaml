@@ -39,12 +39,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    strategy:
-      fail-fast: false
-      matrix:
-        DOCKER_REGISTRY:
-          - "docker.io"
-          - "ghcr.io"
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -57,24 +51,36 @@ jobs:
               max-parallelism = 1
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Login to the ${{ matrix.DOCKER_REGISTRY }} Container Registry
+      - name: Login to Docker Hub
+        # If testing on a fork, login error may occur and can be ignored
+        continue-on-error: true
         uses: docker/login-action@v3
         with:
-          registry: ${{ matrix.DOCKER_REGISTRY }}
-          username: ${{ matrix.DOCKER_REGISTRY == 'docker.io' && secrets.DOCKERHUB_USERNAME || github.actor }}
-          password: ${{ matrix.DOCKER_REGISTRY == 'docker.io' && secrets.DOCKERHUB_TOKEN    || secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ matrix.DOCKER_REGISTRY }}/${{ github.repository_owner }}/fabric-nodeenv
+          # If testing on a fork, Docker Hub publish might fail so place it last
+          images: |
+            ghcr.io/${{ github.repository_owner }}/fabric-nodeenv
+            docker.io/${{ github.repository_owner }}/fabric-nodeenv
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}.{{minor}}.{{patch}}
+      - name: Get Git commit timestamps
+        run: echo "TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
       - name: Build and push image
         id: push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
           file: docker/fabric-nodeenv/Dockerfile
@@ -82,3 +88,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
+        env:
+          SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
