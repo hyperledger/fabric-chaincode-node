@@ -25,8 +25,7 @@ const exportPeerCommand = async (org) => {
     const role = 'Admin';
     const args =
         `export PATH=${dir}/bin:$PATH && export FABRIC_CFG_PATH=${dir}/config/ && ` +
-        `export CORE_PEER_TLS_ENABLED=true && export CORE_PEER_LOCALMSPID="${
-            org[0].toUpperCase() + org.slice(1)
+        `export CORE_PEER_TLS_ENABLED=true && export CORE_PEER_LOCALMSPID="${org[0].toUpperCase() + org.slice(1)
         }MSP" && ` +
         `export CORE_PEER_TLS_ROOTCERT_FILE=${dir}/test-network/organizations/peerOrganizations/${org}.example.com/peers/peer0.${org}.example.com/tls/ca.crt && ` +
         `export CORE_PEER_MSPCONFIGPATH=${dir}/test-network/organizations/peerOrganizations/${org}.example.com/users/${role}@${org}.example.com/msp && ` +
@@ -69,7 +68,7 @@ const queryFunctions = async () => {
     const metadata = JSON.parse(stdout);
 
     const expectedMetadata =
-        '{"$schema":"https://hyperledger.github.io/fabric-chaincode-node/main/api/contract-schema.json","contracts":{"UpdateValues":{"name":"UpdateValues","contractInstance":{"name":"UpdateValues","logBuffer":{"output":[]},"default":true},"transactions":[{"name":"setup","tags":["SUBMIT","submitTx"]},{"name":"setNewAssetValue","tags":["SUBMIT","submitTx"],"parameters":[{"name":"arg0","description":"Argument 0","schema":{"type":"string"}}]},{"name":"doubleAssetValue","tags":["SUBMIT","submitTx"]}],"info":{"title":"","version":""}},"RemoveValues":{"name":"RemoveValues","contractInstance":{"name":"RemoveValues"},"transactions":[{"name":"quarterAssetValue","tags":["SUBMIT","submitTx"]},{"name":"getAssetValue","tags":["SUBMIT","submitTx"]}],"info":{"title":"","version":""}},"org.hyperledger.fabric":{"name":"org.hyperledger.fabric","contractInstance":{"name":"org.hyperledger.fabric"},"transactions":[{"name":"GetMetadata"}],"info":{"title":"","version":""}}},"info":{"version":"2.5.8","title":"chaincode"},"components":{"schemas":{}}}';
+        '{"$schema":"https://hyperledger.github.io/fabric-chaincode-node/main/api/contract-schema.json","contracts":{"UpdateValues":{"name":"UpdateValues","contractInstance":{"name":"UpdateValues","logBuffer":{"output":[]},"default":true},"transactions":[{"name":"setup","tags":["SUBMIT","submitTx"]},{"name":"setNewAssetValue","tags":["SUBMIT","submitTx"],"parameters":[{"name":"arg0","description":"Argument 0","schema":{"type":"string"}}]},{"name":"doubleAssetValue","tags":["SUBMIT","submitTx"]}],"info":{"title":"","version":""}},"RemoveValues":{"name":"RemoveValues","contractInstance":{"name":"RemoveValues"},"transactions":[{"name":"quarterAssetValue","tags":["SUBMIT","submitTx"]},{"name":"getAssetValue","tags":["SUBMIT","submitTx"]}],"info":{"title":"","version":""}},"org.hyperledger.fabric":{"name":"org.hyperledger.fabric","contractInstance":{"name":"org.hyperledger.fabric"},"transactions":[{"name":"GetMetadata"}],"info":{"title":"","version":""}}},"info":{"version":"2.5.9","title":"chaincode"},"components":{"schemas":{}}}';
 
     const schema = fs.readFileSync(
         path.join(
@@ -98,14 +97,14 @@ const instantiateChaincode = async () => {
     // Invoke init function
     await runcmds([
         (await exportPeerCommand('org1')) +
-            ' && ' +
-            util.format(
-                'peer chaincode invoke -o localhost:7050 %s -C %s -n %s -c %s --waitForEvent',
-                getTLSArgs(),
-                CHANNEL_NAME,
-                'mysmartcontract',
-                '\'{"Args":["UpdateValues:setup"]}\''
-            ),
+        ' && ' +
+        util.format(
+            'peer chaincode invoke -o localhost:7050 %s -C %s -n %s -c %s --waitForEvent',
+            getTLSArgs(),
+            CHANNEL_NAME,
+            'mysmartcontract',
+            '\'{"Args":["UpdateValues:setup"]}\''
+        ),
     ]);
 };
 
