@@ -5,7 +5,7 @@ name: Scheduled build
 
 on:
   schedule:
-    - cron: "5 2 * * *"
+    - cron: "5 2 * * 6"
   workflow_dispatch:
 
 jobs:
