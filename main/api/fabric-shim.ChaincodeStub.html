@@ -33,14 +33,14 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="fabric-contract-api.Context.html">fabric-contract-api.Context</a></li><li><a href="fabric-contract-api.Contract.html">fabric-contract-api.Contract</a></li><li><a href="fabric-shim.ChaincodeInterface.html">fabric-shim.ChaincodeInterface</a></li><li><a href="fabric-shim.ChaincodeProposalPayload.html">fabric-shim.ChaincodeProposalPayload</a></li><li><a href="fabric-shim.ChaincodeStub.html">fabric-shim.ChaincodeStub</a></li><li><a href="fabric-shim.ChannelHeader.html">fabric-shim.ChannelHeader</a></li><li><a href="fabric-shim.ClientIdentity.html">fabric-shim.ClientIdentity</a></li><li><a href="fabric-shim.CommonIterator.html">fabric-shim.CommonIterator</a></li><li><a href="fabric-shim.ErrorResponse.html">fabric-shim.ErrorResponse</a></li><li><a href="fabric-shim.FunctionAndParameters.html">fabric-shim.FunctionAndParameters</a></li><li><a href="fabric-shim.Header.html">fabric-shim.Header</a></li><li><a href="fabric-shim.HistoryQueryIterator.html">fabric-shim.HistoryQueryIterator</a></li><li><a href="fabric-shim.PaginationQueryResponse.html">fabric-shim.PaginationQueryResponse</a></li><li><a href="fabric-shim.PrivateQueryResponse.html">fabric-shim.PrivateQueryResponse</a></li><li><a href="fabric-shim.Proposal.html">fabric-shim.Proposal</a></li><li><a href="fabric-shim.ProposalCreator.html">fabric-shim.ProposalCreator</a></li><li><a href="fabric-shim.QueryResponseMetadata.html">fabric-shim.QueryResponseMetadata</a></li><li><a href="fabric-shim.Response.html">fabric-shim.Response</a></li><li><a href="fabric-shim.Shim.html">fabric-shim.Shim</a></li><li><a href="fabric-shim.SignatureHeader.html">fabric-shim.SignatureHeader</a></li><li><a href="fabric-shim.SignedProposal.html">fabric-shim.SignedProposal</a></li><li><a href="fabric-shim.StateQueryIterator.html">fabric-shim.StateQueryIterator</a></li><li><a href="fabric-shim.SuccessResponse.html">fabric-shim.SuccessResponse</a></li><li><a href="module.exports.html">module.exports</a></li><li><a href="module-fabric-ledger.Ledger.html">fabric-ledger.Ledger</a></li>
+					<li><a href="fabric-contract-api.Context.html">fabric-contract-api.Context</a></li><li><a href="fabric-contract-api.Contract.html">fabric-contract-api.Contract</a></li><li><a href="fabric-shim.ChaincodeInterface.html">fabric-shim.ChaincodeInterface</a></li><li><a href="fabric-shim.ChaincodeProposalPayload.html">fabric-shim.ChaincodeProposalPayload</a></li><li><a href="fabric-shim.ChaincodeStub.html">fabric-shim.ChaincodeStub</a></li><li><a href="fabric-shim.ChannelHeader.html">fabric-shim.ChannelHeader</a></li><li><a href="fabric-shim.ClientIdentity.html">fabric-shim.ClientIdentity</a></li><li><a href="fabric-shim.CommonIterator.html">fabric-shim.CommonIterator</a></li><li><a href="fabric-shim.ErrorResponse.html">fabric-shim.ErrorResponse</a></li><li><a href="fabric-shim.FunctionAndParameters.html">fabric-shim.FunctionAndParameters</a></li><li><a href="fabric-shim.Header.html">fabric-shim.Header</a></li><li><a href="fabric-shim.HistoryQueryIterator.html">fabric-shim.HistoryQueryIterator</a></li><li><a href="fabric-shim.PaginationQueryResponse.html">fabric-shim.PaginationQueryResponse</a></li><li><a href="fabric-shim.PrivateQueryResponse.html">fabric-shim.PrivateQueryResponse</a></li><li><a href="fabric-shim.Proposal.html">fabric-shim.Proposal</a></li><li><a href="fabric-shim.ProposalCreator.html">fabric-shim.ProposalCreator</a></li><li><a href="fabric-shim.QueryResponseMetadata.html">fabric-shim.QueryResponseMetadata</a></li><li><a href="fabric-shim.Response.html">fabric-shim.Response</a></li><li><a href="fabric-shim.Shim.html">fabric-shim.Shim</a></li><li><a href="fabric-shim.SignatureHeader.html">fabric-shim.SignatureHeader</a></li><li><a href="fabric-shim.SignedProposal.html">fabric-shim.SignedProposal</a></li><li><a href="fabric-shim.StateQueryIterator.html">fabric-shim.StateQueryIterator</a></li><li><a href="fabric-shim.SuccessResponse.html">fabric-shim.SuccessResponse</a></li><li><a href="module.exports.html">module.exports</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="interfaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Interfaces<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="ChaincodeServerOpts.html">ChaincodeServerOpts</a></li><li><a href="ChaincodeServerTLSProperties.html">ChaincodeServerTLSProperties</a></li>
+					<li><a href="ChaincodeServerOpts.html">ChaincodeServerOpts</a></li><li><a href="ChaincodeServerTLSProperties.html">ChaincodeServerTLSProperties</a></li><li><a href="GRPCOptions.html">GRPCOptions</a></li>
 				</ul>
 			</li>
 			
@@ -102,7 +102,7 @@ The stub encapsulates the APIs between the chaincode implementation and the Fabr
         
 <hr>
 <dt>
-    <h4 class="name" id="ChaincodeStub"><span class="type-signature"></span>new ChaincodeStub(client, channel_id, txId, chaincodeInput, signedProposal)</h4>
+    <h4 class="name" id="ChaincodeStub"><span class="type-signature"></span>new ChaincodeStub(client, channel_id, txId, chaincodeInput, signedProposalpb)</h4>
     
     
 </dt>
@@ -237,7 +237,7 @@ The stub encapsulates the APIs between the chaincode implementation and the Fabr
 
         <tr>
             
-                <td class="name"><code>signedProposal</code></td>
+                <td class="name"><code>signedProposalpb</code></td>
             
 
             <td class="type">
@@ -254,7 +254,7 @@ The stub encapsulates the APIs between the chaincode implementation and the Fabr
 
             
 
-            <td class="description last">the proposal</td>
+            <td class="description last">the proposal protobuf</td>
         </tr>
 
     
@@ -4917,7 +4917,7 @@ If `channel` is empty, the caller's channel is assumed.
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;Array.&lt;byte>></span>
+<span class="param-type">Array.&lt;string></span>
 
 
 
@@ -5036,6 +5036,165 @@ If `channel` is empty, the caller's channel is assumed.
 
 
         
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="purgePrivateData"><span class="type-signature">&lt;async> </span>purgePrivateData(collection, key)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        PurgePrivateData records the specified `key` to be purged in the private writeset
+of the transaction. Note that only hash of the private writeset goes into the
+transaction proposal response (which is sent to the client who issued the
+transaction) and the actual private writeset gets temporarily stored in a
+transient store. The `key` and its value will be deleted from the collection
+when the transaction is validated and successfully committed, and will
+subsequently be completely removed from the private data store (that maintains
+the historical versions of private writesets) as a background operation.
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>collection</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The collection name</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Private data variable key to delete from the state store</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 </dd>
@@ -5421,13 +5580,15 @@ or rejected if any errors
 
     
     <div class="description">
-        Allows the chaincode to propose an event on the transaction proposal. When the transaction
-is included in a block and the block is successfully committed to the ledger, the block event
-will be delivered to the current event listeners that have been registered with the peer's
-event producer. Note that the block event gets delivered to the listeners regardless of the
-status of the included transactions (can be either valid or invalid), so client applications
-are responsible for checking the validity code on each transaction. Consult each SDK's documentation
-for details.
+        Allows the chaincode to propose an event on the transaction proposal response.
+When the transaction is included in a block and the block is successfully committed to the ledger,
+the block event (including transaction level chaincode events)
+will be delivered to the current client application event listeners that have been registered with the peer's event producer.
+Consult each SDK's documentation for details.
+Only a single chaincode event can be included in a transaction.
+If setEvent() is called multiple times only the last event will be included in the transaction.
+The event must originate from the outer-most invoked chaincode in chaincode-to-chaincode scenarios.
+The marshaled ChaincodeEvent will be available in the transaction's ChaincodeAction.events field.
     </div>
     
 
@@ -6100,9 +6261,9 @@ the values of the attributes.
 
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a>
 	
-		on 2021-11-29T13:37:02+00:00
+		on 2025-02-04T14:27:54-05:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
