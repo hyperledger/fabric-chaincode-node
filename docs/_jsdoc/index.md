@@ -1,8 +1,8 @@
-[![Build Status](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_apis/build/status/Fabric-Chaincode-Node?branchName=main)](https://dev.azure.com/Hyperledger/Fabric-Chaincode-Node/_build/latest?definitionId=33&branchName=main)
+[![Build Status](https://github.com/hyperledger/fabric-chaincode-node/actions/workflows/schedule.yaml/badge.svg)](https://github.com/hyperledger/fabric-chaincode-node/actions/workflows/schedule.yaml)
 [![fabric-contract-api npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-contract-api)](https://www.npmjs.com/package/fabric-contract-api)
 [![fabric-shim npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim)](https://www.npmjs.com/package/fabric-shim)
 [![fabric-shim-api npm module](https://img.shields.io/npm/v/fabric-shim?label=fabric-shim-api)](https://www.npmjs.com/package/fabric-shim-api)
-[![Rocket.Chat](https://chat.hyperledger.org/images/join-chat.svg)](https://chat.hyperledger.org/channel/fabric-chaincode-dev)
+[Discord Chat](https://discord.com/invite/hyperledger)
 
 ## Overview
 
@@ -12,7 +12,7 @@ The `fabric-shim` provides the *chaincode interface*, a lower level API for impl
 
 To confirm that the `fabric-shim` maintains API and functional compatibility with previous versions of Hyperledger Fabric.
 
-A more detailed explanation on the concept and programming model can be found in the [smart contract processing topic](https://hyperledger-fabric.readthedocs.io/en/release-2.3/developapps/smartcontract.html).
+A more detailed explanation on the concept and programming model can be found in the [smart contract tutorial](https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html#asset-transfer-chaincode).
 
 ## Contract Interface
 
