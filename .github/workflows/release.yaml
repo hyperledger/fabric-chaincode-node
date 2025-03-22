@@ -62,7 +62,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Login to Docker Hub
-        if: ${{ github.repository_owner == 'hyperledger' }}
         uses: docker/login-action@v3
         with:
           registry: docker.io
@@ -76,10 +75,9 @@ jobs:
         with:
           file: docker/fabric-nodeenv/Dockerfile
           context: docker/fabric-nodeenv
-          outputs: type=registry,name=${{ env.OUTPUT_NAME }},push-by-digest=true,name-canonical=true
+          outputs: type=registry,"name=${{ format('ghcr.io/{0},docker.io/{0}', env.IMAGE_NAME) }}",push-by-digest=true,name-canonical=true
         env:
           SOURCE_DATE_EPOCH: ${{ env.SOURCE_DATE_EPOCH }}
-          OUTPUT_NAME: ${{ github.repository_owner == 'hyperledger' && format('ghcr.io/{0},docker.io/{0}', env.IMAGE_NAME) || format('ghcr.io/{0}', env.IMAGE_NAME) }}
       - name: Export digest
         run: |
           mkdir -p ${{ runner.temp }}/digests
@@ -102,7 +100,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        registry: ${{ fromJSON(github.repository_owner == 'hyperledger' && '["docker.io", "ghcr.io"]' || '["ghcr.io"]') }}
+        registry:
+          - docker.io
+          - ghcr.io
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
