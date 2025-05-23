@@ -478,6 +478,19 @@ class ChaincodeStub {
     }
 
     /**
+     * Retrieves the current values of the state variables for the given keys
+     * @async
+     * @param {...string} keys State variable keys to retrieve from the state store
+     * @returns {Promise<byte[][]>} Promise for the array of current values of the given keys
+     */
+    async getMultipleStates(...keys) {
+        logger.debug('getMultipleStates called with keys:%o', keys);
+        // Access public data by setting the collection to empty string
+        const collection = '';
+        return await this.handler.handleGetMultipleStates(collection, keys, this.channel_id, this.txId);
+    }
+
+    /**
      * Writes the state variable <code>key</code> of value <code>value</code>
      * to the state store. If the variable already exists, the value will be
      * overwritten.
