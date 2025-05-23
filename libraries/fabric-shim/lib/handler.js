@@ -439,7 +439,7 @@ class ChaincodeMessageHandler {
 
         if (responseMsg.getType() === peer.ChaincodeMessage.Type.RESPONSE) {
             const result = peer.GetStateMultipleResult.deserializeBinary(responseMsg.getPayload());
-            return result.getValuesList(); 
+            return result.getValuesList();
         }
 
         if (responseMsg.getType() === peer.ChaincodeMessage.Type.ERROR) {
