@@ -277,6 +277,8 @@ class ChaincodeMessageHandler {
     constructor(stream, chaincode) {
         this._stream = stream;
         this.chaincode = chaincode;
+        this.usePeerGetMultipleKeys = false;
+        this.maxSizeGetMultipleKeys = 0;
     }
 
     // this is a long-running method that does not return until
@@ -386,6 +388,65 @@ class ChaincodeMessageHandler {
         });
         logger.debug('handleGetState - with key:', key);
         return await this._askPeerAndListen(msg, 'GetState');
+    }
+
+    async handleGetMultipleStates(collection, keys, channel_id, txId) {
+        if (keys.length === 0) {
+            return [];
+        }
+
+        const responses = [];
+
+        if (!this.usePeerGetMultipleKeys) {
+            for (const key of keys) {
+                const resp = await this.handleGetState(collection, key, channel_id, txId);
+                responses.push(resp);
+            }
+            return responses;
+        }
+
+        let remainingKeys = [...keys];
+        while (remainingKeys.length > this.maxSizeGetMultipleKeys) {
+            const batch = remainingKeys.slice(0, this.maxSizeGetMultipleKeys);
+            const resp = await this.handleOneSendGetMultipleStates(collection, batch, channel_id, txId);
+            responses.push(...resp);
+            remainingKeys = remainingKeys.slice(this.maxSizeGetMultipleKeys);
+        }
+
+        if (remainingKeys.length > 0) {
+            const resp = await this.handleOneSendGetMultipleStates(collection, remainingKeys, channel_id, txId);
+            responses.push(...resp);
+        }
+
+        return responses.map(r => (r.length === 0 ? null : r));
+    }
+
+    async handleOneSendGetMultipleStates(collection, keys, channel_id, txId) {
+        const msgPb = new peer.GetStateMultiple();
+        msgPb.setCollection(collection);
+        msgPb.setKeysList(keys);
+
+        const msg = mapToChaincodeMessage({
+            type: peer.ChaincodeMessage.Type.GET_STATE_MULTIPLE,
+            payload: msgPb.serializeBinary(),
+            txid: txId,
+            channel_id: channel_id
+        });
+
+        logger.debug('handleOneSendGetMultipleStates - keys:', keys);
+
+        const responseMsg = await this._askPeerAndListen(msg, 'GetMultipleStates');
+
+        if (responseMsg.getType() === peer.ChaincodeMessage.Type.RESPONSE) {
+            const result = peer.GetStateMultipleResult.deserializeBinary(responseMsg.getPayload());
+            return result.getValuesList(); 
+        }
+
+        if (responseMsg.getType() === peer.ChaincodeMessage.Type.ERROR) {
+            throw new Error(Buffer.from(responseMsg.getPayload()).toString());
+        }
+
+        throw new Error(`Unexpected message type ${responseMsg.getType()} received`);
     }
 
     async handlePutState(collection, key, value, channel_id, txId) {
