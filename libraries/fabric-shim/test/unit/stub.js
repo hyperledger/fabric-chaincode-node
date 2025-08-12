@@ -612,6 +612,56 @@ describe('Stub', () => {
             });
         });
 
+        describe.only('getMultipleStates', () => {
+            it('should return handler.handleGetMultipleStates results', async () => {
+                const handleGetMultipleStatesStub = sinon.stub().resolves(['value1', 'value2', 'value3']);
+
+                const stub = new Stub({
+                    handleGetMultipleStates: handleGetMultipleStatesStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                const result = await stub.getMultipleStates('key1', 'key2', 'key3');
+                expect(result).to.deep.equal(['value1', 'value2', 'value3']);
+                
+                expect(handleGetMultipleStatesStub.calledOnce).to.be.true;
+                expect(handleGetMultipleStatesStub.firstCall.args).to.deep.equal([
+                    '',
+                    ['key1', 'key2', 'key3'],
+                    'dummyChannelId',
+                    'dummyTxid'
+                ]);
+            });
+
+            it('should return empty array if no keys passed', async () => {
+                const handleGetMultipleStatesStub = sinon.stub().resolves([]);
+
+                const stub = new Stub({
+                    handleGetMultipleStates: handleGetMultipleStatesStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                const result = await stub.getMultipleStates();
+                expect(result).to.deep.equal([]);
+
+                expect(handleGetMultipleStatesStub.calledOnce).to.be.true;
+                expect(handleGetMultipleStatesStub.firstCall.args).to.deep.equal([
+                    '',
+                    [],
+                    'dummyChannelId',
+                    'dummyTxid'
+                ]);
+            });
+
+            it('should throw error if handler rejects', async () => {
+                const handleGetMultipleStatesStub = sinon.stub().rejects(new Error('Something gone wrong'));
+
+                const stub = new Stub({
+                    handleGetMultipleStates: handleGetMultipleStatesStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                await expect(stub.getMultipleStates('key1')).to.be.rejectedWith('Something gone wrong');
+            });
+        });
+
         describe('putState', () => {
             it ('should return handler.handlePutState', async () => {
                 const handlePutStateStub = sinon.stub().resolves('some state');
