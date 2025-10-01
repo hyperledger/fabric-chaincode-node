@@ -9,6 +9,9 @@ on:
       - "v[0-9]+.[0-9]+.[0-9]+"
       - "v[0-9]+.[0-9]+.[0-9]+-*"
 
+permissions:
+  contents: read
+
 env:
   IMAGE_NAME: ${{ github.repository_owner }}/fabric-nodeenv
 
@@ -19,22 +22,27 @@ jobs:
   publishnpm:
     runs-on: ubuntu-24.04
     needs: test
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version: "18.x"
+          node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
+      # Ensure npm 11.5.1 or later for trusted publishing support
+      - name: Update npm
+        run: npm install -g npm@latest
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: node-tgzs
           path: build/
-      - run: |
+      - name: Publish packages with provenance (OIDC)
+        run: |
           set -xev
           ls -lart build/
           cd build
           find . -type f -name 'fabric-*.tgz' -exec npm publish {} \;
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   docker-build-push:
     name: Push Docker image
