@@ -19,7 +19,7 @@
     "gulp-shell": "~0.7.1",
     "merge-stream": "~2.0.0",
     "npm-cli-login": "~0.1.1",
-    "ip": "^1.1.5",
+    "ip": "^2.0.1",
     "gulp-cli": "2.3.0"
   },
   "devDependencies": {
