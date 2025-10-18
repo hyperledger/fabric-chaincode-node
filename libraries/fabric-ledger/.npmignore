@@ -1,18 +1,8 @@
 # Copyright IBM Corp. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# OS generated files #
-.DS_Store
 
-# Node Files #
-/node_modules
-npm-debug.log
+# Exclude everything except specific inclusions below
+**/*
 
-# Coverage #
-/coverage
-
-# Test Files #
-/test
-
-# Source files #
-/src
+!lib/**/*

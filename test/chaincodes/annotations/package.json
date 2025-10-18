@@ -6,8 +6,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "fabric-chaincode-node start",
-    "prestart": "tsc"
+    "start": "fabric-chaincode-node start"
   },
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -17,11 +16,12 @@
   "author": "",
   "license": "APACHE-2.0",
   "dependencies": {
-    "@types/node": "^16.11.4",
     "fabric-contract-api": "2.5.9",
-    "fabric-shim": "2.5.9",
-    "ts-node": "^3.3.0",
-    "tslint": "^5.6.0",
-    "typescript": "^4.0.2"
+    "fabric-shim": "2.5.9"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.4",
+    "@types/node": "^18.19.130",
+    "typescript": "~5.8.3"
   }
 }

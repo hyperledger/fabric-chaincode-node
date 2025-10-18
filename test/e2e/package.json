@@ -11,11 +11,11 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "git-rev-sync": "3.0.1",
+    "git-rev-sync": "^3.0.2",
     "gulp": "^4.0.2",
     "toolchain": "1.0.0-dev",
     "delay": "5.0.0",
-    "ip": "^1.1.5",
+    "ip": "^2.0.1",
     "ajv": "^6.12.2",
     "ajv-cli": "^3.2.1",
     "spec-junit-splitter-mocha-reporter": "1.0.1"

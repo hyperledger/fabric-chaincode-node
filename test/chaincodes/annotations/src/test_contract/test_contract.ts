@@ -4,7 +4,14 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-import { Contract, Context, Transaction, Returns, Object, Property } from 'fabric-contract-api';
+import {
+    Contract,
+    Context,
+    Transaction,
+    Returns,
+    Object,
+    Property,
+} from 'fabric-contract-api';
 
 @Object()
 class SomethingThatCouldBeAProperty {
@@ -22,7 +29,7 @@ class SomethingThatCouldBeAProperty {
     serialize(): string {
         return JSON.stringify({
             id: this.id,
-            value: this.value
+            value: this.value,
         });
     }
 
@@ -53,7 +60,12 @@ class Asset {
     @Property()
     public extra: SomethingThatCouldBeAProperty;
 
-    constructor(id: string, name: string, value: number, extra: SomethingThatCouldBeAProperty) {
+    constructor(
+        id: string,
+        name: string,
+        value: number,
+        extra: SomethingThatCouldBeAProperty
+    ) {
         this.id = id;
         this.name = name;
         this.value = value;
@@ -65,50 +77,73 @@ class Asset {
             id: this.id,
             name: this.name,
             value: this.value,
-            extra: this.extra.serialize()
+            extra: this.extra.serialize(),
         });
     }
 
     static deserialize(stringifed: string): Asset {
         const json = JSON.parse(stringifed);
 
-        if (!json.hasOwnProperty('id') || !json.hasOwnProperty('name') || !json.hasOwnProperty('value')) {
+        if (
+            !json.hasOwnProperty('id') ||
+            !json.hasOwnProperty('name') ||
+            !json.hasOwnProperty('value')
+        ) {
             throw new Error('Was not JSON formatted asset');
         }
 
-        return new Asset(json.id, json.name, json.value, SomethingThatCouldBeAProperty.deserialize(json.extra));
+        return new Asset(
+            json.id,
+            json.name,
+            json.value,
+            SomethingThatCouldBeAProperty.deserialize(json.extra)
+        );
     }
 }
 
 @Object()
 class Person {
     @Property()
-    private eyeColour: string;
+    private eyeColour: string = '';
 }
 
 @Object()
 class Bob extends Person {
     @Property()
-    private houseName: string;
-
+    private houseName: string = '';
 }
 
 @Object()
 class Fred extends Person {
     @Property()
-    private favouriteColour: string;
+    private favouriteColour: string = '';
 }
 
 export default class TestContract extends Contract {
     constructor() {
-        super()
+        super();
     }
 
     @Transaction()
-    public async createAsset(ctx: Context, id: string, name: string, value: number, extraID: string, extraValue: number) {
-        const asset = new Asset(id, name, value, new SomethingThatCouldBeAProperty(extraID, extraValue));
+    public async createAsset(
+        ctx: Context,
+        id: string,
+        name: string,
+        value: number,
+        extraID: string,
+        extraValue: number
+    ) {
+        const asset = new Asset(
+            id,
+            name,
+            value,
+            new SomethingThatCouldBeAProperty(extraID, extraValue)
+        );
 
-        await ctx.stub.putState(ctx.stub.createCompositeKey(Asset.stateIdentifier, [asset.id]), Buffer.from(asset.serialize()))
+        await ctx.stub.putState(
+            ctx.stub.createCompositeKey(Asset.stateIdentifier, [asset.id]),
+            Buffer.from(asset.serialize())
+        );
     }
 
     @Transaction()
@@ -118,13 +153,18 @@ export default class TestContract extends Contract {
         existingAsset.value = asset.value;
         existingAsset.extra.value = asset.extra.value;
 
-        await ctx.stub.putState(ctx.stub.createCompositeKey(Asset.stateIdentifier, [asset.id]), Buffer.from(existingAsset.serialize()))
+        await ctx.stub.putState(
+            ctx.stub.createCompositeKey(Asset.stateIdentifier, [asset.id]),
+            Buffer.from(existingAsset.serialize())
+        );
     }
 
     @Transaction(false)
-    @Returns("Asset")
+    @Returns('Asset')
     public async getAsset(ctx: Context, id: string): Promise<Asset> {
-        const json = await ctx.stub.getState(ctx.stub.createCompositeKey(Asset.stateIdentifier, [id]))
+        const json = await ctx.stub.getState(
+            ctx.stub.createCompositeKey(Asset.stateIdentifier, [id])
+        );
 
         return Asset.deserialize(json.toString());
     }
@@ -132,5 +172,4 @@ export default class TestContract extends Contract {
     public async ignoreMe(ctx: Context, id: string) {
         // DO NOTHING
     }
-    
 }

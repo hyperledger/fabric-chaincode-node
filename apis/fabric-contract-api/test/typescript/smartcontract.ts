@@ -5,13 +5,11 @@
 
 */
 
-import {Contract, Context} from 'fabric-contract-api';
-import {ChaincodeStub, ClientIdentity} from 'fabric-shim-api';
+import { Contract, Context } from 'fabric-contract-api';
+import { ChaincodeStub, ClientIdentity } from 'fabric-shim-api';
 
 export class ScenarioContext extends Context {
-    customFunction(): void {
-
-    }
+    customFunction(): void {}
 }
 
 export default class TestContractOne extends Contract {
@@ -19,7 +17,7 @@ export default class TestContractOne extends Contract {
         super('org.papernet.commercialpaper');
     }
 
-    beforeTransaction(ctx: ScenarioContext) {
+    beforeTransaction(ctx: ScenarioContext): Promise<void> {
         // test that the context super class properties are available
         const stubApi: ChaincodeStub = ctx.stub;
         const clientIdentity: ClientIdentity = ctx.clientIdentity;
@@ -32,29 +30,33 @@ export default class TestContractOne extends Contract {
         return Promise.resolve();
     }
 
-    afterTransaction(ctx: ScenarioContext, result: any) {
+    afterTransaction(ctx: ScenarioContext, result: any): Promise<void> {
         // This proves that typescript is enforcing the
         // return type of Promise<void>
         return Promise.resolve();
     }
 
-    aroundTransaction(ctx: ScenarioContext, fn: Function, parameters: any) {
+    aroundTransaction(
+        ctx: ScenarioContext,
+        fn: Function,
+        parameters: any
+    ): Promise<void> {
         // This proves that typescript is enforcing the
         // return type of Promise<void>
         return super.aroundTransaction(ctx, fn, parameters);
     }
 
-    unknownTransaction(ctx: ScenarioContext) {
+    unknownTransaction(ctx: ScenarioContext): Promise<void> {
         // This proves that typescript is enforcing the
         // return type of Promise<void>
         return Promise.resolve();
     }
 
-    createContext() {
+    createContext(): ScenarioContext {
         return new ScenarioContext();
     }
 
-    async Transaction(ctx: ScenarioContext) {
+    async Transaction(ctx: ScenarioContext): Promise<void> {
         // test that the context super class properties are available
         const stubApi: ChaincodeStub = ctx.stub;
         const clientIdentity: ClientIdentity = ctx.clientIdentity;
@@ -69,7 +71,7 @@ export class TestContractTwo extends Contract {
         super();
     }
 
-    async Transaction(ctx: Context)  {
+    async Transaction(ctx: Context): Promise<void> {
         const stubApi: ChaincodeStub = ctx.stub;
         const clientIdentity: ClientIdentity = ctx.clientIdentity;
     }

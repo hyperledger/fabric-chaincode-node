@@ -1,2 +1,6 @@
-test
-fabric-contract-api*.tgz
+# Exclude everything except specific inclusions below
+**/*
+
+!lib/**/*
+!schema/**/*
+!types/**/*

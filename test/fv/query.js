@@ -9,25 +9,30 @@ const chai = require('chai');
 chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 const utils = require('./utils');
-const {MED_INC, LONG_STEP} = utils.TIMEOUTS;
-
+const { MED_INC, LONG_STEP } = utils.TIMEOUTS;
 
 describe('Chaincode query', () => {
     const suite = 'query';
     before(async function () {
         this.timeout(LONG_STEP);
-        return utils.installAndInstantiate(suite, 'org.mynamespace.query:instantiate');
+        return utils.installAndInstantiate(suite, {
+            instantiateFunc: 'org.mynamespace.query:instantiate',
+        });
     });
 
     it('should perform an equals query', async function () {
         this.timeout(MED_INC);
         const query = JSON.stringify({
             selector: {
-                value: 'value0'
-            }
+                value: 'value0',
+            },
         });
-        const payload = await utils.query(suite, 'org.mynamespace.query:query', [query]);
-        expect(payload).to.deep.equal(JSON.stringify([{value: 'value0'}]));
+        const payload = await utils.query(
+            suite,
+            'org.mynamespace.query:query',
+            [query]
+        );
+        expect(payload).to.deep.equal(JSON.stringify([{ value: 'value0' }]));
     });
 
     it('should perform an regex query', async function () {
@@ -35,15 +40,21 @@ describe('Chaincode query', () => {
         const query = JSON.stringify({
             selector: {
                 value: {
-                    $regex: 'value[0-2]'
-                }
-            }
+                    $regex: 'value[0-2]',
+                },
+            },
         });
-        const payload = await utils.query(suite, 'org.mynamespace.query:query', [query]);
-        expect(payload).to.deep.equal(JSON.stringify([
-            {value: 'value0'},
-            {value: 'value1'},
-            {value: 'value2'}
-        ]));
+        const payload = await utils.query(
+            suite,
+            'org.mynamespace.query:query',
+            [query]
+        );
+        expect(payload).to.deep.equal(
+            JSON.stringify([
+                { value: 'value0' },
+                { value: 'value1' },
+                { value: 'value2' },
+            ])
+        );
     });
 });
