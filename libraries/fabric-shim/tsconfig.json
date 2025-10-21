@@ -4,23 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 {
-  "compilerOptions": {
-    "types": ["./types/"],
-    "alwaysStrict": true,
-    "module": "commonjs",
-    "declaration": true,
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017",
-    "lib": [
-      "esnext",
-    ]
-  },
-  "include": [
-    "lib/**/*",
-    "test/**/*"
-  ],
-  "exclude": [
-    "node_modules/**/*"
-  ]
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "extends": "@tsconfig/node18/tsconfig.json",
+    "compilerOptions": {
+        "types": ["./types/"],
+        "declaration": true,
+        "declarationMap": true,
+        "erasableSyntaxOnly": true,
+        "isolatedModules": true,
+        "sourceMap": true,
+        "strict": true,
+        "outDir": "lib",
+        "rootDir": "src"
+    },
+    "include": ["lib/**/*", "test/**/*"],
+    "exclude": ["node_modules/**/*"]
 }

@@ -9,7 +9,7 @@
     "url": "https://github.com/hyperledger/fabric-chaincode-node"
   },
   "scripts": {
-    "lint": "eslint ./types/ --ext .ts",
+    "lint": "eslint ./types/",
     "build": "echo No Build needed"
   },
   "keywords": [
@@ -18,13 +18,13 @@
     "Fabric Shim"
   ],
   "engines": {
-    "node": ">=18",
-    "eslint": "^6.6.0"
+    "node": ">=18"
   },
   "types": "./types/index.d.ts",
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/long": "^4.0.1",
-    "eslint": "^6.6.0"
+    "eslint": "^9.37.0",
+    "@eslint/js": "^9.37.0"
   }
 }

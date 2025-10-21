@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export enum CollectionNames {
-    WORLD = 'worldstate'
-}
+export const CollectionNames = {
+    WORLD: 'worldstate',
+} as const;
 
 /**
  * Collection placeholder.
  *
  * @memberof module:fabric-ledger
  */
-export class Collection { }
+export class Collection {}
