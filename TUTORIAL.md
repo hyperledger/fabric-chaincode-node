@@ -15,7 +15,7 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
   "name": "chaincode",
   "description": "My first exciting chaincode implemented in node.js",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "test": "mocha....."
@@ -33,6 +33,7 @@ The dependencies of `fabric-contract-api` and `fabric-shim` will be required.
 }
 
 ```
+
 Remember to add in any additional business logic, and testing libraries needed
 
 Adding `fabric-shim` as a dependency, gives a command `fabric-chaincode-node` that is the script to run for `npm start`.
@@ -45,7 +46,6 @@ Adding `fabric-shim` as a dependency, gives a command `fabric-chaincode-node` th
   },
 ```
 
-
 ### 2: How is chaincode deployed?
 
 Chaincode is deployed by the peer in response to issuing a number of (usually CLI) commands. For node.js chaincode the location of the chaincode npm project is required (the directory that the package.json is in). This does not need to be an installed project, but has to have all the code, and the package.json.
@@ -54,7 +54,7 @@ A docker image is built for this chaincode, the package.json and code copied in.
 
 After the install there is a 'bootstrap' process that starts the chaincode up (more details later). The constructors of the exported Contracts will be run at this point; these constructors are for setting the name and optional setup of the 'error/monitoring functions', (again more later). This instance of the contract will existing whilst this chaincode docker image is up.
 
-When chaincode is instantiated or updated, the `init()` function in the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialisation or migration that might be needed.  These two functions have been abstracted away to focus on specific function implementations.
+When chaincode is instantiated or updated, the `init()` function in the chaincode is called. As with the `invoke()` call from the client, a fn name and parameters can be passed. Remember therefore to have specific functions to call on `init()` and `update()` in order to do any data initialisation or migration that might be needed. These two functions have been abstracted away to focus on specific function implementations.
 
 It is strongly recommended to use the npm shrinkwrap mechanism so the versions of the modules that are used are fixed.
 
@@ -77,7 +77,7 @@ module.exports.contracts = [UpdateValues, RemoveValues];
 ```
 
 This exports two classes that together form the Contract. There can be other code that within the model that is used in a support role.
-*Note that the 'contracts' word is mandatory.*
+_Note that the 'contracts' word is mandatory._
 
 ### 4: What do these classes need to contain?
 
@@ -159,14 +159,12 @@ Then you can invoke the chaincode via this command.
 $ peer chaincode invoke --orderer localhost:7050 --channelID mychannel -c '{"Args":["UpdateValuesContract:getAssetValue"]}' -n mycontract4
 ```
 
-
 ## Additional support provided by the SmartContract class
 
 In case you ask for a function to be executed, it could be that this doesn't exist.
 If so, you can provide you own function to be executed, the default is to throw and error but you're able to customise this if you wish.
 
 For example
-
 
 ```
 /**
@@ -206,14 +204,14 @@ async aroundTransaction(ctx, fn, parameters) {
 
 ### Structure of the Transaction Context
 
-In Fabric, there is a *stub* api that provides chaincode with functionality.
+In Fabric, there is a _stub_ api that provides chaincode with functionality.
 No functionality has been removed, but a new approach to providing abstractions on this to facilitate programming.
 
-*user additions*:  additional properties can be added to the object to support for example common handling of the data serialization.
+_user additions_: additional properties can be added to the object to support for example common handling of the data serialization.
 
 The context object contains
 
-- `ctx.stub`  the same stub instance as in earlier versions for compatibility
+- `ctx.stub` the same stub instance as in earlier versions for compatibility
 - `ctx.identity` and instance of the Client Identity object
 
 You are at liberty to create a subclass of the Context to provide additional functions, or per-transaction context storage. For example
@@ -249,29 +247,29 @@ class ScenarioContext extends Context {
 
 Definitions as per https://www.ietf.org/rfc/rfc2119.txt
 
-- All the functions that are present in the prototype of a class that extends *Contract* will be invokable
-- The exports from the node module *MUST* include *contracts* that is an array of constructors (1 or more)
-- Each class *MAY* call in it's constructor pass a name. This is prefixed to each of the function names by an _  (underscore)
-- Each class *MAY* define functions that are executed before and functions that are executed after the invoked function.
+- All the functions that are present in the prototype of a class that extends _Contract_ will be invokable
+- The exports from the node module _MUST_ include _contracts_ that is an array of constructors (1 or more)
+- Each class _MAY_ call in it's constructor pass a name. This is prefixed to each of the function names by an \_ (underscore)
+- Each class _MAY_ define functions that are executed before and functions that are executed after the invoked function.
   - These are part of the same fabric transaction
   - They are scoped per name
-- Each class *MAY* define a function that would be executed if a matching function name does not exist; otherwise a 'no function exists' error will be thrown
+- Each class _MAY_ define a function that would be executed if a matching function name does not exist; otherwise a 'no function exists' error will be thrown
 - If too many parameters are passed, they will be discarded
 - If too few parameters are passed, the remainder will be set to undefined
-	- as per node.js language standard
+  - as per node.js language standard
 - Having duplicate function names in a single class is an error
 - Any function that is dynamically added will not be registered as an invokable function
-- There is no specific function that is invoked per Fabric's *init* chaincode spi. The instantiate flow can pass function name and parameters; therefore consider
-a dedicated function that will be called for new chaincode deployments, and for upgrade deployments.
+- There is no specific function that is invoked per Fabric's _init_ chaincode spi. The instantiate flow can pass function name and parameters; therefore consider
+  a dedicated function that will be called for new chaincode deployments, and for upgrade deployments.
 
 ## Restrictions on programming in side a Contract function
 
 Hyperledger Fabric's consensus algorithm permits the ability to use general purpose languages; rather than a more restrictive language. But the following restrictions apply
 
 - Functions should not create random variables, or use any function whose return values are functions of the current time or location of execution
-  - i.e. the function will be executed in another context (i.e. peer process).  This could potentially be in a different time zone in a different locale.
+  - i.e. the function will be executed in another context (i.e. peer process). This could potentially be in a different time zone in a different locale.
 - Functions should be aware that they may read state, and write state. But they are producing a set of changes that will be applied to the state. The implication is that updates to the state
-may not be read back.
+  may not be read back.
 
 ```
 let v1 = getState("key");
