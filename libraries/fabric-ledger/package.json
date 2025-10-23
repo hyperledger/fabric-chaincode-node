@@ -23,7 +23,7 @@
     "Fabric Ledger"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "license": "Apache-2.0",
   "nyc": {
@@ -72,6 +72,6 @@
     "typescript-eslint": "^8.46.0",
     "@eslint/js": "^9.37.0",
     "ts-node": "~10.9.2",
-    "@tsconfig/node18": "~18.2.4"
+    "@tsconfig/node20": "~20.1.6"
   }
 }

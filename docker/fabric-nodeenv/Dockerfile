@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-ARG NODE_IMAGE_TAG=22-alpine
+ARG NODE_IMAGE_TAG=24-alpine
 FROM node:${NODE_IMAGE_TAG}
 RUN apk add --no-cache \
 	make \

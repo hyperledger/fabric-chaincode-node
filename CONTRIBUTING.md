@@ -22,51 +22,46 @@ The following [Rush categories](https://rushjs.io/pages/maintainer/add_to_repo/)
 
 ### Pre-requisites
 
-* node v18 => recommend to use [nvm](https://github.com/nvm-sh/nvm)
-* rush => `npm install -g @microsoft/rush`
+- node 20+ => recommend to use [nvm](https://github.com/nvm-sh/nvm)
+- rush => `npm install -g @microsoft/rush`
 
 > As an alternative to installing rush on your system, you can also have node install it for executing single commands similar to what is done in CI, for example from the `libraries/fabric-shim` directory you could add or update a dependency by running `node ../../common/scripts/install-run-rush.js add --package @grpc/grpc-js@latest`
 
 > Note that npm v6 has some bugs that mean adding new dependencies etc are not properly picked up. Longer term we should consider moving to yarn or pnpm. However in practice this isn't a serious problem and has been possible to be worked around by issuing `rm ./common/config/rush/npm-shrinkwrap.json` and then `rush update`
 
-The fv and e2e tests require a set of docker images of Fabric Peers, Orderers and CAs. To ensure you have the correct images ensure these have been dowloaded and tagged.  `rush edge-docker` will do this for you.
-
-They also need to have the `nodeenv` image present - this is build as part of the `rush rebuild` so please ensure this has been run first.  It is advisable to clean up the docker containers and images between test runs to avoid any odd behaviour. Commands to help do this are below.
+They also need to have the `nodeenv` image present - this is build as part of the `rush rebuild` so please ensure this has been run first. It is advisable to clean up the docker containers and images between test runs to avoid any odd behaviour. Commands to help do this are below.
 
 ## Using the repo
 
-* Clone the repo, and ensure you are using node v18, and have rush installed
-* `rush update` is needed to ensure everything is correctly linked and updated.
-    - For example, after updating dependencies in `libraries/fabric-shim/package.json` run `rush update` which will delegate to `pnpm` to update the appropriate project files.
-    - Note - you could also use `rush add` to have rush manage the `package.json` updates.
-* `rush edge-docker` will pull down and tag the very latest docker images for the peers, orderes etc to test against
+- Clone the repo, and ensure you are using node v18, and have rush installed
+- `rush update` is needed to ensure everything is correctly linked and updated.
+  - For example, after updating dependencies in `libraries/fabric-shim/package.json` run `rush update` which will delegate to `pnpm` to update the appropriate project files.
+  - Note - you could also use `rush add` to have rush manage the `package.json` updates.
 
 At this point the repo is fully ready for use and running tests, etc. A full sequence of build-test that is equivalent to the CI pipeline is
 
-* `rush rebuild` will run the linting, and unit tests across the codebase, as well as building the docker images, and jsdoc API docs
-* `rush start-verdaccio` & `rush stop-verdaccio` will start/stop verdaccio (used for local hosting of NPM modules)
-* `rush start-fabric` & `rush stop-fabric` will start/stop the test fabric ready for running FV tests
-* `rush test:fv` will run the fv tests, ensure that both the fabric and verdaccio have already been started
-* `rush test:e2e` to run e2e tests across the repos
+- `rush rebuild` will run the linting, and unit tests across the codebase, as well as building the docker images, and jsdoc API docs
+- `rush start-verdaccio` & `rush stop-verdaccio` will start/stop verdaccio (used for local hosting of NPM modules)
+- `rush start-fabric` & `rush stop-fabric` will start/stop the test fabric ready for running FV tests
+- `rush test:fv` will run the fv tests, ensure that both the fabric and verdaccio have already been started
+- `rush test:e2e` to run e2e tests across the repos
 
 For more specific purposes during development the following are useful:
 
-* `rush publish --include-all --pack --release-folder ./tarballs --publish`
-If you want to get a set of `.tar.gz` files of the node modules to use for local testing this command will put them into the `tarballs` directory
-* `rush rebuild --to fvtests` to run the unit tests for the core modules, but not the docker or jsdoc
-* `rush rebuild --to fabric-contract-api` to build, lint and run just the `fabric-contract-api`
-* `rush logs` will show the location of all the log files
+- `rush publish --include-all --pack --release-folder ./tarballs --publish`
+  If you want to get a set of `.tar.gz` files of the node modules to use for local testing this command will put them into the `tarballs` directory
+- `rush rebuild --to fvtests` to run the unit tests for the core modules, but not the docker or jsdoc
+- `rush rebuild --to fabric-contract-api` to build, lint and run just the `fabric-contract-api`
+- `rush logs` will show the location of all the log files
 
 To clean up docker
 
-* `docker kill $(docker ps -q) && docker rm $(docker ps -aq)` will remove the running containers
-* `docker rmi $(docker images 'dev-*' -q) --force` will remove the images for the chaincode containers
+- `docker kill $(docker ps -q) && docker rm $(docker ps -aq)` will remove the running containers
+- `docker rmi $(docker images 'dev-*' -q) --force` will remove the images for the chaincode containers
 
 ## Mechanics of Contributing
 
 The codebase is maintained in [github](https://github.com/hyperledger/fabric-chaincode-node), with a CI pipeline run with [Github Actions](https://github.com/hyperledger/fabric-chaincode-node/actions). Issues are handled in [Github Issues](https://github.com/hyperledger/fabric-chaincode-node/issues).
-
-
 
 ## Code of Conduct Guidelines <a name="conduct"></a>
 
