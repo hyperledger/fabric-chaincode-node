@@ -51,7 +51,7 @@ jobs:
       - name: Pre-process Artifacts
         run: |
           npx cobertura-merge -o merged_coverage.xml shim=./libraries/fabric-shim/coverage/cobertura-coverage.xml contractapi=./apis/fabric-contract-api/coverage/cobertura-coverage.xml -p
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         name: Upload test results
         if: ${{ !cancelled() }}
         with:
@@ -62,12 +62,12 @@ jobs:
           set -xev
           node common/scripts/install-run-rush.js publish --include-all --pack --release-folder tgz --publish
           docker image save hyperledger/fabric-nodeenv | gzip > fabric-nodeenv.tar.gz
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         name: Binaries
         with:
           name: node-tgzs
           path: tgz/
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         name: Docker
         with:
           name: nodeenv-docker-image
@@ -109,7 +109,7 @@ jobs:
 
           node common/scripts/install-run-rush.js test:fv --verbose
           node common/scripts/install-run-rush.js test:e2e --verbose
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: ${{ !cancelled() }}
         name: TestLogs
         with:
