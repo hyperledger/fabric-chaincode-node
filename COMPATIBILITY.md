@@ -12,7 +12,8 @@ This table shows the summary of the compatibility of the Node chaincode packages
 | v2.2                   | 12                        | 12              | amd64                  |
 | v2.5.0 - v2.5.4        | 18                        | 18              | amd64, arm64           |
 | v2.5.5 - v2.5.7        | 18                        | 20              | amd64, arm64           |
-| v2.5.8+                | 18                        | 22              | amd64, arm64           |
+| v2.5.8                 | 18                        | 22              | amd64, arm64           |
+| v2.5.9+                | 20                        | 24              | amd64, arm64           |
 
 The Node runtime provided by the chaincode Docker image determines the maximum Node version (and features) that smart contract code can exploit when using the default Node chaincode container.
 

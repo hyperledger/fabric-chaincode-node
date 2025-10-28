@@ -55,9 +55,9 @@ importers:
       '@sinonjs/referee-sinon':
         specifier: ~5.0.0
         version: 5.0.0
-      '@tsconfig/node18':
-        specifier: ~18.2.4
-        version: 18.2.4
+      '@tsconfig/node20':
+        specifier: ~20.1.6
+        version: 20.1.6
       '@types/chai':
         specifier: ^4.2.22
         version: 4.3.20
@@ -482,7 +482,7 @@ packages:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
   '@rush-temp/fabric-contract-api@file:projects/fabric-contract-api.tgz':
-    resolution: {integrity: sha512-BJNPGVGLrkHnaqXVLjrBYXVMe7LFKu1o42pcp/wcfjDen172hUVTZqmYamkMdAqW1uj9ITAZ/e2map2/HbsOzg==, tarball: file:projects/fabric-contract-api.tgz}
+    resolution: {integrity: sha512-yxvb8RGA9irJ5lCSuJHRBTvNZBFEzZddOkIdbOh6ZmICGVXk1ubXvrLA1qzUZIdBuf0xXIvBJkZMfYyx7CjDvw==, tarball: file:projects/fabric-contract-api.tgz}
     version: 0.0.0
 
   '@rush-temp/fabric-e2e-tests@file:projects/fabric-e2e-tests.tgz':
@@ -490,7 +490,7 @@ packages:
     version: 0.0.0
 
   '@rush-temp/fabric-ledger@file:projects/fabric-ledger.tgz':
-    resolution: {integrity: sha512-YpIIAI4u1Yl0JuBdl8vChZRvDRcP1ZdHMipFhB/8EJ0nRRhENi/UZTY0b0x4LjLJckncxqNBsiXUgDVn84ungw==, tarball: file:projects/fabric-ledger.tgz}
+    resolution: {integrity: sha512-mFP94YQbuucJ5RvA8Uhq7zHCFlfes5AbAKRtRDPWtsyhlyh5HrtaIgs4ejoslI17Eu2jiUG+zc27d0eGGO22iw==, tarball: file:projects/fabric-ledger.tgz}
     version: 0.0.0
 
   '@rush-temp/fabric-nodeenv@file:projects/fabric-nodeenv.tgz':
@@ -498,7 +498,7 @@ packages:
     version: 0.0.0
 
   '@rush-temp/fabric-shim-api@file:projects/fabric-shim-api.tgz':
-    resolution: {integrity: sha512-HJT4lTrBR7eHQ+8UYEGxkgyH1VcF5UvR3IgP8IpI/aZI0Jx2VO3U/KIJ1a49wANhEXOd3/npi5v1TaqDMqnW7Q==, tarball: file:projects/fabric-shim-api.tgz}
+    resolution: {integrity: sha512-54FRZhX8+yFGI2JltDE1KPifnZyi7WrCTSK4fVcQ8WDtxlP1cS/Wap15O0OWZ1AMLCz4PTQ62NueeQTHdYoP4A==, tarball: file:projects/fabric-shim-api.tgz}
     version: 0.0.0
 
   '@rush-temp/fabric-shim-docs@file:projects/fabric-shim-docs.tgz':
@@ -506,7 +506,7 @@ packages:
     version: 0.0.0
 
   '@rush-temp/fabric-shim@file:projects/fabric-shim.tgz':
-    resolution: {integrity: sha512-GAAsLorv5OsSoim7dW/5weY3DzoHsy3aFQ/1bEde2zjZ6yEDz6ZFob5cQInQqhk659FTWQuLEWzzYS6bJnZxuQ==, tarball: file:projects/fabric-shim.tgz}
+    resolution: {integrity: sha512-YQR0GMh+3eR5m4929n5bansCu3mSmTqFrAkigAnSd1B+Qg0zNA2k3tWUqUDHAhusv5Y3vi/DXgf0TZEO4JkNIw==, tarball: file:projects/fabric-shim.tgz}
     version: 0.0.0
 
   '@rush-temp/fvtests@file:projects/fvtests.tgz':
@@ -597,8 +597,8 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@tsconfig/node18@18.2.4':
-    resolution: {integrity: sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==}
+  '@tsconfig/node20@20.1.6':
+    resolution: {integrity: sha512-sz+Hqx9zwZDpZIV871WSbUzSqNIsXzghZydypnfgzPKLltVJfkINfUeTct31n/tTSa9ZE1ZOfKdRre1uHHquYQ==}
 
   '@types/chai-as-promised@7.1.8':
     resolution: {integrity: sha512-ThlRVIJhr69FLlh6IctTXFkmhtP3NpMZ2QGq69StYLyKZFp/HOp1VdKZj7RvfNWYYcJ1xlbLGLLWj1UvP5u/Gw==}
@@ -4990,7 +4990,7 @@ snapshots:
   '@rush-temp/fabric-contract-api@file:projects/fabric-contract-api.tgz':
     dependencies:
       '@eslint/js': 9.38.0
-      '@tsconfig/node18': 18.2.4
+      '@tsconfig/node20': 20.1.6
       ajv: 6.12.6
       ajv-cli: 3.3.0
       ajv-formats: 2.1.1(ajv@6.12.6)
@@ -5030,7 +5030,7 @@ snapshots:
     dependencies:
       '@eslint/js': 9.38.0
       '@rushstack/eslint-config': 0.5.8(eslint@9.38.0)(typescript@5.8.3)
-      '@tsconfig/node18': 18.2.4
+      '@tsconfig/node20': 20.1.6
       '@types/chai': 4.3.20
       '@types/chai-as-promised': 7.1.8
       '@types/mocha': 9.1.1
@@ -5064,6 +5064,7 @@ snapshots:
   '@rush-temp/fabric-shim-api@file:projects/fabric-shim-api.tgz':
     dependencies:
       '@eslint/js': 9.38.0
+      '@tsconfig/node20': 20.1.6
       '@types/long': 4.0.2
       eslint: 9.38.0
     transitivePeerDependencies:
@@ -5082,7 +5083,7 @@ snapshots:
       '@fidm/x509': 1.2.1
       '@grpc/grpc-js': 1.14.0
       '@hyperledger/fabric-protos': 0.2.2
-      '@tsconfig/node18': 18.2.4
+      '@tsconfig/node20': 20.1.6
       '@types/node': 18.19.130
       ajv: 6.12.6
       caniuse-lite: 1.0.30001751
@@ -5268,7 +5269,7 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@tsconfig/node18@18.2.4': {}
+  '@tsconfig/node20@20.1.6': {}
 
   '@types/chai-as-promised@7.1.8':
     dependencies:
