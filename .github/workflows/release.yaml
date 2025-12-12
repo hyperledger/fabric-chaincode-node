@@ -33,7 +33,7 @@ jobs:
       # Ensure npm 11.5.1 or later for trusted publishing support
       - name: Update npm
         run: npm install -g npm@latest
-      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: node-tgzs
           path: build/
@@ -113,7 +113,7 @@ jobs:
           - ghcr.io
     steps:
       - name: Download digests
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: ${{ runner.temp }}/digests
           pattern: digest-*
