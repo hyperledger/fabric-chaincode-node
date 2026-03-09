@@ -1103,6 +1103,79 @@ describe('Stub', () => {
             });
         });
 
+        describe('getMultipleStates', () => {
+            let stub;
+
+            beforeEach(() => {
+                stub = new Stub({
+                    handleGetState: sinon.stub().resolves(Buffer.from('value'))
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+            });
+
+            it('should throw an error if keys is not an array', async () => {
+                await expect(stub.getMultipleStates('not-an-array')).to.be.rejectedWith(/keys must be an array of strings/);
+            });
+
+            it('should call getState for each key and return the results', async () => {
+                sandbox.stub(stub, 'getState').callsFake(async (key) => {
+                    if (key === 'key1') {
+                        return Buffer.from('value1');
+                    } else if (key === 'key2') {
+                        return Buffer.from('value2');
+                    }
+                });
+
+                const results = await stub.getMultipleStates(['key1', 'key2']);
+                expect(results).to.deep.equal([Buffer.from('value1'), Buffer.from('value2')]);
+                sinon.assert.calledTwice(stub.getState);
+            });
+        });
+
+        describe('getMultiplePrivateData', () => {
+            let stub;
+
+            beforeEach(() => {
+                stub = new Stub({
+                    handleGetState: sinon.stub().resolves(Buffer.from('value'))
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+            });
+
+            it('should throw an error if collection is missing', async () => {
+                await expect(stub.getMultiplePrivateData(null, ['key1'])).to.be.rejectedWith(/collection must be a valid string/);
+            });
+
+            it('should throw an error if keys is not an array', async () => {
+                await expect(stub.getMultiplePrivateData('collection', 'not-an-array')).to.be.rejectedWith(/keys must be an array of strings/);
+            });
+
+            it('should call getPrivateData for each key and return the results', async () => {
+                sandbox.stub(stub, 'getPrivateData').callsFake(async (collection, key) => {
+                    if (key === 'key1') {
+                        return Buffer.from('value1');
+                    } else if (key === 'key2') {
+                        return Buffer.from('value2');
+                    }
+                });
+
+                const results = await stub.getMultiplePrivateData('collection', ['key1', 'key2']);
+                expect(results).to.deep.equal([Buffer.from('value1'), Buffer.from('value2')]);
+                sinon.assert.calledTwice(stub.getPrivateData);
+            });
+        });
+
+        describe('Write Batching Fallbacks', () => {
+            it('should execute startWriteBatch as a no-op', () => {
+                const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                stub.startWriteBatch();
+            });
+
+            it('should execute finishWriteBatch as a no-op', async () => {
+                const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                await stub.finishWriteBatch();
+            });
+        });
+
+
         describe('getPrivateDataHash', () => {
             let handleGetPrivateDataHashStub;
             let stub;
