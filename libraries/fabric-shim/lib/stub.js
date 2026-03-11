@@ -938,6 +938,62 @@ class ChaincodeStub {
     }
 
     /**
+     * Retrieves the current values of the state variables for multiple keys.
+     * This is a fallback implementation that processes reads without actual gRPC batching.
+     * @async
+     * @param {string[]} keys Array of state variable keys to retrieve from the state store
+     * @returns {Promise<byte[][]>} Promise for an array of the current values of the state variables
+     */
+    async getMultipleStates(keys) {
+        logger.debug('getMultipleStates called with keys:%j', keys);
+        if (!Array.isArray(keys)) {
+            throw new Error('keys must be an array of strings');
+        }
+
+        const promises = keys.map(key => this.getState(key));
+        return await Promise.all(promises);
+    }
+
+    /**
+     * getMultiplePrivateData returns the values of the specified `keys` from the specified `collection`.
+     * This is a fallback implementation that processes reads without actual gRPC batching.
+     * @async
+     * @param {string} collection The collection name
+     * @param {string[]} keys Array of private data variable keys to retrieve from the state store
+     * @returns {Promise<byte[][]>} Promise for an array of private values from the state store
+     */
+    async getMultiplePrivateData(collection, keys) {
+        logger.debug('getMultiplePrivateData called with collection:%s, keys:%j', collection, keys);
+        if (!collection || typeof collection !== 'string') {
+            throw new Error('collection must be a valid string');
+        }
+        if (!Array.isArray(keys)) {
+            throw new Error('keys must be an array of strings');
+        }
+
+        const promises = keys.map(key => this.getPrivateData(collection, key));
+        return await Promise.all(promises);
+    }
+
+    /**
+     * startWriteBatch indicates the beginning of a block of PutState/PutPrivateData calls
+     * that should be batched together.
+     * (Fallback behavior: no-op)
+     */
+    startWriteBatch() {
+        logger.debug('startWriteBatch called');
+    }
+
+    /**
+     * finishWriteBatch sends the currently accumulated batch of state writes to the peer.
+     * (Fallback behavior: no-op)
+     * @async
+     */
+    async finishWriteBatch() {
+        logger.debug('finishWriteBatch called');
+    }
+
+    /**
      * getPrivateDataHash returns the hash of the value of the specified `key` from
      * the specified `collection`.
      *
