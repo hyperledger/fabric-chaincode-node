@@ -291,17 +291,17 @@ class ChaincodeStub {
 
     /**
      * This object contains the essential identity information of the chaincode invocation's submitter,
-     * including its organizational affiliation (mspid) and certificate (id_bytes)
-     * @typedef {Object} ProposalCreator
+     * including its organizational affiliation (mspid) and certificate (idBytes)
+     * @typedef {Object} SerializedIdentity
      * @property {string} mspid The unique ID of the Membership Service Provider instance that is associated
      * to the identity's organization and is able to perform digital signing and signature verification
-     * @class
+     * @property {byte[]} idBytes The raw identity bytes (certificate) as a Uint8Array. Often contains an X.509 certificate in PEM form.
      * @memberof fabric-shim
      */
 
     /**
      * Returns the identity object of the chaincode invocation's submitter
-     * @returns {ProposalCreator}
+     * @returns {SerializedIdentity}
      */
     getCreator() {
         return this.creator;
@@ -333,7 +333,7 @@ class ChaincodeStub {
      * to the chaincode.
      * @typedef {Object} SignedProposal
      * @property {Buffer} signature The signature over the proposal. This signature is to be verified against
-     * the {@link ProposalCreator} returned by <code>getCreator()</code>. The signature will have already been
+     * the {@link SerializedIdentity} returned by <code>getCreator()</code>. The signature will have already been
      * verified by the peer before the invocation request reaches the chaincode.
      * @property {Proposal} proposal The object containing the chaincode invocation request and metadata about the request
      * @memberof fabric-shim
@@ -385,7 +385,7 @@ class ChaincodeStub {
 
     /**
      * @typedef {Object} SignatureHeader
-     * @property {ProposalCreator} creator The submitter of the chaincode invocation request
+     * @property {SerializedIdentity} creator The submitter of the chaincode invocation request
      * @property {Buffer} nonce Arbitrary number that may only be used once. Can be used to detect replay attacks.
      * @memberof fabric-shim
      * @class
