@@ -899,6 +899,46 @@ describe('Handler', () => {
             });
         });
 
+        describe('handleGetMultipleStates', () => {
+            let handleGetStateStub;
+            afterEach(() => {
+                sandbox.restore();
+            });
+
+            it('should stub handleGetState and return buffered values', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                handleGetStateStub = sandbox.stub(handler, 'handleGetState').resolves(Buffer.from('value'));
+
+                const result = await handler.handleGetMultipleStates(['key1', 'key2'], 'theChannelID', 'theTxID');
+
+                expect(result).to.deep.equal([Buffer.from('value'), Buffer.from('value')]);
+                expect(handleGetStateStub.calledTwice).to.be.true;
+                expect(handleGetStateStub.firstCall.args).to.deep.equal(['', 'key1', 'theChannelID', 'theTxID']);
+                expect(handleGetStateStub.secondCall.args).to.deep.equal(['', 'key2', 'theChannelID', 'theTxID']);
+            });
+        });
+
+        describe('handleGetMultiplePrivateData', () => {
+            let handleGetStateStub;
+            afterEach(() => {
+                sandbox.restore();
+            });
+
+            it('should stub handleGetState and return buffered values', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                handleGetStateStub = sandbox.stub(handler, 'handleGetState').resolves(Buffer.from('value'));
+
+                const result = await handler.handleGetMultiplePrivateData('collection1', ['key1', 'key2'], 'theChannelID', 'theTxID');
+
+                expect(result).to.deep.equal([Buffer.from('value'), Buffer.from('value')]);
+                expect(handleGetStateStub.calledTwice).to.be.true;
+                expect(handleGetStateStub.firstCall.args).to.deep.equal(['collection1', 'key1', 'theChannelID', 'theTxID']);
+                expect(handleGetStateStub.secondCall.args).to.deep.equal(['collection1', 'key2', 'theChannelID', 'theTxID']);
+            });
+        });
+
         describe('handleGetState', () => {
             const key = 'theKey';
             const collection = '';

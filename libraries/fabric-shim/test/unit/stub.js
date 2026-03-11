@@ -1108,7 +1108,7 @@ describe('Stub', () => {
 
             beforeEach(() => {
                 stub = new Stub({
-                    handleGetState: sinon.stub().resolves(Buffer.from('value'))
+                    handleGetMultipleStates: sinon.stub().resolves([Buffer.from('value1'), Buffer.from('value2')])
                 }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
             });
 
@@ -1116,18 +1116,11 @@ describe('Stub', () => {
                 await expect(stub.getMultipleStates('not-an-array')).to.be.rejectedWith(/keys must be an array of strings/);
             });
 
-            it('should call getState for each key and return the results', async () => {
-                sandbox.stub(stub, 'getState').callsFake(async (key) => {
-                    if (key === 'key1') {
-                        return Buffer.from('value1');
-                    } else if (key === 'key2') {
-                        return Buffer.from('value2');
-                    }
-                });
-
+            it('should call call handleGetMultipleStates on the handler and return the results', async () => {
                 const results = await stub.getMultipleStates(['key1', 'key2']);
                 expect(results).to.deep.equal([Buffer.from('value1'), Buffer.from('value2')]);
-                sinon.assert.calledTwice(stub.getState);
+                sinon.assert.calledOnce(stub.handler.handleGetMultipleStates);
+                sinon.assert.calledWith(stub.handler.handleGetMultipleStates, ['key1', 'key2'], 'dummyChannelId', 'dummyTxid');
             });
         });
 
@@ -1136,7 +1129,7 @@ describe('Stub', () => {
 
             beforeEach(() => {
                 stub = new Stub({
-                    handleGetState: sinon.stub().resolves(Buffer.from('value'))
+                    handleGetMultiplePrivateData: sinon.stub().resolves([Buffer.from('value1'), Buffer.from('value2')])
                 }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
             });
 
@@ -1148,18 +1141,11 @@ describe('Stub', () => {
                 await expect(stub.getMultiplePrivateData('collection', 'not-an-array')).to.be.rejectedWith(/keys must be an array of strings/);
             });
 
-            it('should call getPrivateData for each key and return the results', async () => {
-                sandbox.stub(stub, 'getPrivateData').callsFake(async (collection, key) => {
-                    if (key === 'key1') {
-                        return Buffer.from('value1');
-                    } else if (key === 'key2') {
-                        return Buffer.from('value2');
-                    }
-                });
-
+            it('should call handleGetMultiplePrivateData on the handler and return the results', async () => {
                 const results = await stub.getMultiplePrivateData('collection', ['key1', 'key2']);
                 expect(results).to.deep.equal([Buffer.from('value1'), Buffer.from('value2')]);
-                sinon.assert.calledTwice(stub.getPrivateData);
+                sinon.assert.calledOnce(stub.handler.handleGetMultiplePrivateData);
+                sinon.assert.calledWith(stub.handler.handleGetMultiplePrivateData, 'collection', ['key1', 'key2'], 'dummyChannelId', 'dummyTxid');
             });
         });
 
