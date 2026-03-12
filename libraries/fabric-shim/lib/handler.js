@@ -374,6 +374,14 @@ class ChaincodeMessageHandler {
         handleMessage(msg, this, 'invoke');
     }
 
+    async handleGetMultipleStates(keys, channel_id, txid) {
+        return await Promise.all(keys.map(key => this.handleGetState('', key, channel_id, txid)));
+    }
+
+    async handleGetMultiplePrivateData(collection, keys, channel_id, txid) {
+        return await Promise.all(keys.map(key => this.handleGetState(collection, key, channel_id, txid)));
+    }
+
     async handleGetState(collection, key, channel_id, txId) {
         const msgPb = new peer.GetState();
         msgPb.setKey(key);

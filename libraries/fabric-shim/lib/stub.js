@@ -947,12 +947,11 @@ class ChaincodeStub {
      */
     async getMultipleStates(keys) {
         logger.debug('getMultipleStates called with keys:%j', keys);
-        if (!Array.isArray(keys)) {
+        if (!Array.isArray(keys) || keys.some((key) => typeof key !== 'string')) {
             throw new Error('keys must be an array of strings');
         }
 
-        const promises = keys.map(key => this.getState(key));
-        return await Promise.all(promises);
+        return await this.handler.handleGetMultipleStates(keys, this.channel_id, this.txId);
     }
 
     /**
@@ -965,15 +964,14 @@ class ChaincodeStub {
      */
     async getMultiplePrivateData(collection, keys) {
         logger.debug('getMultiplePrivateData called with collection:%s, keys:%j', collection, keys);
-        if (!collection || typeof collection !== 'string') {
+        if (typeof collection !== 'string') {
             throw new Error('collection must be a valid string');
         }
-        if (!Array.isArray(keys)) {
+        if (!Array.isArray(keys) || keys.some((key) => typeof key !== 'string')) {
             throw new Error('keys must be an array of strings');
         }
 
-        const promises = keys.map(key => this.getPrivateData(collection, key));
-        return await Promise.all(promises);
+        return await this.handler.handleGetMultiplePrivateData(collection, keys, this.channel_id, this.txId);
     }
 
     /**
