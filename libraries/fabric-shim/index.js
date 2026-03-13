@@ -4,4 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 */
 
-module.exports = require('./lib/chaincode.js');
+const shim = require('./lib/chaincode.js');
+module.exports = shim;
+module.exports.KeyEndorsementPolicy = shim.KeyEndorsementPolicy;
