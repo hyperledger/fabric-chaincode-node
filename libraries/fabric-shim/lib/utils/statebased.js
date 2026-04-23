@@ -17,7 +17,8 @@ const ROLE_TYPE_PEER = 'PEER';
  * of the MSP identifiers of organizations.
  * For more informations, please read the [documents]{@link https://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html#setting-key-level-endorsement-policies}
  *
- * @class
+ * @class KeyEndorsementPolicy
+ * @memberof fabric-shim
  */
 class KeyEndorsementPolicy {
     /**
@@ -35,7 +36,7 @@ class KeyEndorsementPolicy {
 
     /**
      * returns the endorsement policy as bytes
-     * @returns {Buffer} the endorsement policy
+     * @returns {Uint8Array} the serialized signature policy envelope
      */
     getPolicy() {
         const spe = this._getPolicyFromMspId();
@@ -45,7 +46,7 @@ class KeyEndorsementPolicy {
     /**
      * adds the specified orgs to the list of orgs that are required
      * to endorse
-     * @param {string} role the role of the new org(s). i.e., MEMBER or PEER
+     * @param {string} role the role of the new org(s). i.e., 'MEMBER' or 'PEER'
      * @param  {...string} neworgs the new org(s) to be added to the endorsement policy
      */
     addOrgs(role, ...neworgs) {
