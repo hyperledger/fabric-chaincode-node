@@ -375,11 +375,35 @@ class ChaincodeMessageHandler {
     }
 
     async handleGetMultipleStates(keys, channel_id, txid) {
-        return await Promise.all(keys.map(key => this.handleGetState('', key, channel_id, txid)));
+        const msgPb = new peer.GetStateMultiple();
+        msgPb.setCollection('');
+        msgPb.setKeysList(keys);
+        const msg = mapToChaincodeMessage({
+            type: peer.ChaincodeMessage.Type.GET_STATE_MULTIPLE,
+            payload: msgPb.serializeBinary(),
+            txid: txid,
+            channel_id: channel_id
+        });
+        logger.debug('handleGetMultipleStates - with keys:', keys);
+        const response = await this._askPeerAndListen(msg, 'GET_STATE_MULTIPLE');
+        const decodedResponse = peer.GetStateMultipleResult.deserializeBinary(response.payload);
+        return decodedResponse.getValuesList();
     }
 
     async handleGetMultiplePrivateData(collection, keys, channel_id, txid) {
-        return await Promise.all(keys.map(key => this.handleGetState(collection, key, channel_id, txid)));
+        const msgPb = new peer.GetStateMultiple();
+        msgPb.setCollection(collection);
+        msgPb.setKeysList(keys);
+        const msg = mapToChaincodeMessage({
+            type: peer.ChaincodeMessage.Type.GET_STATE_MULTIPLE,
+            payload: msgPb.serializeBinary(),
+            txid: txid,
+            channel_id: channel_id
+        });
+        logger.debug('handleGetMultiplePrivateData - with collection:', collection, 'keys:', keys);
+        const response = await this._askPeerAndListen(msg, 'GET_STATE_MULTIPLE');
+        const decodedResponse = peer.GetStateMultipleResult.deserializeBinary(response.payload);
+        return decodedResponse.getValuesList();
     }
 
     async handleGetState(collection, key, channel_id, txId) {
