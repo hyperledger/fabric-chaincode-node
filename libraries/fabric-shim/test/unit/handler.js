@@ -783,6 +783,41 @@ describe('Handler', () => {
                     expect(handleTransactionSpy.firstCall.args).to.deep.equal([mapFromChaincodeMessage(readyMsg)]);
                 });
 
+                it ('should echo KEEPALIVE when in state ready and MSG_TYPE equals KEEPALIVE', () => {
+                    const processStub = sinon.stub(process, 'exit');
+
+                    eventReg.data(registeredMsg);
+                    eventReg.data(establishedMsg);
+
+                    const keepaliveMsg = mapToChaincodeMessage({
+                        type: MSG_TYPE.KEEPALIVE
+                    });
+
+                    eventReg.data(keepaliveMsg);
+
+                    expect(mockStream.write.calledTwice).to.be.true;
+                    expect(mockStream.write.secondCall.args).to.deep.equal([keepaliveMsg]);
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.notCalled).to.be.true;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
+                    expect(processStub.notCalled).to.be.true;
+
+                    processStub.restore();
+                });
+
+                it ('should echo KEEPALIVE when in state created and MSG_TYPE equals KEEPALIVE', () => {
+                    const keepaliveMsg = mapToChaincodeMessage({
+                        type: MSG_TYPE.KEEPALIVE
+                    });
+
+                    eventReg.data(keepaliveMsg);
+
+                    expect(mockStream.write.calledTwice).to.be.true;
+                    expect(mockStream.write.secondCall.args).to.deep.equal([keepaliveMsg]);
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                });
+
                 it ('should end the process with value 1', () => {
                     const processStub = sinon.stub(process, 'exit');
 
