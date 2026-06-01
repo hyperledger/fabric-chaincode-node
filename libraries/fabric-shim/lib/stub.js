@@ -763,6 +763,7 @@ class ChaincodeStub {
      * Only a single chaincode event can be included in a transaction.
      * If setEvent() is called multiple times only the last event will be included in the transaction.
      * The event must originate from the outer-most invoked chaincode in chaincode-to-chaincode scenarios.
+     * If Chaincode A invokes Chaincode B, and Chaincode B calls setEvent, that event will be ignored by the peer.
      * The marshaled ChaincodeEvent will be available in the transaction's ChaincodeAction.events field.
      * @param {string} name Name of the event
      * @param {byte[]} payload A payload can be used to include data about the event
@@ -946,12 +947,11 @@ class ChaincodeStub {
      */
     async getMultipleStates(keys) {
         logger.debug('getMultipleStates called with keys:%j', keys);
-        if (!Array.isArray(keys)) {
+        if (!Array.isArray(keys) || keys.some((key) => typeof key !== 'string')) {
             throw new Error('keys must be an array of strings');
         }
 
-        const promises = keys.map(key => this.getState(key));
-        return await Promise.all(promises);
+        return await this.handler.handleGetMultipleStates(keys, this.channel_id, this.txId);
     }
 
     /**
@@ -964,15 +964,14 @@ class ChaincodeStub {
      */
     async getMultiplePrivateData(collection, keys) {
         logger.debug('getMultiplePrivateData called with collection:%s, keys:%j', collection, keys);
-        if (!collection || typeof collection !== 'string') {
+        if (typeof collection !== 'string') {
             throw new Error('collection must be a valid string');
         }
-        if (!Array.isArray(keys)) {
+        if (!Array.isArray(keys) || keys.some((key) => typeof key !== 'string')) {
             throw new Error('keys must be an array of strings');
         }
 
-        const promises = keys.map(key => this.getPrivateData(collection, key));
-        return await Promise.all(promises);
+        return await this.handler.handleGetMultiplePrivateData(collection, keys, this.channel_id, this.txId);
     }
 
     /**

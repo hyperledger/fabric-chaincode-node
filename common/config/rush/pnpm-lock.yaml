@@ -97,6 +97,9 @@ importers:
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
+      cobertura-merge:
+        specifier: ~1.0.4
+        version: 1.0.4
       cpx:
         specifier: ^1.5.0
         version: 1.5.0
@@ -381,6 +384,10 @@ packages:
     resolution: {integrity: sha512-p5Meqig8DqsNDygoFMfAp0rqZQDtaatwUaYGF0LQvKS77ZLjP8WxvZ4/9zsr8aNs/4NkohKcq7ZUtEK70iBcrQ==}
     engines: {node: '>=16.13.0'}
 
+  '@hyperledger/fabric-protos@0.3.7':
+    resolution: {integrity: sha512-p69dVT+QKrL7OZOuWRrimopNUAQL+VpgVEovud5MGqHSMl20S5hZy0aWqmIW+qasRgJiHLNuU0T6xVfXJIeHKg==}
+    engines: {node: '>=16.13.0'}
+
   '@isaacs/balanced-match@4.0.1':
     resolution: {integrity: sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ==}
     engines: {node: 20 || >=22}
@@ -491,7 +498,7 @@ packages:
     version: 0.0.0
 
   '@rush-temp/fabric-shim@file:projects/fabric-shim.tgz':
-    resolution: {integrity: sha512-GysoUAxix8qz3o1xhmqafCk5YLj2RDOKwNeCOLnuHh8CdKVqheI57Sk574xj+ZNVdQUbOE+s50t7ozc5tRAT1g==, tarball: file:projects/fabric-shim.tgz}
+    resolution: {integrity: sha512-aE+OH4oEZCZk+ahdw9HhWpC/YmpYHsggwJSqLSPs1mPRtXcqOddIks6NVY2plbyGs5KxRvroN1oPGndiMi7uoQ==, tarball: file:projects/fabric-shim.tgz}
     version: 0.0.0
 
   '@rush-temp/fvtests@file:projects/fvtests.tgz':
@@ -4767,6 +4774,11 @@ snapshots:
       '@grpc/grpc-js': 1.14.3
       google-protobuf: 3.21.4
 
+  '@hyperledger/fabric-protos@0.3.7':
+    dependencies:
+      '@grpc/grpc-js': 1.14.3
+      google-protobuf: 3.21.4
+
   '@isaacs/balanced-match@4.0.1': {}
 
   '@isaacs/brace-expansion@5.0.0':
@@ -4950,7 +4962,7 @@ snapshots:
       '@eslint/js': 9.39.2
       '@fidm/x509': 1.2.1
       '@grpc/grpc-js': 1.14.3
-      '@hyperledger/fabric-protos': 0.2.2
+      '@hyperledger/fabric-protos': 0.3.7
       '@tsconfig/node20': 20.1.8
       '@types/node': 18.19.130
       ajv: 6.12.6

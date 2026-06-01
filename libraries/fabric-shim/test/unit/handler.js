@@ -783,6 +783,41 @@ describe('Handler', () => {
                     expect(handleTransactionSpy.firstCall.args).to.deep.equal([mapFromChaincodeMessage(readyMsg)]);
                 });
 
+                it ('should echo KEEPALIVE when in state ready and MSG_TYPE equals KEEPALIVE', () => {
+                    const processStub = sinon.stub(process, 'exit');
+
+                    eventReg.data(registeredMsg);
+                    eventReg.data(establishedMsg);
+
+                    const keepaliveMsg = mapToChaincodeMessage({
+                        type: MSG_TYPE.KEEPALIVE
+                    });
+
+                    eventReg.data(keepaliveMsg);
+
+                    expect(mockStream.write.calledTwice).to.be.true;
+                    expect(mockStream.write.secondCall.args).to.deep.equal([keepaliveMsg]);
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                    expect(handleMsgResponseSpy.notCalled).to.be.true;
+                    expect(handleInitSpy.notCalled).to.be.true;
+                    expect(handleTransactionSpy.notCalled).to.be.true;
+                    expect(processStub.notCalled).to.be.true;
+
+                    processStub.restore();
+                });
+
+                it ('should echo KEEPALIVE when in state created and MSG_TYPE equals KEEPALIVE', () => {
+                    const keepaliveMsg = mapToChaincodeMessage({
+                        type: MSG_TYPE.KEEPALIVE
+                    });
+
+                    eventReg.data(keepaliveMsg);
+
+                    expect(mockStream.write.calledTwice).to.be.true;
+                    expect(mockStream.write.secondCall.args).to.deep.equal([keepaliveMsg]);
+                    expect(mockNewErrorMsg.notCalled).to.be.true;
+                });
+
                 it ('should end the process with value 1', () => {
                     const processStub = sinon.stub(process, 'exit');
 
@@ -896,6 +931,46 @@ describe('Handler', () => {
                 expect(handleMessage.firstCall.args).to.deep.equal(['some message', handler, 'invoke']);
 
                 Handler.__set__('handleMessage', savedHandleMessage);
+            });
+        });
+
+        describe('handleGetMultipleStates', () => {
+            let handleGetStateStub;
+            afterEach(() => {
+                sandbox.restore();
+            });
+
+            it('should stub handleGetState and return buffered values', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                handleGetStateStub = sandbox.stub(handler, 'handleGetState').resolves(Buffer.from('value'));
+
+                const result = await handler.handleGetMultipleStates(['key1', 'key2'], 'theChannelID', 'theTxID');
+
+                expect(result).to.deep.equal([Buffer.from('value'), Buffer.from('value')]);
+                expect(handleGetStateStub.calledTwice).to.be.true;
+                expect(handleGetStateStub.firstCall.args).to.deep.equal(['', 'key1', 'theChannelID', 'theTxID']);
+                expect(handleGetStateStub.secondCall.args).to.deep.equal(['', 'key2', 'theChannelID', 'theTxID']);
+            });
+        });
+
+        describe('handleGetMultiplePrivateData', () => {
+            let handleGetStateStub;
+            afterEach(() => {
+                sandbox.restore();
+            });
+
+            it('should stub handleGetState and return buffered values', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                handleGetStateStub = sandbox.stub(handler, 'handleGetState').resolves(Buffer.from('value'));
+
+                const result = await handler.handleGetMultiplePrivateData('collection1', ['key1', 'key2'], 'theChannelID', 'theTxID');
+
+                expect(result).to.deep.equal([Buffer.from('value'), Buffer.from('value')]);
+                expect(handleGetStateStub.calledTwice).to.be.true;
+                expect(handleGetStateStub.firstCall.args).to.deep.equal(['collection1', 'key1', 'theChannelID', 'theTxID']);
+                expect(handleGetStateStub.secondCall.args).to.deep.equal(['collection1', 'key2', 'theChannelID', 'theTxID']);
             });
         });
 

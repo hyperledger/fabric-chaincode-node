@@ -35,6 +35,7 @@ const MSG_TYPE = {
     INIT: peer.ChaincodeMessage.Type.INIT,
     TRANSACTION: peer.ChaincodeMessage.Type.TRANSACTION,
     COMPLETED: peer.ChaincodeMessage.Type.COMPLETED,
+    KEEPALIVE: peer.ChaincodeMessage.Type.KEEPALIVE,
 };
 
 /*
@@ -295,6 +296,12 @@ class ChaincodeMessageHandler {
         stream.on('data', (msgpb) => {
             const msg = mapFromChaincodeMessage(msgpb);
             logger.debug(util.format('Received chat message from peer: %s, state: %s, type: %s', msg.txid, state, msg.type));
+
+            if (msg.type === MSG_TYPE.KEEPALIVE) {
+                stream.write(msgpb);
+                return;
+            }
+
             if (state === STATES.Ready) {
                 const type = msg.type;
 
@@ -372,6 +379,14 @@ class ChaincodeMessageHandler {
 
     handleTransaction(msg) {
         handleMessage(msg, this, 'invoke');
+    }
+
+    async handleGetMultipleStates(keys, channel_id, txid) {
+        return await Promise.all(keys.map(key => this.handleGetState('', key, channel_id, txid)));
+    }
+
+    async handleGetMultiplePrivateData(collection, keys, channel_id, txid) {
+        return await Promise.all(keys.map(key => this.handleGetState(collection, key, channel_id, txid)));
     }
 
     async handleGetState(collection, key, channel_id, txId) {
