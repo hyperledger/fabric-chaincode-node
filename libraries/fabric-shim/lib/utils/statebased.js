@@ -17,7 +17,7 @@ const ROLE_TYPE_PEER = 'PEER';
  * of the MSP identifiers of organizations.
  * For more informations, please read the [documents]{@link https://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html#setting-key-level-endorsement-policies}
  *
- * @class KeyEndorsementPolicy
+ * @class
  * @memberof fabric-shim
  */
 class KeyEndorsementPolicy {
@@ -90,6 +90,7 @@ class KeyEndorsementPolicy {
      * Internal used only, set the orgs map from a signature policy envelope
      * @param {_policiesProto.SignaturePolicyEnvelope} signaturePolicyEnvelope the signaturePolicyEnvelope
      *  decoded from the endorsement policy.
+     * @private
      */
     _setMspIdsFromSPE(signaturePolicyEnvelope) {
         // iterate over the identities in this envelope
@@ -107,6 +108,7 @@ class KeyEndorsementPolicy {
      * Internal used only. construct the policy from all orgs' mspIds.
      * the policy requires exactly 1 signature from all of the principals.
      * @returns {_policiesProto.SignaturePolicyEnvelope} return the SignaturePolicyEnvelope instance
+     * @private
      */
     _getPolicyFromMspId() {
 
