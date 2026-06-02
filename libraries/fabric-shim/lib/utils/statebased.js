@@ -18,6 +18,7 @@ const ROLE_TYPE_PEER = 'PEER';
  * For more informations, please read the [documents]{@link https://hyperledger-fabric.readthedocs.io/en/latest/endorsement-policies.html#setting-key-level-endorsement-policies}
  *
  * @class
+ * @memberof fabric-shim
  */
 class KeyEndorsementPolicy {
     /**
@@ -35,7 +36,7 @@ class KeyEndorsementPolicy {
 
     /**
      * returns the endorsement policy as bytes
-     * @returns {Buffer} the endorsement policy
+     * @returns {Uint8Array} the serialized signature policy envelope
      */
     getPolicy() {
         const spe = this._getPolicyFromMspId();
@@ -45,7 +46,7 @@ class KeyEndorsementPolicy {
     /**
      * adds the specified orgs to the list of orgs that are required
      * to endorse
-     * @param {string} role the role of the new org(s). i.e., MEMBER or PEER
+     * @param {string} role the role of the new org(s). i.e., 'MEMBER' or 'PEER'
      * @param  {...string} neworgs the new org(s) to be added to the endorsement policy
      */
     addOrgs(role, ...neworgs) {
@@ -89,6 +90,7 @@ class KeyEndorsementPolicy {
      * Internal used only, set the orgs map from a signature policy envelope
      * @param {_policiesProto.SignaturePolicyEnvelope} signaturePolicyEnvelope the signaturePolicyEnvelope
      *  decoded from the endorsement policy.
+     * @private
      */
     _setMspIdsFromSPE(signaturePolicyEnvelope) {
         // iterate over the identities in this envelope
@@ -106,6 +108,7 @@ class KeyEndorsementPolicy {
      * Internal used only. construct the policy from all orgs' mspIds.
      * the policy requires exactly 1 signature from all of the principals.
      * @returns {_policiesProto.SignaturePolicyEnvelope} return the SignaturePolicyEnvelope instance
+     * @private
      */
     _getPolicyFromMspId() {
 
