@@ -612,6 +612,38 @@ describe('Stub', () => {
             });
         });
 
+        describe('getMultipleStates', () => {
+            it('should call handler.handleGetMultipleStates with the keys array', async () => {
+                const handleGetMultipleStatesStub = sinon.stub().resolves([Buffer.from('dummy')]);
+
+                const stub = new Stub({
+                    handleGetMultipleStates: handleGetMultipleStatesStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                const result = await stub.getMultipleStates(['key1', 'key2']);
+
+                expect(result).to.deep.equal([Buffer.from('dummy')]);
+                sinon.assert.calledOnce(handleGetMultipleStatesStub);
+                sinon.assert.calledWith(handleGetMultipleStatesStub, ['key1', 'key2'], 'dummyChannelId', 'dummyTxid');
+            });
+        });
+
+        describe('getMultiplePrivateData', () => {
+            it('should call handler.handleGetMultiplePrivateData with the collection and keys array', async () => {
+                const handleGetMultiplePrivateDataStub = sinon.stub().resolves([Buffer.from('dummy')]);
+
+                const stub = new Stub({
+                    handleGetMultiplePrivateData: handleGetMultiplePrivateDataStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                const result = await stub.getMultiplePrivateData('myCollection', ['key1', 'key2']);
+
+                expect(result).to.deep.equal([Buffer.from('dummy')]);
+                sinon.assert.calledOnce(handleGetMultiplePrivateDataStub);
+                sinon.assert.calledWith(handleGetMultiplePrivateDataStub, 'myCollection', ['key1', 'key2'], 'dummyChannelId', 'dummyTxid');
+            });
+        });
+
         describe('putState', () => {
             it ('should return handler.handlePutState', async () => {
                 const handlePutStateStub = sinon.stub().resolves('some state');
