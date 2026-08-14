@@ -1430,6 +1430,12 @@ describe('Stub', () => {
                 await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
             });
 
+            it('should throw if key is an empty string', async () => {
+                const result = stub.putPrivateData('some collection', '', 'some value');
+                await expect(result).to.eventually.be.rejectedWith(Error, 'key must not be an empty string');
+                sinon.assert.notCalled(handlePutStateStub);
+            });
+
             it ('should return handler.handlePutState with string', async () => {
                 const result = await stub.putPrivateData('some collection', 'some key', 'some value');
                 expect(result).to.deep.equal('some state');

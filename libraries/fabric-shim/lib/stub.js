@@ -1065,6 +1065,9 @@ class ChaincodeStub {
         if (!collection || typeof collection !== 'string') {
             throw new Error('collection must be a valid string');
         }
+        if (key === '') {
+            throw new Error('key must not be an empty string');
+        }
         if (!key || typeof key !== 'string') {
             throw new Error('key must be a valid string');
         }
