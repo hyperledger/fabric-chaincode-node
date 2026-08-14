@@ -104,7 +104,10 @@ declare module 'fabric-shim-api' {
         getPrivateDataValidationParameter(collection: string, key: string): Promise<Uint8Array>;
         getPrivateDataByRange(collection: string, startKey: string, endKey: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
         getPrivateDataByPartialCompositeKey(collection: string, objectType: string, attributes: string[]): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
-        getPrivateDataQueryResult(collection: string, query: string): Promise<Iterators.StateQueryIterator> & AsyncIterable<Iterators.KV>;
+        getMultipleStates(keys: string[]): Promise<Uint8Array[]>;
+        getMultiplePrivateData(collection: string, keys: string[]): Promise<Uint8Array[]>;
+        startWriteBatch(): void;
+        finishWriteBatch(): Promise<void>;
     }
 
     interface SplitCompositekey {

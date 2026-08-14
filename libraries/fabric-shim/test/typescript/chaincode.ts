@@ -221,6 +221,8 @@ class TestTS implements ChaincodeInterface {
         const mspid: string = creator.mspid;
 
         const invokeChaincode: ChaincodeResponse = await stub.invokeChaincode('ccid', ['bob', 'duck'], 'channelid');
+        stub.startWriteBatch();
+        await stub.finishWriteBatch();
     }
 
     testClientIdentity(stub: ChaincodeStub): void {

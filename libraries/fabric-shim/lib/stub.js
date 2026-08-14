@@ -15,6 +15,7 @@ const {ChaincodeEvent} = require('@hyperledger/fabric-protos/lib/peer');
 const Long = require('long');
 
 const logger = require('./logger').getLogger('lib/stub.js');
+const WriteBatch = require('./writebatch');
 
 const VALIDATION_PARAMETER = 'VALIDATION_PARAMETER';
 
@@ -143,6 +144,7 @@ class ChaincodeStub {
 
         this.handler = client;
         this.validationParameterMetakey = VALIDATION_PARAMETER;
+        this.writeBatch = null;
 
         if (signedProposalPb) {
             const decodedSP = {
@@ -493,7 +495,10 @@ class ChaincodeStub {
         if (typeof value === 'string') {
             value = Buffer.from(value);
         }
-        return await this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
+        return await this._writeOrSend(
+            () => this.writeBatch.putState(collection, key, value),
+            () => this.handler.handlePutState(collection, key, value, this.channel_id, this.txId)
+        );
     }
 
     /**
@@ -506,7 +511,10 @@ class ChaincodeStub {
     async deleteState(key) {
         // Access public data by setting the collection to empty string
         const collection = '';
-        return await this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
+        return await this._writeOrSend(
+            () => this.writeBatch.delState(collection, key),
+            () => this.handler.handleDeleteState(collection, key, this.channel_id, this.txId)
+        );
     }
 
     /**
@@ -519,7 +527,10 @@ class ChaincodeStub {
     async setStateValidationParameter(key, ep) {
         // Access public data by setting the collection to empty string
         const collection = '';
-        return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
+        return this._writeOrSend(
+            () => this.writeBatch.putStateMetadataEntry(collection, key, this.validationParameterMetakey, ep),
+            () => this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId)
+        );
     }
 
     /**
@@ -975,21 +986,47 @@ class ChaincodeStub {
     }
 
     /**
-     * startWriteBatch indicates the beginning of a block of PutState/PutPrivateData calls
-     * that should be batched together.
-     * (Fallback behavior: no-op)
+     * startWriteBatch enables a mode where ledger writes are not immediately
+     * forwarded to the peer, but accumulate in a cache. The cache is sent in
+     * large batches either at the end of transaction execution or after
+     * finishWriteBatch is called.
+     *
+     * If write batching is not supported by the peer, this method has no effect
+     * and writes to the ledger continue to be processed immediately.
      */
     startWriteBatch() {
         logger.debug('startWriteBatch called');
+        if (this.handler.usePeerWriteBatch && !this.writeBatch) {
+            this.writeBatch = new WriteBatch();
+        }
     }
 
     /**
-     * finishWriteBatch sends the currently accumulated batch of state writes to the peer.
-     * (Fallback behavior: no-op)
+     * finishWriteBatch sends accumulated writes in large batches to the peer
+     * if startWriteBatch has been called before it.
+     *
+     * If write batching is not supported by the peer or no write batch has been
+     * started, this method has no effect.
      * @async
      */
     async finishWriteBatch() {
         logger.debug('finishWriteBatch called');
+        try {
+            if (!this.writeBatch) {
+                return;
+            }
+            await this.handler.sendBatch(this.writeBatch.records(), this.channel_id, this.txId);
+        } finally {
+            this.writeBatch = null;
+        }
+    }
+
+    _writeOrSend(queueFn, sendFn) {
+        if (this.writeBatch) {
+            queueFn();
+            return;
+        }
+        return sendFn();
     }
 
     /**
@@ -1042,7 +1079,10 @@ class ChaincodeStub {
             value = Buffer.from(value);
         }
 
-        return this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
+        return this._writeOrSend(
+            () => this.writeBatch.putState(collection, key, value),
+            () => this.handler.handlePutState(collection, key, value, this.channel_id, this.txId)
+        );
     }
 
     /**
@@ -1064,7 +1104,10 @@ class ChaincodeStub {
         if (!key || typeof key !== 'string') {
             throw new Error('key must be a valid string');
         }
-        return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
+        return this._writeOrSend(
+            () => this.writeBatch.delState(collection, key),
+            () => this.handler.handleDeleteState(collection, key, this.channel_id, this.txId)
+        );
     }
 
     /**
@@ -1088,7 +1131,10 @@ class ChaincodeStub {
         if (!key || typeof key !== 'string') {
             throw new Error('key must be a valid string');
         }
-        return await this.handler.handlePurgeState(collection, key, this.channel_id, this.txId);
+        return await this._writeOrSend(
+            () => this.writeBatch.purgeState(collection, key),
+            () => this.handler.handlePurgeState(collection, key, this.channel_id, this.txId)
+        );
     }
 
     /**
@@ -1101,7 +1147,10 @@ class ChaincodeStub {
      * @param {Buffer} ep endorsement policy
      */
     async setPrivateDataValidationParameter(collection, key, ep) {
-        return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
+        return this._writeOrSend(
+            () => this.writeBatch.putStateMetadataEntry(collection, key, this.validationParameterMetakey, ep),
+            () => this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId)
+        );
     }
 
     /**
