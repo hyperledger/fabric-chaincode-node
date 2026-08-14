@@ -1993,6 +1993,7 @@ describe('Handler', () => {
 
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.notCalled(mockStub.finishWriteBatch);
             });
 
             it('should handle chaincode.Invoke returning nothing', async () => {
@@ -2025,6 +2026,7 @@ describe('Handler', () => {
 
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.calledOnce(mockStub.finishWriteBatch);
             });
 
             it ('should handle chaincode.Init returning no status', async () => {
@@ -2059,6 +2061,7 @@ describe('Handler', () => {
                 });
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.notCalled(mockStub.finishWriteBatch);
             });
 
             it ('should handle chaincode.Invoke returning no status', async () => {
@@ -2092,6 +2095,7 @@ describe('Handler', () => {
                 });
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.calledOnce(mockStub.finishWriteBatch);
             });
         });
 
@@ -2127,6 +2131,7 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.calledOnce(mockStub.finishWriteBatch);
             });
 
             it ('should write a COMPLETE message when successful invoke', async () => {

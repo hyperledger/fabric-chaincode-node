@@ -742,18 +742,22 @@ async function handleMessage(msg, client, action) {
                 method,
                 resp.status));
 
-            try {
-                await stub.finishWriteBatch();
-            } catch (err) {
-                logger.error(util.format('%s Failed to send write batch: %s', loggerPrefix, err));
-                nextStateMsg = mapToChaincodeMessage({
-                    type: peer.ChaincodeMessage.Type.ERROR,
-                    payload: Buffer.from(err.toString()),
-                    txid: msg.txid,
-                    channel_id: msg.channel_id
-                });
-                client._stream.write(nextStateMsg);
-                return;
+            // Match Go: handleInit skips FinishWriteBatch when Init returns an error.
+            // handleTransaction always flushes, including on error status.
+            if (!(action === 'init' && resp.status >= Stub.RESPONSE_CODE.ERROR)) {
+                try {
+                    await stub.finishWriteBatch();
+                } catch (err) {
+                    logger.error(util.format('%s Failed to send write batch: %s', loggerPrefix, err));
+                    nextStateMsg = mapToChaincodeMessage({
+                        type: peer.ChaincodeMessage.Type.ERROR,
+                        payload: Buffer.from(err.toString()),
+                        txid: msg.txid,
+                        channel_id: msg.channel_id
+                    });
+                    client._stream.write(nextStateMsg);
+                    return;
+                }
             }
 
             const respPb = new peer.Response();

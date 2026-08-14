@@ -639,6 +639,15 @@ describe('Stub', () => {
                 expect(handlePutStateStub.calledOnce).to.be.true;
                 expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', {a:'value'}, 'dummyChannelId', 'dummyTxid']);
             });
+            it('should throw if key is an empty string', async () => {
+                const handlePutStateStub = sinon.stub().resolves('some state');
+                const stub = new Stub({
+                    handlePutState: handlePutStateStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                await expect(stub.putState('', 'a value')).to.be.rejectedWith(/key must not be an empty string/);
+                sinon.assert.notCalled(handlePutStateStub);
+            });
         });
 
         describe('deleteState', () => {
@@ -1156,11 +1165,21 @@ describe('Stub', () => {
                 expect(stub.writeBatch).to.equal(null);
             });
 
-            it('should execute finishWriteBatch as a no-op when no batch is active', async () => {
+            it('should call sendBatch when no batch is active', async () => {
                 const sendBatch = sinon.stub().resolves();
                 const stub = new Stub({sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
                 await stub.finishWriteBatch();
-                sinon.assert.notCalled(sendBatch);
+                sinon.assert.calledOnce(sendBatch);
+                expect(sendBatch.firstCall.args[0]).to.equal(null);
+            });
+
+            it('should throw if key is an empty string while batching', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({usePeerWriteBatch: true, sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                stub.startWriteBatch();
+                await expect(stub.putState('', Buffer.from('value'))).to.be.rejectedWith(/key must not be an empty string/);
+                await stub.finishWriteBatch();
+                expect(sendBatch.firstCall.args[0]).to.deep.equal([]);
             });
 
             it('should start a write batch when the peer supports it', () => {

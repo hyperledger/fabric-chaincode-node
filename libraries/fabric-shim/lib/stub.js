@@ -15,7 +15,7 @@ const {ChaincodeEvent} = require('@hyperledger/fabric-protos/lib/peer');
 const Long = require('long');
 
 const logger = require('./logger').getLogger('lib/stub.js');
-const WriteBatch = require('./writebatch');
+const WriteBatch = require('./batch');
 
 const VALIDATION_PARAMETER = 'VALIDATION_PARAMETER';
 
@@ -492,13 +492,17 @@ class ChaincodeStub {
     async putState(key, value) {
         // Access public data by setting the collection to empty string
         const collection = '';
+        if (key === '') {
+            throw new Error('key must not be an empty string');
+        }
         if (typeof value === 'string') {
             value = Buffer.from(value);
         }
-        return await this._writeOrSend(
-            () => this.writeBatch.putState(collection, key, value),
-            () => this.handler.handlePutState(collection, key, value, this.channel_id, this.txId)
-        );
+        if (this.writeBatch) {
+            this.writeBatch.putState(collection, key, value);
+            return;
+        }
+        return await this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
     }
 
     /**
@@ -511,10 +515,11 @@ class ChaincodeStub {
     async deleteState(key) {
         // Access public data by setting the collection to empty string
         const collection = '';
-        return await this._writeOrSend(
-            () => this.writeBatch.delState(collection, key),
-            () => this.handler.handleDeleteState(collection, key, this.channel_id, this.txId)
-        );
+        if (this.writeBatch) {
+            this.writeBatch.delState(collection, key);
+            return;
+        }
+        return await this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
     }
 
     /**
@@ -527,10 +532,11 @@ class ChaincodeStub {
     async setStateValidationParameter(key, ep) {
         // Access public data by setting the collection to empty string
         const collection = '';
-        return this._writeOrSend(
-            () => this.writeBatch.putStateMetadataEntry(collection, key, this.validationParameterMetakey, ep),
-            () => this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId)
-        );
+        if (this.writeBatch) {
+            this.writeBatch.putStateMetadataEntry(collection, key, this.validationParameterMetakey, ep);
+            return;
+        }
+        return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
     }
 
     /**
@@ -1012,21 +1018,11 @@ class ChaincodeStub {
     async finishWriteBatch() {
         logger.debug('finishWriteBatch called');
         try {
-            if (!this.writeBatch) {
-                return;
-            }
-            await this.handler.sendBatch(this.writeBatch.records(), this.channel_id, this.txId);
+            const writes = this.writeBatch ? this.writeBatch.records() : null;
+            await this.handler.sendBatch(writes, this.channel_id, this.txId);
         } finally {
             this.writeBatch = null;
         }
-    }
-
-    _writeOrSend(queueFn, sendFn) {
-        if (this.writeBatch) {
-            queueFn();
-            return;
-        }
-        return sendFn();
     }
 
     /**
@@ -1079,10 +1075,11 @@ class ChaincodeStub {
             value = Buffer.from(value);
         }
 
-        return this._writeOrSend(
-            () => this.writeBatch.putState(collection, key, value),
-            () => this.handler.handlePutState(collection, key, value, this.channel_id, this.txId)
-        );
+        if (this.writeBatch) {
+            this.writeBatch.putState(collection, key, value);
+            return;
+        }
+        return this.handler.handlePutState(collection, key, value, this.channel_id, this.txId);
     }
 
     /**
@@ -1104,10 +1101,11 @@ class ChaincodeStub {
         if (!key || typeof key !== 'string') {
             throw new Error('key must be a valid string');
         }
-        return this._writeOrSend(
-            () => this.writeBatch.delState(collection, key),
-            () => this.handler.handleDeleteState(collection, key, this.channel_id, this.txId)
-        );
+        if (this.writeBatch) {
+            this.writeBatch.delState(collection, key);
+            return;
+        }
+        return this.handler.handleDeleteState(collection, key, this.channel_id, this.txId);
     }
 
     /**
@@ -1131,10 +1129,11 @@ class ChaincodeStub {
         if (!key || typeof key !== 'string') {
             throw new Error('key must be a valid string');
         }
-        return await this._writeOrSend(
-            () => this.writeBatch.purgeState(collection, key),
-            () => this.handler.handlePurgeState(collection, key, this.channel_id, this.txId)
-        );
+        if (this.writeBatch) {
+            this.writeBatch.purgeState(collection, key);
+            return;
+        }
+        return await this.handler.handlePurgeState(collection, key, this.channel_id, this.txId);
     }
 
     /**
@@ -1147,10 +1146,11 @@ class ChaincodeStub {
      * @param {Buffer} ep endorsement policy
      */
     async setPrivateDataValidationParameter(collection, key, ep) {
-        return this._writeOrSend(
-            () => this.writeBatch.putStateMetadataEntry(collection, key, this.validationParameterMetakey, ep),
-            () => this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId)
-        );
+        if (this.writeBatch) {
+            this.writeBatch.putStateMetadataEntry(collection, key, this.validationParameterMetakey, ep);
+            return;
+        }
+        return this.handler.handlePutStateMetadata(collection, key, this.validationParameterMetakey, ep, this.channel_id, this.txId);
     }
 
     /**
