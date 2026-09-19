@@ -639,6 +639,15 @@ describe('Stub', () => {
                 expect(handlePutStateStub.calledOnce).to.be.true;
                 expect(handlePutStateStub.firstCall.args).to.deep.equal(['', 'a key', {a:'value'}, 'dummyChannelId', 'dummyTxid']);
             });
+            it('should throw if key is an empty string', async () => {
+                const handlePutStateStub = sinon.stub().resolves('some state');
+                const stub = new Stub({
+                    handlePutState: handlePutStateStub
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                await expect(stub.putState('', 'a value')).to.be.rejectedWith(/key must not be an empty string/);
+                sinon.assert.notCalled(handlePutStateStub);
+            });
         });
 
         describe('deleteState', () => {
@@ -1149,15 +1158,203 @@ describe('Stub', () => {
             });
         });
 
-        describe('Write Batching Fallbacks', () => {
-            it('should execute startWriteBatch as a no-op', () => {
+        describe('Write Batching', () => {
+            it('should execute startWriteBatch as a no-op when the peer does not support it', () => {
                 const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', chaincodeInput);
                 stub.startWriteBatch();
+                expect(stub.writeBatch).to.equal(null);
             });
 
-            it('should execute finishWriteBatch as a no-op', async () => {
-                const stub = new Stub('dummyClient', 'dummyChannelId', 'dummyTxid', chaincodeInput);
+            it('should call sendBatch when no batch is active', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
                 await stub.finishWriteBatch();
+                sinon.assert.calledOnce(sendBatch);
+                expect(sendBatch.firstCall.args[0]).to.equal(null);
+            });
+
+            it('should throw if key is an empty string while batching', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({usePeerWriteBatch: true, sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                stub.startWriteBatch();
+                await expect(stub.putState('', Buffer.from('value'))).to.be.rejectedWith(/key must not be an empty string/);
+                await stub.finishWriteBatch();
+                expect(sendBatch.firstCall.args[0]).to.deep.equal([]);
+            });
+
+            it('should start a write batch when the peer supports it', () => {
+                const stub = new Stub({usePeerWriteBatch: true}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                stub.startWriteBatch();
+                expect(stub.writeBatch).to.not.equal(null);
+            });
+
+            it('should not reset an existing write batch', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({usePeerWriteBatch: true, sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                stub.startWriteBatch();
+                await stub.putState('key1', Buffer.from('value1'));
+                stub.startWriteBatch();
+                await stub.putState('key2', Buffer.from('value2'));
+                await stub.finishWriteBatch();
+
+                sinon.assert.calledOnce(sendBatch);
+                expect(sendBatch.firstCall.args[0]).to.have.length(2);
+            });
+
+            it('should queue putState and flush on finishWriteBatch', async () => {
+                const handlePutState = sinon.stub().resolves('sent');
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({
+                    usePeerWriteBatch: true,
+                    handlePutState,
+                    sendBatch
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                stub.startWriteBatch();
+                const queued = await stub.putState('a key', 'a value');
+                expect(queued).to.equal(undefined);
+                sinon.assert.notCalled(handlePutState);
+
+                await stub.finishWriteBatch();
+                sinon.assert.calledOnce(sendBatch);
+                expect(sendBatch.firstCall.args[1]).to.equal('dummyChannelId');
+                expect(sendBatch.firstCall.args[2]).to.equal('dummyTxid');
+
+                const records = sendBatch.firstCall.args[0];
+                expect(records).to.have.length(1);
+                expect(records[0].getKey()).to.equal('a key');
+                expect(Buffer.from(records[0].getValue_asU8()).toString()).to.equal('a value');
+                expect(records[0].getType()).to.equal(peer.WriteRecord.Type.PUT_STATE);
+            });
+
+            it('should keep sending immediately when a batch has not been started', async () => {
+                const handlePutState = sinon.stub().resolves('some state');
+                const stub = new Stub({
+                    usePeerWriteBatch: true,
+                    handlePutState
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                const result = await stub.putState('a key', 'a value');
+                expect(result).to.equal('some state');
+                sinon.assert.calledOnce(handlePutState);
+            });
+
+            it('should overwrite the same data key in the batch', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({usePeerWriteBatch: true, sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                stub.startWriteBatch();
+                await stub.putState('key1', Buffer.from('first'));
+                await stub.deleteState('key1');
+                await stub.finishWriteBatch();
+
+                const records = sendBatch.firstCall.args[0];
+                expect(records).to.have.length(1);
+                expect(records[0].getType()).to.equal(peer.WriteRecord.Type.DEL_STATE);
+            });
+
+            it('should keep metadata writes independent of data writes', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({usePeerWriteBatch: true, sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                const ep = Buffer.from('policy');
+                stub.startWriteBatch();
+                await stub.putState('key1', Buffer.from('value'));
+                await stub.setStateValidationParameter('key1', ep);
+                await stub.finishWriteBatch();
+
+                const records = sendBatch.firstCall.args[0];
+                expect(records).to.have.length(2);
+                const types = records.map((rec) => rec.getType());
+                expect(types).to.include(peer.WriteRecord.Type.PUT_STATE);
+                expect(types).to.include(peer.WriteRecord.Type.PUT_STATE_METADATA);
+            });
+
+            it('should queue private data writes and deletes', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const handlePutState = sinon.stub();
+                const handleDeleteState = sinon.stub();
+                const stub = new Stub({
+                    usePeerWriteBatch: true,
+                    sendBatch,
+                    handlePutState,
+                    handleDeleteState
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                stub.startWriteBatch();
+                await stub.putPrivateData('col', 'key1', 'secret');
+                await stub.deletePrivateData('col', 'key2');
+                await stub.finishWriteBatch();
+
+                sinon.assert.notCalled(handlePutState);
+                sinon.assert.notCalled(handleDeleteState);
+                const records = sendBatch.firstCall.args[0];
+                expect(records).to.have.length(2);
+                expect(records[0].getCollection()).to.equal('col');
+                expect(records[0].getType()).to.equal(peer.WriteRecord.Type.PUT_STATE);
+                expect(records[1].getType()).to.equal(peer.WriteRecord.Type.DEL_STATE);
+            });
+
+            it('should queue purgePrivateData', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const handlePurgeState = sinon.stub();
+                const stub = new Stub({
+                    usePeerWriteBatch: true,
+                    sendBatch,
+                    handlePurgeState
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                stub.startWriteBatch();
+                await stub.purgePrivateData('col', 'key1');
+                await stub.finishWriteBatch();
+
+                sinon.assert.notCalled(handlePurgeState);
+                expect(sendBatch.firstCall.args[0][0].getType()).to.equal(peer.WriteRecord.Type.PURGE_PRIVATE_DATA);
+            });
+
+            it('should queue setPrivateDataValidationParameter', async () => {
+                const sendBatch = sinon.stub().resolves();
+                const handlePutStateMetadata = sinon.stub();
+                const stub = new Stub({
+                    usePeerWriteBatch: true,
+                    sendBatch,
+                    handlePutStateMetadata
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                stub.startWriteBatch();
+                await stub.setPrivateDataValidationParameter('col', 'key1', Buffer.from('ep'));
+                await stub.finishWriteBatch();
+
+                sinon.assert.notCalled(handlePutStateMetadata);
+                const rec = sendBatch.firstCall.args[0][0];
+                expect(rec.getType()).to.equal(peer.WriteRecord.Type.PUT_STATE_METADATA);
+                expect(rec.getCollection()).to.equal('col');
+            });
+
+            it('should send subsequent writes immediately after finishWriteBatch', async () => {
+                const handlePutState = sinon.stub().resolves('sent');
+                const sendBatch = sinon.stub().resolves();
+                const stub = new Stub({
+                    usePeerWriteBatch: true,
+                    handlePutState,
+                    sendBatch
+                }, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+
+                stub.startWriteBatch();
+                await stub.putState('key1', Buffer.from('value1'));
+                await stub.finishWriteBatch();
+                await stub.putState('key2', Buffer.from('value2'));
+
+                sinon.assert.calledOnce(sendBatch);
+                sinon.assert.calledOnce(handlePutState);
+                expect(handlePutState.firstCall.args[1]).to.equal('key2');
+            });
+
+            it('should clear the batch after finishWriteBatch even if sendBatch fails', async () => {
+                const sendBatch = sinon.stub().rejects(new Error('peer failed'));
+                const stub = new Stub({usePeerWriteBatch: true, sendBatch}, 'dummyChannelId', 'dummyTxid', chaincodeInput);
+                stub.startWriteBatch();
+                await stub.putState('key1', Buffer.from('value'));
+                await expect(stub.finishWriteBatch()).to.be.rejectedWith(/peer failed/);
+                expect(stub.writeBatch).to.equal(null);
             });
         });
 
@@ -1231,6 +1428,12 @@ describe('Stub', () => {
             it ('should throw an error if key null', async () => {
                 const result = stub.putPrivateData('some collection', null, 'some value');
                 await expect(result).to.eventually.be.rejectedWith(Error, 'key must be a valid string');
+            });
+
+            it('should throw if key is an empty string', async () => {
+                const result = stub.putPrivateData('some collection', '', 'some value');
+                await expect(result).to.eventually.be.rejectedWith(Error, 'key must not be an empty string');
+                sinon.assert.notCalled(handlePutStateStub);
             });
 
             it ('should return handler.handlePutState with string', async () => {

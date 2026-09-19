@@ -705,6 +705,62 @@ describe('Handler', () => {
                     expect(handleTransactionSpy.notCalled).to.be.true;
                 });
 
+                it('should leave write batching disabled when READY has no payload', () => {
+                    eventReg.data(registeredMsg);
+                    eventReg.data(establishedMsg);
+
+                    expect(handler.usePeerWriteBatch).to.equal(false);
+                    expect(handler.maxSizeWriteBatch).to.equal(100);
+                });
+
+                it('should enable write batching from READY ChaincodeAdditionalParams', () => {
+                    const params = new peer.ChaincodeAdditionalParams();
+                    params.setUseWriteBatch(true);
+                    params.setMaxSizeWriteBatch(250);
+                    const readyMsg = mapToChaincodeMessage({
+                        type: MSG_TYPE.READY,
+                        payload: params.serializeBinary()
+                    });
+
+                    eventReg.data(registeredMsg);
+                    eventReg.data(readyMsg);
+
+                    expect(handler.usePeerWriteBatch).to.equal(true);
+                    expect(handler.maxSizeWriteBatch).to.equal(250);
+                });
+
+                it('should raise maxSizeWriteBatch to the default minimum', () => {
+                    const params = new peer.ChaincodeAdditionalParams();
+                    params.setUseWriteBatch(true);
+                    params.setMaxSizeWriteBatch(10);
+                    const readyMsg = mapToChaincodeMessage({
+                        type: MSG_TYPE.READY,
+                        payload: params.serializeBinary()
+                    });
+
+                    eventReg.data(registeredMsg);
+                    eventReg.data(readyMsg);
+
+                    expect(handler.usePeerWriteBatch).to.equal(true);
+                    expect(handler.maxSizeWriteBatch).to.equal(100);
+                });
+
+                it('should keep write batching disabled when the peer does not enable it', () => {
+                    const params = new peer.ChaincodeAdditionalParams();
+                    params.setUseWriteBatch(false);
+                    params.setMaxSizeWriteBatch(10);
+                    const readyMsg = mapToChaincodeMessage({
+                        type: MSG_TYPE.READY,
+                        payload: params.serializeBinary()
+                    });
+
+                    eventReg.data(registeredMsg);
+                    eventReg.data(readyMsg);
+
+                    expect(handler.usePeerWriteBatch).to.equal(false);
+                    expect(handler.maxSizeWriteBatch).to.equal(10);
+                });
+
                 it ('should call handleMsgResponse when in state ready and MSG_TYPE equals RESPONSE', () => {
                     eventReg.data(registeredMsg);
                     eventReg.data(establishedMsg);
@@ -1075,6 +1131,107 @@ describe('Handler', () => {
                 expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
                 expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
                 expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('PutState');
+            });
+        });
+
+        describe('handleWriteBatch', () => {
+            const key = 'theKey';
+            const value = Buffer.from('some value');
+            const collection = '';
+
+            let expectedMsg;
+            let rec;
+
+            before(() => {
+                rec = new peer.WriteRecord();
+                rec.setKey(key);
+                rec.setValue(value);
+                rec.setCollection(collection);
+                rec.setType(peer.WriteRecord.Type.PUT_STATE);
+
+                const batch = new peer.WriteBatchState();
+                batch.setRecList([rec]);
+
+                expectedMsg = mapToChaincodeMessage({
+                    type: peer.ChaincodeMessage.Type.WRITE_BATCH_STATE,
+                    payload: batch.serializeBinary(),
+                    channel_id: 'theChannelID',
+                    txid: 'theTxID'
+                });
+            });
+
+            afterEach(() => {
+                Handler = rewire('../../../fabric-shim/lib/handler.js');
+                sandbox.restore();
+            });
+
+            it('should resolve when _askPeerAndListen resolves', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').resolves('some response');
+
+                const result = await handler.handleWriteBatch([rec], 'theChannelID', 'theTxID');
+
+                expect(result).to.deep.equal('some response');
+                expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+                expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+                expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('WriteBatchState');
+            });
+
+            it('should reject when _askPeerAndListen rejects', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                const _askPeerAndListenStub = sandbox.stub(handler, '_askPeerAndListen').rejects();
+
+                const result = handler.handleWriteBatch([rec], 'theChannelID', 'theTxID');
+
+                await expect(result).to.eventually.be.rejected;
+                expect(_askPeerAndListenStub.firstCall.args.length).to.deep.equal(2);
+                expect(_askPeerAndListenStub.firstCall.args[0]).to.deep.equal(expectedMsg);
+                expect(_askPeerAndListenStub.firstCall.args[1]).to.deep.equal('WriteBatchState');
+            });
+        });
+
+        describe('sendBatch', () => {
+            afterEach(() => {
+                Handler = rewire('../../../fabric-shim/lib/handler.js');
+                sandbox.restore();
+            });
+
+            it('should do nothing for an empty write list', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                const handleWriteBatchStub = sandbox.stub(handler, 'handleWriteBatch').resolves();
+
+                await handler.sendBatch([], 'theChannelID', 'theTxID');
+                await handler.sendBatch(null, 'theChannelID', 'theTxID');
+
+                sinon.assert.notCalled(handleWriteBatchStub);
+            });
+
+            it('should send a single batch when under the size limit', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                const handleWriteBatchStub = sandbox.stub(handler, 'handleWriteBatch').resolves();
+
+                await handler.sendBatch(['a'], 'theChannelID', 'theTxID');
+
+                sinon.assert.calledOnce(handleWriteBatchStub);
+                expect(handleWriteBatchStub.firstCall.args).to.deep.equal([['a'], 'theChannelID', 'theTxID']);
+            });
+
+            it('should split writes that exceed maxSizeWriteBatch', async () => {
+                const mockStream = {write: sinon.stub(), end: sinon.stub()};
+                const handler = new Handler.ChaincodeMessageHandler(mockStream, mockChaincodeImpl);
+                handler.maxSizeWriteBatch = 2;
+                const handleWriteBatchStub = sandbox.stub(handler, 'handleWriteBatch').resolves();
+
+                const writes = ['a', 'b', 'c'];
+                await handler.sendBatch(writes, 'theChannelID', 'theTxID');
+
+                sinon.assert.calledTwice(handleWriteBatchStub);
+                expect(handleWriteBatchStub.firstCall.args).to.deep.equal([['a', 'b'], 'theChannelID', 'theTxID']);
+                expect(handleWriteBatchStub.secondCall.args).to.deep.equal([['c'], 'theChannelID', 'theTxID']);
             });
         });
 
@@ -1774,6 +1931,8 @@ describe('Handler', () => {
 
             const createStubStub = sandbox.stub().returns(mockStub);
             Handler.__set__('createStub', createStubStub);
+            mockStub.finishWriteBatch.reset();
+            mockStub.finishWriteBatch.resolves();
         });
 
         afterEach(() => {
@@ -1869,6 +2028,7 @@ describe('Handler', () => {
 
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.notCalled(mockStub.finishWriteBatch);
             });
 
             it('should handle chaincode.Invoke returning nothing', async () => {
@@ -1901,6 +2061,7 @@ describe('Handler', () => {
 
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.calledOnce(mockStub.finishWriteBatch);
             });
 
             it ('should handle chaincode.Init returning no status', async () => {
@@ -1935,6 +2096,7 @@ describe('Handler', () => {
                 });
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.notCalled(mockStub.finishWriteBatch);
             });
 
             it ('should handle chaincode.Invoke returning no status', async () => {
@@ -1968,6 +2130,7 @@ describe('Handler', () => {
                 });
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.calledOnce(mockStub.finishWriteBatch);
             });
         });
 
@@ -2003,6 +2166,7 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Init.firstCall.args[0]).to.deep.equal(mockStub);
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.calledOnce(mockStub.finishWriteBatch);
             });
 
             it ('should write a COMPLETE message when successful invoke', async () => {
@@ -2015,6 +2179,19 @@ describe('Handler', () => {
                 expect(mockHandler.chaincode.Invoke.firstCall.args[0]).to.deep.equal(mockStub);
                 expect(mockHandler._stream.write.calledOnce).to.be.true;
                 expect(mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0])).to.deep.equal(mapFromChaincodeMessage(expectedResponse));
+                sinon.assert.calledOnce(mockStub.finishWriteBatch);
+            });
+
+            it('should send ERROR when finishWriteBatch fails', async () => {
+                mockHandler.chaincode.Invoke = sandbox.stub().resolves({status: Stub.RESPONSE_CODE.OK});
+                mockStub.finishWriteBatch.rejects(new Error('batch send failed'));
+
+                await handleMessage(msg, mockHandler, 'invoke');
+
+                expect(mockHandler._stream.write.calledOnce).to.be.true;
+                const sent = mapFromChaincodeMessage(mockHandler._stream.write.firstCall.args[0]);
+                expect(sent.type).to.equal(peer.ChaincodeMessage.Type.ERROR);
+                expect(sent.payload.toString()).to.equal('Error: batch send failed');
             });
         });
     });

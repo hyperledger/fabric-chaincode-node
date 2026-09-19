@@ -26,6 +26,8 @@ const STATES = {
     Ready: 'ready'
 };
 
+const DEFAULT_MAX_SIZE_WRITE_BATCH = 100;
+
 // message types
 const MSG_TYPE = {
     REGISTERED: peer.ChaincodeMessage.Type.REGISTERED,
@@ -278,6 +280,8 @@ class ChaincodeMessageHandler {
     constructor(stream, chaincode) {
         this._stream = stream;
         this.chaincode = chaincode;
+        this.usePeerWriteBatch = false;
+        this.maxSizeWriteBatch = DEFAULT_MAX_SIZE_WRITE_BATCH;
     }
 
     // this is a long-running method that does not return until
@@ -329,6 +333,7 @@ class ChaincodeMessageHandler {
 
             if (state === STATES.Established) {
                 if (msg.type === MSG_TYPE.READY) {
+                    this._applyPeerCapabilities(msg.payload);
                     logger.info('Successfully established communication with peer node. State transferred to "ready"');
                     state = STATES.Ready;
                 } else {
@@ -381,6 +386,20 @@ class ChaincodeMessageHandler {
         handleMessage(msg, this, 'invoke');
     }
 
+    _applyPeerCapabilities(payload) {
+        if (!payload || payload.length === 0) {
+            return;
+        }
+
+        const params = peer.ChaincodeAdditionalParams.deserializeBinary(payload);
+        this.usePeerWriteBatch = params.getUseWriteBatch();
+        this.maxSizeWriteBatch = params.getMaxSizeWriteBatch();
+
+        if (this.usePeerWriteBatch && this.maxSizeWriteBatch < DEFAULT_MAX_SIZE_WRITE_BATCH) {
+            this.maxSizeWriteBatch = DEFAULT_MAX_SIZE_WRITE_BATCH;
+        }
+    }
+
     async handleGetMultipleStates(keys, channel_id, txid) {
         return await Promise.all(keys.map(key => this.handleGetState('', key, channel_id, txid)));
     }
@@ -415,6 +434,29 @@ class ChaincodeMessageHandler {
             channel_id: channel_id
         });
         return await this._askPeerAndListen(msg, 'PutState');
+    }
+
+    async handleWriteBatch(writes, channel_id, txId) {
+        const batch = new peer.WriteBatchState();
+        batch.setRecList(writes);
+        const msg = mapToChaincodeMessage({
+            type: peer.ChaincodeMessage.Type.WRITE_BATCH_STATE,
+            payload: batch.serializeBinary(),
+            txid: txId,
+            channel_id: channel_id
+        });
+        return await this._askPeerAndListen(msg, 'WriteBatchState');
+    }
+
+    async sendBatch(writes, channel_id, txId) {
+        if (!writes || writes.length === 0) {
+            return;
+        }
+
+        const maxSize = this.maxSizeWriteBatch;
+        for (let i = 0; i < writes.length; i += maxSize) {
+            await this.handleWriteBatch(writes.slice(i, i + maxSize), channel_id, txId);
+        }
     }
 
     async handleDeleteState(collection, key, channel_id, txId) {
@@ -706,6 +748,24 @@ async function handleMessage(msg, client, action) {
                 loggerPrefix,
                 method,
                 resp.status));
+
+            // Match Go: handleInit skips FinishWriteBatch when Init returns an error.
+            // handleTransaction always flushes, including on error status.
+            if (!(action === 'init' && resp.status >= Stub.RESPONSE_CODE.ERROR)) {
+                try {
+                    await stub.finishWriteBatch();
+                } catch (err) {
+                    logger.error(util.format('%s Failed to send write batch: %s', loggerPrefix, err));
+                    nextStateMsg = mapToChaincodeMessage({
+                        type: peer.ChaincodeMessage.Type.ERROR,
+                        payload: Buffer.from(err.toString()),
+                        txid: msg.txid,
+                        channel_id: msg.channel_id
+                    });
+                    client._stream.write(nextStateMsg);
+                    return;
+                }
+            }
 
             const respPb = new peer.Response();
             respPb.setMessage(resp.message);
