@@ -147,14 +147,14 @@ class TestTS implements ChaincodeInterface {
         this.testStateQueryIterator(queryResult);
     }
 
-    async testIterator(iterator: Iterators.CommonIterator<any>) {
-        const historyNext: Promise<any> = iterator.next();
-        const nextVal: any = await historyNext;
+    async testIterator(iterator: Iterators.CommonIterator<unknown>): Promise<void> {
+        const historyNext: Promise<unknown> = iterator.next();
+        const nextVal: unknown = await historyNext;
         const historyClose: Promise<void> = iterator.close();
         await historyClose;
     }
 
-    async testHistoryQueryIterator(historyQuery: Iterators.HistoryQueryIterator) {
+    async testHistoryQueryIterator(historyQuery: Iterators.HistoryQueryIterator): Promise<void> {
         const historyNext: Iterators.NextKeyModificationResult = await historyQuery.next();
         await historyQuery.close();
         const done: boolean = historyNext.done;
@@ -165,7 +165,7 @@ class TestTS implements ChaincodeInterface {
         const value: Uint8Array = keyMod.value;
     }
 
-    async testStateQueryIterator(stateQuery: Iterators.StateQueryIterator) {
+    async testStateQueryIterator(stateQuery: Iterators.StateQueryIterator): Promise<void> {
         const stateNext: Iterators.NextResult<Iterators.KV> = await stateQuery.next();
         await stateQuery.close();
         const done: boolean = stateNext.done;
@@ -238,7 +238,7 @@ class TestTS implements ChaincodeInterface {
         this.testSignedProposal(proposal);
     }
 
-    testSignedProposal(proposal: ChaincodeProposal.SignedProposal) {
+    testSignedProposal(proposal: ChaincodeProposal.SignedProposal): void {
         const prop: ChaincodeProposal.Proposal = proposal.proposal;
         const sig: Uint8Array = proposal.signature;
 
@@ -263,12 +263,12 @@ class TestTS implements ChaincodeInterface {
         const map: Map<string, Uint8Array> = payload.transientMap;
     }
 
-    testQueryResponseMetadata(metadata: QueryResponseMetadata) {
+    testQueryResponseMetadata(metadata: QueryResponseMetadata): void {
         const cnt: number = metadata.fetchedRecordsCount;
         const bookmark: string = metadata.bookmark;
     }
 
-    async testStateBasedEP(stub: ChaincodeStub) {
+    async testStateBasedEP(stub: ChaincodeStub): Promise<void> {
         const ep = new KeyEndorsementPolicy();
         ep.addOrgs(ENDORSER_ROLES.MEMBER, 'Org1MSP', 'Org3MSP');
         ep.addOrgs(ENDORSER_ROLES.PEER, 'Org2MSP');
